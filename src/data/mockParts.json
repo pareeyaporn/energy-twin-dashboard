@@ -1,0 +1,6 @@
+[
+  {"id":"attic","name":"Attic","lossPerYear":610,"condition":"R-11 fiberglass, compressed in spots","upgrade":"Blow in cellulose to R-49","costRange":[1800,2600],"savingsRange":[380,520],"source":"NREL ResStock","pos":{"x":50,"y":14}},
+  {"id":"windows","name":"Windows","lossPerYear":420,"condition":"Original single-pane aluminum frames","upgrade":"Double-pane low-e replacements","costRange":[7500,12000],"savingsRange":[180,290],"source":"NREL ResStock","pos":{"x":80,"y":52}},
+  {"id":"air","name":"Air leaks","lossPerYear":380,"condition":"Gaps at rim joist, attic hatch and outlets","upgrade":"Professional air sealing with blower-door test","costRange":[600,1200],"savingsRange":[220,340],"source":"NREL ResStock","pos":{"x":12,"y":44}},
+  {"id":"walls","name":"Walls","lossPerYear":290,"condition":"Uninsulated 2x4 cavities","upgrade":"Dense-pack cellulose wall insulation","costRange":[2800,4200],"savingsRange":[160,240],"source":"NREL ResStock","pos":{"x":28,"y":70}}
+]

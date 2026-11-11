@@ -28,3 +28,9 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- All app state lives in one zustand store (`src/store/useTwin.ts`); displayed costs/savings come from store selectors, never hard-coded in components, so mock data can be swapped for real calculations.
+- Mock data lives in `src/data/*.json`; `src/engine` (calculations) and `src/three` (3D) are reserved for code the owner adds later — don't add logic there.
+- Zustand selectors that return new objects must be wrapped in `useShallow` to avoid render loops.
+- The index page renders only one layout (desktop or stacked) via a media-query hook, so stage popovers aren't duplicated.

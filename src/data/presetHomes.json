@@ -1,0 +1,5 @@
+[
+  {"id":"maya","title":"Maya's house","city":"Chicago, IL","shortCity":"Chicago","climateZone":"5A","zip":"60618","year":1978,"sqft":1850,"fuel":"Gas","system":"Furnace","systemLabel":"gas furnace","yearlyCost":2340,"electricMonthly":85,"fuelMonthly":110},
+  {"id":"phoenix","title":"Desert ranch","city":"Phoenix, AZ","shortCity":"Phoenix","climateZone":"2B","zip":"85016","year":2001,"sqft":1600,"fuel":"Electric","system":"Heat pump","systemLabel":"electric heat pump","yearlyCost":2050,"electricMonthly":171,"fuelMonthly":0},
+  {"id":"boston","title":"Brownstone","city":"Boston, MA","shortCity":"Boston","climateZone":"5A","zip":"02116","year":1925,"sqft":2200,"fuel":"Oil","system":"Boiler","systemLabel":"oil boiler","yearlyCost":3480,"electricMonthly":110,"fuelMonthly":180}
+]

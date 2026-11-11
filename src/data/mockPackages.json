@@ -1,0 +1,17 @@
+[
+  {"id":"p1","name":"Insulate + seal + right-sized heat pump","upgrades":["Attic insulation","Air sealing","Heat pump"],"cost":13800,"savings":930,"savingsRange":[780,1050],"payback":8.4,"value15":6200,"newYearlyCost":1410,
+   "reason":"Insulating first lets you buy a smaller heat pump.",
+   "breakdown":[{"category":"Heating","now":1450,"plan":720},{"category":"Cooling","now":380,"plan":210},{"category":"Other","now":510,"plan":480}],
+   "explanation":"Your attic and air leaks are responsible for most of the heat your home loses each winter. Fixing them first cuts the amount of heat you need, so a smaller and cheaper heat pump can do the job. The heat pump then replaces your aging gas furnace and also cools more efficiently in summer. Together these upgrades pay for themselves in about eight years. Over 15 years, you come out roughly $6,200 ahead, even after the upfront cost.",
+   "items":[{"name":"Attic insulation","cost":2200,"savings":450,"lifetime":30,"source":"NREL ResStock"},{"name":"Air sealing","cost":900,"savings":280,"lifetime":20,"source":"NREL ResStock"},{"name":"Heat pump (3 ton)","cost":10700,"savings":200,"lifetime":18,"source":"EIA"}]},
+  {"id":"p2","name":"Insulation + air sealing + smart thermostat","upgrades":["Attic insulation","Air sealing","Smart thermostat"],"cost":4600,"savings":640,"savingsRange":[520,760],"payback":7.2,"value15":4900,"newYearlyCost":1700,
+   "reason":"Low cost, quick wins that fix the biggest leaks.",
+   "breakdown":[{"category":"Heating","now":1450,"plan":930},{"category":"Cooling","now":380,"plan":290},{"category":"Other","now":510,"plan":480}],
+   "explanation":"This plan targets the cheapest, highest-impact fixes. Insulating the attic and sealing air leaks stops most of the heat from escaping. A smart thermostat trims waste when nobody is home. It costs a third as much as a heat pump package and pays back in about seven years. You keep your current furnace for now.",
+   "items":[{"name":"Attic insulation","cost":2200,"savings":450,"lifetime":30,"source":"NREL ResStock"},{"name":"Air sealing","cost":900,"savings":120,"lifetime":20,"source":"NREL ResStock"},{"name":"Smart thermostat","cost":1500,"savings":70,"lifetime":10,"source":"EIA RECS"}]},
+  {"id":"p3","name":"Heat pump only","upgrades":["Heat pump"],"cost":11900,"savings":560,"savingsRange":[420,700],"payback":21.3,"value15":-2100,"newYearlyCost":1780,
+   "reason":"Without insulation, you need a bigger, pricier unit.",
+   "breakdown":[{"category":"Heating","now":1450,"plan":980},{"category":"Cooling","now":380,"plan":300},{"category":"Other","now":510,"plan":500}],
+   "explanation":"A heat pump alone is far more efficient than your furnace, but the house still leaks heat. That means you need a larger unit, which costs more up front. Savings are real but smaller than the combined packages. The payback is longer than the equipment's typical lifetime, so this plan loses money over 15 years.",
+   "items":[{"name":"Heat pump (4 ton)","cost":11900,"savings":560,"lifetime":18,"source":"EIA"}]}
+]

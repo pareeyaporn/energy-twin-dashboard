@@ -24,7 +24,7 @@ export function HomeForm() {
       </div>
       <div className="grid gap-3">
         <div className="flex justify-between"><Label className="label-caps">Home size</Label><span className="num text-sm font-medium">{home.sqft.toLocaleString()} sq ft</span></div>
-        <Slider aria-label="Home size in square feet" min={600} max={5000} step={50} value={[home.sqft]} onValueChange={([v]) => updateHome({ sqft: v })} />
+        <Slider aria-label="Home size in square feet" min={600} max={5000} step={50} value={[home.sqft]} onValueChange={([v]) => v !== undefined && updateHome({ sqft: v })} />
       </div>
       <div className="grid gap-2">
         <Label className="label-caps">Year built</Label>

@@ -32,7 +32,7 @@ export function OptimizePanel() {
             <Input aria-label="Budget in dollars" type="number" min={2000} max={40000} step={500} className="num pl-6" value={s.budget}
               onChange={(e) => s.setBudget(Math.max(0, Math.min(40000, Number(e.target.value) || 0)))} />
           </div>
-          <Slider aria-label="Budget" min={2000} max={40000} step={500} value={[s.budget]} onValueChange={([v]) => s.setBudget(v)} />
+          <Slider aria-label="Budget" min={2000} max={40000} step={500} value={[s.budget]} onValueChange={([v]) => v !== undefined && s.setBudget(v)} />
           <div className="num flex justify-between text-[11px] text-text-muted"><span>$2,000</span><span>$40,000</span></div>
         </section>
         <section className="space-y-3"><p className="label-caps">What matters most</p><GoalCards /></section>

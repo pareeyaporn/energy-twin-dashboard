@@ -6,6 +6,8 @@ Energy Twin is a 3D home energy simulator for new homeowners (bought in the last
 
 Built for a 48-hour hackathon in [Lovable](https://lovable.dev), extended with Claude Code, and synced through GitHub.
 
+Full idea overview: [docs/00_IDEA.md](docs/00_IDEA.md).
+
 ## Demo path
 
 Maya's preset home (Chicago, 1978, gas) → Thermal Vision → $15k budget → Optimize → upgrades appear on the house → the bill counts down → plan with sources.

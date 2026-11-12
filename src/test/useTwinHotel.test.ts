@@ -334,8 +334,28 @@ describe("optimizing under a scenario", () => {
     await p;
   }
 
-  it("is off by default and measures against the plain baseline", async () => {
+  it("turns on by itself when a scenario starts and off when the scenario is cleared", async () => {
+    expect(get().optimizeOnScenario).toBe(false);
+    await run();
+    expect(get().hotelPlan!.scenario).toBeNull();
+    get().setScenario({ occupancy: 0.85 });
+    expect(get().optimizeOnScenario).toBe(true);
+    expect(get().hotelPlan).toBeNull(); // the baseline plan no longer matches what is shown
+    get().setScenario({ smartRoomControls: true }); // already on: nothing else changes
+    expect(get().optimizeOnScenario).toBe(true);
+    get().resetScenario();
+    expect(get().optimizeOnScenario).toBe(false);
+    get().applyStressTest("heat_wave");
+    expect(get().optimizeOnScenario).toBe(true);
+    get().applyStressTest(null);
+    expect(get().optimizeOnScenario).toBe(false);
+  });
+
+  it("can be switched off during a scenario, and then measures against the plain baseline", async () => {
     get().applyStressTest("price_up_20");
+    get().setOptimizeOnScenario(false);
+    get().setScenario({ occupancy: 0.85 }); // a scenario already running: the user's choice stays
+    expect(get().optimizeOnScenario).toBe(false);
     await run();
     expect(get().hotelPlan!.scenario).toBeNull();
     expect(get().hotelPlanBaseline).toBe(get().baseline);
@@ -343,6 +363,7 @@ describe("optimizing under a scenario", () => {
 
   it("when on, measures against the scenario and says so", async () => {
     get().applyStressTest("price_up_20");
+    get().setOptimizeOnScenario(false);
     await run();
     const plain = get().hotelPlan!;
     get().setOptimizeOnScenario(true);

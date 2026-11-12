@@ -59,12 +59,12 @@ describe("advisor in the store", () => {
   });
 
   it("includes the current plan and scenario in the context", async () => {
+    get().applyStressTest("price_up_20"); // turns on optimizing for the scenario
     vi.useFakeTimers();
     const run = get().runHotelOptimizer();
     await vi.advanceTimersByTimeAsync(2000);
     await run;
     vi.useRealTimers();
-    get().applyStressTest("price_up_20");
     let seen: advisor.AdvisorContext | null = null;
     useFetch((body) => {
       seen = body.context;

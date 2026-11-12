@@ -3,12 +3,12 @@ import { ZONE_IDS, ZONE_LABELS } from "@/engine/hotel";
 import type { ZoneId } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
 import { selectCompare, selectZoneRows } from "@/store/hotelDerived";
-import { intensityColor, percent, usd } from "../format";
+import { intensityColor, percent, relativeIntensity, usd } from "../format";
 import { GhostUpgradeOverlay } from "./GhostUpgrades";
-import { VIEW, ZONE_SHAPES } from "./zoneLayout";
+import { GUEST_WING_FACTS, VIEW, ZONE_SHAPES } from "./zoneLayout";
 
 /**
- * The building cross-section with six clickable zones, colored by yearly cost (blue = lower, red = higher).
+ * The building cross-section with six clickable zones, colored by yearly cost from the lowest shown (blue) to the highest (red).
  * Before, after or a split view. Everything shown is read from the store.
  */
 export function BuildingDiagram() {
@@ -19,10 +19,14 @@ export function BuildingDiagram() {
   const mode = useTwin((s) => s.compareMode);
   const reduce = useTwin((s) => s.reduceEffects);
   const selectZone = useTwin((s) => s.selectZone);
+  const rooms = useTwin((s) => s.hotel.profile.rooms);
+  const floors = useTwin((s) => s.hotel.profile.floors);
 
   const before = (z: ZoneId) => compare.before.byZone[z].cost;
   const after = (z: ZoneId) => compare.after.byZone[z].cost;
-  const max = Math.max(1, ...ZONE_IDS.flatMap((z) => [before(z), after(z)]));
+  const shown = ZONE_IDS.flatMap((z) => [before(z), after(z)]);
+  const min = Math.min(...shown);
+  const max = Math.max(...shown);
   const rowOf = (z: ZoneId) => rows.find((r) => r.zone === z);
   const transition = reduce ? "none" : "fill 400ms ease";
   const split = mode === "split";
@@ -32,7 +36,7 @@ export function BuildingDiagram() {
     <g clipPath={clip ? `url(#${clip})` : undefined}>
       {ZONE_IDS.flatMap((z) =>
         ZONE_SHAPES[z].rects.map((r, i) => (
-          <rect key={`${z}-${i}`} x={r.x} y={r.y} width={r.w} height={r.h} rx="8" fill={intensityColor(cost(z) / max)} fillOpacity="0.85" style={{ transition }} />
+          <rect key={`${z}-${i}`} x={r.x} y={r.y} width={r.w} height={r.h} rx="8" fill={intensityColor(relativeIntensity(cost(z), min, max))} fillOpacity="0.85" style={{ transition }} />
         )),
       )}
     </g>
@@ -91,15 +95,22 @@ export function BuildingDiagram() {
                 <rect key={i} x={r.x} y={r.y} width={r.w} height={r.h} rx="8" fill="transparent" stroke={isSel ? "var(--primary)" : "var(--glass-border)"} strokeWidth={isSel ? 3 : 1.5} />
               ))}
               {z === "hallways_shared" ? (
-                <text x={shape.label.x} y={shape.label.y} textAnchor="middle" fontSize="11" fill="var(--foreground)" transform={`rotate(-90 ${shape.label.x} ${shape.label.y})`}>
-                  {shape.short} {usd(cost)}
-                </text>
+                <>
+                  <text x={shape.label.x} y={shape.label.y} textAnchor="middle" fontSize="12" fontWeight="600" fill="var(--foreground)">{shape.short}</text>
+                  <text x={shape.label.x} y={shape.label.y + 16} textAnchor="middle" fontSize="11" fill="var(--foreground)">{usd(cost)}</text>
+                </>
               ) : (
                 <>
                   <text x={shape.label.x} y={shape.label.y} textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--foreground)">{shape.short}</text>
                   <text x={shape.label.x} y={shape.label.y + 18} textAnchor="middle" fontSize="13" fill="var(--foreground)">{usd(cost)} / yr</text>
                   {changed && (
                     <text x={shape.label.x} y={shape.label.y + 34} textAnchor="middle" fontSize="11" fill="var(--foreground)" fillOpacity="0.85">was {usd(before(z))}</text>
+                  )}
+                  {z === "guest_rooms" && (
+                    <>
+                      <text x={GUEST_WING_FACTS.x} y={GUEST_WING_FACTS.y} textAnchor="middle" fontSize="13" fill="var(--foreground)" fillOpacity="0.9">{rooms} rooms</text>
+                      <text x={GUEST_WING_FACTS.x} y={GUEST_WING_FACTS.y + 18} textAnchor="middle" fontSize="13" fill="var(--foreground)" fillOpacity="0.9">{floors} floors</text>
+                    </>
                   )}
                 </>
               )}

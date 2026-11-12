@@ -26,6 +26,20 @@ afterEach(() => {
 });
 
 describe("HotelTwin header and zones", () => {
+  it("labels both guest-room wings, writes the hallway label level, and spreads the color scale", () => {
+    const { container } = render(<HotelTwin />);
+    const guest = zoneButton(/Guest rooms:/);
+    expect(within(guest).getByText(`${get().hotel.profile.rooms} rooms`)).toBeInTheDocument();
+    expect(within(guest).getByText(`${get().hotel.profile.floors} floors`)).toBeInTheDocument();
+    const halls = zoneButton(/Hallways and shared facilities:/);
+    for (const t of halls.querySelectorAll("text")) expect(t.getAttribute("transform")).toBeNull();
+    // The cheapest zone is drawn fully blue and the most expensive fully red.
+    const fills = [...container.querySelectorAll("svg rect[fill^='color-mix']")].map((r) => r.getAttribute("fill"));
+    expect(fills).toContain("color-mix(in oklab, var(--efficient), var(--heat) 0%)");
+    expect(fills).toContain("color-mix(in oklab, var(--heat), var(--loss) 100%)");
+  });
+
+
   it("shows the hotel, a simulated-data label and the baseline cost", () => {
     render(<HotelTwin />);
     expect(screen.getByText("Lakeshore Inn")).toBeInTheDocument();

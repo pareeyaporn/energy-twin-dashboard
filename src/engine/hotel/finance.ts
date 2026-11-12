@@ -182,6 +182,8 @@ export function incentiveLines(
     for (const prog of data.incentives.incentives) {
       if (!prog.appliesTo.includes(item.id)) continue;
       if (prog.hvacTypes && !prog.hvacTypes.includes(p.hvacType)) continue;
+      // A utility's program only reaches hotels in its territory (approximated by state; ComEd serves northern Illinois).
+      if (prog.states && !prog.states.includes(p.state)) continue;
       const usable = !userSet && prog.applied && prog.verified && prog.value !== null;
       const cov = coverage[item.id] ?? 1;
       const amountAt = (s: (typeof SCENARIOS)[number]): number => {

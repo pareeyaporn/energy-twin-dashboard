@@ -309,7 +309,7 @@ export interface HotelData {
     verified: boolean;
   };
   weather: {
-    climates: Record<string, { label: string; meanTempF: number[]; highTempF?: number[]; lowTempF?: number[]; balancePointF: number; latitude?: number; solar?: ClimateSolar }>;
+    climates: Record<string, { label: string; meanTempF: number[]; highTempF?: number[]; lowTempF?: number[]; balancePointF: number; latitude?: number; solar?: ClimateSolar; /** Where this city's temperatures come from (the shared `source` covers Chicago). */ source?: string }>;
     cityToClimate: Record<string, string>;
     defaultClimate: string;
     source: string;
@@ -406,6 +406,11 @@ export interface IncentiveProgram {
   kind: 'percent_of_cost' | 'per_kw' | 'per_room' | 'fixed' | 'per_watt_reduced' | 'per_watt_controlled' | 'per_ton';
   /** Only for these HVAC types (for example a rate that depends on how guest rooms are heated). */
   hvacTypes?: HvacType[];
+  /**
+   * Only for hotels in these states (2-letter codes): a utility or state program (ComEd, Peoples Gas, Illinois Shines) is not offered
+   * elsewhere. Absent = nationwide (for example a federal tax credit).
+   */
+  states?: string[];
   /** The program's cap on the incentive as a share of the measure's cost (ComEd: 90%). */
   maxShareOfCost?: number;
   /** The program year the rate comes from, shown with the amount. */

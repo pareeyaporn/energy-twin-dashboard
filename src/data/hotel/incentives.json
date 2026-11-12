@@ -26,7 +26,10 @@
       "note": "Not applied. Payments depend on the program block, system size and contract terms; not researched.",
       "source": "Illinois Power Agency, Illinois Shines program (to research).",
       "verified": false,
-      "status": "unverified"
+      "status": "unverified",
+      "states": [
+        "IL"
+      ]
     },
     {
       "id": "comed_led_lighting",
@@ -42,7 +45,10 @@
       "note": "Program rules (ComEd 2026 Standard Incentives Application (V15)): pre-approval is required for projects requesting $10,000 or more (otherwise ComEd may cap the incentive at $10,000); the incentive cannot exceed 90% of the incremental measure cost or 90% of the project cost, whichever is less (modeled as 90% of the upgrade's cost); funds are limited and subject to availability; final amounts depend on verified equipment. Rate: $0.75 per watt reduced. Watts reduced are estimated from the hotel's modeled lighting load (150 W per guest room and 1.0 W per ft2 of public areas and corridors, equipment.json placeholders) times the LED reduction, so the amount is an estimate. The rate is from the 2025 worksheet; confirm the 2026 lighting rate before applying.",
       "source": "ComEd Indoor Lighting Incentives Worksheet, January 1 - December 31, 2025 (updated November 5, 2025); ComEd 2026 Standard Incentives Application (V15)",
       "verified": true,
-      "status": "verified"
+      "status": "verified",
+      "states": [
+        "IL"
+      ]
     },
     {
       "id": "comed_occupancy_sensors",
@@ -58,7 +64,10 @@
       "note": "Program rules (ComEd 2026 Standard Incentives Application (V15)): pre-approval is required for projects requesting $10,000 or more (otherwise ComEd may cap the incentive at $10,000); the incentive cannot exceed 90% of the incremental measure cost or 90% of the project cost, whichever is less (modeled as 90% of the upgrade's cost); funds are limited and subject to availability; final amounts depend on verified equipment. Rate: $0.25 per watt controlled (new sensors only; replacing existing controls is not eligible). Watts controlled are the modeled public-area and corridor lighting load (1.0 W per ft2, placeholder) times the share covered.",
       "source": "ComEd Indoor Lighting Incentives Worksheet, January 1 - December 31, 2025 (updated November 5, 2025); ComEd 2026 Standard Incentives Application (V15)",
       "verified": true,
-      "status": "verified"
+      "status": "verified",
+      "states": [
+        "IL"
+      ]
     },
     {
       "id": "comed_grem_gas_heat",
@@ -78,7 +87,10 @@
       "note": "Program rules (ComEd 2026 Standard Incentives Application (V15)): pre-approval is required for projects requesting $10,000 or more (otherwise ComEd may cap the incentive at $10,000); the incentive cannot exceed 90% of the incremental measure cost or 90% of the project cost, whichever is less (modeled as 90% of the upgrade's cost); funds are limited and subject to availability; final amounts depend on verified equipment. Rate: $75 per cooling ton controlled for guest rooms with natural gas heat and electric air conditioning; occupancy or key-card control with at least a 5 F unoccupied setback; new installations only. Tons are estimated at 0.75 ton per room (assumption). Your gas company may offer an additional rebate (not included).",
       "source": "ComEd HVAC and VSD Incentives Worksheet, January 1 - December 31, 2026 (updated May 4, 2026); ComEd 2026 Standard Incentives Application (V15)",
       "verified": true,
-      "status": "verified"
+      "status": "verified",
+      "states": [
+        "IL"
+      ]
     },
     {
       "id": "comed_grem_electric_heat",
@@ -99,7 +111,10 @@
       "note": "Program rules (ComEd 2026 Standard Incentives Application (V15)): pre-approval is required for projects requesting $10,000 or more (otherwise ComEd may cap the incentive at $10,000); the incentive cannot exceed 90% of the incremental measure cost or 90% of the project cost, whichever is less (modeled as 90% of the upgrade's cost); funds are limited and subject to availability; final amounts depend on verified equipment. Rate: $100 per cooling ton controlled for guest rooms with electric resistance or heat-pump heating and air conditioning. Tons are estimated at 0.75 ton per room (assumption).",
       "source": "ComEd HVAC and VSD Incentives Worksheet, January 1 - December 31, 2026 (updated May 4, 2026); ComEd 2026 Standard Incentives Application (V15)",
       "verified": true,
-      "status": "verified"
+      "status": "verified",
+      "states": [
+        "IL"
+      ]
     },
     {
       "id": "comed_hvac_equipment",
@@ -114,7 +129,10 @@
       "note": "Not applied: the 2026 rates depend on rated efficiency, which the model does not track. Water-cooled chillers $10 and air-cooled $7 per ton for each 0.01 kW/ton of IPLV below the qualifying efficiency; rooftop units $20 per ton per point of IEER/SEER2 above the requirement; PTAC/PTHP $30 per ton (under 2 tons). Enter an amount once the equipment is chosen.",
       "source": "ComEd HVAC and VSD Incentives Worksheet, January 1 - December 31, 2026 (updated May 4, 2026)",
       "verified": false,
-      "status": "unverified"
+      "status": "unverified",
+      "states": [
+        "IL"
+      ]
     },
     {
       "id": "comed_energy_management",
@@ -128,7 +146,10 @@
       "note": "Not applied: EMS measures are in ComEd's separate Energy Management Systems worksheet, which has not been provided. Note: chiller VSD and chilled-water reset incentives cannot be combined with an EMS measure.",
       "source": "ComEd HVAC and VSD Incentives Worksheet, January 1 - December 31, 2026 (updated May 4, 2026) (refers to the EMS worksheet)",
       "verified": false,
-      "status": "unverified"
+      "status": "unverified",
+      "states": [
+        "IL"
+      ]
     },
     {
       "id": "peoples_gas_business_efficiency",
@@ -144,9 +165,12 @@
       "note": "Not applied. Rebate amounts vary by measure and program year; not researched.",
       "source": "Peoples Gas Energy Efficiency Program for business (to research).",
       "verified": false,
-      "status": "unverified"
+      "status": "unverified",
+      "states": [
+        "IL"
+      ]
     }
   ],
-  "source": "Programs that may lower the upfront cost. Modular: each program has an amount rule (kind and value) and is applied only when 'applied' and 'verified' are both true; until then it is shown as listed, with status 'unverified' and $0 in every calculation. No incentive amounts are invented. A user can enter a confirmed amount per upgrade, which replaces program amounts for that upgrade.",
+  "source": "Programs that may lower the upfront cost. Modular: each program has an amount rule (kind and value) and is applied only when 'applied' and 'verified' are both true; until then it is shown as listed, with status 'unverified' and $0 in every calculation. No incentive amounts are invented. A user can enter a confirmed amount per upgrade, which replaces program amounts for that upgrade. Territory: ComEd, Peoples Gas and Illinois Shines programs carry \"states\": [\"IL\"] and are not offered to hotels in other states (ComEd serves northern Illinois including Chicago; a hotel elsewhere in Illinois may be in Ameren territory, which the state-level rule does not distinguish). Programs without \"states\" (the federal 48E credit) apply nationwide.",
   "verified": false
 }

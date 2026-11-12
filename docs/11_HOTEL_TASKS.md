@@ -20,13 +20,14 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
       (add `src/engine/hotel/` and `src/twin/`), golden rule 8 stays ("the AI never invents numbers")
 - [ ] 0.5 [CC] Update `README.md` and `docs/00_IDEA.md`: problem, persona (hotel owner or GM), differentiation (existing buildings,
       operations plus investments, not new-build design like Eden)
+- [x] 0.8b [CC] Backend architecture doc `docs/12_BACKEND_ARCHITECTURE.md` and README updated for the hotel pivot
 - [ ] 0.6 [CC] Rewrite `docs/05` (Claude Code prompts) and `docs/06` (Lovable prompts) for the new phases; update `docs/07` demo
       checklist and Q&A (vs Eden, vs ENERGY STAR Portfolio Manager, accuracy, why hotels)
 - [ ] 0.7 [TEAM] Delete finished branches on GitHub (I cannot delete remote branches); turn on "Automatically delete head branches"
 - [ ] 0.8 [TEAM] Allow the network domains needed for research: `epa.gov`, `noaa.gov` (and `nrel.gov`, `energystar.gov` if used)
 
 ## Phase 1 — Hotel data model and baseline simulation (P0) [CC]
-- [ ] 1.1 Engine spec `docs/12_HOTEL_ENGINE_SPEC.md`: units, equations, load categories, zones, assumptions, what is *not* modeled
+- [ ] 1.1 Engine spec `docs/13_HOTEL_ENGINE_SPEC.md`: units, equations, load categories, zones, assumptions, what is *not* modeled
 - [ ] 1.2 `src/engine/hotel/types.ts`
   - `HotelProfile`: name, city/state/country, rooms, floor area, floors, year built, operating hours (default 24/7), HVAC type
     (PTAC, VRF, central plant, RTU), monthly bill, electricity rate, average occupancy, seasonal occupancy, occupied hours per room,
@@ -108,10 +109,10 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 - [ ] 5.6 P2, only if time: lightweight 3D with React Three Fiber
 
 ## Phase 6 — AI advisor (P1) [CC]
-- [ ] 6.1 Design note: the model receives a precomputed context (baseline by zone, current scenario, three packages, and a few precomputed
+- [ ] 6.1 Design note (see [12_BACKEND_ARCHITECTURE.md](12_BACKEND_ARCHITECTURE.md)): the model receives a precomputed context (baseline by zone, current scenario, three packages, and a few precomputed
       comparisons such as solar-first vs thermostats-first); it explains, it never calculates. Tool-calling is a later upgrade
 - [ ] 6.2 `supabase/functions/advisor/index.ts` (Deno): input question plus context, 6 s timeout, returns `{ text }`
-- [ ] 6.3 Guardrail: a post-check that every number in the answer appears in the context; if not, discard it and use the fallback
+- [ ] 6.3 Guardrail (runs in the browser, shared engine code): every number in the answer must appear in the context; if not, discard it and use the fallback
 - [ ] 6.4 Fallback: deterministic template answers for the demo questions (why HVAC is costly, how occupancy changes energy, solar or
       thermostats first, how to use a $30,000 budget), cached for the demo
 - [ ] 6.5 [TEAM] Decide the AI provider and secret name (Lovable Cloud secrets only, never in code)

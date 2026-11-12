@@ -119,4 +119,9 @@ clearAdvisor(). Keep the answer text exactly as given. Don't modify src/engine, 
 ```
 Add a footer disclaimer: "Estimates from synthetic and public data, not an engineering audit. No guaranteed savings." Mark any input or total that
 uses a default with "default (estimate)". Check empty, loading and error states, keyboard focus order and mobile layout. Fix layout shift.
+Remove home-era leftovers from the top bar: the "Thermal Vision" switch (nothing reads thermalMode any more), the "1 Hotel profile · 2 Explore
+· 3 Optimize" step bar (it uses the old home step and never advances), and the "Share plan" button (the link does not carry the hotel, scenario
+or package). Delete components nothing imports any more: HomeForm, CostSummary, PresetCard and StageOverlays. In the budget input, keep the
+typed text while editing and commit on blur or Enter, so clearing the field does not set the budget to $0. Don't modify src/engine, src/data,
+src/twin, src/store or supabase.
 ```

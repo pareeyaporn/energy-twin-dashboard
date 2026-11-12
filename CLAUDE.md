@@ -13,11 +13,12 @@ An AI advisor explains the computed results in plain language. It never produces
 
 History: the project began as a home energy simulator (Maya's house). We pivoted because an earlier winner, Eden, covers
 net-zero **new-build** home design. We differentiate on **existing** buildings, operations plus investments. The hotel product is
-built (`src/engine/hotel/`, `src/twin/`, the workspace UI, the advisor); the home engine files in `src/engine/` are legacy and unused.
+built (`src/engine/hotel/`, `src/twin/`, the 3D twin in `src/three/`, the workspace UI, the advisor); the home engine files in `src/engine/` are legacy and unused.
 
 Hackathon: 48 hours. Built in **Lovable**, extended with **Claude Code**, synced through **GitHub**.
-Demo = one flawless 3-minute path: synthetic 100-room hotel (Chicago) → zone-level energy → occupancy 60% to 85% →
-smart room controls on → $50,000 budget → three packages → ask the advisor → before/after energy, cost and carbon.
+Demo = one flawless 6–7 minute path (script in `docs/07`): synthetic 100-room hotel (Chicago) in 3D → zone-level energy → a living
+building (seasons, day–night) → occupancy 60% to 85% → smart room controls on → $50,000 budget → three packages and the 10-year projection →
+ask the advisor → the 300-room preset → before/after energy, cost and carbon.
 **The script follows the calibrated results**, whichever upgrades perform best; never adjust calculations to fit a story.
 
 Full specs live in `/docs`. Read the relevant doc before working on an area:
@@ -26,8 +27,8 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 - `docs/12_BACKEND_ARCHITECTURE.md` — runtime topology, the AI advisor function, guardrails
 - `docs/13_HOTEL_ENGINE_SPEC.md` — equations, assumptions, the financial breakdown and the demo figures
 - `docs/08_DATA_TODO.md` — data status and research still to find; `docs/14_RESEARCH_LOG.md` — every sourced value; `docs/15_PRODUCT_DECISIONS.md` — team decisions (not facts)
-- Home-era docs, still useful as patterns until rewritten: `docs/02_ENGINE_SPEC.md`, `docs/03_DATA_SPEC.md`,
-  `docs/04_3D_SPEC.md`, `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md`; `docs/09` is superseded.
+- `docs/04_3D_SPEC.md` — the 3D hotel twin (what drives each visual); `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md` — prompts and status
+- Home-era docs, still useful as patterns: `docs/02_ENGINE_SPEC.md`, `docs/03_DATA_SPEC.md`. (`docs/09`, the superseded offices-and-retail plan, was removed; it is in git history.)
 
 ## Honesty rules
 
@@ -58,7 +59,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 | `src/engine/` | Claude Code | Pure TypeScript. No React, no network, no AI. `hotel/` is the active engine; the home files are legacy |
 | `src/data/` | Claude Code | JSON only. Every value carries a source; `hotel/` is the active set |
 | `src/twin/` | Claude Code | The clickable 2D hotel diagram (`<HotelTwin />`). Lovable only places it |
-| `src/three/` | Claude Code | Optional lightweight 3D (P2). Lovable only places `<Scene />` |
+| `src/three/` | Claude Code | The 3D hotel twin (built, Phase 9). Loaded by `src/twin/parts/View3D.tsx`; Lovable places only `<HotelTwin />` |
 | `supabase/functions/` | Claude Code | Backend functions (AI advisor). Keys are read only here |
 | `docs/` | Anyone | Specs and plans |
 
@@ -68,7 +69,7 @@ If a task needs a change in a Lovable-owned file, make the **smallest possible**
 
 - React + TypeScript + Vite + Tailwind + shadcn/ui (from Lovable)
 - State: `zustand` (`src/store/useTwin.ts`)
-- 3D (optional, P2): `three`, `@react-three/fiber`, `@react-three/drei`, `@react-three/postprocessing`, `@react-spring/three` (installed; the P0/P1 twin is 2D SVG)
+- 3D: `three`, `@react-three/fiber`, `@react-three/drei` (used, lazy-loaded, 2D fallback); `@react-three/postprocessing`, `@react-spring/three` installed but unused
 - Charts: `recharts`
 - Tests: `vitest`
 - Backend: Lovable Cloud (Supabase edge functions, Deno)
@@ -81,7 +82,7 @@ Never upgrade React itself.
 ## Architecture (data flow)
 
 ```
-Lovable UI panels ──writes──▶ zustand store ◀──reads── 2D digital twin (src/twin)
+Lovable UI panels ──writes──▶ zustand store ◀──reads── digital twin: 2D (src/twin), 3D (src/three)
                                    │
                                    ▼
                      src/engine/hotel (pure functions, in the browser)
@@ -92,7 +93,7 @@ Lovable UI panels ──writes──▶ zustand store ◀──reads── 2D di
 store results ──▶ supabase/functions/advisor ──▶ AI text (explanation only) ──▶ validated in the browser
 ```
 
-- The twin does **no math**. Colors, labels and the metric tiles all read numbers from the store, which the engine computed.
+- The twin (2D and 3D) does **no math**. Scenery (trees, snow, sky, traffic) is visual only; anything that looks like data comes from the store. Colors, labels and the metric tiles all read numbers from the store, which the engine computed.
   If the numbers change, the visuals change.
 - Components never hard-code costs or savings. They read from the store.
 - The advisor receives precomputed results; the browser rejects any answer containing a number not in them. See `docs/12`.
@@ -101,10 +102,11 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 
 `useTwin` holds the hotel state: `hotelInput` / `hotel` (resolved profile with `defaulted` and `notes`), `baseline`, `scenario`,
 `activeStressTest`, `scenarioResult`, `optimizeOnScenario` (follows the scenario automatically), `hotelPlan`, `optimizing`,
-`optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, twin controls (`selectedZone`, `twinLayer`, time, `compareMode`)
+`optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, `hotelDiscountRate`, twin controls (`selectedZone`, `twinLayer`, time with modes
+`seasons` / `day` / `year`, `compareMode`)
 and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
 `applyHotelPackage` and `askAdvisor`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
-`selectUpgradeComparison`, `selectUpgradeBaseline`, …). Some home-era fields remain for compatibility.
+`selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, …). Some home-era fields remain for compatibility.
 
 Before changing the store, read `src/store/useTwin.ts` and **extend** it, backwards compatibly, rather than replacing it.
 Show the diff and get the user's OK first.

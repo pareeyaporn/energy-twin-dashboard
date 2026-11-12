@@ -66,3 +66,10 @@ Product decisions taken at the same time (discount rate, optimizer rules, HVAC t
 - The demo hotel's 91.1 kBtu/ft² is 45% above the ENERGY STAR national hotel median (63.0) and 6% above the CBECS lodging mean (85.7, which
   includes nursing homes). A cold climate and a restaurant explain part of it; the default EUI input (92) is still a placeholder (docs/08, B5/B6).
 - Installed costs for most upgrades and solar $/W are still placeholders (docs/08, A2, A3).
+
+## Pass 4 (November 2026, with the 3D twin)
+
+| Item | Before | Now | Source | Read |
+| --- | --- | --- | --- | --- |
+| Chicago normal highs and lows | monthly means only | **highs** 31.6 … 84.5 °F (Jul), **lows** 18.8 (Jan) … 66.4 °F; used for the modeled hourly temperature in the 3D readout | NOAA NCEI U.S. Climate Normals 1991–2020, Chicago O'Hare (USW00094846), monthly TMAX/TMIN normals | Primary (CSV) |
+| Peer benchmarks in the data | in this log only | `defaults.peerBenchmarks`: ENERGY STAR hotel median **63.0**, CBECS 2018 lodging mean **85.7** kBtu/ft² site; used by `benchmarkComparison` for context only | As in pass 2 | Primary |

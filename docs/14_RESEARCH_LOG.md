@@ -43,6 +43,12 @@ Method: [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md), section 8.
 | ComEd business incentives | program listed | rules recorded (pre-approval at $10,000 or more, otherwise a possible $10,000 cap; up to $2 million per customer); **amounts not available** (in worksheets on another host) | ComEd 2026 Standard Incentives Application (www.comed.com) | Primary (PDF) |
 | Heat-pump water heaters, heat-pump HVAC | not modeled | **still not modeled**: no commercial hotel-scale cost and performance found (IL-TRM's water-heater measure covers tanks up to 120 gallons) | IL-TRM v14.0 Vol. 2 | Primary (PDF) |
 
+| Hot water per room | 20 gal per occupied room (unsourced) | kept; consistent with **14 gal per hotel room per day** | IL-TRM v14.0 4.3.2 table (from the 2007 ASHRAE Handbook, HVAC Applications, ch. 49) | Primary (PDF) |
+| Condensing boiler cost and life | none | **$22.95 per kBtu/h** full installed (>90% EC), 25 years (recorded; chiller part still unsourced) | IL-TRM v14.0 4.4.10 | Primary (PDF) |
+| Chicago hotel occupancy | defaults only | **69.2%** CBD average in 2025 (68.1% in 2024), ADR $243.10; used for the 300-room preset | STR via Choose Chicago, 2025 Hotel Performance (January 2026) | Primary (PDF) |
+| Monthly occupancy shape | synthetic | **still synthetic** (only annual figures are published) | Choose Chicago | Primary (PDF) |
+| Comfort limits | unlabeled defaults | documented as a **product decision**; ASHRAE 55 not consulted (paid standard) | — | — |
+
 Product decisions taken at the same time (discount rate, optimizer rules, HVAC types, solar sizes, emissions, incentives) are in
 [15_PRODUCT_DECISIONS.md](15_PRODUCT_DECISIONS.md); they are choices, not sourced facts.
 

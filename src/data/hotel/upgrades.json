@@ -221,7 +221,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Heating reduction mid 13%: replacing an 80% efficient boiler (typical existing stock, GSA evaluation) with a condensing boiler at about 92% seasonal efficiency gives 1 - 0.80/0.92 = 13%; NREL ComStock (Condensing Gas Boilers, 2025) reports 9% site savings for an example building. Low and high, cooling reduction, cost and life: PLACEHOLDER. Values seen in search excerpts; to confirm.",
+      "source": "Heating reduction mid 13%: replacing an 80% efficient boiler (typical existing stock, GSA evaluation) with a condensing boiler at about 92% seasonal efficiency gives 1 - 0.80/0.92 = 13%; NREL ComStock (Condensing Gas Boilers, 2025) reports 9% site savings for an example building. Low and high, cooling reduction, cost and life: PLACEHOLDER. Values seen in search excerpts; to confirm. Boiler part, for reference: IL-TRM v14.0 4.4.10 High Efficiency Boiler gives a full installed cost of $22.95 per kBtu/h for a condensing hot-water boiler (over 90% combustion efficiency; $12.94 for 85 to 90%) and a 25-year life; at the model's boiler size (0.03 kBtu/h per ft2) that is about $38,000 for the demo hotel. The chiller cost is not sourced, so the combined $2.00 per ft2 stays a PLACEHOLDER.",
       "verified": false
     },
     {

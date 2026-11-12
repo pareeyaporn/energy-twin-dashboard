@@ -26,7 +26,7 @@
     "id": "demo-chicago-300",
     "label": "Riverwalk Grand, 300 rooms (synthetic downtown full-service hotel)",
     "synthetic": true,
-    "note": "Synthetic. Sized from the Choose Chicago hotel supply list (147 hotels, 49,526 rooms; median 232, mean 337, middle half 173 to 378 rooms), so 300 rooms is a typical downtown full-service size. Floor area, occupancy and setpoints use the documented defaults; floors and year built are illustrative.",
+    "note": "Synthetic. Sized from the Choose Chicago hotel supply list (147 hotels, 49,526 rooms; median 232, mean 337, middle half 173 to 378 rooms), so 300 rooms is a typical downtown full-service size. Occupancy 69.2%: Chicago central business district 2025 average (STR, in Choose Chicago's 2025 Hotel Performance report). Floor area and setpoints use the documented defaults; floors and year built are illustrative.",
     "input": {
       "name": "Riverwalk Grand",
       "city": "Chicago",
@@ -40,7 +40,8 @@
       "occupiedHoursPerRoom": 14,
       "budget": 150000,
       "horizonYears": 5,
-      "objective": "balanced"
+      "objective": "balanced",
+      "occupancy": 0.692
     }
   }
 ]

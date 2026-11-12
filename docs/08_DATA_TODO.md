@@ -30,7 +30,10 @@ The home-era data files in `src/data/` belong to the legacy home engine and are 
 | Incentives (`incentives.json`) | Programs listed, **no amounts applied** | — |
 | **Installed costs** for LED, sensors, EMS, HVAC, water heating, insulation; **solar $/W** | **Placeholders** | — |
 | Weather (`weather.json` temperatures) | **Sourced, primary** | NOAA 1991–2020 normals, Chicago O'Hare |
-| Baseline model internals (age factor, zone allocation, driver weights, shapes, equipment, occupancy curve) | **Placeholders** | — |
+| Hot water per room | **Checked, primary** | IL-TRM 4.3.2 / ASHRAE: 14 gal per hotel room per day (default consistent) |
+| Chicago occupancy (annual) | **Sourced, primary** | STR via Choose Chicago: CBD 69.2% in 2025 (300-room preset) |
+| Comfort limits | **Product decision** | docs/15 (not ASHRAE 55 values) |
+| Baseline model internals (age factor, zone allocation, driver weights, shapes, equipment, monthly occupancy shape) | **Placeholders** | monthly occupancy is not published |
 
 **Benchmark check (done):** the demo hotel models at 91.1 kBtu/ft² site energy, 53% electric; CBECS 2018 Table C1 lodging averages 85.7 kBtu/ft²,
 57% electric (national, includes nursing homes); the ENERGY STAR national median for hotels is 63.0 kBtu/ft² (August 2024). Plausible for a Chicago

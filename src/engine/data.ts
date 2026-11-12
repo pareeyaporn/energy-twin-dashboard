@@ -2,6 +2,7 @@ import ratesJson from '@/data/rates.json';
 import endUseSplitsJson from '@/data/endUseSplits.json';
 import componentLossSharesJson from '@/data/componentLossShares.json';
 import defaultsJson from '@/data/defaults.json';
+import upgradesJson from '@/data/upgrades.json';
 import type { EngineData, Era, PartId } from './types';
 
 const { source: splitSource, verified: splitVerified, ...zones } = endUseSplitsJson as Record<string, unknown>;
@@ -9,6 +10,7 @@ const { source: lossSource, verified: lossVerified, ...eras } = componentLossSha
 
 /** The sourced data the engine reads. Pass a different bundle to tests to isolate behavior. */
 export const defaultData: EngineData = {
+  upgrades: upgradesJson as unknown as EngineData['upgrades'],
   rates: ratesJson as unknown as EngineData['rates'],
   endUseSplits: {
     source: splitSource as string,

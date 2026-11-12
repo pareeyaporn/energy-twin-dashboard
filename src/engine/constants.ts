@@ -1,4 +1,4 @@
-import type { Assumptions, Era, PartId } from './types';
+import type { Assumptions, Era, PartId, UpgradeId } from './types';
 
 export const MONTHS_PER_YEAR = 12;
 export const BASE_SQFT_FOR_AVG_ELEC = 1800;
@@ -36,3 +36,19 @@ export const COP_SCORE_ANCHORS: [[number, number], [number, number]] = [
   [2.3, 0.5],
   [3.5, 1],
 ];
+
+/** Fixed order upgrades are applied in, whatever order the caller lists them (no double counting). */
+export const UPGRADE_ORDER: UpgradeId[] = [
+  'attic_insulation',
+  'air_sealing',
+  'windows',
+  'heat_pump',
+  'smart_thermostat',
+];
+export const ENVELOPE_UPGRADES: UpgradeId[] = ['attic_insulation', 'air_sealing', 'windows'];
+
+/** Cooling is less envelope-driven than heating: coolingLoad' = coolingLoad x (W + (1 - W) x factor). */
+export const COOLING_ENVELOPE_WEIGHT = 0.5;
+export const SQFT_PER_WINDOW = 110;
+export const HEAT_PUMP_TON_STEP = 0.5;
+export const HEAT_PUMP_MIN_TONS = 1.5;

@@ -2,8 +2,12 @@ import { describe, expect, it } from 'vitest';
 import presets from '@/data/presetHomes.json';
 import rates from '@/data/rates.json';
 import { estimateBaseline } from '../baseline';
+import { applyUpgrades, orderUpgrades } from '../upgrades';
+import { packageCost } from '../costs';
+import { financials } from '../finance';
+import { DEFAULT_ASSUMPTIONS } from '../constants';
 import { defaultData } from '../data';
-import type { Home } from '../types';
+import type { Home, UpgradeId } from '../types';
 
 function homeFromPreset(id: string): Home {
   const p = presets.find((x) => x.id === id);
@@ -97,5 +101,150 @@ describe('baseline', () => {
 
   it('throws a clear error for a state with no rates', () => {
     expect(() => estimateBaseline({ ...homeFromPreset('maya'), state: 'ZZ' })).toThrow(/No rates/);
+  });
+});
+
+const ALL: UpgradeId[] = ['attic_insulation', 'air_sealing', 'windows', 'heat_pump', 'smart_thermostat'];
+const subsets = (ids: UpgradeId[]): UpgradeId[][] =>
+  ids.reduce<UpgradeId[][]>((acc, id) => acc.concat(acc.map((s) => [...s, id])), [[]]);
+
+describe('upgrades', () => {
+  const maya = homeFromPreset('maya');
+  const base = estimateBaseline(maya);
+
+  // Test 7 (upgrade half)
+  it('applyUpgrades([]) returns the baseline costs exactly', () => {
+    const o = applyUpgrades(maya, base, []);
+    expect(o.costs).toEqual(base.costs);
+    expect(o.parts).toEqual(base.parts);
+  });
+
+  it('applies upgrades in a fixed order regardless of input order', () => {
+    const a = applyUpgrades(maya, base, ['smart_thermostat', 'heat_pump', 'attic_insulation']);
+    const b = applyUpgrades(maya, base, ['attic_insulation', 'heat_pump', 'smart_thermostat']);
+    expect(a).toEqual(b);
+    expect(orderUpgrades(['heat_pump', 'attic_insulation'])).toEqual(['attic_insulation', 'heat_pump']);
+  });
+
+  it('rejects unknown upgrades and a heat pump for a home that already has one', () => {
+    expect(() => orderUpgrades(['solar' as UpgradeId])).toThrow(/Unknown upgrade/);
+    const phoenix = homeFromPreset('phoenix');
+    expect(() => applyUpgrades(phoenix, estimateBaseline(phoenix), ['heat_pump'])).toThrow(/already has a heat pump/);
+  });
+
+  it('no upgrade raises any part intensity, and the non-heat-pump ones lower the bill', () => {
+    for (const id of ALL) {
+      const o = applyUpgrades(maya, base, [id]);
+      if (id !== 'heat_pump') expect(o.costs.total).toBeLessThan(base.costs.total);
+      o.parts.forEach((p, i) => expect(p.intensity).toBeLessThanOrEqual(base.parts[i]!.intensity + 1e-9));
+    }
+  });
+
+  it('attic insulation cools the attic the most', () => {
+    const o = applyUpgrades(maya, base, ['attic_insulation']);
+    const drop = o.parts.map((p, i) => base.parts[i]!.intensity - p.intensity);
+    expect(drop[0]).toBe(Math.max(...drop));
+  });
+
+  // Test 5
+  it('heat pump is smaller after attic insulation + air sealing than on its own', () => {
+    const alone = applyUpgrades(maya, base, ['heat_pump']);
+    const sealed = applyUpgrades(maya, base, ['attic_insulation', 'air_sealing', 'heat_pump']);
+    expect(sealed.heatPumpTons!).toBeLessThan(alone.heatPumpTons!);
+    const cost = (o: typeof alone, ids: UpgradeId[]) => packageCost(maya, ids, o).items.find((i) => i.id === 'heat_pump')!.cost.mid;
+    expect(cost(sealed, ['attic_insulation', 'air_sealing', 'heat_pump'])).toBeLessThan(cost(alone, ['heat_pump']));
+  });
+
+  // Test 6. The spec states this as "savings <= alone", which assumes the heat pump saves money. At today's
+  // prices it costs Maya MORE to run than her gas furnace, so "saves less" is checked on the magnitude: the
+  // envelope work shrinks the load the heat pump serves, and the effect is not added on top.
+  it('heat pump effect after envelope work is smaller than alone (no double counting)', () => {
+    const env = applyUpgrades(maya, base, ['attic_insulation', 'air_sealing']);
+    const envHp = applyUpgrades(maya, base, ['attic_insulation', 'air_sealing', 'heat_pump']);
+    const hpAlone = applyUpgrades(maya, base, ['heat_pump']);
+    const incremental = env.costs.total - envHp.costs.total;
+    const alone = base.costs.total - hpAlone.costs.total;
+    expect(Math.abs(incremental)).toBeLessThan(Math.abs(alone));
+    // Combined saving = envelope saving + incremental heat pump saving, never envelope + full heat pump saving
+    const combined = base.costs.total - envHp.costs.total;
+    expect(combined).toBeCloseTo(base.costs.total - env.costs.total + incremental, 6);
+    expect(combined).not.toBeCloseTo(base.costs.total - env.costs.total + alone, 0);
+  });
+
+  it('a heat pump does not change the 3D leaks, only the envelope and thermostat do', () => {
+    const hp = applyUpgrades(maya, base, ['heat_pump']);
+    hp.parts.forEach((p, i) => expect(p.intensity).toBeCloseTo(base.parts[i]!.intensity, 9));
+  });
+
+  it('heat pump removes heating fuel but keeps water heating and other costs', () => {
+    const o = applyUpgrades(maya, base, ['heat_pump']);
+    expect(o.costs.waterHeating).toBe(base.costs.waterHeating);
+    expect(o.costs.other).toBe(base.costs.other);
+  });
+
+  it('costs follow the cost models', () => {
+    const o = applyUpgrades(maya, base, ALL);
+    const { items, total } = packageCost(maya, ALL, o);
+    const by = Object.fromEntries(items.map((i) => [i.id, i.cost]));
+    expect(by['attic_insulation']!.mid).toBeCloseTo(2.0 * (1850 / 2), 6);
+    expect(by['windows']!.mid).toBeCloseTo(850 * Math.round(1850 / 110), 6);
+    expect(by['air_sealing']!.mid).toBe(1200);
+    expect(by['smart_thermostat']!.mid).toBe(250);
+    expect(total.mid).toBeCloseTo(items.reduce((s, i) => s + i.cost.mid, 0), 6);
+    expect(() => packageCost(maya, ['heat_pump'], applyUpgrades(maya, base, []))).toThrow(/heatPumpTons/);
+  });
+
+  // Test 9
+  it('savings ranges are ordered low <= mid <= high for every combination', () => {
+    for (const ids of subsets(ALL)) {
+      const s = (sc: 'low' | 'mid' | 'high') => base.costs.total - applyUpgrades(maya, base, ids, sc).costs.total;
+      expect(s('low')).toBeLessThanOrEqual(s('mid') + 1e-9);
+      expect(s('mid')).toBeLessThanOrEqual(s('high') + 1e-9);
+    }
+  });
+
+  it('heat pump size and cost do not change with the savings scenario', () => {
+    const t = (sc: 'low' | 'mid' | 'high') => applyUpgrades(maya, base, ['attic_insulation', 'heat_pump'], sc).heatPumpTons;
+    expect(t('low')).toBe(t('mid'));
+    expect(t('high')).toBe(t('mid'));
+  });
+});
+
+describe('finance', () => {
+  const maya = homeFromPreset('maya');
+  const base = estimateBaseline(maya);
+  const ids: UpgradeId[] = ['attic_insulation', 'air_sealing'];
+  const o = applyUpgrades(maya, base, ids);
+  const savings = base.costs.total - o.costs.total;
+  const items = packageCost(maya, ids, o).items.map((i) => ({
+    cost: i.cost.mid,
+    lifetimeYears: i.id === 'attic_insulation' ? 30 : 15,
+  }));
+
+  // Test 8
+  it('net value is lower with a 5% discount rate than 3%', () => {
+    const v3 = financials(savings, items, { ...DEFAULT_ASSUMPTIONS, discountRate: 0.03 }).value;
+    const v5 = financials(savings, items, { ...DEFAULT_ASSUMPTIONS, discountRate: 0.05 }).value;
+    expect(v5).toBeLessThan(v3);
+  });
+
+  it('payback is cost / first-year savings, and null without savings', () => {
+    const f = financials(savings, items, DEFAULT_ASSUMPTIONS);
+    expect(f.paybackYears).toBeCloseTo(f.cost / savings, 9);
+    expect(financials(0, items, DEFAULT_ASSUMPTIONS).paybackYears).toBeNull();
+    expect(financials(-5, items, DEFAULT_ASSUMPTIONS).paybackYears).toBeNull();
+  });
+
+  it('matches a hand calculation and counts residual life', () => {
+    const a = { priceGrowth: 0, discountRate: 0, horizonYears: 15 };
+    // no growth, no discount: 15 x savings - cost + residual (30-year item has half its life left)
+    const v = financials(100, [{ cost: 1000, lifetimeYears: 30 }], a).value;
+    expect(v).toBeCloseTo(15 * 100 - 1000 + 500, 6);
+  });
+
+  it('price growth raises net value', () => {
+    const lo = financials(savings, items, { ...DEFAULT_ASSUMPTIONS, priceGrowth: 0 }).value;
+    const hi = financials(savings, items, { ...DEFAULT_ASSUMPTIONS, priceGrowth: 0.04 }).value;
+    expect(hi).toBeGreaterThan(lo);
   });
 });

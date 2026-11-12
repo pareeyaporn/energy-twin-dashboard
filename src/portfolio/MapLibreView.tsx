@@ -32,6 +32,43 @@ export function MapLibreView({
   const markers = useRef<Map<string, { marker: Marker; el: HTMLButtonElement }>>(new Map());
   const handlers = useRef({ onHover, onSelect, onFail });
   handlers.current = { onHover, onSelect, onFail };
+  const lib = useRef<typeof import("maplibre-gl") | null>(null);
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
+
+  /** Adds a marker for each hotel that has none and removes markers of hotels no longer listed (a hotel added or removed). */
+  const syncMarkers = () => {
+    const m = map.current;
+    const L = lib.current;
+    if (!m || !L) return;
+    const ids = new Set(rowsRef.current.map((r) => r.id));
+    for (const [id, { marker }] of markers.current)
+      if (!ids.has(id)) {
+        marker.remove();
+        markers.current.delete(id);
+      }
+    for (const r of rowsRef.current) {
+      if (markers.current.has(r.id)) continue;
+      const el = document.createElement("button");
+      el.type = "button";
+      el.style.cssText = `width:16px;height:16px;padding:0;border-radius:9999px;border:2px solid ${r.synthetic ? "var(--background)" : "var(--foreground)"};cursor:pointer;`;
+      el.setAttribute("aria-label", `${r.name}, ${r.neighborhood}`);
+      el.dataset["testid"] = `marker-${r.id}`;
+      el.addEventListener("mouseenter", () => handlers.current.onHover(r.id));
+      el.addEventListener("mouseleave", () => handlers.current.onHover(null));
+      el.addEventListener("focus", () => handlers.current.onHover(r.id));
+      el.addEventListener("blur", () => handlers.current.onHover(null));
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        handlers.current.onSelect(r.id);
+      });
+      const marker = new L.Marker({ element: el }).setLngLat([r.lng, r.lat]).addTo(m);
+      markers.current.set(r.id, { marker, el });
+    }
+  };
+  const idsKey = rows.map((r) => r.id).join("|");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => syncMarkers(), [idsKey]);
 
   // Create the map once.
   useEffect(() => {
@@ -39,10 +76,10 @@ export function MapLibreView({
     let timer: ReturnType<typeof setTimeout> | undefined;
     (async () => {
       try {
-        const lib = (await import("maplibre-gl")).default;
+        const mod = (await import("maplibre-gl")).default;
         await import("maplibre-gl/dist/maplibre-gl.css");
         if (cancelled || !box.current) return;
-        const m = new lib.Map({
+        const m = new mod.Map({
           container: box.current,
           style: MAP_STYLE_URL,
           bounds: boundsOf(rows),
@@ -51,7 +88,7 @@ export function MapLibreView({
           fadeDuration: reduce ? 0 : 300,
         });
         map.current = m;
-        m.addControl(new lib.NavigationControl({ showCompass: false }), "top-right");
+        m.addControl(new mod.NavigationControl({ showCompass: false }), "top-right");
         let loaded = false;
         timer = setTimeout(() => !loaded && handlers.current.onFail(), LOAD_TIMEOUT_MS);
         m.on("load", () => {
@@ -60,23 +97,8 @@ export function MapLibreView({
         m.on("error", () => {
           if (!loaded) handlers.current.onFail();
         });
-        for (const r of rows) {
-          const el = document.createElement("button");
-          el.type = "button";
-          el.style.cssText = "width:16px;height:16px;padding:0;border-radius:9999px;border:2px solid var(--background);cursor:pointer;";
-          el.setAttribute("aria-label", `${r.name}, ${r.neighborhood}`);
-          el.dataset["testid"] = `marker-${r.id}`;
-          el.addEventListener("mouseenter", () => handlers.current.onHover(r.id));
-          el.addEventListener("mouseleave", () => handlers.current.onHover(null));
-          el.addEventListener("focus", () => handlers.current.onHover(r.id));
-          el.addEventListener("blur", () => handlers.current.onHover(null));
-          el.addEventListener("click", (e) => {
-            e.stopPropagation();
-            handlers.current.onSelect(r.id);
-          });
-          const marker = new lib.Marker({ element: el }).setLngLat([r.lng, r.lat]).addTo(m);
-          markers.current.set(r.id, { marker, el });
-        }
+        lib.current = mod;
+        syncMarkers();
       } catch {
         if (!cancelled) handlers.current.onFail();
       }
@@ -97,6 +119,7 @@ export function MapLibreView({
     for (const [id, { el }] of markers.current) {
       const c = colors[id] ?? "var(--primary)";
       const on = id === focusId;
+      el.style.transition = reduce ? "none" : "background 450ms ease, box-shadow 450ms ease";
       el.style.background = c;
       el.style.boxShadow = reduce ? "none" : `0 0 0 ${on ? 8 : 5}px color-mix(in oklab, ${c} 30%, transparent), 0 0 18px 4px color-mix(in oklab, ${c} 45%, transparent)`;
       el.style.outline = on ? "2px solid var(--foreground)" : "none";

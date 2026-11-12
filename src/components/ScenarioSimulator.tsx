@@ -6,7 +6,7 @@ import { ChevronDown, Leaf, RotateCcw, SlidersHorizontal, Wallet, Zap } from "lu
 import { STRESS_TESTS } from "@/engine/hotel";
 import type { Setpoints } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
-import { selectCompare } from "@/store/hotelDerived";
+import { selectCompare, selectIsSynthetic } from "@/store/hotelDerived";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -88,7 +88,7 @@ function MetricTile({ id, label, icon, before, after, prefix = "", suffix }: { i
 
 export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "panel" } = {}) {
   const profile = useTwin((s) => s.hotel.profile);
-  const presetId = useTwin((s) => s.hotelPresetId ?? s.activePropertyId);
+  const presetId = useTwin((s) => (selectIsSynthetic(s) ? "synthetic" : null));
   const scenario = useTwin((s) => s.scenario);
   const scenarioResult = useTwin((s) => s.scenarioResult);
   const activeStressTest = useTwin((s) => s.activeStressTest);

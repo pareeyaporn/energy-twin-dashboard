@@ -156,6 +156,8 @@ export interface AdvisorPortfolioHotel {
   bestPackage: string | null;
   /** 0–100, 10-year NPV per dollar invested, relative to this portfolio. */
   priorityScore: number;
+  /** False for a hotel the user added with their own inputs. Optional for backwards compatibility. */
+  synthetic?: boolean;
 }
 
 export interface AdvisorPortfolio {
@@ -249,6 +251,7 @@ export function summarizePortfolio(p: NonNullable<AdvisorInput['portfolio']>): A
         paybackYears: h.potential?.paybackYears == null ? null : r1(h.potential.paybackYears),
         bestPackage: h.potential ? packageName(h.potential.upgradeIds) : null,
         priorityScore: h.priorityScore,
+        synthetic: h.synthetic,
       })),
     definitions: p.summary.definitions,
     plan: plan

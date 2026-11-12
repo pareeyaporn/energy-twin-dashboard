@@ -28,7 +28,7 @@ const COLS: Col[] = [
 ];
 
 /** Every property side by side; click a header to sort. */
-export function PortfolioTable({ rows, onExplore }: { rows: PropertySummary[]; onExplore: (id: string) => void }) {
+export function PortfolioTable({ rows, onExplore, onRemove }: { rows: PropertySummary[]; onExplore: (id: string) => void; onRemove?: (id: string) => void }) {
   const [sort, setSort] = useState<{ id: string; dir: 1 | -1 }>({ id: "prio", dir: -1 });
   const col = COLS.find((c) => c.id === sort.id)!;
   const sorted = [...rows].sort((a, b) => {
@@ -66,10 +66,16 @@ export function PortfolioTable({ rows, onExplore }: { rows: PropertySummary[]; o
           {sorted.map((r) => (
             <tr key={r.id} className="border-b border-border/50 hover:bg-accent/30" data-testid="portfolio-row">
               {COLS.map((c) => (
-                <td key={c.id} className={`p-2 ${c.numeric ? "num text-right" : ""} ${c.id === "name" ? "font-medium" : ""}`}>{c.show(r)}</td>
+                <td key={c.id} className={`p-2 ${c.numeric ? "num text-right" : ""} ${c.id === "name" ? "font-medium" : ""}`}>
+                  {c.show(r)}
+                  {c.id === "name" && !r.synthetic && <span className="ml-1.5 rounded-full border border-primary/40 px-1.5 text-[10px] font-normal text-primary">Your hotel</span>}
+                </td>
               ))}
               <td className="p-2 text-right">
                 <button type="button" className="whitespace-nowrap text-primary hover:underline" onClick={() => onExplore(r.id)}>Open twin</button>
+                {!r.synthetic && onRemove && (
+                  <button type="button" className="ml-2 whitespace-nowrap text-muted-foreground hover:text-loss hover:underline" onClick={() => onRemove(r.id)} aria-label={`Remove ${r.name}`}>Remove</button>
+                )}
               </td>
             </tr>
           ))}

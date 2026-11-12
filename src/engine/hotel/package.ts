@@ -51,9 +51,10 @@ export function packageMetrics(
   assumptions: FinancialAssumptions,
   budget: number,
   overrides: IncentiveOverrides = {},
+  coverage: Partial<Record<UpgradeId, number>> = {},
 ): FinancialMetrics {
   const d = ctx.data;
-  const inc = incentiveLines(costs.items, ctx.profile, mid.sizing, overrides, d);
+  const inc = incentiveLines(costs.items, ctx.profile, mid.sizing, overrides, d, coverage);
   return calculateFinancialMetrics(
     {
       annualSavings: mid.savings.cost,
@@ -93,7 +94,7 @@ export function evaluatePackage(
   const annualSavings = { low: low.savings.cost, mid: mid.savings.cost, high: high.savings.cost };
   const carbonAvoidedKg = { low: low.savings.carbonKg, mid: mid.savings.carbonKg, high: high.savings.carbonKg };
   const assumptions: FinancialAssumptions = { ...DEFAULT_FINANCE, horizonYears: p.horizonYears, ...options.assumptions };
-  const metrics = packageMetrics(ctx, ids, mid, costs, assumptions, options.budget ?? p.budget, options.incentives);
+  const metrics = packageMetrics(ctx, ids, mid, costs, assumptions, options.budget ?? p.budget, options.incentives, amounts?.coverage);
   const solarValue: Range3 = { low: low.sizing.solarValuePerYear, mid: mid.sizing.solarValuePerYear, high: high.sizing.solarValuePerYear };
   const solar: SolarDetails | null =
     ids.some(isSolar) && mid.sizing.solarKw > 0
@@ -110,7 +111,7 @@ export function evaluatePackage(
       : null;
   const financials = financialBreakdown({
     grossCost: costs.total,
-    incentives: incentiveLines(costs.items, p, mid.sizing, options.incentives, d),
+    incentives: incentiveLines(costs.items, p, mid.sizing, options.incentives, d, amounts?.coverage),
     annualSavings,
     solarValue,
     gasValue: { low: low.savings.gasCost, mid: mid.savings.gasCost, high: high.savings.gasCost },

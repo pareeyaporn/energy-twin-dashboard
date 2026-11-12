@@ -141,12 +141,38 @@ export type IncentiveOverrides = Partial<Record<UpgradeId, number>>;
  * otherwise it is listed as possible but not applied, with $0. A user-entered amount for an upgrade replaces its program amounts.
  * Amounts are per scenario so percent-of-cost incentives follow the cost range.
  */
+/**
+ * What a per-watt or per-ton incentive is paid on, from the hotel's estimated equipment (equipment.json) and the share of the upgrade
+ * installed: LED watts removed (connected lighting × the scenario's reduction), lighting watts put on sensors (public areas and
+ * corridors), or guest-room cooling tons controlled.
+ */
+export function incentiveBasis(
+  kind: 'per_watt_reduced' | 'per_watt_controlled' | 'per_ton',
+  id: UpgradeId,
+  p: HotelProfile,
+  s: (typeof SCENARIOS)[number],
+  coverage = 1,
+  data: HotelData = hotelData,
+): number {
+  const e = data.equipment;
+  const k = Math.min(1, Math.max(0, coverage));
+  const commonW = p.floorAreaSqft * (e.publicAreaShareOfFloorArea + e.corridorShareOfFloorArea) * e.lightingWPerSqft;
+  const guestW = p.rooms * e.guestRoomLightingKW * 1000;
+  if (kind === 'per_watt_reduced') {
+    const red = data.upgrades.upgrades.find((u) => u.id === id)?.params['lightingReduction']?.[s] ?? 0;
+    return (guestW + commonW) * red * k;
+  }
+  if (kind === 'per_watt_controlled') return commonW * k;
+  return p.rooms * (e.guestRoomCoolingTonsPerRoom ?? 0) * k;
+}
+
 export function incentiveLines(
   items: readonly { id: UpgradeId; cost: Range3 }[],
   p: HotelProfile,
   sizing: Pick<UpgradeSizing, 'solarKw'>,
   overrides: IncentiveOverrides = {},
   data: HotelData = hotelData,
+  coverage: Partial<Record<UpgradeId, number>> = {},
 ): { lines: IncentiveLine[]; total: Range3 } {
   const lines: IncentiveLine[] = [];
   const total: Range3 = { low: 0, mid: 0, high: 0 };
@@ -155,13 +181,23 @@ export function incentiveLines(
     const userSet = typeof user === 'number' && Number.isFinite(user) && user > 0;
     for (const prog of data.incentives.incentives) {
       if (!prog.appliesTo.includes(item.id)) continue;
+      if (prog.hvacTypes && !prog.hvacTypes.includes(p.hvacType)) continue;
       const usable = !userSet && prog.applied && prog.verified && prog.value !== null;
+      const cov = coverage[item.id] ?? 1;
       const amountAt = (s: (typeof SCENARIOS)[number]): number => {
         if (!usable || prog.value === null) return 0;
         const v = prog.value;
         const raw =
-          prog.kind === 'percent_of_cost' ? v * item.cost[s] : prog.kind === 'per_kw' ? v * sizing.solarKw : prog.kind === 'per_room' ? v * p.rooms : v;
-        return Math.min(raw, item.cost[s]);
+          prog.kind === 'percent_of_cost'
+            ? v * item.cost[s]
+            : prog.kind === 'per_kw'
+              ? v * sizing.solarKw
+              : prog.kind === 'per_room'
+                ? v * p.rooms * cov
+                : prog.kind === 'per_watt_reduced' || prog.kind === 'per_watt_controlled' || prog.kind === 'per_ton'
+                  ? v * incentiveBasis(prog.kind, item.id, p, s, cov, data)
+                  : v;
+        return Math.min(raw, item.cost[s] * (prog.maxShareOfCost ?? 1));
       };
       for (const s of SCENARIOS) total[s] += amountAt(s);
       lines.push({ id: `${item.id}:${prog.id}`, label: prog.label, amount: amountAt('mid'), applied: usable, origin: 'program', note: prog.note, source: prog.source });

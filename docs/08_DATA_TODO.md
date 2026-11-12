@@ -57,7 +57,7 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
   median gross installed prices for non-residential PV by size ($3.70 up to 10 kW … $1.70 over 1,000 kW), transcribed by the team (the PDF host
   is not reachable from the build session). The ±15% low/high band is a placeholder. Editable per hotel (`solarCostPerW`). Still to do:
   Illinois- or Chicago-specific prices and the percentiles, if wanted.
-- [ ] **A4. Incentive amounts** (only with a source; until then shown as unverified and $0). ComEd: the 2026 Standard Incentives Application
+- [ ] **A4. Incentive amounts** — *mostly done (November 2026), from ComEd's own worksheets: LED $0.75 per watt reduced and occupancy sensors $0.25 per watt controlled (2025 Indoor Lighting worksheet; confirm 2026), guest room energy management $75 per ton with gas heat / $100 with electric or heat-pump heat (2026 HVAC worksheet); 90% of cost cap. Listed, not applied: HVAC equipment (rated-efficiency based), energy management (EMS worksheet not provided), Peoples Gas, Illinois Shines, federal 48E.* Originally: (only with a source; until then shown as unverified and $0). ComEd: the 2026 Standard Incentives Application
   rules are recorded; the measure amounts are in worksheets on `azure-na-assets.contentstack.com` (allow it, or download the worksheets by hand).
   Also: ComEd business rebates for LED, controls and HVAC (`www.comed.com` is reachable); Peoples Gas
   rebates; Illinois Shines REC payments; federal Section 48E status for new solar (needs `www.irs.gov`). Enter as `value`, `applied: true`,

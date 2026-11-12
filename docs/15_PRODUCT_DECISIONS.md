@@ -122,3 +122,11 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
 - **Persistent changes** (HVAC decline, price rises) are re-evaluated every year: payback and NPV are shown under them, the optimizer
   switches to them as before, the user's plan from before the test is kept for the comparison, and the panel says whether the pick changes.
 - **The plan tested** is the AI package applied to the twin, otherwise the active custom plan, otherwise the AI's pick; the user can choose.
+
+## 13. ComEd incentives (November 2026)
+
+- **Applied only from the utility's own worksheets**, at the published rate, capped at 90% of the upgrade's cost. The lighting rates are from the
+  2025 worksheet (the latest provided) and are applied with that label; confirm the 2026 rates before a real project.
+- **Watts and tons are estimated** from the hotel's modeled equipment (placeholders) and a 0.75 ton-per-room assumption, so incentive amounts are
+  estimates, like the savings. Pre-approval and eligibility are the hotel's to confirm.
+- **The budget is still compared with the gross cost** (incentives arrive after installation); payback, net benefit and NPV use the net investment.

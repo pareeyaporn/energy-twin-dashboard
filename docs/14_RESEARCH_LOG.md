@@ -117,3 +117,24 @@ insulation and smart controls instead of a quarter-roof solar array.
 **Still blocked:** ComEd incentive worksheets (A2/A4: the worksheets page is a JavaScript app with no file links), 220 ILCS 5/16-107.5
 (`www.ilga.gov` refused by the session's network policy) and DOE Better Buildings case studies (`betterbuildingssolutioncenter.energy.gov`
 refused). `illinoisshines.com` is reachable; its REC payments are incentives, not export credit, and are not applied.
+
+## Pass 7 (November 2026, ComEd incentive worksheets provided by the team)
+
+Documents (uploaded by the team): ComEd 2026 Standard Incentives Application V15; ComEd Indoor Lighting Incentives Worksheet 2025 (updated
+Nov 5, 2025); ComEd HVAC and VSD Incentives Worksheet 2025 (updated Nov 4, 2024) and 2026 (updated May 4, 2026).
+
+| Incentive | Rate | Basis in the model | Applied |
+| --- | --- | --- | --- |
+| LED fixtures and retrofits | **$0.75 per watt reduced** (2025 worksheet) | connected lighting (150 W/room + 1.0 W/ft² public and corridors, placeholders) × LED reduction × share installed | Yes |
+| Occupancy sensors | **$0.25 per watt controlled** (2025 worksheet) | public-area and corridor lighting × share covered | Yes |
+| Guest room energy management, gas heat + electric AC | **$75 per cooling ton** (2026) | rooms × 0.75 ton (assumption) × share of rooms | Yes (central plant, RTU hotels) |
+| Guest room energy management, electric or heat-pump heat | **$100 per cooling ton** (2026) | same | Yes (PTAC, PTHP, VRF hotels) |
+| Chillers, rooftop units, PTAC/PTHP | $10 (water-cooled) / $7 (air-cooled) per ton per 0.01 kW/ton IPLV below qualifying; RTU $20/ton per IEER/SEER2 point; PTAC/PTHP $30/ton | needs rated efficiency, not modeled | No (listed) |
+| Energy management systems | in the separate EMS worksheet (not provided) | — | No (listed) |
+
+Program rules: pre-approval for requests of $10,000 or more (otherwise ComEd may cap at $10,000); total incentive at most 90% of the incremental
+measure cost or project cost, whichever is less (modeled as 90% of the upgrade's cost); up to $2 million per customer; funds limited.
+
+**Effect (100-room hotel):** LED $10,631 (net $22,369, payback 2.9 years, was 4.2); occupancy sensors $4,125 (net $2,475, 1.1 years, was 3.0); smart
+room controls $5,625 (net $20,375, 11.9 years, was 15.2). The recommendations do not change: at $50,000 LED + sensors ($24,844 net; 2.4 years under
+the demo's 85%-occupancy scenario, 2.7 on the baseline). 300-room hotel at $150,000: LED + energy management, $115,106 net, 3.4 years.

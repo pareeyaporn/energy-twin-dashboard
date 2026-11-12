@@ -343,6 +343,8 @@ export interface HotelData {
       rtu: { label: string; tonsPerSqft: number; efficiency: string };
     };
     guestRoomLightingKW: number;
+    /** Guest-room cooling capacity per room, tons (assumption; for per-ton incentives). */
+    guestRoomCoolingTonsPerRoom?: number;
     guestRoomPlugKW: number;
     lightingWPerSqft: number;
     kitchen: { rangeKBtuHPerRoom: number; hoods: number; hoodKW: number; refrigeration: number; refrigerationKW: number };
@@ -394,8 +396,18 @@ export interface IncentiveProgram {
   id: string;
   label: string;
   appliesTo: UpgradeId[];
-  /** percent_of_cost: value is a share (0.3 = 30%); per_kw: $ per kW of solar; per_room: $ per guest room; fixed: $. */
-  kind: 'percent_of_cost' | 'per_kw' | 'per_room' | 'fixed';
+  /**
+   * percent_of_cost: value is a share (0.3 = 30%); per_kw: $ per kW of solar; per_room: $ per guest room; fixed: $;
+   * per_watt_reduced: $ per watt of lighting load removed (LED); per_watt_controlled: $ per watt of lighting put on sensors;
+   * per_ton: $ per ton of guest-room cooling controlled. Watts and tons come from the hotel's estimated equipment and the plan's coverage.
+   */
+  kind: 'percent_of_cost' | 'per_kw' | 'per_room' | 'fixed' | 'per_watt_reduced' | 'per_watt_controlled' | 'per_ton';
+  /** Only for these HVAC types (for example a rate that depends on how guest rooms are heated). */
+  hvacTypes?: HvacType[];
+  /** The program's cap on the incentive as a share of the measure's cost (ComEd: 90%). */
+  maxShareOfCost?: number;
+  /** The program year the rate comes from, shown with the amount. */
+  programYear?: string;
   value: number | null;
   applied: boolean;
   note: string;

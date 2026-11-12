@@ -79,6 +79,7 @@
     "recircPumps": 2,
     "recircPumpKW": 0.75
   },
-  "source": "PLACEHOLDER, synthetic rule-of-thumb sizing for display and scaling only. Every item is an estimate.",
-  "verified": false
+  "source": "PLACEHOLDER, synthetic rule-of-thumb sizing for display and scaling only. Every item is an estimate. Guest-room cooling 0.75 ton per room: ASSUMPTION (midpoint of the 0.75-1.0 ton range used for the smart-controls calibration; the IL-TRM gives no default), used only for per-ton incentives.",
+  "verified": false,
+  "guestRoomCoolingTonsPerRoom": 0.75
 }

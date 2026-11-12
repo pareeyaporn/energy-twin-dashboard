@@ -190,23 +190,24 @@ Price growth EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar: PVWatts C
 
 | Upgrade | Net cost | kWh / yr | therms / yr | $ / yr | Payback | 5-year net | 10-year net | t CO2 / yr |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Occupancy sensors | $6,600 | 17,396 | −251 | $2,211 | 3.0 y | $4,884 | $17,497 | 5.9 |
-| LED lighting | $33,000 | 62,186 | −1,008 | $7,800 | 4.2 y | $7,495 | $51,903 | 20.5 |
+| Occupancy sensors ($6,600 − $4,125 ComEd) | $2,475 | 17,396 | −251 | $2,211 | 1.1 y | $9,009 | $21,622 | 5.9 |
+| LED lighting ($33,000 − $10,631 ComEd) | $22,369 | 62,186 | −1,008 | $7,800 | 2.9 y | $18,126 | $62,534 | 20.5 |
 | Water heating and low-flow (cost from IL-TRM 4.3.1–4.3.3) | $20,000 | 8,897 | 1,720 | $2,848 | 7.0 y | −$4,808 | $13,030 | 12.8 |
 | Energy management | $26,000 | 18,680 | 539 | $3,126 | 8.3 y | −$9,591 | $8,936 | 10.6 |
 | Rooftop solar (55 kW at $2.90/W, LBNL 2024 median; 68,211 kWh, all used on site) | $159,500 | 68,211 | 0 | $8,614 | 18.5 y | −$115,021 | −$66,846 | 28.3 |
 | Insulation (IL-TRM 4.8.1 $1.40/ft², 2024 $) | $21,010 | 8,186 | 733 | $1,831 | 11.5 y | −$11,317 | −$140 | 7.3 |
-| Smart room controls (fan saving calibrated to IL-TRM) | $26,000 | 10,820 | 209 | $1,715 | 15.2 y | −$17,015 | −$6,918 | 5.6 |
+| Smart room controls (fan saving calibrated to IL-TRM; $26,000 − $5,625 ComEd) | $20,375 | 10,820 | 209 | $1,715 | 11.9 y | −$11,390 | −$1,293 | 5.6 |
 | HVAC equipment | $110,000 | 15,275 | 1,187 | $3,249 | 33.9 y | −$92,822 | −$73,079 | 12.6 |
 
-At $50,000 the optimizer picks LED lighting plus occupancy sensors ($39,600, $9,098 a year, 4.4 years).
+At $50,000 the optimizer picks LED lighting plus occupancy sensors ($39,600 gross, $14,756 verified ComEd incentives, $24,844 net, $9,098 a year,
+2.7 years). Net cost and payback use the net investment; the budget is compared with the gross cost (docs/15).
 
 **Smart room controls calibration.** IL-TRM v14.0 4.4.8 (Chicago hotel, central hot-water fan coils, gas heat) implies about 6,900–14,700 kWh and
 225–650 therms a year for 100 rooms at 0.75–1.0 ton per room. The setback alone gave 4,903 kWh; with smart controls the simulation now also cuts
 guest-room fan energy 17% while rooms are empty (`defaults.smartControlFan`), giving about 10,800 kWh and 209 therms. **Insulation** scales its
 weather-load reduction by 5 / floors above 5 floors. **Second preset:** `demo-chicago-300` (300 rooms, 20 floors, defaults for floor area and
-occupancy, then 69.2% occupancy from STR via Choose Chicago); at $150,000 the optimizer picks LED lighting plus energy management ($147,000,
-$34,163 a year, 4.3 years; baseline about $410,400 a year). Log: `docs/14`.
+occupancy, then 69.2% occupancy from STR via Choose Chicago); at $150,000 the optimizer picks LED lighting plus energy management ($147,000 gross,
+$115,106 net after $31,894 ComEd LED incentive, $34,163 a year, 3.4 years; baseline about $410,400 a year). Log: `docs/14`.
 
 ### Limits of this version
 - **Smart room controls pay back slowly (21 years)** because their modeled savings are small (see section 7) and setback recovery is counted. That is a calibration question, not a product conclusion.
@@ -258,7 +259,7 @@ package would win two roles, the later role takes its next best and the package 
 
 **When nothing fits** the result is empty with `emptyReason` and `cheapestUseful` (the cheapest single upgrade that saves money). `explainPortfolio(result)` writes 4 to 6 sentences from the result's numbers only (the advisor's fallback).
 
-### Demo hotel, objective "balanced" (mid estimates; synthetic placeholders)
+### Demo hotel, objective "balanced" (mid estimates; synthetic placeholders) — historical, from Phase 3 (before calibration, incentives and sourced costs; current figures are above)
 
 | Budget | Maximum savings | Fastest payback | Balanced |
 | --- | --- | --- | --- |

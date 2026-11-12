@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
 import type { HotelInput, HvacType, Objective, Setpoints } from "@/engine/hotel";
+import { useShallow } from "zustand/react/shallow";
 import { useTwin } from "@/store/useTwin";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -51,7 +52,7 @@ const objectiveOptions = [
 ];
 
 export function HotelProfileForm() {
-  const { hotel, hotelInput, setHotelInput } = useTwin();
+  const { hotel, hotelInput, setHotelInput } = useTwin(useShallow((s) => ({ hotel: s.hotel, hotelInput: s.hotelInput, setHotelInput: s.setHotelInput })));
   const profile = hotel.profile;
   function input(name: keyof HotelInput, label: string, numeric = true, scale = 1, step?: number) {
     const raw = profile[name];

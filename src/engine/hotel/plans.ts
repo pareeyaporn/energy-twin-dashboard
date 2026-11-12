@@ -5,7 +5,7 @@ import { isSolar } from './constants';
 import { evaluatePackage } from './package';
 import type { EvaluateOptions } from './package';
 import { compareUpgrades } from './comparison';
-import { areasOf, eligibleUpgrades, solarSizeKw, upgradeDef, validateUpgradeSet } from './upgrades';
+import { areasOf, eligibleUpgrades, solarSizeKw, upgradeDef, upgradeLifetime, validateUpgradeSet } from './upgrades';
 import type { UpgradeContext } from './upgrades';
 import type {
   CatalogCategory,
@@ -109,7 +109,7 @@ export function upgradeCatalog(ctx: UpgradeContext, data: HotelData = hotelData)
       quantity: quantityFor(ctx, id, d),
       available,
       costStatus: def.costStatus ?? 'placeholder',
-      lifetimeYears: def.lifetimeYears,
+      lifetimeYears: upgradeLifetime(id, ctx.profile, d),
       comfort: def.comfort,
       source: def.source,
     };

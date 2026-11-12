@@ -32,6 +32,12 @@ export function upgradeDef(id: UpgradeId, data: HotelData = hotelData): UpgradeD
   return def;
 }
 
+/** An upgrade's life for this hotel: by HVAC type where the data gives one (equipment replacement), otherwise the upgrade's life. */
+export function upgradeLifetime(id: UpgradeId, p: HotelProfile, data: HotelData = hotelData): number {
+  const def = upgradeDef(id, data);
+  return def.lifetimeByHvac?.[p.hvacType] ?? def.lifetimeYears;
+}
+
 function param(def: UpgradeDef, key: string, sc: SavingsScenario): number {
   const r = def.params[key];
   if (!r) throw new Error(`Upgrade ${def.id} is missing parameter "${key}"`);

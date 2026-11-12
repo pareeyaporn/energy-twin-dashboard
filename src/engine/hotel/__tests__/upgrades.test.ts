@@ -159,8 +159,8 @@ describe('costs', () => {
     close(mid('smart_room_controls'), 260 * 100); // IL-TRM $260 per room
     close(mid('led_lighting'), 0.6 * 55000);
     close(mid('occupancy_sensors'), 0.4 * 55000 * 0.3);
-    close(mid('insulation'), 3.5 * (55000 / 5));
-    close(mid('water_heating'), 220 * 100);
+    close(mid('insulation'), 1.91 * (55000 / 5)); // IL-TRM 4.8.1 $1.40/ft², in 2024 dollars
+    close(mid('water_heating'), 200 * 100); // built from IL-TRM 4.3.1–4.3.3 costs
     close(mid('energy_management'), 15000 + 0.2 * 55000);
     close(mid('hvac_upgrade'), 2 * 55000);
     close(mid('rooftop_solar'), 3100 * 50); // LBNL 2024 median, 20–50 kW non-residential: $3.10/W

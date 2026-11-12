@@ -524,6 +524,8 @@ export interface UpgradeDef {
   description: string;
   lifetimeYears: number;
   cost: CostModel;
+  /** Life by the hotel's HVAC type, when it depends on the equipment replaced (IL-TRM measure lives). Falls back to `lifetimeYears`. */
+  lifetimeByHvac?: Partial<Record<HvacType, number>>;
   /** The floor-area part of the cost scales with the HVAC size factor (equipment sized from the reduced load). */
   sizeScaled?: boolean;
   params: Record<string, Range3>;

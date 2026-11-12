@@ -65,14 +65,14 @@
       "id": "insulation",
       "label": "Roof and envelope insulation",
       "category": "building_water",
-      "costStatus": "placeholder",
+      "costStatus": "sourced",
       "description": "Cuts the weather-driven heating and cooling load.",
-      "lifetimeYears": 30,
+      "lifetimeYears": 20,
       "cost": {
         "perSqftRoof": {
-          "low": 2,
-          "mid": 3.5,
-          "high": 5.5
+          "low": 1.4,
+          "mid": 1.91,
+          "high": 3.5
         }
       },
       "params": {
@@ -91,7 +91,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Weather-load reduction mid 10%: consistent with NREL ComStock roof insulation to ASHRAE AEDG levels (about 11% of gas heating and 12% of electric heating, stock-wide). Low and high: PLACEHOLDER. Cost: PLACEHOLDER $3.50 per ft2 of roof (contractor ranges $2 to $7 per ft2 for insulation only). Life: PLACEHOLDER. Scaling: the reduction applies to a building of up to 5 floors and is multiplied by 5 / floors above that, because roof insulation mainly affects the top floors (a modeling assumption, not a sourced value).",
+      "source": "Weather-load reduction mid 10%: consistent with NREL ComStock roof insulation to ASHRAE AEDG levels (about 11% of gas heating and 12% of electric heating, stock-wide). Low and high: PLACEHOLDER. Cost: Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2, measure 4.8.1 Roof Insulation for C&I Facilities: $1.40 per ft2 for R-30 ($0.59 material + $0.81 installation; Itron 2010-2012 WO017 Ex Ante Measure Cost Study for the CPUC). Mid $1.91 is that value raised to 2024 dollars with the CPI-U (about x1.37 from 2012 to 2024; CPI ratio from memory, not fetched); low $1.40 is the TRM value; high $3.50 keeps the earlier contractor upper range (roofs needing more work). Life: 20 years (same measure, EUL per DEER 2008). Scaling: the reduction applies to a building of up to 5 floors and is multiplied by 5 / floors above that, because roof insulation mainly affects the top floors (a modeling assumption, not a sourced value).",
       "verified": false
     },
     {
@@ -167,7 +167,7 @@
       "category": "hvac_controls",
       "costStatus": "placeholder",
       "description": "Schedules and tunes the central plant, public-area HVAC and fans.",
-      "lifetimeYears": 12,
+      "lifetimeYears": 10,
       "cost": {
         "fixed": {
           "low": 8000,
@@ -196,7 +196,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "HVAC reduction 4/7/10%: consistent with a 3% whole-building median saving for lodging retro-commissioning (Crowe, Mills et al. 2020, Energy and Buildings, about 1,500 buildings), which is about 7.6% of HVAC energy if all of it is HVAC (39.5% HVAC share, CBECS 2018 lodging). Cost: PLACEHOLDER $15,000 + $0.20 per ft2; for comparison the retro-commissioning median is $0.26 per ft2 (Crowe 2020), without control hardware. Life: PLACEHOLDER. Values seen in search excerpts; to confirm.",
+      "source": "HVAC reduction 4/7/10%: consistent with a 3% whole-building median saving for lodging retro-commissioning (Crowe, Mills et al. 2020, Energy and Buildings, about 1,500 buildings), which is about 7.6% of HVAC energy if all of it is HVAC (39.5% HVAC share, CBECS 2018 lodging). Cost: PLACEHOLDER $15,000 + $0.20 per ft2; for comparison the retro-commissioning median is $0.26 per ft2 (Crowe 2020), without control hardware. Life 10 years: the TRM has no general energy-management-system measure; the nearest controls measure, Advanced Rooftop Controls (Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2, 4.4.41), is deemed 10 years (CO2-sensor life); AMI-driven commissioning (4.9.25) is about 7. A judgment, not a deemed value. Values seen in search excerpts; to confirm.",
       "verified": false
     },
     {
@@ -223,7 +223,7 @@
         "coolingReduction": {
           "low": 0.1,
           "mid": 0.15,
-          "high": 0.22
+          "high": 0.26
         }
       },
       "constants": {},
@@ -233,20 +233,27 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Heating reduction mid 13%: replacing an 80% efficient boiler (typical existing stock, GSA evaluation) with a condensing boiler at about 92% seasonal efficiency gives 1 - 0.80/0.92 = 13%; NREL ComStock (Condensing Gas Boilers, 2025) reports 9% site savings for an example building. Low and high, cooling reduction, cost and life: PLACEHOLDER. Values seen in search excerpts; to confirm. Boiler part, for reference: IL-TRM v14.0 4.4.10 High Efficiency Boiler gives a full installed cost of $22.95 per kBtu/h for a condensing hot-water boiler (over 90% combustion efficiency; $12.94 for 85 to 90%) and a 25-year life; at the model's boiler size (0.03 kBtu/h per ft2) that is about $38,000 for the demo hotel. The chiller cost is not sourced, so the combined $2.00 per ft2 stays a PLACEHOLDER.",
-      "verified": false
+      "source": "Heating reduction mid 13%: replacing an 80% efficient boiler (typical existing stock, GSA evaluation) with a condensing boiler at about 92% seasonal efficiency gives 1 - 0.80/0.92 = 13%; NREL ComStock (Condensing Gas Boilers, 2025) reports 9% site savings for an example building. Life by system (Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2): central plant 23 years (electric chiller 4.4.6; the condensing boiler, 4.4.10, lasts 25), rooftop units 15 (4.4.15), PTAC and PTHP 8 (4.4.13), VRF and other heat pumps 16 (4.4.9). Cooling reduction: high 26% from the TRM 4.4.6 worked example (a 150-ton water-cooled chiller at 0.405 kW/ton IPLV against the 0.550 code baseline: 1 - 0.405/0.550 = 26%); mid 15% and low 10% are a PLACEHOLDER for a standard high-efficiency unit. Heating low and high and the cost: PLACEHOLDER. Values seen in search excerpts; to confirm. Boiler part, for reference: IL-TRM v14.0 4.4.10 High Efficiency Boiler gives a full installed cost of $22.95 per kBtu/h for a condensing hot-water boiler (over 90% combustion efficiency; $12.94 for 85 to 90%) and a 25-year life; at the model's boiler size (0.03 kBtu/h per ft2) that is about $38,000 for the demo hotel. The chiller cost is not sourced, so the combined $2.00 per ft2 stays a PLACEHOLDER.",
+      "verified": false,
+      "lifetimeByHvac": {
+        "central_plant": 23,
+        "rtu": 15,
+        "ptac": 8,
+        "pthp": 8,
+        "vrf": 16
+      }
     },
     {
       "id": "water_heating",
       "label": "High-efficiency water heating and low-flow fixtures",
       "category": "building_water",
-      "costStatus": "placeholder",
+      "costStatus": "sourced",
       "description": "Condensing water heaters and low-flow fixtures.",
       "lifetimeYears": 15,
       "cost": {
         "perRoom": {
           "low": 120,
-          "mid": 220,
+          "mid": 200,
           "high": 350
         }
       },
@@ -264,7 +271,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "PLACEHOLDER. Replace with ENERGY STAR and DOE hotel water-heating guidance.",
+      "source": "Life 15 years: Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2, 4.3.1 Water Heater (gas storage units; low-flow showerheads and aerators are 10 years, 4.3.2 and 4.3.3). Cost mid $200 per room, built from the same TRM: commercial gas storage water heater over 75,000 Btu/h at 0.90 thermal efficiency, $6,021 full installed cost (4.3.1); low-flow showerhead $12 and faucet aerator $8 installed (4.3.3, 4.3.2); for 100 rooms with three heaters that is about $18,100 + $1,200 + $800 = $20,100. The number of heaters (three for the demo hotel's ~600 kBtu/h) is an assumption; low and high keep the earlier range. Savings 15/22/30%: PLACEHOLDER range, cross-checked: a 0.80 to 0.90 thermal-efficiency heater saves 1 - 0.80/0.90 = 11% of water-heating fuel; faucets use about 25% of a hotel's hot water (TRM 4.3.2 table: hotel 14 gallons per room per day, 25% through faucets); showerheads drop from 2.67 to 1.5 to 2.0 gpm as used (4.3.3). The showers' share of hotel hot water is not given in the TRM, so the combined figure stays a placeholder (22% mid is below what heater plus fixtures would give if showers are a third or more of the use).",
       "verified": false
     },
     {

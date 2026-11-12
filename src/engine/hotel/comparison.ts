@@ -1,7 +1,7 @@
 import { hotelData } from './data';
 import { evaluatePackage } from './package';
 import type { EvaluateOptions } from './package';
-import { eligibleUpgrades } from './upgrades';
+import { eligibleUpgrades, upgradeLifetime } from './upgrades';
 import type { UpgradeContext } from './upgrades';
 import type { FinancialBreakdown, FinancialMetrics, HotelData, PackageComfort, UpgradeId } from './types';
 
@@ -34,7 +34,7 @@ export function compareUpgrades(ctx: UpgradeContext, options: Omit<EvaluateOptio
       financials: e.financials,
       metrics: e.metrics,
       comfort: e.comfort,
-      lifetimeYears: def.lifetimeYears,
+      lifetimeYears: upgradeLifetime(id, ctx.profile, data),
       source: def.source,
     };
   });

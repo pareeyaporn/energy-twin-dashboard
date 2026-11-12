@@ -51,6 +51,12 @@ Example: **“I operate a 100-room hotel and have $50,000 for energy improvement
 
 Evaluate smart thermostats, HVAC upgrades, LEDs, occupancy sensors, water heating, insulation, rooftop solar and energy management controls. For each show upfront cost, energy savings, dollar savings, payback, five-year net benefit, estimated emissions impact and comfort implications.
 
+**Decided (financial breakdown).** Every upgrade, solar included, and every package shows the same figures from one calculation: gross installation
+cost, applicable incentives (listed with sources, applied only when confirmed; none are invented), net upfront investment, annual energy saved (kWh,
+therms), annual money saved, simple payback, five- and ten-year net benefit, and annual CO2 reduction. Solar cost follows system size and regional
+pricing; output uses location-specific solar data; savings count self-consumption and export compensation, minus degradation and O&M. The optimizer
+and the advisor use exactly these numbers. Method: `docs/13`, section 8.
+
 Use a deterministic calculation/optimization algorithm, not LLM-generated numbers. Enforce budget limits, upgrade interactions, dependencies and comfort constraints. Compare at least three packages: maximum savings, fastest payback and balanced financial/sustainability performance. Show total cost, annual savings, five-year net savings, payback, carbon impact and remaining budget.
 
 ## 8. AI Energy Advisor
@@ -65,6 +71,22 @@ Create a polished B2B SaaS experience with:
 - **AI advisor:** grounded explanations.
 
 Use professional typography, clear financial metrics, intuitive charts and responsive controls.
+
+**As built (design decisions).**
+- **One workspace** on `/`: a left panel with four numbered tabs that follow the demo story (**1 Hotel · 2 Scenario · 3 Invest · 4 Ask**),
+  and in the center the digital twin, always visible, under a **cost / energy / carbon strip** showing before → after and the change.
+  Moving a control updates the strip and recolors the twin at once.
+- **Hotel tab:** preset picker and a short profile summary; the full form opens with "Edit details".
+- **Scenario tab:** the most-used controls first (occupancy, setpoints, smart room controls), the rest under "More controls";
+  stress tests, "why this changed", comfort notes and saved scenarios.
+- **Invest tab:** budget chips ($25k / $50k / $100k), objective, "Optimize for this scenario" (on by itself when a scenario runs), the live
+  "testing combinations" counter and three compact package cards; applying one switches the twin to the split before/after view with upgrade
+  markers. "Compare in detail" opens `/optimizer`. LV11 adds the full financial breakdown per upgrade.
+- **Ask tab:** the advisor chat with suggested questions; each answer is labeled "Explains the computed results" or "Template answer".
+- **Report** (`/overview`) and **Sources** in the top bar; a footer disclaimer on every screen.
+- **Twin colors** run from the cheapest zone (blue) to the most expensive (red); every zone is labeled; keyboard and screen-reader accessible.
+- **Known rough edges:** a "default (estimate)" tag on every number (to become one note), the number strip stacks tall on mobile, and the
+  split line crosses the twin's labels (task 7b.7).
 
 ## 10. Technical Architecture
 Preserve the existing app stack where possible (e.g. React, TypeScript, Tailwind). Recharts is suitable for charts; React Three Fiber is optional if lightweight 3D is achievable. Prefer a deterministic TypeScript engine for instant frontend simulations. If Python simulation code already exists, evaluate reuse before rewriting.
@@ -85,7 +107,8 @@ Do not sacrifice working P0 features for P2 polish.
 2. Open a synthetic 100-room hotel and show zone-level energy consumption.
 3. Change occupancy from 60% to 85%, then enable smart HVAC controls; show the calculated differences.
 4. Enter a $50,000 budget and generate upgrade packages, returns and savings.
-5. Ask the AI advisor: “Why recommend smart thermostats over solar?” Explain using actual model outputs.
+5. Ask the AI advisor a question that the results answer honestly, explained using actual model outputs. (The original placeholder question,
+   "Why recommend smart thermostats over solar?", is not supported by the current estimates; the question is chosen after calibration.)
 6. End with before/after energy, cost and estimated carbon impact.
 
 **Core message:** Energy Twin helps hotel owners test energy decisions before spending real money.

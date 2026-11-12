@@ -105,13 +105,13 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
       advisor messages. Add selectors and extend the store tests
 - [x] 4.2 [CC] Write the Lovable prompts (revised `docs/06`): Overview, Hotel profile form (building, operations and financial sections,
       all optional, defaults shown as "default (estimate)"), Scenario simulator, Budget optimizer, AI advisor, B2B SaaS styling
-- [ ] 4.3 [LV] Overview: annual consumption and cost, breakdown by category, estimated emissions, top opportunities
-- [ ] 4.4 [LV] Scenario simulator: occupancy, guest-room setpoint, vacant-room setback toggle, common-area schedule, electricity
+- [x] 4.3 [LV] Overview (LV3): annual consumption and cost, breakdown by category, estimated emissions, top opportunities
+- [x] 4.4 [LV] Scenario simulator (LV4): occupancy, guest-room setpoint, vacant-room setback toggle, common-area schedule, electricity
       price change, with before/after charts (Recharts) and metric tiles (energy, cost, carbon)
-- [ ] 4.5 [LV] Budget optimizer tab: budget and objective inputs, the three ranked package cards, a comparison table, remaining budget
-- [ ] 4.6 [LV] "Why this changed" panel from the engine drivers; saved scenarios (P1; keep in the store and local storage)
-- [ ] 4.7 [LV] Banner and disclaimers: "Estimates from synthetic and public data, not an engineering audit"
-- [ ] 4.8 [CC] Review the Lovable output, remove leftover residential copy ("Maya", "home", "attic"), check the build and the demo path
+- [x] 4.5 [LV] Budget optimizer tab (LV5): budget and objective inputs, the three ranked package cards, a comparison table, remaining budget
+- [x] 4.6 [LV] "Why this changed" panel from the engine drivers; saved scenarios (P1; LV4, LV7). Saved scenarios last for the browser session; local storage not added
+- [x] 4.7 [LV] Banner and disclaimers (LV9): "Estimates from synthetic and public data, not an engineering audit"
+- [x] 4.8 [CC] Review the Lovable output (each LV prompt reviewed), remove leftover residential copy ("Maya", "home", "attic"), check the build and the demo path
 
 ## Phase 5a — Engine support for the twin (built)
 - [x] 5a.1 `opportunitiesByZone`: upgrades that help each zone, with zone savings, cost, payback and comfort impact (store: `selectOpportunities`)
@@ -144,20 +144,20 @@ a bill-calibration view, a 12-month forecast band, 3D, and live IoT.
 - [x] 6.3 Guardrail (runs in the browser, shared engine code): every number in the answer must appear in the context; if not, discard it and use the fallback
 - [x] 6.4 Fallback: deterministic template answers for the demo questions (why HVAC is costly, how occupancy changes energy, solar or
       thermostats first, how to use a $30,000 budget), cached for the demo
-- [ ] 6.5 [TEAM] Add the secret `ANTHROPIC_API_KEY` in Lovable Cloud (provider defaulted to the Claude API; secrets only, never in code) and set `ALLOWED_ORIGINS`. See `docs/12`, section 6
-- [ ] 6.6 [LV] Chat panel with suggested questions, a loading state and the timeout fallback
+- [x] 6.5 [TEAM] Add the secret `ANTHROPIC_API_KEY` in Lovable Cloud (done; answers in about 3 s). **Still to do:** set `ALLOWED_ORIGINS` and a spending limit. See `docs/12`, section 6
+- [x] 6.6 [LV] Chat panel (LV8) with suggested questions, a loading state and the timeout fallback
 - [x] 6.7 Tests: context builder, number-validator, fallback selection
 
 ## Phase 7 — Data research (TEAM, runs in parallel)
 Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: true` and name the exact table.
-- [ ] 7.1 Commercial electricity and gas prices for the demo state (EIA commercial price tables)
-- [ ] 7.2 Lodging energy use and end uses by climate (EIA CBECS), plus an energy intensity benchmark (ENERGY STAR)
+- [x] 7.1 Commercial electricity and gas prices for the demo state (EIA commercial price tables); price growth from EIA AEO2026
+- [ ] 7.2 Lodging energy use and end uses by climate (EIA CBECS), plus an energy intensity benchmark (ENERGY STAR). **Partly:** national lodging end-use split and fuel mix from CBECS 2018 Tables E1 and E5; climate split and EUI benchmark still to do
 - [ ] 7.3 Chicago monthly weather normals (NOAA)
 - [ ] 7.4 Hot water per occupied room, lighting power and hours, kitchen share (ASHRAE or ENERGY STAR guidance)
 - [ ] 7.5 HVAC efficiency by type (PTAC, VRF, central plant, RTU)
-- [ ] 7.6 Upgrade savings and costs for all eight upgrades (NREL ComStock, ENERGY STAR hotel guidance, DOE Better Buildings case studies)
-- [ ] 7.7 Rooftop solar cost per kW and production (NREL PVWatts)
-- [ ] 7.8 Grid emission factor for the demo region (EPA eGRID)
+- [ ] 7.6 Upgrade savings and costs for all eight upgrades (NREL ComStock, ENERGY STAR hotel guidance, DOE Better Buildings case studies). **Pass 1 done** from search excerpts (see `docs/08`); most costs still placeholders; confirm in the IL-TRM once `icc.illinois.gov` is allowed
+- [ ] 7.7 Rooftop solar cost per kW and production (PVWatts, now at `developer.nlr.gov`). **Partly:** O&M and degradation sourced; $/W, output and export credit still to do
+- [ ] 7.8 Grid emission factor for the demo region (EPA eGRID). **Partly:** EIA Illinois generation rate (510 lbs CO2/MWh) in use; eGRID subregion still to check
 - [ ] 7.9 Seasonal occupancy pattern (a synthetic curve is acceptable, but cite the basis)
 - [ ] 7.10 Comfort guidance for setpoints (ASHRAE 55)
 - [ ] 7.11 Compare the demo hotel against an ENERGY STAR Portfolio Manager benchmark and note the result for Q&A
@@ -168,14 +168,23 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
       interaction, solar cost and size, and the balanced-score weights. Check: demo hotel total against an ENERGY STAR Portfolio Manager benchmark, package savings as a share of the bill
       against published hotel case studies, and that the demo question still has an honest answer. Do not pick numbers to fit the story; change the demo question if the numbers say so.
 
+## Phase 7b — Financial breakdown and research pass 1 (built)
+- [x] 7b.1 One financial breakdown for every upgrade and package (gross cost, incentives, net investment, kWh and therms, $ saved, payback, 5- and 10-year net benefit, CO2); one savings stream; optimizer, cards, zone opportunities and advisor read the same numbers
+- [x] 7b.2 Solar: location-based output, hour-by-hour self-use and export, regional $/W by size, export credit, degradation and O&M
+- [x] 7b.3 Incentives listed per upgrade with sources; none applied until confirmed; user-entered amounts supported
+- [ ] 7b.4 [LV] LV11: show the breakdown on every upgrade card and in the comparison table
+- [ ] 7b.5 Calibrate smart room controls: the model saves about 3% of guest-room HVAC vs 10.8–26.5% measured (DOE/PNNL); check against the IL-TRM per-room figures
+- [ ] 7b.6 Research pass 2 once the hosts are allowed (`docs/08`): PVWatts for Chicago, solar $/W (LBNL file), IL-TRM measures, ENERGY STAR benchmark, eGRID
+- [ ] 7b.7 Small UI fixes: one "some inputs are defaults" note instead of a tag on every number; compact number row on mobile; twin split-view labels (CC)
+
 ## Phase 8 — Demo hardening (all)
-- [ ] 8.1 Make the three-minute path deterministic (brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart HVAC on,
-      $50,000 budget, advisor question "Why recommend smart thermostats over solar?", closing before/after with carbon
+- [ ] 8.1 Make the three-minute path deterministic (brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
+      $50,000 budget, an advisor question **chosen after calibration from what the results actually show**, closing before/after with carbon
 - [ ] 8.2 Cache the advisor answers for the demo; no console errors; no layout shift
 - [ ] 8.3 Rehearse five times in a row without a failure; record the backup video (30–45 s); test the real projector resolution
 - [ ] 8.4 [TEAM] Slides: tagline "Simulate smarter. Spend better. Save energy.", the three pillars, roadmap (P2 items), and Q&A owners
 - [ ] 8.5 Claims check: nothing says engineering-grade accuracy, verified carbon savings, guaranteed returns or real-time monitoring
-- [ ] 8.6 Remove or hide leftover home-only code paths from the demo; decide whether to delete the home engine after the demo
+- [ ] 8.6 Remove or hide leftover home-only code paths from the demo (home UI removed in LV9); decide whether to delete the home engine and data after the demo
 
 ## Definition of done (per task)
 `npm run build` and `npx vitest run` pass; the demo path still works; committed and pushed; numbers come only from the engine.

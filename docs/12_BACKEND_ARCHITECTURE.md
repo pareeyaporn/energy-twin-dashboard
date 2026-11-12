@@ -12,12 +12,16 @@ is built today, and what we will add. Product context is in [10_HOTEL_SPEC.md](1
 4. **Secrets stay on the server.** API keys are Lovable Cloud secrets, read only inside backend functions, never in `VITE_*` variables or code.
 5. **External services are never on the critical path.** The demo works with them all down.
 
-## 2. What exists today (verified in the repo)
+## 2. What exists today (verified in the repo, November 2026)
 - **Framework:** TanStack Start (React, TypeScript, Vite). `vite.config.ts` uses `@lovable.dev/vite-tanstack-config`,
   which builds the server with Nitro for a **Cloudflare Worker** target.
 - **Server entry:** `src/server.ts` wraps TanStack's server entry with an SSR error page (`src/lib/error-capture.ts`, `src/lib/error-page.ts`).
-- **No `supabase/` folder and no `@supabase/supabase-js` dependency yet.** Lovable Cloud can provide them; nothing is set up.
-- **Engine** (`src/engine`, pure TypeScript, no network): home baseline, upgrades, costs, finance. The hotel engine will live in `src/engine/hotel/`.
+- **Lovable Cloud is enabled.** `.env` holds the project URL and publishable key (public values), `supabase/config.toml` the project id, and
+  `src/integrations/supabase/` the client Lovable generated. The advisor function (`supabase/functions/advisor`) is deployed and the
+  `ANTHROPIC_API_KEY` secret is set; answers arrive in about 3 seconds.
+- **Engine** (`src/engine/hotel`, pure TypeScript, no network): baseline, scenarios, twin data, upgrades, the common financial breakdown, solar,
+  incentives, optimizer and the advisor's browser side. The home engine files in `src/engine/` are legacy and unused by the app.
+- **No other backend.** No database tables are used; saved scenarios live in the browser session.
 
 ## 3. Runtime topology
 
@@ -33,10 +37,10 @@ is built today, and what we will add. Product context is in [10_HOTEL_SPEC.md](1
                                        │ HTTPS (advisor question + precomputed context)
         ┌──────────────────────────────▼───────────────────────┐
         │  Lovable Cloud edge function: supabase/functions/advisor (Deno)   │
-        │  • holds the AI key (secret)   • 7.5 s timeout • thin proxy       │
+        │  • holds the AI key (secret)   • 7.5 s limit   • thin proxy       │
         └──────────────────────────────┬───────────────────────┘
                                        │ HTTPS
-                                 LLM provider (TBD)
+                                 Claude API (claude-opus-5-5 by default)
 
   Hosting: TanStack Start SSR on a Cloudflare Worker, served through Lovable. Lovable syncs only the `main` branch.
 ```
@@ -101,7 +105,8 @@ The UI keeps a short "testing combinations…" state for the animation. Target: 
 1. Make sure Lovable Cloud (Supabase) is enabled for the project so `supabase/functions/advisor` is deployed.
 2. Add the secret `ANTHROPIC_API_KEY` in Lovable Cloud. Optionally set `ALLOWED_ORIGINS` to the published app's origin.
 3. Ask the advisor a question in the app. An answer marked `ai` came from the model and passed the number check; `fallback` (with a reason) is the template answer.
-   This has not been run against the real API from this repository's development environment, because no key was available there.
+   Done: answers come from the model in about 3 seconds. Still to do: set `ALLOWED_ORIGINS` to the published app's origin and a monthly spending
+   limit in the Anthropic console. (This repository's development environment cannot reach the function, so it is tested with mocks there.)
 
 ## 7. Guardrails against invented numbers
 - **Validator (client):** extract every number from the answer (strip `$`, commas, `%`, units) and require each to appear in the context
@@ -161,4 +166,7 @@ EPA eGRID (emission factors), utility bill upload and calibration, building-mana
 - [x] **Where the advisor runs.** Recommended: a Supabase edge function, as `CLAUDE.md` specifies, with the client building the context and validating.
       Alternative: a TanStack Start server function on the Worker, which could share engine code with the validator. Confirm before building.
 - [ ] Whether saved scenarios need to persist beyond the browser
-- [ ] Rate limit values and the context size cap
+- [x] Rate limit values and the context size cap: 20 a minute per caller; 60,000 characters. Measured contexts are about 7,000 characters (15,000 in
+      the worst case: a scenario, a plan and two extra budgets). The size is bounded by design (at most 8 upgrades, 3 packages plus the winner,
+      2 extra budgets; each question sends a fresh context), so no summarizing or larger limit is needed. Do not summarize with a model: the
+      number check needs the exact figures.

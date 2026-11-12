@@ -50,6 +50,15 @@ Tests: occupancy raises energy sublinearly, setback saves only when rooms are va
 Print the demo hotel's 60% to 85% occupancy result and the smart-HVAC result so we can sanity-check them. Commit "hotel: scenarios", push.
 ```
 
+## H4b — Twin data functions (tasks 1.11, 1.12)
+
+```
+Implement the Tier A twin data functions in src/engine/hotel per docs/11 task 1.11: typicalDayProfile(), roomOccupancyPattern(),
+equipmentInventory(), energyFlows(), simulatedMeter() and the stress-test presets (heat wave, cold snap, conference week, +20% price).
+All pure and deterministic: no randomness, no Date.now(); time comes in as an argument. Tests per task 1.12 (typical day reconciles to the
+monthly totals, flows conserve energy and cost, the room map matches the scenario and is repeatable). Commit "hotel: twin data", push.
+```
+
 ## H5 — Store contract proposal (task 1.10)
 
 ```
@@ -91,13 +100,15 @@ Apply the approved store changes from H5. Backwards compatible. Extend src/test/
 "store: hotel state (touches shared file)", push.
 ```
 
-## H10 — Twin component (tasks 5.1 to 5.5)
+## H10 — Twin component, Tier A (tasks 5.1 to 5.10)
 
 ```
-Create src/twin/HotelTwin.tsx: a clickable SVG diagram of the six zones reading everything from the store. Heat-map by energy intensity
-or cost share, before/after toggle, zone panel with energy, cost share, equipment, schedule, assumptions and opportunities, and scenario
-feedback (lit windows follow occupancy, vacant rooms dim). Respect reduceEffects; keyboard and screen-reader support. No math in the
-component. Add a component test for zone selection. Commit "twin: hotel diagram", push.
+Create src/twin/HotelTwin.tsx: a layered 2D SVG digital twin reading everything from the store, no math in the component. Layers: Zones
+(heat-map by energy intensity or cost share), Rooms (every room occupied, vacant or vacant-with-setback), Equipment (list per zone with load,
+schedule, efficiency) and Flow (Sankey from grid and gas to zones to end uses, using Recharts). Add a time scrubber (play, pause, scrub a
+typical day and the year, speed control), a simulated live meter labeled "simulated", ghost upgrades with a before/after split when a package is
+applied, and stress-test buttons (heat wave, cold snap, conference week, +20% price). Respect reduceEffects; keyboard and screen-reader support.
+Component tests for layer switching, zone selection and the time scrubber. Commit "twin: tier A", push.
 ```
 
 ## H11 — Advisor (tasks 6.1 to 6.7)

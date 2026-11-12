@@ -3,50 +3,75 @@ import { PORTFOLIO_OBJECTIVES, upgradeDef } from "@/engine/hotel";
 import type { PortfolioObjective } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
 import { Button } from "@/components/ui/button";
-import { percent, usd } from "@/twin/format";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { usd } from "@/twin/format";
+import { PortfolioCompare } from "./PortfolioCompare";
+import { PortfolioCustomPlan } from "./PortfolioCustomPlan";
+import { TotalsGrid } from "./TotalsGrid";
 
 const BUDGETS = [100_000, 250_000, 500_000, 750_000, 1_000_000];
 
-/** One budget across the chain: which package goes to which hotel. Every figure comes from the engine. */
-export function PortfolioOptimizer({ onExplore }: { onExplore: (id: string) => void }) {
+/** Portfolio investments: one budget across the chain, as the AI recommends it, as I build it, and the two compared. */
+export function PortfolioOptimizer({ onExplore, onEdit }: { onExplore: (id: string) => void; onEdit: (propertyId: string, planId: string | null) => void }) {
   const budget = useTwin((s) => s.portfolioBudget);
   const setBudget = useTwin((s) => s.setPortfolioBudget);
+
+  return (
+    <section aria-label="Portfolio investments" className="space-y-3 rounded-xl border border-glass-border p-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold">Portfolio investments</h2>
+          <p className="text-xs text-muted-foreground">One budget across the hotels, at most one upgrade package per hotel.</p>
+        </div>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="text-xs">
+            <span className="mb-1 block text-muted-foreground">Total budget</span>
+            <span className="flex items-center gap-1">
+              <span className="text-muted-foreground">$</span>
+              <input
+                type="number"
+                min={0}
+                step={10_000}
+                value={budget}
+                onChange={(e) => setBudget(Number(e.target.value))}
+                className="num w-32 rounded-md border border-input bg-background px-2 py-1 text-sm"
+                aria-label="Total portfolio budget in dollars"
+                data-testid="portfolio-budget"
+              />
+            </span>
+          </label>
+          <div className="flex flex-wrap gap-1" aria-label="Budget presets">
+            {BUDGETS.map((b) => (
+              <button key={b} type="button" onClick={() => setBudget(b)} className={`rounded-full border px-2 py-0.5 text-[11px] ${b === budget ? "border-primary text-foreground" : "border-glass-border text-muted-foreground"}`}>
+                {b >= 1_000_000 ? `$${b / 1_000_000}M` : `$${b / 1000}k`}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <Tabs defaultValue="ai">
+        <TabsList>
+          <TabsTrigger value="ai">AI recommended</TabsTrigger>
+          <TabsTrigger value="mine" data-testid="tab-mine">My portfolio</TabsTrigger>
+          <TabsTrigger value="compare" data-testid="tab-compare">Compare</TabsTrigger>
+        </TabsList>
+        <TabsContent value="ai" className="mt-3"><AiPortfolio onExplore={onExplore} /></TabsContent>
+        <TabsContent value="mine" className="mt-3"><PortfolioCustomPlan onEdit={onEdit} /></TabsContent>
+        <TabsContent value="compare" className="mt-3"><PortfolioCompare /></TabsContent>
+      </Tabs>
+    </section>
+  );
+}
+
+function AiPortfolio({ onExplore }: { onExplore: (id: string) => void }) {
   const objective = useTwin((s) => s.portfolioObjective);
   const setObjective = useTwin((s) => s.setPortfolioObjective);
   const plan = useTwin((s) => s.portfolioPlan);
   const busy = useTwin((s) => s.portfolioOptimizing);
   const run = useTwin((s) => s.runPortfolioOptimizer);
-
   return (
-    <section aria-label="Portfolio investment optimizer" className="space-y-3 rounded-xl border border-glass-border p-4">
-      <div>
-        <h2 className="text-base font-semibold">Portfolio investment optimizer</h2>
-        <p className="text-xs text-muted-foreground">Split one budget across the hotels: at most one upgrade package per hotel, chosen from every combination the single-hotel optimizer tests.</p>
-      </div>
+    <div className="space-y-3">
       <div className="flex flex-wrap items-end gap-3">
-        <label className="text-xs">
-          <span className="mb-1 block text-muted-foreground">Total budget</span>
-          <span className="flex items-center gap-1">
-            <span className="text-muted-foreground">$</span>
-            <input
-              type="number"
-              min={0}
-              step={10_000}
-              value={budget}
-              onChange={(e) => setBudget(Number(e.target.value))}
-              className="num w-32 rounded-md border border-input bg-background px-2 py-1 text-sm"
-              aria-label="Total portfolio budget in dollars"
-              data-testid="portfolio-budget"
-            />
-          </span>
-        </label>
-        <div className="flex flex-wrap gap-1" aria-label="Budget presets">
-          {BUDGETS.map((b) => (
-            <button key={b} type="button" onClick={() => setBudget(b)} className={`rounded-full border px-2 py-0.5 text-[11px] ${b === budget ? "border-primary text-foreground" : "border-glass-border text-muted-foreground"}`}>
-              {b >= 1_000_000 ? `$${b / 1_000_000}M` : `$${b / 1000}k`}
-            </button>
-          ))}
-        </div>
         <label className="text-xs">
           <span className="mb-1 block text-muted-foreground">Objective</span>
           <select value={objective} onChange={(e) => setObjective(e.target.value as PortfolioObjective)} className="rounded-md border border-input bg-background px-2 py-1 text-sm" data-testid="portfolio-objective">
@@ -58,26 +83,9 @@ export function PortfolioOptimizer({ onExplore }: { onExplore: (id: string) => v
           {busy ? "Testing combinations…" : "Optimize the portfolio"}
         </Button>
       </div>
-
       {plan && (
         <div className="space-y-3" data-testid="portfolio-plan">
-          <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {([
-              ["Investment (gross)", usd(plan.totals.grossCost)],
-              ["Incentives", usd(plan.totals.incentives)],
-              ["Net investment", usd(plan.totals.netInvestment)],
-              ["Budget left", usd(plan.totals.remainingBudget)],
-              ["Annual savings", `${usd(plan.totals.annualSavings)} (${percent(plan.totals.shareOfPortfolioCost)} of energy cost)`],
-              ["Payback", plan.totals.paybackYears != null ? `${plan.totals.paybackYears.toFixed(1)} years` : "—"],
-              ["NPV 5 / 10 years", `${usd(plan.totals.npv5)} / ${usd(plan.totals.npv10)}`],
-              ["CO₂ avoided", `${Math.round(plan.totals.carbonAvoidedKg / 1000).toLocaleString("en-US")} t / yr`],
-            ] as const).map(([k, v]) => (
-              <div key={k} className="rounded-lg bg-accent/30 p-2">
-                <dt className="text-[11px] text-muted-foreground">{k}</dt>
-                <dd className="num text-sm font-medium">{v}</dd>
-              </div>
-            ))}
-          </dl>
+          <TotalsGrid totals={plan.totals} />
           <div className="table-scroll overflow-x-auto">
             <table className="w-full min-w-[720px] text-xs">
               <caption className="sr-only">Recommended package per hotel (estimates)</caption>
@@ -117,6 +125,6 @@ export function PortfolioOptimizer({ onExplore }: { onExplore: (id: string) => v
           </p>
         </div>
       )}
-    </section>
+    </div>
   );
 }

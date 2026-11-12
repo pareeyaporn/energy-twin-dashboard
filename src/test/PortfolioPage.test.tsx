@@ -67,3 +67,35 @@ describe("Portfolio page", () => {
     expect(screen.getByTestId("portfolio-breadcrumb").textContent).toContain("Wells Street Hotel");
   });
 });
+
+describe("Portfolio page, P1", () => {
+  beforeEach(() => {
+    useTwin.getState().resetHotel();
+    navigate.mockClear();
+  });
+  afterEach(() => cleanup());
+
+  it("Customize AI plan fills My portfolio, and Compare shows both", async () => {
+    vi.useFakeTimers();
+    render(<PortfolioPage />);
+    fireEvent.click(screen.getByTestId("run-portfolio"));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1300);
+    });
+    vi.useRealTimers();
+    act(() => {
+      useTwin.getState().customizeAiPortfolio();
+    });
+    const mine = await import("@/store/hotelDerived").then((m) => m.selectPortfolioCustomEvaluation(useTwin.getState()));
+    expect(mine.totals.annualSavings).toBeCloseTo(useTwin.getState().portfolioPlan!.totals.annualSavings, 4);
+  });
+
+  it("runs a portfolio stress test for a selection of hotels", () => {
+    render(<PortfolioPage />);
+    fireEvent.click(screen.getByTestId("pstress-heat_wave"));
+    expect(screen.getByTestId("portfolio-stress-report")).toBeTruthy();
+    expect(screen.getAllByTestId("pstress-row")).toHaveLength(5);
+    fireEvent.click(screen.getByTestId("pscope-wells-street"));
+    expect(screen.getAllByText("(not in the test)")).toHaveLength(1);
+  });
+});

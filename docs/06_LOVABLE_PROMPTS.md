@@ -53,8 +53,9 @@ Add a Source chip on each line item that opens the Sources sheet.
 ## LV6 — Place the digital twin (after H10)
 
 ```
-Place <HotelTwin /> from src/twin/HotelTwin in the center stage. Don't modify the component. Add a before/after toggle and a legend.
-When a zone is selected, show the zone panel beside the diagram on wide screens and below it on narrow screens.
+Place <HotelTwin /> from src/twin/HotelTwin in the center stage. Don't modify the component. The component has its own layer switcher
+(Zones, Rooms, Equipment, Flow), time scrubber, simulated meter and stress-test buttons; give it as much room as possible. Add a legend and a
+"Simulated data" label. When a zone is selected, show the zone panel beside the diagram on wide screens and below it on narrow screens.
 ```
 
 ## LV7 — Saved scenarios (P1, task 4.6)

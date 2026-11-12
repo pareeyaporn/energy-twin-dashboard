@@ -4,7 +4,7 @@ Source brief: [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Priorities follow the brief:
 Owner tags: **[CC]** Claude Code, **[LV]** Lovable (UI prompts), **[TEAM]** research or decisions by people.
 
 Approved decisions: new engine in `src/engine/hotel/` alongside the home engine; extend `src/store/useTwin.ts`
-backwards compatibly; clickable **2D** twin (3D is P2); demo hotel = 100 rooms in Chicago; save the brief and mark
+backwards compatibly; clickable **2D** twin with the **Tier A** feature set (below; 3D is P2); demo hotel = 100 rooms in Chicago; save the brief and mark
 `docs/09` superseded; merge the P5 optimizer branch as is.
 
 Order: Phase 0 → 1 → 2 → 3 are engine and can start now. Phase 7 (data research, TEAM) runs in parallel with all of them.
@@ -51,7 +51,21 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
       a +20% rate raises the energy cost by 20%; setback saves only when rooms are vacant; cooling peaks in summer and heating in winter;
       calibration hits the bill; determinism and purity
 - [ ] 1.9 `src/engine/hotel/index.ts` exports; add to `src/engine/index.ts`
-- [ ] 1.10 Store contract proposal (types only) for Phase 4, shown to you for approval before editing `src/store/`
+- [ ] 1.10 Store contract proposal (types only) for Phase 4, shown to you for approval before editing `src/store/`. Include the twin UI state:
+      active layer, time mode (day or year), time index, playing, playback speed, before/after compare, active stress test
+- [ ] 1.11 Twin data functions (Tier A). Pure, deterministic (no randomness, no `Date.now()`; time is passed in by the UI):
+  - `typicalDayProfile(profile, month)`: hourly electric kW and gas therm/h by zone and category for a typical day, built from the schedules,
+    guest arrival and departure curves and the base loads; the profiles reconcile to the monthly totals from 1.4
+  - `roomOccupancyPattern(profile, scenario, hour)`: room-by-room occupied, vacant or vacant-with-setback state for all rooms, with a
+    deterministic pattern (from room index, occupancy fraction and hour); the occupied count equals round(occupancy × rooms)
+  - `equipmentInventory(profile)`: major equipment per zone (for example guest-room units, central plant, water heaters, kitchen hoods, lighting)
+    with rated load, schedule and efficiency, each flagged estimated
+  - `energyFlows(baseline)`: nodes and links from grid and gas, through the zones, to end uses, in kWh, therms and dollars, for the flow diagram
+  - `simulatedMeter(profile, month, hour)`: kW and $/h from the typical-day profile, always labeled simulated
+  - Stress-test presets as scenario deltas: heat wave, cold snap, conference week (occupancy spike), +20% electricity price
+- [ ] 1.12 Tests for 1.11: the typical day reconciles to the monthly totals; the energy flows conserve energy and cost; the room map's occupied count
+      matches the scenario; the same inputs always give the same room map; vacant-room setback shows only when rooms are vacant;
+      stress tests move energy and cost in the expected direction
 
 ## Phase 2 — Upgrades, costs and financial metrics (P0) [CC]
 - [ ] 2.1 Upgrade catalog `src/data/hotel/upgrades.json` (8 upgrades, each with cost model, affected zone and category, savings
@@ -99,14 +113,23 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 - [ ] 4.7 [LV] Banner and disclaimers: "Estimates from synthetic and public data, not an engineering audit"
 - [ ] 4.8 [CC] Review the Lovable output, remove leftover residential copy ("Maya", "home", "attic"), check the build and the demo path
 
-## Phase 5 — Interactive digital twin, 2D (P1) [CC component, LV places it]
-- [ ] 5.1 New folder `src/twin/` (Claude Code owned; add it to the CLAUDE.md folder table). `<HotelTwin />` is a clickable SVG diagram of six
-      zones; Lovable only places it
-- [ ] 5.2 Heat-map coloring by energy intensity or cost share, with a before/after toggle and animated numbers
-- [ ] 5.3 Zone panel on click: energy, cost share, major equipment, schedule, efficiency assumptions, improvement opportunities (from the engine)
-- [ ] 5.4 Scenario feedback: guest-room windows light up with occupancy, vacant rooms dim, the HVAC area pulses, cost labels update with price changes
-- [ ] 5.5 Respect `reduceEffects`; keyboard and screen-reader support; component tests for zone selection through the store
-- [ ] 5.6 P2, only if time: lightweight 3D with React Three Fiber
+## Phase 5 — Interactive digital twin, 2D, Tier A (P1) [CC component, LV places it]
+Needs Phases 1–2. In scope (**Tier A**): room grid, zone heat-map, equipment layer, time scrubber, simulated live meter, energy flow diagram,
+ghost upgrades, stress-test events. Out of scope for now: fault injection and anomaly detection, an operational playbook optimizer,
+a bill-calibration view, a 12-month forecast band, 3D, and live IoT.
+- [ ] 5.1 New folder `src/twin/` (Claude Code owned; add it to the CLAUDE.md folder table). `<HotelTwin />` is a layered SVG diagram; it reads everything
+      from the store and does no math; Lovable only places it
+- [ ] 5.2 Layer switcher: **Zones** (heat-map by energy intensity or cost share), **Rooms**, **Equipment** and **Flow**, plus a before/after toggle and animated numbers
+- [ ] 5.3 Room grid: all rooms by floor, showing occupied, vacant and vacant-with-setback; follows the occupancy scenario and the time scrubber
+- [ ] 5.4 Equipment layer and zone panel on click: energy, cost share, equipment list with load, schedule and efficiency, and improvement opportunities
+      (all from the engine)
+- [ ] 5.5 Time scrubber: play, pause and scrub a typical day (24 hours) and the year (12 months), with speed control; colors, room states and numbers follow time
+- [ ] 5.6 Simulated live meter: a ticking kW and cost readout driven by the time scrubber, always labeled "simulated"
+- [ ] 5.7 Energy flow diagram: Sankey from grid and gas through the zones to end uses, with cost on each flow (Recharts)
+- [ ] 5.8 Ghost upgrades: applying a package shows it on the twin (solar on the roof, LED glow, thermostat icons) with a before/after split view
+- [ ] 5.9 Stress-test buttons (heat wave, cold snap, conference week, +20% price): trigger a scenario and show the twin reacting
+- [ ] 5.10 Respect `reduceEffects`; keyboard and screen-reader support; component tests for layer switching, zone selection and the time scrubber through the store
+- [ ] 5.11 P2, only if time: lightweight 3D with React Three Fiber
 
 ## Phase 6 — AI advisor (P1) [CC]
 - [ ] 6.1 Design note (see [12_BACKEND_ARCHITECTURE.md](12_BACKEND_ARCHITECTURE.md)): the model receives a precomputed context (baseline by zone, current scenario, three packages, and a few precomputed

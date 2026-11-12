@@ -1,0 +1,153 @@
+[
+  {
+    "id": "northshore-hospitality",
+    "name": "Northshore Hospitality",
+    "city": "Chicago",
+    "synthetic": true,
+    "note": "Synthetic second organization, to show several organizations, brands, regions and ownership types. The four hotels, their names, brands and inputs are invented (documented assumptions); every value the input leaves out is a default the profile flags. Chicago weather, Illinois rates and ComEd incentives.",
+    "futureBuildingTypes": [
+      {
+        "id": "resort",
+        "label": "Resorts",
+        "note": "Need pool, spa and outdoor-amenity energy drivers."
+      },
+      {
+        "id": "casino",
+        "label": "Casinos",
+        "note": "Need 24-hour gaming-floor lighting, ventilation and equipment loads."
+      },
+      {
+        "id": "convention_center",
+        "label": "Convention centers",
+        "note": "Need event-driven occupancy and exhibit-hall ventilation."
+      },
+      {
+        "id": "entertainment_venue",
+        "label": "Entertainment venues",
+        "note": "Need show schedules, stage lighting and crowd ventilation."
+      }
+    ],
+    "properties": [
+      {
+        "id": "lincoln-park-suites",
+        "organizationId": "northshore-hospitality",
+        "brand": "Northshore Suites",
+        "region": "North Side",
+        "ownership": "owned",
+        "neighborhood": "Lincoln Park",
+        "segment": "Extended-stay suites",
+        "buildingType": "hotel",
+        "lat": 41.9214,
+        "lng": -87.6513,
+        "synthetic": true,
+        "note": "Synthetic. Extended-stay suites with packaged heat pumps (PTHP); occupancy 74% and guests in the room longer (16 h) are assumptions; floor area defaulted.",
+        "input": {
+          "name": "Lincoln Park Suites",
+          "city": "Chicago",
+          "state": "IL",
+          "country": "US",
+          "rooms": 120,
+          "floors": 6,
+          "yearBuilt": 2005,
+          "operatingHours": 24,
+          "hvacType": "pthp",
+          "occupancy": 0.74,
+          "occupiedHoursPerRoom": 16,
+          "budget": 60000,
+          "horizonYears": 5,
+          "objective": "balanced"
+        }
+      },
+      {
+        "id": "hyde-park-inn",
+        "organizationId": "northshore-hospitality",
+        "brand": "Northshore Inn",
+        "region": "South Side",
+        "ownership": "franchised",
+        "neighborhood": "Hyde Park",
+        "segment": "Older midscale inn",
+        "buildingType": "hotel",
+        "lat": 41.7943,
+        "lng": -87.5907,
+        "synthetic": true,
+        "note": "Synthetic. An older hotel with rooftop units (gas heat); occupancy 58% is an assumption; floor area defaulted.",
+        "input": {
+          "name": "Hyde Park Inn",
+          "city": "Chicago",
+          "state": "IL",
+          "country": "US",
+          "rooms": 90,
+          "floors": 4,
+          "yearBuilt": 1968,
+          "operatingHours": 24,
+          "hvacType": "rtu",
+          "occupancy": 0.58,
+          "occupiedHoursPerRoom": 14,
+          "budget": 40000,
+          "horizonYears": 5,
+          "objective": "balanced"
+        }
+      },
+      {
+        "id": "midway-express",
+        "organizationId": "northshore-hospitality",
+        "brand": "Northshore Inn",
+        "region": "Airports",
+        "ownership": "managed",
+        "neighborhood": "Midway",
+        "segment": "Airport select-service hotel",
+        "buildingType": "hotel",
+        "lat": 41.7868,
+        "lng": -87.7522,
+        "synthetic": true,
+        "note": "Synthetic. An airport hotel with PTAC room units; occupancy 72% and 10 occupied hours per room are assumptions; floor area defaulted.",
+        "input": {
+          "name": "Midway Express Hotel",
+          "city": "Chicago",
+          "state": "IL",
+          "country": "US",
+          "rooms": 160,
+          "floors": 6,
+          "yearBuilt": 1988,
+          "operatingHours": 24,
+          "hvacType": "ptac",
+          "occupancy": 0.72,
+          "occupiedHoursPerRoom": 10,
+          "budget": 70000,
+          "horizonYears": 5,
+          "objective": "balanced"
+        }
+      },
+      {
+        "id": "gold-coast-residence",
+        "organizationId": "northshore-hospitality",
+        "brand": "Northshore Suites",
+        "region": "Downtown",
+        "ownership": "owned",
+        "neighborhood": "Gold Coast",
+        "segment": "Historic full-service hotel",
+        "buildingType": "hotel",
+        "lat": 41.9058,
+        "lng": -87.6273,
+        "synthetic": true,
+        "note": "Synthetic. A historic full-service hotel with a central plant; occupancy 68% is an assumption; floor area defaulted.",
+        "input": {
+          "name": "Gold Coast Residence",
+          "city": "Chicago",
+          "state": "IL",
+          "country": "US",
+          "rooms": 210,
+          "floors": 14,
+          "yearBuilt": 1972,
+          "operatingHours": 24,
+          "hvacType": "central_plant",
+          "occupancy": 0.68,
+          "occupiedHoursPerRoom": 14,
+          "budget": 120000,
+          "horizonYears": 5,
+          "objective": "balanced"
+        }
+      }
+    ]
+  }
+]

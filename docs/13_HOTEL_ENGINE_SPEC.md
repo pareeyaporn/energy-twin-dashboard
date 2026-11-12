@@ -206,8 +206,9 @@ At $50,000 the optimizer picks LED lighting plus occupancy sensors ($38,940 gros
 225–650 therms a year for 100 rooms at 0.75–1.0 ton per room. The setback alone gave 4,903 kWh; with smart controls the simulation now also cuts
 guest-room fan energy 17% while rooms are empty (`defaults.smartControlFan`), giving about 10,800 kWh and 209 therms. **Insulation** scales its
 weather-load reduction by 5 / floors above 5 floors. **Second preset:** `demo-chicago-300` (300 rooms, 20 floors, defaults for floor area and
-occupancy, then 69.2% occupancy from STR via Choose Chicago); at $150,000 the optimizer picks LED lighting plus energy management ($147,000 gross,
-$115,106 net after $31,894 ComEd LED incentive, $32,521 a year, 3.5 years; baseline about $374,700 a year). Log: `docs/14`.
+occupancy, then 69.2% occupancy from STR via Choose Chicago); at $150,000 the optimizer's maximum-savings package is roof insulation, LED lighting and occupancy sensors ($132,578 gross,
+$88,309 net after $44,269 of ComEd incentives, $30,323 a year, 2.9 years; baseline about $374,700 a year). Energy management dropped out when
+its cost was sourced (research pass 10: NREL, about $2.53 per ft² instead of a $0.47 per ft² placeholder). Log: `docs/14`.
 
 ### Limits of this version
 - **Smart room controls pay back slowly (21 years)** because their modeled savings are small (see section 7) and setback recovery is counted. That is a calibration question, not a product conclusion.
@@ -365,6 +366,12 @@ insulation + LED + sensors at O'Hare Gateway; LED + water heating at Wells Stree
 - `portfolioStressReport(items, test, scope)`: `stressTestReport` for each hotel in the scope, with its plan; totals of normal and stressed cost,
   with and without plans, and the extra cost the plans avoid. Example, electricity +20% on four hotels (all but Wells Street) with the $500,000
   AI portfolio: the chain's cost rises $244,071 a year; the plans avoid $23,070 of it (9%); payback at Riverwalk Grand falls from 2.5 to 2.1 years.
+
+### A second organization (synthetic)
+
+Northshore Hospitality: Lincoln Park Suites (120 rooms, PTHP, 2005, 74%, North Side, owned), Hyde Park Inn (90, rooftop units, 1968, 58%,
+South Side, franchised), Midway Express Hotel (160, PTAC, 1988, 72%, Airports, managed), Gold Coast Residence (210, central plant, 1972, 68%,
+Downtown, owned). Inputs are assumptions; floor areas are defaulted. Brands, regions and ownership types for both organizations are labels.
 
 ### Limits
 

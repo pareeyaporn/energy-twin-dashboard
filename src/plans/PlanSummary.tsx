@@ -77,7 +77,7 @@ export function PlanSummary({ plan, rate, onRemove }: { plan: PlanEvaluation; ra
         </ul>
       )}
       <p className="text-[10px] text-muted-foreground">
-        Recomputed with all upgrades together (savings are not added up). Estimates: some installed costs are still placeholders (LED retrofit, energy management, the chiller part of a central plant); incentives use ComEd's published rates, are estimated from the modeled equipment and need the utility's approval.
+        Recomputed with all upgrades together (savings are not added up). Estimates: some installed costs are still assumptions (the LED retrofit mix, VRF equipment) and chiller costs are a lower bound; incentives use ComEd's published rates, are estimated from the modeled equipment and need the utility's approval.
       </p>
     </section>
   );

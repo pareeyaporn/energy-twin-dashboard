@@ -769,8 +769,16 @@ export interface BenchmarkComparison {
 /** 'hotel' is the only type the model simulates; the others are listed for later and are not simulated. */
 export type BuildingType = 'hotel' | 'resort' | 'casino' | 'convention_center' | 'entertainment_venue';
 
+/** How the organization holds a hotel (labels only; the model treats them alike). */
+export type Ownership = 'owned' | 'managed' | 'franchised' | 'leased';
+
 export interface PortfolioProperty {
   id: string;
+  /** The organization the hotel belongs to, its brand, region (an area of the city) and ownership type. Optional for older data. */
+  organizationId?: string;
+  brand?: string;
+  region?: string;
+  ownership?: Ownership;
   /** Set when the property uses a single-hotel preset's input (its figures then match that preset). */
   presetId?: string;
   neighborhood: string;

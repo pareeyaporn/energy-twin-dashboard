@@ -2,7 +2,7 @@ import { STRESS_CATEGORIES, STRESS_TESTS } from "@/engine/hotel";
 import type { StressTest } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
 import type { PortfolioStressPlanChoice } from "@/store/useTwin";
-import { selectPortfolioStressReport } from "@/store/hotelDerived";
+import { selectPortfolioItems, selectPortfolioStressReport } from "@/store/hotelDerived";
 import { percent, signedUsd, usd } from "@/twin/format";
 
 const PLAN_CHOICES: { id: PortfolioStressPlanChoice; label: string }[] = [
@@ -13,7 +13,8 @@ const PLAN_CHOICES: { id: PortfolioStressPlanChoice; label: string }[] = [
 
 /** A stress test on one hotel, a selection or the whole chain, with the chosen plans: normal vs stressed cost and what the plans absorb. */
 export function PortfolioStress() {
-  const properties = useTwin((s) => s.portfolio.properties);
+  // Only the hotels that pass the portfolio filter.
+  const properties = useTwin(selectPortfolioItems).map((x) => x.property);
   const testId = useTwin((s) => s.portfolioStressTestId);
   const setTest = useTwin((s) => s.setPortfolioStressTest);
   const scope = useTwin((s) => s.portfolioStressScope);

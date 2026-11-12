@@ -275,3 +275,38 @@ Bug fixed: the PTAC/PTHP hotels' common-area rooftop units showed a capacity 1,0
 **Effect:** LED + occupancy sensors at $50,000 costs $38,940 (was $39,600), $24,184 net, payback 2.3 years under the 85% scenario (2.7 on the baseline);
 sensors alone pay back in under a year. Central-plant HVAC is unchanged in total ($109,918) but now split into a sourced and a placeholder part.
 No recommendation changes.
+
+## Pass 10 (November 2026, installed costs, net metering, hot water, validation)
+
+Found with web search on reachable hosts (EIA, NREL's publications host, EPA, ENERGY STAR, Illinois Shines); `www.ilga.gov`, `www.icc.illinois.gov`,
+ComEd, PNNL, `energy.gov` and DOE Better Buildings stayed blocked. Values below were checked in the downloaded documents unless marked "search
+excerpt" (weaker: from a search result, not the document).
+
+| Item | Before | Now | Source |
+| --- | --- | --- | --- |
+| Energy management cost | $15,000 + $0.20 per ft² (placeholder; below even a front-end upgrade) | **$0.79 / $2.53 / $7.60 per ft²** (front end only / upgrade existing system / complete system averages) | NREL, *Commercial Building Sensors and Controls Systems: Barriers, Drivers, and Costs*, NREL/TP-5500-82117 (August 2022), Table 5 "Total Project Cost per Square Foot Data Summary" (front end $0.69–0.95, upgrade existing $0.49–7.86, complete $5.20–14.23) |
+| Chiller part of a central plant | $1.31 per ft² (placeholder) | **$820 / $1,030 / $1,350 per ton** total installed (2022$), a lower bound for a replacement | EIA, *Updated Buildings Sector Appliance and Equipment Costs and Efficiencies* (Guidehouse and Leidos, March 2023), commercial air-cooled screw chillers, typical: $820/ton at 300 tons, $1,250 at 100 tons, $86 per kBtu/h; high efficiency 100 tons $1,350. Excludes demolition, rigging and chilled-water work |
+| LED retrofit cost | $0.40 / $0.60 / $0.90 per ft² (placeholder) | unchanged, now **between sourced bounds**: relamping $22.22 per 2-lamp fixture (63.1 → 27.4 W) ≈ $0.35 per W of existing lighting; new luminaire $338.08 per fixture (→ 44.0 W) ≈ $5.36 per W. The mid ≈ $1.05 per W ≈ 14% of fixtures replaced (an assumption) | EIA 2023 (as above), Appendix C, commercial 4-ft linear 2-lamp systems, 2022 typical |
+| ComEd 2026 LED incentive | $0.75 per W reduced (2025 worksheet) | unchanged; a May 2026 secondary page states the same $0.75 per W reduced and $0.25 per W controlled; the 2026 worksheet's host is blocked | secondary page (search excerpt); primary still to confirm |
+| Solar export credit | $0 (fallback) | **method sourced, value not**: systems interconnected after December 31, 2024 are credited "at your electricity supply rate" (Illinois Shines); customers above 100 kW receive supply and transmission only net metering credits (ComEd Rider POGNM, ICC docket 22-0036, search excerpt). No non-residential supply price was found, so the $0 fallback stays (editable). No effect on either preset, which export nothing | illinoisshines.com (fetched); ICC 22-0036 (search excerpt) |
+| Hot water by use | showers' share unknown | **guest rooms ≈ 79% of service water heating** in a 228-room full-service hotel (guest hot water 2,978 MMBtu a year against laundry and kitchen 788; pool and spa excluded). A showers-only share is still not published | EPA CHP Partnership hotel report (December 2005), Table 18 |
+| Energy by zone and plant share | assumptions | still assumptions: no published hotel breakdown by zone. Context only: lighting is "almost a quarter of all electricity"; heating and cooling "almost 40 percent of the electricity and more than half of the natural gas" | ENERGY STAR Building Upgrade Manual / hotel guidance |
+
+**Effect:** the 100-room demo and the portfolio at $500,000 are unchanged. Energy management alone now costs about $139,000 for the 100-room hotel
+(payback about 54 years) and drops out of the packages. 300-room preset at $150,000: maximum savings is now insulation + LED + occupancy sensors
+($132,578 gross, $88,309 net, $30,323 a year, 2.9 years) instead of LED + energy management ($147,000, $32,521 a year, 3.5 years). Central-plant
+HVAC replacement for the 100-room hotel is about $179,000 (was $110,000).
+
+### Validation against published hotel results
+
+| Case (year) | Measures | Reported | Model (100-room demo hotel) | Read |
+| --- | --- | --- | --- | --- |
+| Willard InterContinental, Washington DC (ENERGY STAR, fetched) | CFL lighting | 11% of whole-building energy, more than $100,000 a year | LED + occupancy sensors 7.5% of the bill; 52% of lighting cost | Consistent (an incandescent baseline saves more than the model's mixed fluorescent stock) |
+| Loews Vanderbilt, Nashville (search excerpt) | LED in public areas + central guest-room fan-coil control | 22%, $328,250 | All upgrades together, no budget limit: 25% of the bill | Consistent for multi-measure programs |
+| Hilton Columbus Downtown (search excerpt) | guest-room LED downlights and more | 32% (against an ASHRAE 90.1-2007 code baseline, not pre-retrofit) | 25% (all upgrades) | Not directly comparable (code baseline) |
+| Hilton Austin (search excerpt) | multi-measure | 31%, $400,000 | 25% (all upgrades) | Same order |
+| DOE/PNNL guest-room occupancy-based controls (2012, search excerpt) | guest-room energy management | 10–30% potential; 18.4% average HVAC savings in one summary | Smart room controls 3.9% of total HVAC cost | **Model likely low**: the model applies the savings to guest-room HVAC only and from the IL-TRM setback, so it reads lower than field studies; to review (not tuned to fit) |
+| PG&E, Westin St. Francis (2010, search excerpt) | guest-room energy management | 25.4% of HVAC energy | 3.9% of HVAC cost | Same as above |
+
+No Chicago hotel case was found. Whole-building and lighting results agree with the model's range; guest-room controls are the one measure the
+model seems to understate, which makes the recommendations conservative for that measure.

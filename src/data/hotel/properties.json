@@ -3,10 +3,14 @@
   "name": "Lakefront Hotel Group",
   "city": "Chicago",
   "synthetic": true,
-  "note": "Synthetic demonstration hotel chain. The five properties, their names and locations are invented to show the portfolio view; their inputs are documented assumptions, and every value the input leaves out is a default the profile flags. Two properties reuse the single-hotel presets (Lakeshore Inn and Riverwalk Grand), so their figures match the single-hotel demo. All five use Chicago weather (O'Hare normals), Illinois rates and ComEd incentives.",
+  "note": "Synthetic demonstration hotel chain. The five properties, their names and locations are invented to show the portfolio view; their inputs are documented assumptions, and every value the input leaves out is a default the profile flags. Two properties reuse the single-hotel presets (Lakeshore Inn and Riverwalk Grand), so their figures match the single-hotel demo. All five use Chicago weather (O'Hare normals), Illinois rates and ComEd incentives. Brands, regions and ownership types are invented for the demonstration.",
   "properties": [
     {
       "id": "lakeshore-inn",
+      "organizationId": "lakefront-hotel-group",
+      "brand": "Lakefront Collection",
+      "region": "Downtown",
+      "ownership": "owned",
       "presetId": "demo-chicago-100",
       "neighborhood": "Streeterville",
       "segment": "Boutique lakefront hotel",
@@ -35,6 +39,10 @@
     },
     {
       "id": "riverwalk-grand",
+      "organizationId": "lakefront-hotel-group",
+      "brand": "Lakefront Grand",
+      "region": "Downtown",
+      "ownership": "owned",
       "presetId": "demo-chicago-300",
       "neighborhood": "The Loop",
       "segment": "Downtown full-service hotel",
@@ -62,6 +70,10 @@
     },
     {
       "id": "ohare-gateway",
+      "organizationId": "lakefront-hotel-group",
+      "brand": "Lakefront Express",
+      "region": "Airports",
+      "ownership": "franchised",
       "neighborhood": "Rosemont (near O'Hare)",
       "segment": "Airport select-service hotel",
       "buildingType": "hotel",
@@ -88,6 +100,10 @@
     },
     {
       "id": "lakefront-convention",
+      "organizationId": "lakefront-hotel-group",
+      "brand": "Lakefront Grand",
+      "region": "Downtown",
+      "ownership": "managed",
       "neighborhood": "Near South Side (McCormick Place)",
       "segment": "Convention hotel",
       "buildingType": "hotel",
@@ -114,6 +130,10 @@
     },
     {
       "id": "wells-street",
+      "organizationId": "lakefront-hotel-group",
+      "brand": "Lakefront Collection",
+      "region": "Downtown",
+      "ownership": "managed",
       "neighborhood": "River North",
       "segment": "Modern boutique hotel",
       "buildingType": "hotel",
@@ -140,9 +160,25 @@
     }
   ],
   "futureBuildingTypes": [
-    { "id": "resort", "label": "Resorts", "note": "Need pool, spa and outdoor-amenity energy drivers." },
-    { "id": "casino", "label": "Casinos", "note": "Need 24-hour gaming-floor lighting, ventilation and equipment loads." },
-    { "id": "convention_center", "label": "Convention centers", "note": "Need event-driven occupancy and exhibit-hall ventilation." },
-    { "id": "entertainment_venue", "label": "Entertainment venues", "note": "Need show schedules, stage lighting and crowd ventilation." }
+    {
+      "id": "resort",
+      "label": "Resorts",
+      "note": "Need pool, spa and outdoor-amenity energy drivers."
+    },
+    {
+      "id": "casino",
+      "label": "Casinos",
+      "note": "Need 24-hour gaming-floor lighting, ventilation and equipment loads."
+    },
+    {
+      "id": "convention_center",
+      "label": "Convention centers",
+      "note": "Need event-driven occupancy and exhibit-hall ventilation."
+    },
+    {
+      "id": "entertainment_venue",
+      "label": "Entertainment venues",
+      "note": "Need show schedules, stage lighting and crowd ventilation."
+    }
   ]
 }

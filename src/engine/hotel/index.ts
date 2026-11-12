@@ -1,6 +1,6 @@
 export * from './types';
 export * from './constants';
-export { hotelData, hotelPortfolio } from './data';
+export { hotelData, hotelPortfolio, hotelOrganizations } from './data';
 export { resolveProfile, presetProfile, isResolved } from './profile';
 export { baselineConditions, applyScenario, comfortFlags, monthlyOccupancy } from './conditions';
 export {

@@ -3,11 +3,12 @@
 Paste these into Claude Code one at a time, from the repo root. Wait for each to finish, check the result, then move on.
 Every prompt ends with build + tests + commit + push so Lovable stays in sync. Task numbers refer to [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md).
 
-Before each prompt: `git pull`. Read `CLAUDE.md` first. The old home-era prompts (P0–P15) are replaced by this file; their code is still in `src/engine` as legacy.
+Before each prompt: `git pull`. Read `CLAUDE.md` first. The old home-era prompts (P0–P15) are replaced by this file; their code has been removed.
 
 **Status:** H0–H11 are done (engine, data, store, twin, advisor). Since then, also done outside these prompts: the common financial
 breakdown and solar model (docs/13 section 8), research passes 1–3 and the first calibration round (docs/14), and the product decisions (docs/15).
-Phase 7 is closed except installed costs (7.6) and solar $/W (7.7). **Next: H12 — demo hardening.**
+Phase 7 is closed except installed costs (7.6) and solar $/W (7.7). Phase 9, the 3D twin, is done (docs/04, docs/11), with the 10-year projection
+and the peer benchmark. **Next: the Flow, Rooms and Equipment tab redesign, then H12 — demo hardening.**
 
 | Prompt | Status |
 | --- | --- |
@@ -16,6 +17,8 @@ Phase 7 is closed except installed costs (7.6) and solar $/W (7.7). **Next: H12 
 | H6–H8 upgrades, costs, finance, optimizer | Done; extended with the common breakdown |
 | H10 twin component | Done |
 | H11 advisor | Done; live with the Claude API |
+| Phase 9 3D twin (camera, realism, people) | Done |
+| Flow / Rooms / Equipment redesign | Planned (after LV15) |
 | H12 demo hardening | **Next** |
 
 ---
@@ -23,7 +26,7 @@ Phase 7 is closed except installed costs (7.6) and solar $/W (7.7). **Next: H12 
 ## H0 — Orientation (5 min)
 
 ```
-Read CLAUDE.md and docs/10_HOTEL_SPEC.md, docs/11_HOTEL_TASKS.md and docs/12_BACKEND_ARCHITECTURE.md. Inspect src/engine (home-era),
+Read CLAUDE.md and docs/10_HOTEL_SPEC.md, docs/11_HOTEL_TASKS.md and docs/12_BACKEND_ARCHITECTURE.md. Inspect src/engine/hotel,
 src/data, src/store/useTwin.ts and src/components. Summarize: what is reusable, what is residential-specific, and anything in the
 repo that conflicts with the docs. Don't change anything yet.
 ```

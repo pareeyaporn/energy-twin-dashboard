@@ -82,3 +82,15 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
 - Insulation: reduction scaled by 5 ÷ floors above 5 floors.
 - Budget compared with the **gross** cost (most incentives arrive after installation).
 - Demo hotels are synthetic; the 100-room hotel is a boutique-size property, the 300-room preset a typical downtown size.
+
+## 9. The 3D twin and projections (November 2026)
+
+- **3D is the default view on desktop** when WebGL works and effects are not reduced; phones, no WebGL and "reduce effects" use 2D.
+- **Realistic look by default**, with an "Energy view" toggle for the cost heat map; the selected zone always shows its cost color.
+- **Hourly outdoor temperature is modeled**, not measured: a two-part cosine through the NOAA normal low at sunrise and high at 15:00,
+  labeled "modeled". Every hour shown is a typical day of that month.
+- **People on the street** are counted from guests booked but out at the hour (up to 12 on the street, 4 at the door); their walking and the
+  traffic are illustrative. Scenery (trees, snow, sky) follows the calendar and is not data.
+- **Solar without an array**: no panels; selecting the roof shows a translucent full-roof preview labeled "Not installed — potential".
+- **Projection horizon: 10 years**, the same savings stream as the 5- and 10-year net benefit and NPV (so they always agree).
+- **Peer benchmark is context, not calibration**: the model is not adjusted toward ENERGY STAR or CBECS values.

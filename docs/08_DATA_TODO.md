@@ -8,7 +8,7 @@ What is sourced, what is still a placeholder, and what to look up next, for the 
 
 The model is described in [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md); tasks are in [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md) (7.x, 7b.x).
 **Every change with before, after and source is logged in [14_RESEARCH_LOG.md](14_RESEARCH_LOG.md).**
-The home-era data files in `src/data/` belong to the legacy home engine and are not used by the hotel app.
+The home-era data files were removed, except `presetHomes.json`, `mockPackages.json` and `mockParts.json`, which the store still imports for backwards compatibility.
 
 ## Status at a glance (November 2026)
 
@@ -33,6 +33,8 @@ The home-era data files in `src/data/` belong to the legacy home engine and are 
 | Hot water per room | **Checked, primary** | IL-TRM 4.3.2 / ASHRAE: 14 gal per hotel room per day (default consistent) |
 | Chicago occupancy (annual) | **Sourced, primary** | STR via Choose Chicago: CBD 69.2% in 2025 (300-room preset) |
 | Comfort limits | **Product decision** | docs/15 (not ASHRAE 55 values) |
+| Peer benchmarks (`defaults.json` → `peerBenchmarks`) | **Sourced, primary**; comparison only | ENERGY STAR hotel median 63.0 (Aug 2024); CBECS 2018 lodging 85.7 |
+| Hourly outdoor temperature (3D readout) | **Modeled** from sourced normals | NOAA 1991–2020 O'Hare normal highs and lows; low at sunrise, high at 15:00 |
 | Baseline model internals (age factor, zone allocation, driver weights, shapes, equipment, monthly occupancy shape) | **Placeholders** | monthly occupancy is not published |
 
 **Benchmark check (done):** the demo hotel models at 91.1 kBtu/ft² site energy, 53% electric; CBECS 2018 Table C1 lodging averages 85.7 kBtu/ft²,
@@ -87,6 +89,7 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
 
 - [x] Demo hotel energy intensity against CBECS 2018 lodging (see above).
 - [x] Against the ENERGY STAR national median for hotels (63.0 kBtu/ft² site): the demo hotel is 45% above it (see the benchmark note).
+      Now computed by `benchmarkComparison` and shown in the app (LV15) as context; the model is not tuned toward it.
 - [ ] Package savings as a share of the bill against published hotel case studies (DOE Better Buildings, utilities).
 - [ ] After A1–A3, re-run the optimizer and write the demo question from what the results say (task 8.1).
 

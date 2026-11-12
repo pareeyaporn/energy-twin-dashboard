@@ -121,7 +121,7 @@ They are monthly-resolution approximations of a week-scale event.
 - Heating by electric PTAC or VRF uses the same site-energy share as gas heating; the higher efficiency of heat pumps is not modeled.
 - Prices are all-in averages; there are no demand charges or time-of-use rates.
 - Weather is monthly means only; stress tests are monthly approximations.
-- The home-era engine in `src/engine` is untouched and still exported next to this one (`hotel` namespace) to avoid name clashes.
+- The home-era engine that used to sit next to this one in `src/engine` was removed (November 2026).
 
 ## 8. Upgrades, costs and financial metrics (Phase 2)
 Eight upgrades (`src/data/hotel/upgrades.json`, all placeholders): smart guest-room thermostats and occupancy sensing, roof and envelope insulation, LED lighting,

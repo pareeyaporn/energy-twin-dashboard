@@ -59,5 +59,5 @@ but no way to tell which upgrades beat the others, or what they do to guest comf
 
 ## Current state
 
-The Lovable UI shell and a home-era engine exist. The hotel engine, dashboard, twin and advisor are planned; see the status table in the
+The hotel engine, workspace dashboard, 2D and 3D twin, budget optimizer and AI advisor are built; see the status table in the
 [README](../README.md) and the task list in [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md).

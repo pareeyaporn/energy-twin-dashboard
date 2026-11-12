@@ -70,4 +70,51 @@ describe("Scenario simulator controls", () => {
     expect(screen.getByTestId("scenario-cost-after")).toHaveAttribute("data-value", String(compare.after.annual.cost));
     expect(screen.getByText("Energy prices")).toBeInTheDocument();
   });
+
+  it("saves a named scenario and restores its controls and comparison results", () => {
+    act(() => {
+      useTwin.getState().setScenario({ occupancy: 0.85, electricityRateChangePct: 20 });
+      useTwin.getState().applyStressTest("heat_wave");
+    });
+    render(<ScenarioSimulator />);
+    fireEvent.change(screen.getByLabelText(/Scenario name/), { target: { value: "Summer peak" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save scenario" }));
+    expect(useTwin.getState().savedScenarios).toHaveLength(1);
+    expect(useTwin.getState().savedScenarios[0]?.name).toBe("Summer peak");
+
+    act(() => {
+      useTwin.getState().setScenario({ occupancy: 0.25 }, ["electricityRateChangePct"]);
+      useTwin.getState().applyStressTest(null);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Load Summer peak" }));
+    expect(useTwin.getState().scenario).toEqual({ occupancy: 0.85, electricityRateChangePct: 20 });
+    expect(useTwin.getState().activeStressTest).toBe("heat_wave");
+    const compare = selectCompare(useTwin.getState());
+    expect(compare.after).toBe(useTwin.getState().scenarioResult?.after);
+    expect(screen.getByTestId("scenario-cost-after")).toHaveAttribute("data-value", String(compare.after.annual.cost));
+  });
+
+  it("renames a saved scenario", () => {
+    act(() => {
+      useTwin.getState().setScenario({ occupancy: 0.85 });
+      useTwin.getState().saveScenario("Summer peak");
+    });
+    render(<ScenarioSimulator />);
+    fireEvent.click(screen.getByRole("button", { name: "Rename Summer peak" }));
+    fireEvent.change(screen.getByLabelText("New name for Summer peak"), { target: { value: "Conference week" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save name" }));
+    expect(useTwin.getState().savedScenarios[0]?.name).toBe("Conference week");
+    expect(screen.getByRole("button", { name: "Load Conference week" })).toBeInTheDocument();
+  });
+
+  it("deletes a saved scenario", () => {
+    act(() => {
+      useTwin.getState().setScenario({ occupancy: 0.85 });
+      useTwin.getState().saveScenario("Summer peak");
+    });
+    render(<ScenarioSimulator />);
+    fireEvent.click(screen.getByRole("button", { name: "Delete Summer peak" }));
+    expect(useTwin.getState().savedScenarios).toEqual([]);
+    expect(screen.getByText("No saved scenarios yet.")).toBeInTheDocument();
+  });
 });

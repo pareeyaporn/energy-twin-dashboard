@@ -69,7 +69,14 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
   upgrade. ComEd: the 2026 Standard Incentives Application rules are recorded; the measure amounts are in worksheets not read yet. Federal §48E:
   facts recorded from IRS Notice 2025-42, not applied (eligibility depends on dates and labor requirements).
 
-## 7. Calibration choices made earlier (also decisions)
+## 7. Comfort limits
+
+- **Decision:** warnings when occupied rooms are heated below 67 °F or cooled above 77 °F, common-area HVAC runs under 20 hours, the vacant setback
+  goes below 58 °F or above 82 °F, or heating is set above cooling; vacant setpoints never go below 55 °F or above 85 °F.
+- These are team choices for flagging, **not values from ASHRAE Standard 55** (a paid standard that was not consulted). Review them against it before
+  claiming compliance. Edit: `defaults.json` → `comfort` and `vacantLimits`.
+
+## 8. Calibration choices made earlier (also decisions)
 
 - Smart room controls: guest-room fan saving of 17% while rooms are empty, calibrated to the IL-TRM range (`defaults.smartControlFan`).
 - Insulation: reduction scaled by 5 ÷ floors above 5 floors.

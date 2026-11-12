@@ -151,18 +151,18 @@ a bill-calibration view, a 12-month forecast band, 3D, and live IoT.
 ## Phase 7 — Data research (TEAM, runs in parallel)
 Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: true` and name the exact table.
 - [x] 7.1 Commercial electricity and gas prices for the demo state (EIA commercial price tables); price growth from EIA AEO2026
-- [ ] 7.2 Lodging energy use and end uses by climate (EIA CBECS), plus an energy intensity benchmark (ENERGY STAR). **Partly:** national lodging end-use split and fuel mix from CBECS 2018 Tables E1 and E5; climate split and EUI benchmark still to do
+- [x] 7.2 Lodging end uses (CBECS 2018 Tables E1, E5, national) and benchmarks (CBECS C1 85.7, ENERGY STAR hotel median 63.0 kBtu/ft²). CBECS has no lodging-by-climate table, so a climate-specific split would need NREL ComStock (docs/08, B5)
 - [x] 7.3 Chicago monthly weather normals (NOAA 1991–2020, O'Hare)
-- [ ] 7.4 Hot water per occupied room, lighting power and hours, kitchen share (ASHRAE or ENERGY STAR guidance)
-- [ ] 7.5 HVAC efficiency by type (PTAC, VRF, central plant, RTU)
-- [ ] 7.6 Upgrade savings and costs for all eight upgrades (NREL ComStock, ENERGY STAR hotel guidance, DOE Better Buildings case studies). **Pass 1 done** from search excerpts (see `docs/08`); most costs still placeholders; confirm in the IL-TRM once `icc.illinois.gov` is allowed
-- [ ] 7.7 Rooftop solar cost per kW and production. **Partly:** output from PVWatts (Chicago TMY), O&M and degradation sourced; $/W (LBNL file, manual download) and export credit $ still to do
+- [x] 7.4 Hot water: IL-TRM 4.3.2 / ASHRAE, 14 gal per hotel room per day (the default 20 per occupied room is consistent); kitchen share from CBECS; IL-TRM hotel lighting hours (guest 777, common 4,542 h a year) recorded
+- [x] 7.5 HVAC efficiency by type: gas 0.80, resistance 1.0, heat pump COP 2.3 (IL-TRM conversion), PTHP added (docs/15); condensing boiler ≥90% (IL-TRM 4.4.10)
+- [ ] 7.6 Upgrade savings and costs. **Savings sourced or calibrated for all; costs sourced** for smart controls ($260/room) and noted for boilers ($22.95/kBtu-h), sensors ($55–125 each), showerheads ($12). **Still placeholders:** LED, sensor, EMS, HVAC (chiller part), water heating and insulation costs per ft² or per room (docs/08 A2)
+- [ ] 7.7 Rooftop solar: output (PVWatts), O&M, degradation sourced; three sizes. **Blocked:** $/W needs the LBNL file (manual download); export credit $ not published
 - [x] 7.8 Grid emission factor for the demo region: EPA eGRID2023 RFCW (0.4155 kg CO2e/kWh); gas from the EPA Emission Factors Hub 2025
-- [ ] 7.9 Seasonal occupancy pattern (a synthetic curve is acceptable, but cite the basis)
-- [ ] 7.10 Comfort guidance for setpoints (ASHRAE 55)
+- [x] 7.9 Seasonal occupancy: annual anchor sourced (Chicago CBD 69.2% in 2025, STR via Choose Chicago; used for the 300-room preset); the monthly shape stays synthetic because only annual figures are published, as the task allows
+- [x] 7.10 Comfort limits documented as a product decision (docs/15); ASHRAE 55 is a paid standard and was not consulted, so the limits are not presented as ASHRAE values
 - [x] 7.11 Compare the demo hotel against an ENERGY STAR Portfolio Manager benchmark: 91.1 vs the hotel median 63.0 kBtu/ft² (and CBECS lodging 85.7); see `docs/14`
 - [x] 7.12 Update `docs/08_DATA_TODO.md` to this list (rewritten as the detailed hotel research to-do, with the current placeholder values and sources to use)
-- [ ] 7.13 **Calibration pass, after everything is built (decided: do not tune numbers before then).** Replace the placeholder savings, costs and interaction factors with
+- [x] 7.13 **Calibration pass, first round done** (docs/14): sourced data replaced placeholders, smart controls calibrated to the IL-TRM, benchmarks checked, demo results re-run. Remaining cost items continue under 7.6 and 7.7. Original note: Replace the placeholder savings, costs and interaction factors with
       reasonable, sourced values, then check the whole result for realism. Start with the items the demo depends on:
       smart room control savings (setback degrees, per-degree sensitivities, guest-presence curve), the HVAC share of energy, LED and occupancy-sensor savings, the lighting-to-heating/cooling
       interaction, solar cost and size, and the balanced-score weights. Check: demo hotel total against an ENERGY STAR Portfolio Manager benchmark, package savings as a share of the bill

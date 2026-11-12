@@ -250,7 +250,8 @@ describe('the 300-room downtown preset', () => {
   const bctx = prepareUpgradeContext(big);
   it('uses documented defaults where the preset leaves inputs out, and labels them', () => {
     expect(big.profile.rooms).toBe(300);
-    expect(big.defaulted).toEqual(expect.arrayContaining(['floorAreaSqft', 'occupancy']));
+    expect(big.defaulted).toEqual(expect.arrayContaining(['floorAreaSqft']));
+    expect(big.profile.occupancy).toBe(0.692); // Chicago CBD 2025 (STR via Choose Chicago)
   });
   it('scales sensibly: about three times the energy of the 100-room hotel, and per-room costs scale with rooms', () => {
     const ratio = bctx.baseline.annual.siteKBtu / ctx.baseline.annual.siteKBtu;

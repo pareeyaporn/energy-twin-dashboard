@@ -278,5 +278,8 @@
       "efficiency": 0.8
     },
     "source": "PRODUCT DECISION on documented values: heating site energy = the CBECS lodging heating share (treated as a gas-heated hotel at 80% seasonal efficiency) x 0.80 / system efficiency. Gas boiler or rooftop furnace 80% (typical existing stock, GSA evaluation; IL-TRM uses 80% AFUE for gas in its lighting interaction factors); electric resistance 100%; heat pump COP 2.3 (the IL-TRM v14.0 section 4.5 conversion for heat-pump-heated spaces). Cooling efficiency differences between systems are not modeled."
-  }
+  },
+  "hotWaterSource": "Hot water per occupied room (20 gallons a day, default): cross-checked against the IL-TRM v14.0 Vol. 2, measure 4.3.2 table (from the 2007 ASHRAE Handbook, HVAC Applications, ch. 49): hotels use 14 gallons of hot water per room per day (motels 20), about 25% from faucets. At 65% occupancy, 20 gallons per occupied room is about 13 per room, consistent.",
+  "comfortSource": "PRODUCT DECISION: comfort warnings at occupied heating below 67 F or cooling above 77 F, common-area HVAC under 20 hours, vacant setback below 58 F or above 82 F, and vacant limits of 55 F and 85 F. These are team choices for flagging, not values taken from ASHRAE Standard 55 (a paid standard that was not consulted); they should be reviewed against it.",
+  "seasonalOccupancySource": "PLACEHOLDER shape, synthetic: monthly multipliers on the annual occupancy, peaking in summer. Annual anchor: Chicago central business district occupancy was 69.2% in 2025 and 68.1% in 2024 (STR, Choose Chicago 2025 Hotel Performance report, January 2026); Choose Chicago publishes annual figures only, so the monthly shape is not sourced. The report also notes a record summer 2025, consistent with a summer peak."
 }

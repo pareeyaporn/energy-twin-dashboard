@@ -20,6 +20,8 @@ export default defineConfig({
         "react/jsx-dev-runtime",
         "react-dom/client",
         "@radix-ui/react-collapsible",
+        "@radix-ui/react-dialog",
+        "recharts",
         "@radix-ui/react-accordion",
         "@radix-ui/react-dropdown-menu",
         "@radix-ui/react-hover-card",

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { DiscountRateControl, NpvEstimate } from "@/components/DiscountRateControl";
+import { ProjectionSparkline } from "@/components/Projection";
 
 // Display formatting only; values come straight from the engine's financial breakdown.
 export const fmtMoney = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -62,7 +63,7 @@ function SourceChip({ label, source }: { label: string; source: string }) {
   return <TooltipProvider delayDuration={200}><Tooltip><TooltipTrigger asChild><Button variant="outline" size="sm" className="h-6 text-[10px]" aria-label={`Source for ${label}`} onClick={() => open(true)}><BookOpen />Source</Button></TooltipTrigger><TooltipContent className="max-w-80">{source}</TooltipContent></Tooltip></TooltipProvider>;
 }
 
-type SortKey = "label" | "gross" | "incentives" | "net" | "kwh" | "savings" | "payback" | "nb5" | "nb10" | "npv5" | "npv10" | "co2";
+type SortKey = "projection" | "label" | "gross" | "incentives" | "net" | "kwh" | "savings" | "payback" | "nb5" | "nb10" | "npv5" | "npv10" | "co2";
 const columns: { key: SortKey; label: string; value: (r: UpgradeComparisonRow) => number | string; show: (r: UpgradeComparisonRow) => React.ReactNode }[] = [
   { key: "label", label: "Upgrade", value: (r) => r.label, show: (r) => r.label },
   { key: "gross", label: "Gross cost", value: (r) => r.financials.grossCost.mid, show: (r) => fmtMoney(r.financials.grossCost.mid) },
@@ -75,6 +76,7 @@ const columns: { key: SortKey; label: string; value: (r: UpgradeComparisonRow) =
   { key: "nb10", label: "Net benefit 10 yr", value: (r) => r.financials.netBenefit10.mid, show: (r) => <span className={neg(r.financials.netBenefit10.mid)}>{fmtMoney(r.financials.netBenefit10.mid)}</span> },
   { key: "npv5", label: "NPV, 5 years", value: (r) => r.financials.npv5?.mid ?? Number.NEGATIVE_INFINITY, show: (r) => <NpvEstimate f={r.financials} years={5} /> },
   { key: "npv10", label: "NPV, 10 years", value: (r) => r.financials.npv10?.mid ?? Number.NEGATIVE_INFINITY, show: (r) => <NpvEstimate f={r.financials} years={10} /> },
+  { key: "projection", label: "Projection", value: (r) => r.financials.projection?.at(-1)?.cumulativeNet.mid ?? Number.NEGATIVE_INFINITY, show: (r) => <ProjectionSparkline f={r.financials} label={r.label} /> },
   { key: "co2", label: "CO2, estimate / yr", value: (r) => r.financials.carbonAvoidedKgPerYear.mid, show: (r) => fmtTonnes(r.financials.carbonAvoidedKgPerYear.mid) },
 ];
 

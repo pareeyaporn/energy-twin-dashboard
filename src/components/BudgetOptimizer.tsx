@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { DiscountRateControl, NpvEstimate } from "@/components/DiscountRateControl";
+import { ProjectionSparkline, ProjectionToggle } from "@/components/Projection";
 import { FinancialLines, UpgradeComparison, fmtEnergy } from "@/components/FinancialLines";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -33,6 +34,7 @@ function InvestmentCard({ pkg, winner, objective }: { pkg: RankedPackage; winner
     <Button variant="ghost" className="h-auto w-full justify-start whitespace-normal p-0 text-left text-base font-semibold hover:bg-transparent hover:text-primary" aria-pressed={active} onClick={() => apply(e.id)}><span>{e.name}</span>{active && <Check className="ml-auto shrink-0 text-primary" />}</Button>
     <Badge variant="outline" className="text-muted-foreground">Estimate</Badge><DefaultEstimate />
     <FinancialLines f={e.financials} />
+    <ProjectionToggle f={e.financials} />
     <dl className="space-y-2 border-t border-border pt-2 text-sm"><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Remaining budget</dt><dd className="num">{money(e.metrics.remainingBudget)}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Comfort score</dt><dd className="num">{number(e.comfort.score * 100)}%</dd></div></dl>
     <p className="text-sm text-muted-foreground">{pkg.reason}</p>
     {pkg.note && <p className="text-xs text-heat">{pkg.note}</p>}
@@ -55,6 +57,7 @@ function CompactInvestmentCard({ pkg, winner, objective }: { pkg: RankedPackage;
     <h3 className="text-sm font-semibold">{e.name}</h3><DefaultEstimate />
     <Badge variant="outline" className="text-muted-foreground">Estimate</Badge>
     <FinancialLines f={e.financials} dense />
+    <ProjectionToggle f={e.financials} />
     <dl className="space-y-2 border-t border-border pt-2 text-xs"><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Remaining budget</dt><dd className="num">{money(e.metrics.remainingBudget)}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Comfort score</dt><dd className="num">{number(e.comfort.score * 100)}%</dd></div></dl>
     <Button size="sm" variant={active ? "secondary" : "accentOutline"} className="w-full" aria-label={`Apply ${pkg.roleLabel}`} aria-pressed={active} onClick={() => { apply(e.id); setCompareMode("split"); }}>{active ? <><Check />Applied</> : "Apply"}</Button>
   </article>;
@@ -131,6 +134,7 @@ export function BudgetOptimizer({ compact = false, workspace = false }: { compac
           ["8 CO2, estimate / yr", (p: RankedPackage) => `${(p.evaluation.financials.carbonAvoidedKgPerYear.mid / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 })} t`],
           ["NPV, 5 years", (p: RankedPackage) => <NpvEstimate f={p.evaluation.financials} years={5} />],
           ["NPV, 10 years", (p: RankedPackage) => <NpvEstimate f={p.evaluation.financials} years={10} />],
+          ["Projection", (p: RankedPackage) => <ProjectionSparkline f={p.evaluation.financials} label={p.roleLabel} />],
           ["Remaining budget", (p: RankedPackage) => money(p.evaluation.metrics.remainingBudget)],
           ["Comfort score", (p: RankedPackage) => `${number(p.evaluation.comfort.score * 100)}%`],
         ].map(([label, format]) => <tr key={String(label)} className="border-b border-border/50"><th className="p-3 text-left font-normal text-muted-foreground">{String(label)}</th>{cards.map((pkg) => <td key={pkg.role} className="num whitespace-nowrap p-3 text-right">{typeof format === "function" ? format(pkg) : ""}</td>)}</tr>)}</tbody></table></div></section>

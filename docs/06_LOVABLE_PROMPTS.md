@@ -21,7 +21,7 @@ Call selectors like `useTwin(selectDisplayed)`; they are memoized and safe to us
 | What-if result | `scenarioResult` (null when none): `before`, `after`, `delta`, `deltaByZone`, `deltaByCategory`, `drivers` (why it changed), `flags` (comfort notes) |
 | What the screen should show | `selectDisplayed(s)` → `{ kind: 'baseline' \| 'scenario' \| 'package', result }`; `selectCompare(s)` → `{ before, after, kind }`; `selectHotelCost`, `selectHotelBaselineCost`, `selectHotelLabel` |
 | Zones, equipment, flows, time | `selectZoneRows`, `selectEquipment`, `selectFlows`, `selectTypicalDay`, `selectRooms`, `selectMeter`; `selectedZone`/`selectZone`, `twinLayer`/`setTwinLayer`, `timeMode`/`timeMonth`/`timeHour`/`setTime`, `playing`/`setPlaying`, `playbackSpeed`/`setPlaybackSpeed`, `compareMode`/`setCompareMode` |
-| Budget optimizer | `runHotelOptimizer()`, `optimizing`, `hotelPlan` (`packages`, `objectiveWinner`, `combinationsTested`, `feasibleCount`, `emptyReason`, `cheapestUseful`), `applyHotelPackage(id \| null)`, `activeHotelPackageId` |
+| Budget optimizer | `runHotelOptimizer()`, `optimizing`, `optimizerCombinations` (set when a run starts), `hotelPlan` (`packages`, `objectiveWinner`, `combinationsTested`, `feasibleCount`, `emptyReason`, `cheapestUseful`), `applyHotelPackage(id \| null)`, `activeHotelPackageId` |
 | Package fields | `evaluation.cost` and `evaluation.annualSavings` (`low`/`mid`/`high`), `evaluation.metrics` (`paybackYears`, `netBenefit`, `roi`, `remainingBudget`, `carbonAvoidedKgPerYear`), `evaluation.comfort`, `evaluation.lineItems`, plus `role`, `roleLabel`, `reason`, `note`, `budgetRisk` |
 | Optimize against the current what-if (for example electricity +20%) | `optimizeOnScenario`, `setOptimizeOnScenario(b)`; the plan records `hotelPlan.scenario`, and `hotelPlanBaseline` is what it was measured against |
 | AI advisor | `advisorMessages` (`{ id, role: 'user' \| 'advisor', text, source?: 'ai' \| 'fallback', reason? }`), `advisorBusy`, `askAdvisor(question)`, `clearAdvisor()`; suggested questions: `advisor.ADVISOR_SUGGESTED_QUESTIONS` from `@/engine/hotel` |
@@ -68,15 +68,18 @@ toggle, common-area HVAC hours, lighting hours, and electricity price change (%)
 clearKeys to remove a field). Add four stress-test buttons that call applyStressTest (heat_wave, cold_snap, conference_surge, price_up_20; click
 again to clear) using STRESS_TESTS from @/engine/hotel for the labels and descriptions (read only), and a Reset button calling resetScenario. Show before/after metric tiles (energy,
 cost, carbon) from selectCompare with animated numbers, a monthly before/after chart, a list of scenarioResult.drivers ("Why this changed",
-label, dollar change and detail text), and scenarioResult.flags as comfort notes (warn in amber, info in muted). Don't modify src/engine,
-src/data, src/twin, src/store or supabase.
+label, dollar change and detail text), and scenarioResult.flags as comfort notes (warn in amber, info in muted). Add an "Optimize for this
+scenario" switch bound to optimizeOnScenario / setOptimizeOnScenario, shown on the simulator and next to the optimizer's Find button; when a plan
+was made on a scenario (hotelPlan.scenario is set), label the optimizer results "Measured against the current scenario". In the optimizer's
+"Testing combinations…" counter, count up to optimizerCombinations (available as soon as the run starts) instead of a percentage.
+Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```
 
 ## LV5 — Budget optimizer (task 4.5)
 
 ```
 Add a Budget optimizer view: a budget input (setHotelBudget), an objective picker (setHotelObjective) and a "Find the best investments" button
-that calls runHotelOptimizer(). While optimizing is true show "Testing combinations…" counting up to hotelPlan.combinationsTested over 2
+that calls runHotelOptimizer(). While optimizing is true show "Testing combinations…" counting up to optimizerCombinations over 2
 seconds. When hotelPlan appears, show hotelPlan.packages as three cards (role label, name, cost, annual savings with the low-to-high range,
 five-year net benefit, payback, carbon avoided, remaining budget, comfort score and notes, the reason line, and a warning when budgetRisk is
 true). Highlight the card matching hotelPlan.objectiveWinner and show note text when present. Clicking a card (or auto-selecting the winner

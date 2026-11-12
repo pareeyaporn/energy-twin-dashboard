@@ -157,6 +157,20 @@ describe("budget optimizer in the store", () => {
     for (const pk of plan.packages) expect(pk.evaluation.cost.mid).toBeLessThanOrEqual(50000);
   });
 
+  it("exposes the number of combinations as soon as a run starts, so the UI can count up to it", async () => {
+    expect(get().optimizerCombinations).toBeNull();
+    const p = get().runHotelOptimizer();
+    expect(get().optimizing).toBe(true);
+    expect(get().hotelPlan).toBeNull();
+    const n = get().optimizerCombinations;
+    expect(n).toBeGreaterThan(1);
+    await vi.advanceTimersByTimeAsync(2000);
+    await p;
+    expect(get().hotelPlan!.combinationsTested).toBe(n);
+    get().resetHotel();
+    expect(get().optimizerCombinations).toBeNull();
+  });
+
   it("ignores a second request while one is running", async () => {
     const a = get().runHotelOptimizer();
     const b = get().runHotelOptimizer();

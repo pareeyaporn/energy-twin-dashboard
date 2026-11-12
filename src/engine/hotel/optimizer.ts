@@ -46,7 +46,7 @@ const OBJECTIVE_ROLE: Record<Objective, PackageRole> = {
 };
 
 /** All subsets of `ids` (the empty set first), in a fixed order. */
-function subsets<T>(ids: readonly T[]): T[][] {
+export function subsets<T>(ids: readonly T[]): T[][] {
   return ids.reduce<T[][]>((acc, id) => acc.concat(acc.map((s) => [...s, id])), [[]]);
 }
 

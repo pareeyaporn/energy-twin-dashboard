@@ -1,5 +1,11 @@
 # Task roadmap
 
+## Dashboard cleanup
+
+- [x] Remove obsolete controls, drawer, unused components, and advisor plugins.
+- [x] Add shared disclaimer and default provenance, safe currency budget editing, concise sources, and objective-winner labels.
+- [x] Verify empty/loading/error states, keyboard navigation, mobile layout, and stable stage sizing.
+
 ## AI advisor
 
 - [x] Add the advisor panel, suggested questions, busy state, source labels, and clear action.

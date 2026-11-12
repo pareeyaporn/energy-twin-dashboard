@@ -1,3 +1,4 @@
+import { Disclaimer } from "@/components/Disclaimer";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { ScenarioSimulator } from "@/components/ScenarioSimulator";
@@ -28,6 +29,7 @@ function ScenarioPage() {
         </div>
       </header>
       <ScenarioSimulator />
+      <Disclaimer />
     </main>
   );
 }

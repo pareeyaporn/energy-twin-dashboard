@@ -71,7 +71,7 @@ export function AdvisorPanel() {
                 {message.role === "user" ? (
                   <p className="whitespace-pre-wrap break-words">{message.text}</p>
                 ) : (
-                  <MessageResponse mode="static" className="break-words">
+                  <MessageResponse mode="static" plugins={{}} className="whitespace-pre-wrap break-words">
                     {message.text}
                   </MessageResponse>
                 )}

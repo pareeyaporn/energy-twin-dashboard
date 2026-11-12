@@ -1,3 +1,4 @@
+import { DefaultEstimate } from "@/components/DefaultEstimate";
 import type { ReactNode } from "react";
 import { Leaf, Wallet, Zap } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
@@ -13,17 +14,18 @@ function Kpi({ id, label, icon, before, after, prefix = "", unit }: { id: string
   const same = Math.round(before) === Math.round(after);
   const pct = before ? (delta / before) * 100 : 0;
   return (
-    <section className="min-w-0 rounded-lg border border-border bg-card px-3 py-2" aria-label={`Annual ${label.toLowerCase()}`} data-testid={`kpi-${id}`}>
+    <section className="min-w-0 rounded-lg border border-border bg-card px-3 py-2 min-h-32" aria-label={`Annual ${label.toLowerCase()}`} data-testid={`kpi-${id}`}>
       <div className="flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">{icon}{label}</h2>
         <Badge variant="outline" className="border-primary/25 text-[10px] font-normal text-primary">Estimate</Badge>
       </div>
+      <DefaultEstimate />
       <p className="num mt-1 flex flex-wrap items-baseline gap-x-1.5 text-sm">
         {!same && <><span className="text-muted-foreground">{prefix}{number(before)}</span><span className="text-muted-foreground" aria-label="to">→</span></>}
         <span className="text-base font-semibold"><AnimatedNumber value={after} prefix={prefix} /></span>
         <span className="text-[10px] text-muted-foreground">{unit} / yr</span>
       </p>
-      {!same && <p className={cn("num text-xs", delta < 0 ? "text-savings" : "text-heat")}>{delta < 0 ? "−" : "+"}{prefix}{number(Math.abs(delta))} ({pct > 0 ? "+" : ""}{pct.toFixed(1)}%)</p>}
+      <div className="min-h-4">{!same && <p className={cn("num text-xs", delta < 0 ? "text-savings" : "text-heat")}>{delta < 0 ? "−" : "+"}{prefix}{number(Math.abs(delta))} ({pct > 0 ? "+" : ""}{pct.toFixed(1)}%)</p>}</div>
     </section>
   );
 }

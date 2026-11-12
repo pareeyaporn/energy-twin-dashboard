@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useTwin } from "@/store/useTwin";
+import { DefaultEstimate } from "./DefaultEstimate";
 import { HomePanel } from "./HomePanel";
 import { HotelProfileForm, hvacOptions } from "./HotelProfileForm";
 import { Button } from "@/components/ui/button";
@@ -13,20 +14,20 @@ const number = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits:
 export function HotelTab() {
   const p = useTwin(useShallow((s) => s.hotel.profile));
   const [editing, setEditing] = useState(false);
-  const rows: [string, string][] = [
-    ["Name", p.name],
-    ["City", p.city],
-    ["Rooms", number(p.rooms)],
-    ["Floor area", `${number(p.floorAreaSqft)} ft²`],
-    ["HVAC type", hvacOptions.find((o) => o.value === p.hvacType)?.label ?? p.hvacType],
-    ["Monthly bill", p.monthlyEnergyBill === null ? "estimated" : `$${number(p.monthlyEnergyBill)}`],
+  const rows: [string, string, string][] = [
+    ["Name", p.name, "name"],
+    ["City", p.city, "city"],
+    ["Rooms", number(p.rooms), "rooms"],
+    ["Floor area", `${number(p.floorAreaSqft)} ft²`, "floorAreaSqft"],
+    ["HVAC type", hvacOptions.find((o) => o.value === p.hvacType)?.label ?? p.hvacType, "hvacType"],
+    ["Monthly bill", p.monthlyEnergyBill === null ? "estimated" : `$${number(p.monthlyEnergyBill)}`, "monthlyEnergyBill"],
   ];
   return (
     <div className="space-y-5 p-5">
       <HomePanel presetOnly />
       <dl className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm" aria-label="Hotel summary">
-        {rows.map(([label, value]) => (
-          <div key={label} className="flex justify-between gap-3"><dt className="text-muted-foreground">{label}</dt><dd className="num text-right font-medium">{value}</dd></div>
+        {rows.map(([label, value, field]) => (
+          <div key={label} className="flex justify-between gap-3"><dt className="text-muted-foreground">{label}</dt><dd className="num min-w-0 break-words text-right font-medium">{value}<DefaultEstimate field={field} /></dd></div>
         ))}
       </dl>
       <Collapsible open={editing} onOpenChange={setEditing}>

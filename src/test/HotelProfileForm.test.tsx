@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useTwin } from "@/store/useTwin";
 
 function edit(label: string, value: string) {
-  const field = screen.getByRole("spinbutton", { name: label });
+  const field = screen.getByLabelText(label, { selector: "input" });
   fireEvent.change(field, { target: { value } });
   fireEvent.blur(field);
 }

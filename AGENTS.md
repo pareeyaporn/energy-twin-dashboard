@@ -33,7 +33,7 @@ use the editor.
 - All app state lives in one zustand store (`src/store/useTwin.ts`); displayed costs/savings come from store selectors, never hard-coded in components, so mock data can be swapped for real calculations.
 - Mock data lives in `src/data/*.json`; `src/engine` (calculations) and `src/three` (3D) are reserved for code the owner adds later — don't add logic there.
 - Zustand selectors that return new objects must be wrapped in `useShallow` to avoid render loops.
-- The index page renders only one layout (desktop or stacked) via a media-query hook, so stage popovers aren't duplicated.
+- The index page renders one CSS-responsive workspace tree, so stage popovers are not duplicated and hydration never swaps desktop/mobile trees.
 - Translate legacy sample terminology only at the presentation boundary with `src/lib/presentation.ts`; keep underlying data and calculations unchanged during UI-only wording updates.
 - Hotel profile controls display resolved `hotel.profile` values and commit optional input patches through `setHotelInput`; nested temperature resets preserve other explicit setpoints because the store clears only top-level keys.
 - The Overview is a separate content route reading `selectDisplayed`, `selectZoneRows`, and `selectOpportunities`; rank unique standalone upgrades by their supplied whole-hotel savings to avoid double-counting zone entries.
@@ -42,3 +42,5 @@ use the editor.
 - The advisor panel uses AI Elements and the existing store actions; preserve returned text and source labels without adding inference, error messages, or fallback logic in the UI.
 - Prebundle lazy panel dependencies and React together in Vite's optimizeDeps include list to prevent late discovery replacing React chunks beneath mounted components.
 - The dashboard is one workspace: a four-tab left panel reusing existing components through variant props (ScenarioSimulator panel, BudgetOptimizer workspace, HomePanel presetOnly) beside an always-visible Stage with a selectCompare KPI strip; full pages stay on their own routes.
+- Budget editors retain transient text locally and commit valid amounts only on blur/Enter; an empty draft preserves the stored budget, so typing never triggers intermediate optimizations.
+- Render default provenance from resolved profile metadata and use plugin-free advisor text rendering to avoid shipping unused document-rendering bundles.

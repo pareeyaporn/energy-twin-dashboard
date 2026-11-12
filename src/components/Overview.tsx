@@ -1,3 +1,4 @@
+import { DefaultEstimate } from "@/components/DefaultEstimate";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Leaf, Wallet, Zap } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
@@ -14,7 +15,7 @@ const categories: Record<Category, string> = {
 const chartConfig = { elecCost: { label: "Electricity", color: "var(--primary)" }, gasCost: { label: "Natural gas", color: "var(--heat)" } };
 
 function Estimate() {
-  return <Badge variant="outline" className="border-primary/25 text-[10px] font-normal text-primary">Estimate</Badge>;
+  return <><Badge variant="outline" className="border-primary/25 text-[10px] font-normal text-primary">Estimate</Badge><DefaultEstimate /></>;
 }
 
 type BreakdownRow = { id: string; label: string; elecCost: number; gasCost: number; cost: number; elecKWh: number; gasTherms: number };

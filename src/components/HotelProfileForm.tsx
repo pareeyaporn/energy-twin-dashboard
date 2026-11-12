@@ -5,6 +5,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useTwin } from "@/store/useTwin";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { BudgetInput } from "@/components/BudgetInput";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -57,6 +58,7 @@ export function HotelProfileForm() {
   function input(name: keyof HotelInput, label: string, numeric = true, scale = 1, step?: number) {
     const raw = profile[name];
     const value = typeof raw === "number" ? Number((raw * scale).toFixed(6)) : typeof raw === "string" ? raw : null;
+    if (name === "budget") return <Field name="budget" label={label} onReset={() => setHotelInput({}, ["budget"])}><BudgetInput id="hotel-budget" label={label} value={profile.budget} onCommit={(budget) => setHotelInput({ budget })} /></Field>;
     return <ProfileInput key={name} name={name} label={label} value={value} numeric={numeric} step={step}
       onReset={() => setHotelInput({}, [name])}
       onCommit={(v) => {

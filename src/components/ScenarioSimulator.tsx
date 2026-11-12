@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+import { DefaultEstimate } from "@/components/DefaultEstimate";
 import type { ReactNode } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { ChevronDown, Leaf, RotateCcw, SlidersHorizontal, Wallet, Zap } from "lucide-react";
@@ -26,6 +28,7 @@ const chartConfig = {
 
 interface ScenarioSliderProps {
   label: string;
+  defaultField?: string;
   value: number;
   displayValue: string;
   min: number;
@@ -37,13 +40,13 @@ interface ScenarioSliderProps {
   onReset: () => void;
 }
 
-function ScenarioSlider({ label, value, displayValue, min, max, step = 1, overridden, profileText, onValueChange, onReset }: ScenarioSliderProps) {
+function ScenarioSlider({ label, defaultField, value, displayValue, min, max, step = 1, overridden, profileText, onValueChange, onReset }: ScenarioSliderProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
           <Label className="text-sm font-medium">{label}</Label>
-          <p className="mt-1 text-xs text-muted-foreground">{profileText}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{profileText}</p><DefaultEstimate field={defaultField} active={!overridden} />
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <span className="num text-sm font-semibold">{displayValue}</span>
@@ -64,6 +67,7 @@ function MetricTile({ id, label, icon, before, after, prefix = "", suffix }: { i
         <h2 className="flex items-center gap-2 text-sm font-medium">{icon}{label}</h2>
         <Badge variant="outline" className="border-primary/25 text-[10px] font-normal text-primary">Estimate</Badge>
       </div>
+      <DefaultEstimate />
       <dl className="space-y-3">
         <div className="flex min-w-0 items-center justify-between gap-3 border-b border-border pb-3">
           <dt className="label-caps">Before</dt>
@@ -126,19 +130,19 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
           </div>
   );
   const occupancyEl = (
-          <ScenarioSlider label="Occupancy" value={occupancy} displayValue={`${occupancy}%`} min={0} max={100} overridden={scenario.occupancy !== undefined} profileText={`Hotel profile: ${Math.round(profile.occupancy * 100)}%`} onValueChange={(value) => setScenario({ occupancy: value / 100 })} onReset={() => setScenario({}, ["occupancy"])} />
+          <ScenarioSlider defaultField="occupancy" label="Occupancy" value={occupancy} displayValue={`${occupancy}%`} min={0} max={100} overridden={scenario.occupancy !== undefined} profileText={`Hotel profile: ${Math.round(profile.occupancy * 100)}%`} onValueChange={(value) => setScenario({ occupancy: value / 100 })} onReset={() => setScenario({}, ["occupancy"])} />
   );
   const setpointsEl = (
           <div className="space-y-5 border-t border-border pt-5">
-            <ScenarioSlider label="Guest-room occupied heating" value={occupiedHeatF} displayValue={`${occupiedHeatF}°F`} min={55} max={75} overridden={scenario.setpoints?.occupiedHeatF !== undefined} profileText={`Hotel profile: ${profile.setpoints.occupiedHeatF}°F`} onValueChange={(value) => changeSetpoint("occupiedHeatF", value)} onReset={() => resetSetpoint("occupiedHeatF")} />
-            <ScenarioSlider label="Guest-room occupied cooling" value={occupiedCoolF} displayValue={`${occupiedCoolF}°F`} min={68} max={85} overridden={scenario.setpoints?.occupiedCoolF !== undefined} profileText={`Hotel profile: ${profile.setpoints.occupiedCoolF}°F`} onValueChange={(value) => changeSetpoint("occupiedCoolF", value)} onReset={() => resetSetpoint("occupiedCoolF")} />
+            <ScenarioSlider defaultField="setpoints.occupiedHeatF" label="Guest-room occupied heating" value={occupiedHeatF} displayValue={`${occupiedHeatF}°F`} min={55} max={75} overridden={scenario.setpoints?.occupiedHeatF !== undefined} profileText={`Hotel profile: ${profile.setpoints.occupiedHeatF}°F`} onValueChange={(value) => changeSetpoint("occupiedHeatF", value)} onReset={() => resetSetpoint("occupiedHeatF")} />
+            <ScenarioSlider defaultField="setpoints.occupiedCoolF" label="Guest-room occupied cooling" value={occupiedCoolF} displayValue={`${occupiedCoolF}°F`} min={68} max={85} overridden={scenario.setpoints?.occupiedCoolF !== undefined} profileText={`Hotel profile: ${profile.setpoints.occupiedCoolF}°F`} onValueChange={(value) => changeSetpoint("occupiedCoolF", value)} onReset={() => resetSetpoint("occupiedCoolF")} />
           </div>
   );
   const smartEl = (
           <div className="flex items-start justify-between gap-4 border-t border-border pt-5">
             <div className="space-y-1">
               <Label htmlFor="scenario-smart-controls" className="text-sm font-medium">Smart room controls</Label>
-              <p className="text-xs text-muted-foreground">Set back vacant guest rooms automatically.</p>
+              <p className="text-xs text-muted-foreground">Set back vacant guest rooms automatically.</p><DefaultEstimate field="smartRoomControls" active={scenario.smartRoomControls === undefined} />
             </div>
             <div className="flex items-center gap-1">
               <Switch id="scenario-smart-controls" checked={smartRoomControls} onCheckedChange={(checked) => setScenario({ smartRoomControls: checked })} />
@@ -148,15 +152,15 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
   );
   const moreEl = (
           <div className="space-y-5 border-t border-border pt-5">
-            <ScenarioSlider label="Common-area HVAC hours" value={commonAreaHvacHours} displayValue={`${commonAreaHvacHours} h/day`} min={0} max={24} overridden={scenario.commonAreaHvacHours !== undefined} profileText={`Hotel profile: ${profile.commonAreaHvacHours} h/day`} onValueChange={(value) => setScenario({ commonAreaHvacHours: value })} onReset={() => setScenario({}, ["commonAreaHvacHours"])} />
-            <ScenarioSlider label="Lighting hours" value={lightingHoursPerDay} displayValue={`${lightingHoursPerDay} h/day`} min={0} max={24} step={0.5} overridden={scenario.lightingHoursPerDay !== undefined} profileText={`Hotel profile: ${profile.lightingHoursPerDay} h/day`} onValueChange={(value) => setScenario({ lightingHoursPerDay: value })} onReset={() => setScenario({}, ["lightingHoursPerDay"])} />
+            <ScenarioSlider defaultField="commonAreaHvacHours" label="Common-area HVAC hours" value={commonAreaHvacHours} displayValue={`${commonAreaHvacHours} h/day`} min={0} max={24} overridden={scenario.commonAreaHvacHours !== undefined} profileText={`Hotel profile: ${profile.commonAreaHvacHours} h/day`} onValueChange={(value) => setScenario({ commonAreaHvacHours: value })} onReset={() => setScenario({}, ["commonAreaHvacHours"])} />
+            <ScenarioSlider defaultField="lightingHoursPerDay" label="Lighting hours" value={lightingHoursPerDay} displayValue={`${lightingHoursPerDay} h/day`} min={0} max={24} step={0.5} overridden={scenario.lightingHoursPerDay !== undefined} profileText={`Hotel profile: ${profile.lightingHoursPerDay} h/day`} onValueChange={(value) => setScenario({ lightingHoursPerDay: value })} onReset={() => setScenario({}, ["lightingHoursPerDay"])} />
             <ScenarioSlider label="Electricity price change" value={electricityRateChangePct} displayValue={`${electricityRateChangePct > 0 ? "+" : ""}${electricityRateChangePct}%`} min={-50} max={100} step={5} overridden={scenario.electricityRateChangePct !== undefined} profileText="Relative to the current electricity price" onValueChange={(value) => setScenario({ electricityRateChangePct: value })} onReset={() => setScenario({}, ["electricityRateChangePct"])} />
           </div>
   );
   const stressEl = (
           <section className="panel min-w-0 p-5" aria-label="Stress tests">
             <div className="mb-4"><h2 className="font-semibold">Stress tests</h2><p className="mt-1 text-xs text-muted-foreground">Select one event; select it again to clear it.</p></div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 @min-[340px]:grid-cols-2">
               {STRESS_TESTS.map((test) => {
                 const active = activeStressTest === test.id;
                 return <Button key={test.id} type="button" variant={active ? "accent" : "outline"} aria-pressed={active} onClick={() => applyStressTest(active ? null : test.id)} className="h-auto min-h-20 items-start justify-start whitespace-normal p-3 text-left"><span><span className="block font-medium">{test.label}</span><span className={cn("mt-1 block text-xs font-normal", active ? "text-primary-foreground/80" : "text-muted-foreground")}>{test.description}</span></span></Button>;
@@ -180,7 +184,8 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
   if (variant === "panel") {
     // Workspace tab: controls and explanations only; the KPI strip and twin show the change.
     return (
-      <div className="space-y-5 p-5" aria-label="Scenario controls">
+      <div className="@container space-y-5 p-5" aria-label="Scenario controls">
+        <Button asChild variant="link" className="h-auto px-0"><Link to="/scenario">Scenario in detail</Link></Button>
         {headerEl}
         {occupancyEl}
         {setpointsEl}

@@ -1,3 +1,4 @@
+import { Disclaimer } from "@/components/Disclaimer";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { Overview } from "@/components/Overview";
@@ -16,5 +17,5 @@ export const Route = createFileRoute("/overview")({
 });
 
 function OverviewPage() {
-  return <main className="min-h-screen bg-background"><header className="flex h-16 items-center justify-between gap-3 border-b border-border px-4 md:px-8"><Link to="/" className="font-semibold">Energy Twin</Link><Button asChild variant="ghost" size="sm"><Link to="/"><ArrowLeft />Dashboard</Link></Button></header><Overview /></main>;
+  return <main className="min-h-screen bg-background"><header className="flex h-16 items-center justify-between gap-3 border-b border-border px-4 md:px-8"><Link to="/" className="font-semibold">Energy Twin</Link><Button asChild variant="ghost" size="sm"><Link to="/"><ArrowLeft />Dashboard</Link></Button></header><Overview /><Disclaimer /></main>;
 }

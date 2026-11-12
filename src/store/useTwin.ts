@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  DEFAULT_FINANCE,
   advisor,
   calculateBaselineEnergy,
   hotelData,
@@ -104,6 +105,8 @@ export interface TwinState {
   hotelPlan: PortfolioResult | null;
   /** The situation the plan was measured against: the baseline, or the scenario's result if the optimizer ran on a scenario. */
   hotelPlanBaseline: EnergyResult | null;
+  /** Discount rate for NPV (product decision: 8% default, 3% alternative); NPV only, payback and net benefit do not use it. */
+  hotelDiscountRate: number;
   /** How many combinations the running (or last) optimizer run tests; set as soon as a run starts so the UI can count up to it. */
   optimizerCombinations: number | null;
   /** When true the optimizer measures upgrades against the current scenario (for example electricity +20%). */
@@ -127,6 +130,8 @@ export interface TwinState {
   setHotelBudget: (n: number) => void;
   setHotelObjective: (o: Objective) => void;
   setOptimizeOnScenario: (b: boolean) => void;
+  /** Change the NPV discount rate (for example 0.08 or 0.03). Clears the plan so it is re-run with the new rate. */
+  setHotelDiscountRate: (r: number) => void;
   setScenario: (patch: Scenario, clear?: (keyof Scenario)[]) => void;
   resetScenario: () => void;
   applyStressTest: (id: StressTest["id"] | null) => void;
@@ -205,6 +210,7 @@ function initialHotelState() {
     hotelPlan: null as PortfolioResult | null,
     hotelPlanBaseline: null as EnergyResult | null,
     optimizerCombinations: null as number | null,
+    hotelDiscountRate: DEFAULT_FINANCE.discountRate,
     optimizeOnScenario: false,
     activeHotelPackageId: null as string | null,
     savedScenarios: [] as SavedScenario[],
@@ -298,6 +304,8 @@ export const useTwin = create<TwinState>((set, get) => ({
   },
   setHotelBudget: (n) => get().setHotelInput({ budget: Math.max(0, n) }),
   setHotelObjective: (objective) => get().setHotelInput({ objective }),
+  setHotelDiscountRate: (r) =>
+    set({ hotelDiscountRate: Number.isFinite(r) ? Math.min(0.3, Math.max(0, r)) : DEFAULT_FINANCE.discountRate, hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null }),
   setOptimizeOnScenario: (optimizeOnScenario) => set({ optimizeOnScenario, hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null }),
   setScenario: (patch, clear) =>
     set((s) => {
@@ -316,7 +324,8 @@ export const useTwin = create<TwinState>((set, get) => ({
     const scenario = get().optimizeOnScenario ? effectiveScenario(get().scenario, get().activeStressTest) : {};
     const onScenario = Object.keys(scenario).length > 0;
     const ctx = onScenario ? prepareScenarioContext(started, scenario) : prepareUpgradeContext(started, undefined, get().baseline);
-    const plan = optimizeInvestmentPortfolio(ctx, onScenario ? { scenario } : {});
+    const assumptions = { discountRate: get().hotelDiscountRate };
+    const plan = optimizeInvestmentPortfolio(ctx, onScenario ? { scenario, assumptions } : { assumptions });
     set({ optimizerCombinations: plan.combinationsTested });
     await new Promise((r) => setTimeout(r, 2000));
     // If the hotel or the scenario changed while waiting, the result is stale: drop it.

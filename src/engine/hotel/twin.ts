@@ -161,7 +161,8 @@ export function equipmentInventory(p: HotelProfile, data: HotelData = hotelData)
   const central = e.central;
   switch (p.hvacType) {
     case 'ptac':
-      items.push({ id: 'central-plant', zone: 'central_hvac', label: central.ptac.label, count: 1, ratedTons: publicSqft * central.ptac.tonsPerPublicSqft * 1000, fuel: 'electric', schedule: `${p.commonAreaHvacHours} h per day`, efficiency: central.ptac.efficiency, source: src, estimated: true });
+    case 'pthp':
+      items.push({ id: 'central-plant', zone: 'central_hvac', label: central[p.hvacType].label, count: 1, ratedTons: publicSqft * central[p.hvacType].tonsPerPublicSqft * 1000, fuel: 'electric', schedule: `${p.commonAreaHvacHours} h per day`, efficiency: central[p.hvacType].efficiency, source: src, estimated: true });
       break;
     case 'vrf':
       items.push({ id: 'central-plant', zone: 'central_hvac', label: central.vrf.label, count: 1, ratedTons: p.rooms * central.vrf.tonsPerRoom, fuel: 'electric', schedule: 'On demand', efficiency: central.vrf.efficiency, source: src, estimated: true });

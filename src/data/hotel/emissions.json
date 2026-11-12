@@ -1,9 +1,122 @@
 {
-  "elecKgCO2ePerKWh": {
-    "IL": 0.4155,
-    "default": 0.3497
+  "subregions": {
+    "AKGD": {
+      "name": "ASCC Alaska Grid",
+      "kgCO2ePerKWh": 0.4106
+    },
+    "AKMS": {
+      "name": "ASCC Miscellaneous",
+      "kgCO2ePerKWh": 0.237
+    },
+    "AZNM": {
+      "name": "WECC Southwest",
+      "kgCO2ePerKWh": 0.3203
+    },
+    "CAMX": {
+      "name": "WECC California",
+      "kgCO2ePerKWh": 0.195
+    },
+    "ERCT": {
+      "name": "ERCOT All",
+      "kgCO2ePerKWh": 0.3341
+    },
+    "FRCC": {
+      "name": "FRCC All",
+      "kgCO2ePerKWh": 0.356
+    },
+    "HIMS": {
+      "name": "HICC Miscellaneous",
+      "kgCO2ePerKWh": 0.5141
+    },
+    "HIOA": {
+      "name": "HICC Oahu",
+      "kgCO2ePerKWh": 0.6799
+    },
+    "MROE": {
+      "name": "MRO East",
+      "kgCO2ePerKWh": 0.6373
+    },
+    "MROW": {
+      "name": "MRO West",
+      "kgCO2ePerKWh": 0.4203
+    },
+    "NEWE": {
+      "name": "NPCC New England",
+      "kgCO2ePerKWh": 0.2464
+    },
+    "NWPP": {
+      "name": "WECC Northwest",
+      "kgCO2ePerKWh": 0.2882
+    },
+    "NYCW": {
+      "name": "NPCC NYC/Westchester",
+      "kgCO2ePerKWh": 0.3927
+    },
+    "NYLI": {
+      "name": "NPCC Long Island",
+      "kgCO2ePerKWh": 0.5395
+    },
+    "NYUP": {
+      "name": "NPCC Upstate NY",
+      "kgCO2ePerKWh": 0.1101
+    },
+    "PRMS": {
+      "name": "Puerto Rico Miscellaneous",
+      "kgCO2ePerKWh": 0.7024
+    },
+    "RFCE": {
+      "name": "RFC East",
+      "kgCO2ePerKWh": 0.2718
+    },
+    "RFCM": {
+      "name": "RFC Michigan",
+      "kgCO2ePerKWh": 0.4427
+    },
+    "RFCW": {
+      "name": "RFC West",
+      "kgCO2ePerKWh": 0.4155
+    },
+    "RMPA": {
+      "name": "WECC Rockies",
+      "kgCO2ePerKWh": 0.4729
+    },
+    "SPNO": {
+      "name": "SPP North",
+      "kgCO2ePerKWh": 0.3936
+    },
+    "SPSO": {
+      "name": "SPP South",
+      "kgCO2ePerKWh": 0.3972
+    },
+    "SRMV": {
+      "name": "SERC Mississippi Valley",
+      "kgCO2ePerKWh": 0.3364
+    },
+    "SRMW": {
+      "name": "SERC Midwest",
+      "kgCO2ePerKWh": 0.5663
+    },
+    "SRSO": {
+      "name": "SERC South",
+      "kgCO2ePerKWh": 0.3837
+    },
+    "SRTV": {
+      "name": "SERC Tennessee Valley",
+      "kgCO2ePerKWh": 0.4097
+    },
+    "SRVC": {
+      "name": "SERC Virginia/Carolina",
+      "kgCO2ePerKWh": 0.2705
+    }
+  },
+  "usKgCO2ePerKWh": 0.3497,
+  "cityToSubregion": {
+    "chicago,il": "RFCW"
+  },
+  "stateDefaultSubregion": {
+    "IL": "RFCW"
   },
   "gasKgCO2ePerTherm": 5.311,
-  "source": "Electricity: EPA eGRID2023 Summary Tables (created March 27, 2025), Table 1, subregion total output emission rates, CO2e: RFC West (RFCW, the subregion serving ComEd and Chicago) 916.054 lb/MWh = 0.4155 kg/kWh; U.S. 770.884 lb/MWh = 0.3497 kg/kWh (used when the state has no entry). Note: southern and central Illinois (Ameren) is in SERC Midwest (SRMW, 1,248.6 lb/MWh); the Illinois value assumes a ComEd (northern Illinois) building. For comparison, EIA's State Electricity Profiles 2024 put power generated in Illinois at 510 lb CO2/MWh, lower because Illinois exports much of its nuclear power. Gas: EPA GHG Emission Factors Hub 2025, Table 1 (stationary combustion, natural gas): 53.06 kg CO2, 1 g CH4 and 0.1 g N2O per MMBtu; with AR5 global warming potentials (28 and 265, the Hub's Table 11) that is 53.11 kg CO2e per MMBtu = 5.311 kg per therm. Estimates; not verified carbon accounting.",
+  "source": "Electricity: EPA eGRID2023 Summary Tables (created March 27, 2025), Table 1, total output emission rate, CO2e, for all 27 subregions (lb/MWh divided by 2,204.62 to get kg/kWh); U.S. 770.884 lb/MWh = 0.3497 kg/kWh. The subregion comes from the city (Chicago: RFC West, RFCW, which serves ComEd), else a state default (a state can span several subregions: IL defaults to RFCW, but Ameren territory is SRMW), else the U.S. rate; users can set it directly. Gas: EPA GHG Emission Factors Hub 2025, Table 1: 53.06 kg CO2, 1 g CH4 and 0.1 g N2O per MMBtu, with AR5 GWPs = 5.311 kg CO2e per therm. Estimates; not verified carbon accounting.",
   "verified": true
 }

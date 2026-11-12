@@ -3,6 +3,7 @@ import { hotelData } from './data';
 import { DEFAULT_FINANCE, calculateFinancialMetrics, financialBreakdown, incentiveLines } from './finance';
 import type { IncentiveOverrides } from './finance';
 import { exportCreditPerKWh, solarCostPerW } from './solar';
+import { isSolar } from './constants';
 import { calculateUpgradeSavings, isContext, orderUpgrades, prepareUpgradeContext, upgradeDef } from './upgrades';
 import type { UpgradeContext } from './upgrades';
 import type {
@@ -31,7 +32,8 @@ export interface EvaluateOptions {
 
 /** Yearly degradation of the solar part of the savings (0 if the package has no solar). */
 export function solarDegradation(ids: readonly UpgradeId[], data: HotelData = hotelData): number {
-  return ids.includes('rooftop_solar') ? (upgradeDef('rooftop_solar', data).constants['degradationPerYear'] ?? 0) : 0;
+  const solar = ids.find(isSolar);
+  return solar ? (upgradeDef(solar, data).constants['degradationPerYear'] ?? 0) : 0;
 }
 
 /**
@@ -90,7 +92,7 @@ export function evaluatePackage(
   const metrics = packageMetrics(ctx, ids, mid, costs, assumptions, options.budget ?? p.budget, options.incentives);
   const solarValue: Range3 = { low: low.sizing.solarValuePerYear, mid: mid.sizing.solarValuePerYear, high: high.sizing.solarValuePerYear };
   const solar: SolarDetails | null =
-    ids.includes('rooftop_solar') && mid.sizing.solarKw > 0
+    ids.some(isSolar) && mid.sizing.solarKw > 0
       ? {
           sizeKw: mid.sizing.solarKw,
           generationKWh: mid.sizing.solarGenerationKWhYear,
@@ -113,6 +115,7 @@ export function evaluatePackage(
     solar,
     priceGrowth: assumptions.priceGrowth,
     gasPriceGrowth: assumptions.gasPriceGrowth ?? assumptions.priceGrowth,
+    discountRate: assumptions.discountRate,
   });
 
   let lineItems: PackageLineItem[] = [];

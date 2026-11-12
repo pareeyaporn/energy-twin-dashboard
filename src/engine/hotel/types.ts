@@ -24,7 +24,7 @@ export type Category = 'hvac' | 'lighting' | 'hotWater' | 'kitchen' | 'equipment
 /** The spec's load kinds. */
 export type LoadType = 'base' | 'occupancy' | 'weather' | 'schedule';
 
-export type HvacType = 'ptac' | 'vrf' | 'central_plant' | 'rtu';
+export type HvacType = 'ptac' | 'pthp' | 'vrf' | 'central_plant' | 'rtu';
 export type Objective = 'annual_savings' | 'payback' | 'roi' | 'carbon' | 'balanced';
 export type FuelKind = 'electric' | 'gas';
 
@@ -49,6 +49,8 @@ export interface HotelInput {
   hvacType?: HvacType;
   monthlyEnergyBill?: number;
   electricityRate?: number; // $/kWh
+  /** EPA eGRID subregion acronym (for example RFCW); defaults from the city, then the state, then the U.S. rate. */
+  gridSubregion?: string;
   gasRate?: number; // $/therm
   occupancy?: number; // annual average, 0..1
   seasonalOccupancy?: number[]; // 12 relative factors
@@ -70,6 +72,8 @@ export interface HotelProfile {
   state: string;
   country: string;
   climateId: string;
+  /** EPA eGRID subregion used for the grid emission factor ('US' when only the national rate applies). */
+  gridSubregion: string;
   rooms: number;
   floorAreaSqft: number;
   floors: number;
@@ -236,6 +240,8 @@ export interface HotelData {
     driverWeights: Record<EndUse, DriverWeights>;
     hvacZoneShares: Record<Exclude<ZoneId, 'central_hvac' | 'hot_water'>, number>;
     hvacPlantShare: Record<HvacType, number>;
+    /** Heating system by HVAC type: kind and seasonal efficiency (COP for heat pumps); `reference` is the efficiency behind the CBECS share. */
+    heatingSystems: Record<HvacType, { kind: 'gas' | 'resistance' | 'heatPump'; efficiency: number }> & { reference: { efficiency: number }; source: string };
     zoneAllocation: Record<'lighting' | 'equipment' | 'other' | 'kitchen' | 'hotWater', Record<ZoneId, number>>;
     referenceSetpoints: { heatF: number; coolF: number };
     setpointSensitivity: { heatingPerF: number; coolingPerF: number; min: number; max: number };
@@ -245,7 +251,6 @@ export interface HotelData {
       kBtuPerRoomPerF: number;
       returnsPerBookedRoomPerDay: number;
       referenceOccupiedHoursPerRoom: number;
-      heatingEfficiency: { gas: number; electric: number };
       coolingCOP: number;
     };
     vacantLimits: { minHeatF: number; maxCoolF: number };
@@ -259,7 +264,7 @@ export interface HotelData {
     /** With smart room controls, the share of guest-room fan energy saved while a room is empty (calibrated to the IL-TRM). */
     smartControlFan: { reductionWhenEmpty: number; source: string };
     /** Energy price growth (nominal, a year) and the discount rate, with their source. */
-    finance: { elecPriceGrowth: number; gasPriceGrowth: number; discountRate: number; source: string; verified: boolean };
+    finance: { elecPriceGrowth: number; gasPriceGrowth: number; discountRate: number; discountRateAlternatives: number[]; source: string; verified: boolean };
     profileDefaults: {
       rooms: number;
       sqftPerRoom: number;
@@ -294,7 +299,11 @@ export interface HotelData {
   rates: Record<string, { commercialElecPerKWh: number; commercialGasPerTherm: number; solar?: RegionalSolar; source: string; verified: boolean }>;
   incentives: { incentives: IncentiveProgram[]; source: string; verified: boolean };
   emissions: {
-    elecKgCO2ePerKWh: Record<string, number>;
+    /** EPA eGRID subregion output emission rates, CO2e. */
+    subregions: Record<string, { name: string; kgCO2ePerKWh: number }>;
+    usKgCO2ePerKWh: number;
+    cityToSubregion: Record<string, string>;
+    stateDefaultSubregion: Record<string, string>;
     gasKgCO2ePerTherm: number;
     source: string;
     verified: boolean;
@@ -311,6 +320,7 @@ export interface HotelData {
     inRoomUnit: Record<HvacType, { label: string; ratedKW: number; efficiency: string }>;
     central: {
       ptac: { label: string; tonsPerPublicSqft: number; efficiency: string };
+      pthp: { label: string; tonsPerPublicSqft: number; efficiency: string };
       vrf: { label: string; tonsPerRoom: number; efficiency: string };
       central_plant: { label: string; boilerKBtuHPerSqft: number; tonsPerSqft: number; efficiency: string };
       rtu: { label: string; tonsPerSqft: number; efficiency: string };
@@ -339,6 +349,8 @@ export type UpgradeId =
   | 'energy_management'
   | 'hvac_upgrade'
   | 'water_heating'
+  | 'rooftop_solar_quarter'
+  | 'rooftop_solar_half'
   | 'rooftop_solar';
 
 /** low = pessimistic savings (and cheapest-to-install for cost ranges are separate); high = optimistic. */
@@ -372,6 +384,8 @@ export interface IncentiveProgram {
   note: string;
   source: string;
   verified: boolean;
+  /** 'verified' once the amount and eligibility are confirmed from the program's own source; 'unverified' until then. */
+  status?: 'verified' | 'unverified';
 }
 
 /** One incentive line on an upgrade's financial breakdown. */
@@ -412,6 +426,11 @@ export interface FinancialBreakdown {
   netBenefit10: Range3;
   /** 8. CO2 avoided each year, kg. */
   carbonAvoidedKgPerYear: Range3;
+  /** Net present value over 5 and 10 years at `discountRate` (same savings stream, discounted). For the detailed comparison. */
+  /** Optional in the type for backwards compatibility; the engine always sets them. */
+  discountRate?: number;
+  npv5?: Range3;
+  npv10?: Range3;
   /** Solar details when the upgrade includes solar. */
   solar: SolarDetails | null;
   /** Plain-language assumptions behind these numbers (shown next to them). */
@@ -594,6 +613,8 @@ export interface OptimizerOptions {
   assumptions?: Partial<FinancialAssumptions>;
   /** Confirmed incentive amounts entered by the user, per upgrade (dollars). */
   incentives?: Partial<Record<UpgradeId, number>>;
+  /** Weights of the balanced score (financial, carbon, comfort); any positive numbers, normalized to sum to 1. */
+  balancedWeights?: Partial<{ financial: number; carbon: number; comfort: number }>;
   /**
    * Optimize against the hotel under this what-if (savings, payback and ranking are all relative to it). With a plain profile the
    * context is built for you; with a prepared context (`prepareScenarioContext`) it is only recorded in the result.

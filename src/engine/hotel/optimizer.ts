@@ -66,6 +66,15 @@ const COMPARE: Record<PackageRole, (a: Candidate, b: Candidate) => number> = {
   max_carbon: (a, b) => b.carbonAvoidedKg - a.carbonAvoidedKg || a.cost - b.cost || byId(a, b),
 };
 
+/** Balanced weights, defaulting each missing one, with negatives treated as 0, scaled to sum to 1 (equal weights if all are 0). */
+export function normalizedWeights(w: Partial<{ financial: number; carbon: number; comfort: number }> = {}): { financial: number; carbon: number; comfort: number } {
+  const d = OPTIMIZER_DEFAULTS.balancedWeights;
+  const pick = (x: number | undefined, dflt: number) => (typeof x === 'number' && Number.isFinite(x) ? Math.max(0, x) : dflt);
+  const raw = { financial: pick(w.financial, d.financial), carbon: pick(w.carbon, d.carbon), comfort: pick(w.comfort, d.comfort) };
+  const sum = raw.financial + raw.carbon + raw.comfort;
+  return sum > 0 ? { financial: raw.financial / sum, carbon: raw.carbon / sum, comfort: raw.comfort / sum } : { financial: 1 / 3, carbon: 1 / 3, comfort: 1 / 3 };
+}
+
 function minMax(xs: number[]): { min: number; max: number } {
   return { min: Math.min(...xs), max: Math.max(...xs) };
 }
@@ -77,7 +86,9 @@ function reasonFor(role: PackageRole, c: Candidate, baselineCost: number, minSha
     case 'max_savings':
       return `Saves the most each year (${usd(c.annualSavings)}, about ${share}% of the bill) of any package that fits the budget.`;
     case 'fastest_payback':
-      return `Pays back soonest (${c.paybackYears?.toFixed(1) ?? 'n/a'} years) among packages that save at least ${Math.round(minShare * 100)}% of the bill.`;
+      return minShare > 0
+        ? `Pays back soonest (${c.paybackYears?.toFixed(1) ?? 'n/a'} years) among packages that save at least ${Math.round(minShare * 100)}% of the bill.`
+        : `Pays back soonest (${c.paybackYears?.toFixed(1) ?? 'n/a'} years) among packages that fit the budget and save money.`;
     case 'balanced':
       return `Best blend of five-year net benefit (${c.netBenefit < 0 ? '-' : ''}${usd(c.netBenefit)}), carbon avoided and guest comfort (score ${c.comfortScore.toFixed(2)}).`;
     case 'max_roi':
@@ -113,7 +124,8 @@ export function optimizeInvestmentPortfolio(
   const assumptions: FinancialAssumptions = { ...DEFAULT_FINANCE, horizonYears: p.horizonYears, ...options.assumptions };
 
   const eligible = eligibleUpgrades(p, ctx.baseline.annual.elecKWh, d);
-  const all = subsets(eligible);
+  // Only combinations that respect exclusions (for example one solar size at most), so "combinations tested" counts real options.
+  const all = subsets(eligible).filter((ids) => validateUpgradeSet(ids, p, ctx.baseline.annual.elecKWh, d).length === 0);
   const rejected = { overBudget: 0, comfort: 0, belowSavingsThreshold: 0, invalid: 0 };
   const scored: Candidate[] = [];
   let feasibleCount = 0;
@@ -161,7 +173,7 @@ export function optimizeInvestmentPortfolio(
   if (scored.length) {
     const net = minMax(scored.map((c) => c.netBenefit));
     const co2 = minMax(scored.map((c) => c.carbonAvoidedKg));
-    const w = OPTIMIZER_DEFAULTS.balancedWeights;
+    const w = normalizedWeights(options.balancedWeights);
     for (const c of scored) c.balancedScore = w.financial * norm(c.netBenefit, net) + w.carbon * norm(c.carbonAvoidedKg, co2) + w.comfort * c.comfortScore;
   }
 
@@ -221,7 +233,9 @@ export function optimizeInvestmentPortfolio(
         ? `No combination fits within ${usd(budget)}.${cheapestUseful ? ` The cheapest useful upgrade is ${cheapestUseful.label} at about ${usd(cheapestUseful.cost)}.` : ''}`
         : rejected.comfort > 0 && feasibleCount === 0
           ? `Every combination that fits the budget falls below the comfort limit (${minComfortScore}).`
-          : `No combination within the budget saves at least ${Math.round(minSavingsShare * 100)}% of the bill.`;
+          : minSavingsShare > 0
+            ? `No combination within the budget saves at least ${Math.round(minSavingsShare * 100)}% of the bill.`
+            : 'No combination within the budget saves money.';
   }
 
   return {

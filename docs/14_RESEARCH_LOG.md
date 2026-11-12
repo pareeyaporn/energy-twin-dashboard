@@ -35,6 +35,17 @@ Method: [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md), section 8.
 | Benchmarks | none | demo hotel **91.1** kBtu/ft² site; CBECS 2018 lodging mean **85.7** (Table C1); ENERGY STAR hotel median **63.0** site / 146.7 source | EIA CBECS 2018 Table C1; ENERGY STAR "U.S. Energy Use Intensity by Property Type" (August 2024) | Primary |
 | Hotel size, Chicago | not checked | Choose Chicago list: **147 hotels, 49,526 rooms**, median **232**, mean 337, middle half 173–378; 18% under 150 rooms | Choose Chicago, Chicago hotel supply | Primary (page) |
 
+## Pass 3 (November 2026, with the product decisions)
+
+| Item | Before | Now | Source | Read |
+| --- | --- | --- | --- | --- |
+| Grid factors by location | one value per state | all **27 eGRID2023 subregions** (CO2e), chosen from the city, then the state, then the U.S. | EPA eGRID2023 Summary Tables, Table 1 | Primary (xlsx) |
+| ComEd business incentives | program listed | rules recorded (pre-approval at $10,000 or more, otherwise a possible $10,000 cap; up to $2 million per customer); **amounts not available** (in worksheets on another host) | ComEd 2026 Standard Incentives Application (www.comed.com) | Primary (PDF) |
+| Heat-pump water heaters, heat-pump HVAC | not modeled | **still not modeled**: no commercial hotel-scale cost and performance found (IL-TRM's water-heater measure covers tanks up to 120 gallons) | IL-TRM v14.0 Vol. 2 | Primary (PDF) |
+
+Product decisions taken at the same time (discount rate, optimizer rules, HVAC types, solar sizes, emissions, incentives) are in
+[15_PRODUCT_DECISIONS.md](15_PRODUCT_DECISIONS.md); they are choices, not sourced facts.
+
 ## Modeling decisions made with this research
 
 - **Smart room controls:** the fan saving (17% of guest-room fan energy while empty) is a calibration to the IL-TRM range, not a measured value;

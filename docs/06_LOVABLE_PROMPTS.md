@@ -15,6 +15,7 @@ Style for every prompt: polished B2B SaaS look, professional typography, clear f
 | LV9 polish | Done |
 | LV11 upgrade comparison and the financial breakdown | Done |
 | LV12 layout fix (packages first, collapsed comparison, shared assumptions, short Source buttons, remaining budget and comfort back) | Done |
+| **LV13 NPV with an 8% / 3% switch, grid subregion field** | **Next** |
 
 ## Store API cheat sheet (already built; read it, do not change it)
 
@@ -34,6 +35,8 @@ Call selectors like `useTwin(selectDisplayed)`; they are memoized and safe to us
 | Budget optimizer | `runHotelOptimizer()`, `optimizing`, `optimizerCombinations` (set when a run starts), `hotelPlan` (`packages`, `objectiveWinner`, `combinationsTested`, `feasibleCount`, `emptyReason`, `cheapestUseful`), `applyHotelPackage(id \| null)`, `activeHotelPackageId` |
 | Package fields | `evaluation.cost` and `evaluation.annualSavings` (`low`/`mid`/`high`), `evaluation.metrics` (`paybackYears`, `netBenefit`, `roi`, `remainingBudget`, `carbonAvoidedKgPerYear`), `evaluation.comfort`, `evaluation.lineItems`, plus `role`, `roleLabel`, `reason`, `note`, `budgetRisk` |
 | Financial breakdown (same for every upgrade and package) | `evaluation.financials`: `grossCost`, `incentives` (lines with `label`, `amount`, `applied`, `note`, `source`), `incentivesTotal`, `netInvestment`, `annualEnergySavings` (`elecKWh`, `gasTherms`), `annualSavings`, `simplePaybackYears`, `netBenefit5`, `netBenefit10`, `carbonAvoidedKgPerYear` (ranges are `low`/`mid`/`high`), `solar` (`sizeKw`, `generationKWh`, `selfConsumedKWh`, `exportedKWh`, `installedCostPerW`, `exportCreditPerKWh`, `degradationPerYear`) or null, `assumptions` (strings) |
+| NPV and discount rate | `financials.npv5`, `financials.npv10` (ranges), `financials.discountRate`; `hotelDiscountRate` (default 0.08), `setHotelDiscountRate(r)`; alternative rates in `hotelData.defaults.finance.discountRateAlternatives` ([0.03]) |
+| Grid emissions | `hotel.profile.gridSubregion` (eGRID acronym, for example RFCW); set with `setHotelInput({ gridSubregion })`; names in `hotelData.emissions.subregions` |
 | Upgrade comparison (every upgrade on its own) | `selectUpgradeComparison(s)` → rows `{ id, label, description, financials, metrics, comfort, lifetimeYears, source }`, measured the same way as the optimizer |
 | Optimize against the current what-if (for example electricity +20%) | `optimizeOnScenario` (turns on by itself when a scenario or stress test starts and off when it is cleared), `setOptimizeOnScenario(b)`; the plan records `hotelPlan.scenario`, and `hotelPlanBaseline` is what it was measured against |
 | AI advisor | `advisorMessages` (`{ id, role: 'user' \| 'advisor', text, source?: 'ai' \| 'fallback', reason? }`), `advisorBusy`, `askAdvisor(question)`, `clearAdvisor()`; suggested questions: `advisor.ADVISOR_SUGGESTED_QUESTIONS` from `@/engine/hotel` |
@@ -195,3 +198,18 @@ eight lines, add back "Remaining budget" (evaluation.metrics.remainingBudget) an
 percentage), and add both rows to the Compare investments table. Keep all values from the store; display formatting only.
 Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```
+
+## LV13 — NPV and the discount rate; grid subregion (after the product decisions)
+
+```
+In the Compare all upgrades table and the Compare investments table, add two columns/rows "NPV, 5 years" and "NPV, 10 years" from
+financials.npv5.mid and financials.npv10.mid (with low to high), labeled "at {financials.discountRate as %}". Above both tables add a small
+"Discount rate" switch with 8% and 3% (values from hotelData.defaults.finance.discountRate and discountRateAlternatives) that calls
+setHotelDiscountRate; show "8% is the default for commercial investment analysis; 3% is an alternative scenario (a product decision)".
+Keep simple payback, not NPV, on the main upgrade and package cards. In the hotel profile form's Building section add an optional
+"Grid region (eGRID)" select listing hotelData.emissions.subregions (acronym and name), bound to hotel.profile.gridSubregion through
+setHotelInput({ gridSubregion }), with the "default (estimate)" tag when it is in hotel.defaulted. Solar now appears at three sizes in the
+comparison (quarter, half and full roof); keep them as separate rows. Display formatting only.
+Don't modify src/engine, src/data, src/twin, src/store or supabase.
+```
+

@@ -183,11 +183,11 @@ export const selectUpgradeBaseline = (s: TwinState): EnergyResult =>
 
 export const selectOpportunities = (s: TwinState) => opportunitiesOf(s.hotel, selectUpgradeBaseline(s));
 
-const comparisonOf = memoLast((hotel: ResolvedProfile, measuredAgainst: EnergyResult): UpgradeComparisonRow[] =>
-  compareUpgrades(contextFromBaseline(hotel, measuredAgainst)),
+const comparisonOf = memoLast((hotel: ResolvedProfile, measuredAgainst: EnergyResult, discountRate: number): UpgradeComparisonRow[] =>
+  compareUpgrades(contextFromBaseline(hotel, measuredAgainst), { assumptions: { discountRate } }),
 );
 /**
  * Every eligible upgrade on its own with the common financial breakdown (gross cost, incentives, net investment, kWh and $ saved,
  * payback, 5- and 10-year net benefit, CO2). Same calculation as the optimizer's packages and the advisor's figures.
  */
-export const selectUpgradeComparison = (s: TwinState): UpgradeComparisonRow[] => comparisonOf(s.hotel, selectUpgradeBaseline(s));
+export const selectUpgradeComparison = (s: TwinState): UpgradeComparisonRow[] => comparisonOf(s.hotel, selectUpgradeBaseline(s), s.hotelDiscountRate);

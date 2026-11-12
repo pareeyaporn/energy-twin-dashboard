@@ -50,7 +50,9 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
   insulation. Sources: IL-TRM measure costs where they exist, ComEd and Peoples Gas program data, DOE/NREL cost studies, hotel case studies.
 - [ ] **A3. Solar installed $/W by size** for small commercial (≤100 kW) systems in Illinois: LBNL *Tracking the Sun* / *Distributed Solar and
   Storage* data file. `emp.lbl.gov` blocks automated downloads, so **download it by hand and upload it** to the session.
-- [ ] **A4. Incentive amounts** (only with a source): ComEd business rebates for LED, controls and HVAC (`www.comed.com` is reachable); Peoples Gas
+- [ ] **A4. Incentive amounts** (only with a source; until then shown as unverified and $0). ComEd: the 2026 Standard Incentives Application
+  rules are recorded; the measure amounts are in worksheets on `azure-na-assets.contentstack.com` (allow it, or download the worksheets by hand).
+  Also: ComEd business rebates for LED, controls and HVAC (`www.comed.com` is reachable); Peoples Gas
   rebates; Illinois Shines REC payments; federal Section 48E status for new solar (needs `www.irs.gov`). Enter as `value`, `applied: true`,
   `verified: true` in `incentives.json`.
 - [ ] **A5. Solar export credit $/kWh** for a ComEd non-residential customer (supply-only credit): ComEd tariff or Illinois Commerce Commission filing.
@@ -70,13 +72,13 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
   (ComStock hotel profiles), equipment sizing, Chicago seasonal occupancy (STR or Choose Chicago), floor area per room.
 - [ ] B7. Comfort limits and setpoint references (ASHRAE 55).
 
-## Decisions (not facts; record the reasoning)
+## Decisions (not facts) — decided, see [15_PRODUCT_DECISIONS.md](15_PRODUCT_DECISIONS.md)
 
-- [ ] Discount rate for NPV (3% placeholder; NPV is not shown on the cards).
-- [ ] Optimizer rules: minimum comfort score 0.70, minimum savings 1% of the bill, balanced weights 0.5 / 0.3 / 0.2.
-- [ ] PTAC heating treated as electric resistance (a PTHP hotel would use the heat-pump interaction factor).
-- [ ] Whether to add a smaller solar array, a heat-pump option and a heat-pump water heater as alternatives.
-- [ ] Illinois emission factor assumes a ComEd (northern Illinois, RFCW) building; Ameren territory would use SRMW.
+- [x] Discount rate: 8% default, 3% alternative; NPV in the detailed comparison, simple payback on the cards.
+- [x] Optimizer: comfort limit 0.70 kept and documented; no minimum savings share; balanced weights configurable and normalized.
+- [x] HVAC types: PTAC (resistance), PTHP (heat pump), central plant, VRF, rooftop units, each with its heating efficiency and interaction factor.
+- [x] Solar at three sizes. Heat-pump HVAC and heat-pump water heaters deferred until sourced cost and performance exist.
+- [x] Emissions: eGRID subregion by location (Chicago RFCW), editable per hotel.
 
 ## Validation
 

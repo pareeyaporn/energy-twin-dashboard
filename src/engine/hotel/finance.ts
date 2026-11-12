@@ -59,6 +59,13 @@ export function savingsInYear(s: SavingsStream, t: number): number {
   return ((elec - solar) + solar * (1 - s.degradationPerYear) ** (t - 1)) * ge + gas * gg;
 }
 
+/** Present value of the savings over N years at rate r, minus the net investment. */
+export function npvOver(years: number, s: SavingsStream, netInvestment: number, r: number): number {
+  let pv = 0;
+  for (let t = 1; t <= years; t++) pv += savingsInYear(s, t) / (1 + r) ** t;
+  return pv - netInvestment;
+}
+
 /** Sum of yearly savings over N years minus the net investment (nominal, no residual value). */
 export function netBenefitOver(years: number, s: SavingsStream, netInvestment: number): number {
   let total = 0;
@@ -186,6 +193,7 @@ export function financialBreakdown(input: {
   solar: SolarDetails | null;
   priceGrowth: number;
   gasPriceGrowth: number;
+  discountRate: number;
 }): FinancialBreakdown {
   const net: Range3 = {
     low: Math.max(0, input.grossCost.low - input.incentives.total.low),
@@ -207,6 +215,12 @@ export function financialBreakdown(input: {
     mid: netBenefitOver(years, stream('mid'), net.mid),
     high: netBenefitOver(years, stream('high'), net.low),
   });
+  const r = input.discountRate;
+  const npv = (years: number): Range3 => ({
+    low: npvOver(years, stream('low'), net.high, r),
+    mid: npvOver(years, stream('mid'), net.mid, r),
+    high: npvOver(years, stream('high'), net.low, r),
+  });
   const applied = input.incentives.lines.filter((l) => l.applied);
   const listed = input.incentives.lines.filter((l) => !l.applied);
   const assumptions = [
@@ -217,6 +231,7 @@ export function financialBreakdown(input: {
         ? 'No incentives applied; possible programs are listed with each upgrade and are applied only once confirmed.'
         : 'No incentive programs are listed for this upgrade.',
     'Simple payback is the net investment divided by first-year savings.',
+    `Net present value discounts future savings at ${round1(input.discountRate * 100)}% a year (a product decision; 3% is the alternative).`,
     input.solar
       ? 'Solar operation and maintenance is subtracted from the savings; inverter replacement and other upkeep are not included.'
       : 'Operation, maintenance and replacement costs are not included.',
@@ -241,6 +256,9 @@ export function financialBreakdown(input: {
     netBenefit5: benefit(BENEFIT_YEARS[0]),
     netBenefit10: benefit(BENEFIT_YEARS[1]),
     carbonAvoidedKgPerYear: input.carbonAvoidedKgPerYear,
+    discountRate: r,
+    npv5: npv(BENEFIT_YEARS[0]),
+    npv10: npv(BENEFIT_YEARS[1]),
     solar: input.solar,
     assumptions,
   };

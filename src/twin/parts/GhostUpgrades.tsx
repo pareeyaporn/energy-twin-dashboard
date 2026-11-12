@@ -11,6 +11,8 @@ export const UPGRADE_SHORT: Record<UpgradeId, string> = {
   energy_management: "Energy management",
   hvac_upgrade: "HVAC equipment",
   water_heating: "Water heating",
+  rooftop_solar_quarter: "Solar (quarter roof)",
+  rooftop_solar_half: "Solar (half roof)",
   rooftop_solar: "Rooftop solar",
 };
 
@@ -32,7 +34,7 @@ export function GhostUpgradeOverlay() {
           <line x1="86" y1="22" x2="554" y2="22" stroke="var(--savings)" strokeWidth="5" strokeDasharray="10 5" />
         </g>
       )}
-      {has("rooftop_solar") && (
+      {(has("rooftop_solar") || has("rooftop_solar_half") || has("rooftop_solar_quarter")) && (
         <g data-upgrade="rooftop_solar">
           <title>Rooftop solar</title>
           {[0, 1, 2, 3, 4, 5].map((i) => (

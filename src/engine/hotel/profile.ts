@@ -53,6 +53,17 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
     notes.push(`No weather data for ${city}, ${state}; ${data.weather.climates[climateId]?.label ?? climateId} was used.`);
   }
 
+  const em = data.emissions;
+  let gridSubregion = typeof input.gridSubregion === 'string' ? input.gridSubregion.trim().toUpperCase() : '';
+  if (gridSubregion && !em.subregions[gridSubregion]) {
+    notes.push(`Grid subregion "${gridSubregion}" is not in the eGRID table; it was set from the location instead.`);
+    gridSubregion = '';
+  }
+  if (!gridSubregion) {
+    defaulted.push('gridSubregion');
+    gridSubregion = em.cityToSubregion[climateKey] ?? em.stateDefaultSubregion[state] ?? 'US';
+  }
+
   const rateEntry = data.rates[state] ?? data.rates['default'];
   const electricityRate = num('electricityRate', input.electricityRate, rateEntry?.commercialElecPerKWh ?? 0.14, 0.01, 2);
   const gasRate = num('gasRate', input.gasRate, rateEntry?.commercialGasPerTherm ?? 1, 0.05, 20);
@@ -97,6 +108,7 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
     state,
     country,
     climateId,
+    gridSubregion,
     rooms,
     floorAreaSqft,
     floors,

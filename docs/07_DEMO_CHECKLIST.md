@@ -6,7 +6,7 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 
 - **Hour 36:** twin and simulator frozen (bug fixes only).
 - **Hour 40:** everything frozen. Only fixes for things that break the demo path.
-- **Hour 34:** record a 30–45 s screen capture of the full sequence. Put it in the slides as a backup.
+- **Hour 34:** record a 60–90 s screen capture of the key moments (3D, what-if, packages, advisor). Put it in the slides as a backup.
 - Do not sacrifice a working P0 feature for P2 polish.
 
 ## Before rehearsals
@@ -29,17 +29,25 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 - [ ] Phone hotspot ready if venue Wi-Fi fails (everything works offline after load except a live AI answer, which is cached)
 - [ ] Backup video open in another tab
 
-## Demo path (3 minutes) — run 5 times in a row without a failure
+## Demo path (6–7 minutes) — run 5 times in a row without a failure
 
-1. Introduce a hotel owner with rising energy costs and unclear upgrade choices (30 s)
-2. Open the synthetic 100-room Chicago hotel and show zone-level energy and cost. In 3D: let the fly-in play, click a zone (the camera glides),
-   press "January night" (snow, lit windows, the rooftop unit glowing red for heating) and "July afternoon" (cooling), then "Energy view"
-3. Change occupancy from 60% to 85%, then enable smart room controls; show the cost strip and the "why it changed" panel
-   (more guests raise the bill; the controls claw part of it back)
-4. Enter a $50,000 budget (Invest tab, "Optimize for this scenario" turns on by itself), generate the three packages, compare cost, savings,
-   payback, five- and ten-year net benefit and carbon; apply one and show the split before/after twin
-5. Ask the advisor the question chosen after calibration (see `docs/10`, section 12) and point out that the answer uses the model's numbers
-6. Close with before/after energy, cost and estimated carbon. Core message: *Energy Twin helps hotel owners test energy decisions before spending real money.*
+Story: *a hotel GM is being pitched solar, smart thermostats and LEDs and doesn't know which pays. Energy Twin lets her test before she spends.*
+Every figure below comes from the engine (synthetic 100-room Lakeshore Inn, Chicago, November 2026 data). **If the engine changes, re-run
+the numbers (task 8.1) and update this script, never the other way round.** Items marked † need LV15 or Phase 10; skip them if not merged.
+
+| Time | Act | Do | Say (figures as of now) |
+| --- | --- | --- | --- |
+| 0:00–0:40 | **1. The problem** | Title slide, then the app | "Hotels run 24/7, occupancy swings the bill, and most owners have no energy team. This hotel spends **$131,666** a year on energy. Every vendor says their product is the answer." |
+| 0:40–1:40 | **2. Meet the twin** | Let the 3D fly-in play; turn on **Energy view**; click **Central HVAC** (camera glides), then **Guest rooms** | "A digital twin of an existing hotel, synthetic but built from public data. The plant is the biggest cost at **$39,551**, then guest rooms **$23,751** and the kitchen **$23,413**." † Benchmark card: "**91 kBtu/ft²**, 45% above the ENERGY STAR hotel median of 63: there is room to save." |
+| 1:40–2:40 | **3. A living building** | **January night**, then **July afternoon**; point at the hourly readout and the street; † **Flow** tab with the animated Sankey | "Same clock for the whole hotel. A January night: **64 kW** of heating, the roof unit glows red, lit windows are guests in their rooms. July afternoon: **85 kW** of cooling. The people outside are guests who are out right now, from the model." |
+| 2:40–3:40 | **4. Test an operating decision** | Scenario: occupancy **60% → 85%**; open "why it changed"; turn on **smart room controls** | "A conference season: the bill rises **$13,962** to **$145,628**. Smart room controls claw back **$1,068**: less than you'd think, because at 85% few rooms are empty. That's the kind of thing you want to know before buying." |
+| 3:40–5:10 | **5. Spend the budget** | Invest: **$50,000**, "optimize for this scenario" (on by itself); show the three packages; open the **10-year projection** on the top one; open **Compare all upgrades** and point at solar; **Apply** the top package and show the split twin | "It tested every combination, **256**, and **12** fit the budget and comfort limit. Best: **LED lighting + occupancy sensors**, **$39,600**, saving **$10,378** a year, payback **3.8 years**, **$73,387** over ten years, **27 t** of CO2 a year. Fastest: sensors alone, **2.6 years**. Solar on the full roof costs **$154,000** and takes about **18 years** here, so it isn't recommended — and we don't count incentives we couldn't verify." |
+| 5:10–6:00 | **6. Ask the advisor** | Ask the advisor question chosen in task 8.1 (suggested: *"Why not solar, and what should I do with $50,000?"*) | "The answer is written by Claude but every number comes from the model; the app rejects any answer with a number that isn't in the results." |
+| 6:00–6:40 | **7. Scale and honesty** | Switch to the **300-room** preset, $150,000; then close on the before/after strip (energy, cost, carbon) | "A 300-room downtown hotel: **LED + energy management**, **$147,000**, **$34,163** a year, **4.3 years**. Estimates, with sources and ranges; not an audit and not live monitoring. *Simulate smarter. Spend better. Save energy.*" |
+| 6:40–7:00 | Buffer | — | Hand over to Q&A |
+
+**Fallbacks:** no WebGL or a slow laptop → 2D button (the script works in 2D; skip act 3's 3D moments). Advisor slow or offline → the cached
+answer (task 8.2) or the template answer appears within 8 s. Wrong state → the **Reset demo** button (task 8.7).
 
 ## Q&A prep
 
@@ -52,6 +60,6 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 | How do you handle guest comfort? | Engine lead | Comfort is a constraint: setpoint and schedule changes that could hurt guests are flagged and the optimizer respects a comfort margin |
 | What about demand charges and complex tariffs? | Engine lead | Flat all-in average rates (EIA) for now; tariffs are on the roadmap |
 | Why not solar? / Are incentives included? | Engine lead | Solar is sized to the roof and priced per W; for this hotel it pays back slowly. Incentives are listed but only applied when confirmed (the federal credit's deadlines changed in 2025), so the figures are before incentives unless one is entered |
-| Where do the numbers come from? | Engine lead | EIA prices, the EIA hotel end-use survey (CBECS 2018), EIA price outlook (AEO2026) and EIA grid emissions; upgrade savings from DOE, PNNL, LBNL and the Illinois technical reference manual; the rest is labeled placeholder |
+| Where do the numbers come from? | Engine lead | EIA prices, the EIA hotel end-use survey (CBECS 2018), EIA price outlook (AEO2026), EPA eGRID2023 grid emissions by region, NOAA weather normals, NREL PVWatts solar output, the Illinois technical reference manual for upgrade savings; installed costs and solar $/W are still labeled placeholders |
 | Why hotels? | Pitch lead | They run 24/7, occupancy swings energy use, and owners often have no energy team |
 | What's next? | Pitch lead | Utility-bill calibration, live building data, multi-property optimization, offices, retail, hospitals and factories |

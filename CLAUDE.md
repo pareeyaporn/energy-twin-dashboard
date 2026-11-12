@@ -16,8 +16,9 @@ net-zero **new-build** home design. We differentiate on **existing** buildings, 
 built (`src/engine/hotel/`, `src/twin/`, the 3D twin in `src/three/`, the workspace UI, the advisor); the home engine files in `src/engine/` are legacy and unused.
 
 Hackathon: 48 hours. Built in **Lovable**, extended with **Claude Code**, synced through **GitHub**.
-Demo = one flawless 3-minute path: synthetic 100-room hotel (Chicago) → zone-level energy → occupancy 60% to 85% →
-smart room controls on → $50,000 budget → three packages → ask the advisor → before/after energy, cost and carbon.
+Demo = one flawless 6–7 minute path (script in `docs/07`): synthetic 100-room hotel (Chicago) in 3D → zone-level energy → a living
+building (seasons, day–night) → occupancy 60% to 85% → smart room controls on → $50,000 budget → three packages and the 10-year projection →
+ask the advisor → the 300-room preset → before/after energy, cost and carbon.
 **The script follows the calibrated results**, whichever upgrades perform best; never adjust calculations to fit a story.
 
 Full specs live in `/docs`. Read the relevant doc before working on an area:

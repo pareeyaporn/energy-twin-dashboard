@@ -247,12 +247,14 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
 - [ ] 10.5 Tests (hourly flows sum to the meter, Sankey layout, room and equipment mapping), screenshots, docs
 
 ## Phase 8 — Demo hardening (all)
-- [ ] 8.1 Make the three-minute path deterministic (brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
+- [ ] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
       $50,000 budget, an advisor question **chosen after calibration from what the results actually show**, closing before/after with carbon
 - [ ] 8.2 Cache the advisor answers for the demo; no console errors; no layout shift
 - [ ] 8.3 Rehearse five times in a row without a failure; record the backup video (30–45 s); test the real projector resolution
 - [ ] 8.4 [TEAM] Slides: tagline "Simulate smarter. Spend better. Save energy.", the three pillars, roadmap (P2 items), and Q&A owners
 - [ ] 8.5 Claims check: nothing says engineering-grade accuracy, verified carbon savings, guaranteed returns or real-time monitoring
+- [ ] 8.7 "Reset demo" control: restores the 100-room preset, baseline, July 3 PM, 3D home view and clears the advisor
+- [ ] 8.8 Re-run the demo figures from the engine before each rehearsal and update the script in `docs/07`
 - [ ] 8.6 Remove or hide leftover home-only code paths from the demo (home UI removed in LV9); decide whether to delete the home engine and data after the demo
 
 ## Definition of done (per task)

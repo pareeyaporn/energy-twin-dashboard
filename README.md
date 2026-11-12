@@ -35,11 +35,12 @@ installed costs, solar $/W and incentive amounts are still labeled placeholders 
 - **AI advisor:** plain-language answers from Claude, grounded in the computed results. The browser rejects any answer with a number that is
   not in the results and falls back to a template answer; nothing is invented.
 
-## Demo path (3 minutes)
-Synthetic 100-room hotel → zone-level energy → occupancy 60% to 85% → smart room controls on → $50,000 budget → three packages →
-ask the advisor → before/after energy, cost and carbon. **The script follows the calibrated results:** the advisor question and the
-featured upgrades follow the results, whichever upgrades perform best (today: LED lighting plus occupancy sensors at $50,000, about $9,100 a year,
-payback 4.4 years). Open the twin in 3D for the January-night and July-afternoon moments.
+## Demo path (6–7 minutes)
+Seven acts, scripted with timings in [docs/07](docs/07_DEMO_CHECKLIST.md): the problem → meet the twin in 3D (zones, Energy view, benchmark) →
+a living building (January night, July afternoon, energy flow) → test an operating decision (occupancy 60% to 85%, smart room controls) →
+spend a $50,000 budget (three packages, 10-year projection, why not solar) → ask the advisor → scale to the 300-room preset and close on
+before/after energy, cost and carbon. **The script follows the results**, whichever upgrades perform best (today, with the 85% scenario:
+LED lighting plus occupancy sensors, $39,600, about $10,400 a year, payback 3.8 years; on the plain baseline $9,100 a year and 4.4 years).
 
 ## Status
 

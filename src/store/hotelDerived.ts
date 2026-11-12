@@ -4,6 +4,14 @@ import {
   STRESS_TESTS,
   applyScenario,
   compareUpgrades,
+  daylight,
+  outdoorTempF,
+  solarHourKW,
+  solarSizeKw,
+  sunAzimuthDeg,
+  sunElevationDeg,
+  isSolar,
+  hotelData,
   contextFromBaseline,
   energyFlows,
   opportunitiesByZone,
@@ -191,3 +199,87 @@ const comparisonOf = memoLast((hotel: ResolvedProfile, measuredAgainst: EnergyRe
  * payback, 5- and 10-year net benefit, CO2). Same calculation as the optimizer's packages and the advisor's figures.
  */
 export const selectUpgradeComparison = (s: TwinState): UpgradeComparisonRow[] => comparisonOf(s.hotel, selectUpgradeBaseline(s), s.hotelDiscountRate);
+
+/** Everything the twin shows for the current month and hour, from the engine. Read-only; memoized. */
+export interface HourState {
+  month: number;
+  hour: number;
+  /** Modeled from NOAA monthly normal highs and lows. */
+  outdoorTempF: number;
+  sunrise: number;
+  sunset: number;
+  sunElevationDeg: number;
+  sunAzimuthDeg: number;
+  isDay: boolean;
+  rooms: { total: number; booked: number; present: number; setback: number };
+  /** That hour of a typical day of the month, by end use (site kW: electricity kW plus gas converted at 29.3 kW per therm/h). */
+  demandKW: { heating: number; cooling: number; ventilation: number; lighting: number; hotWater: number; other: number; total: number };
+  elecKW: number;
+  gasThermsPerHour: number;
+  costPerHour: number;
+  solar: { installed: boolean; sizeKw: number; kW: number; previewSizeKw: number; previewKW: number };
+}
+
+const KW_PER_THERM_H = 29.3071;
+
+const hourStateOf = memoLast(
+  (hotel: ResolvedProfile, baselineElecKWh: number, result: EnergyResult, conditions: Conditions, month: number, hour: number, solarId: string | null, solarKw: number): HourState => {
+    const p = hotel.profile;
+    const day = typicalDayProfile(result, month)[hour]!;
+    const site = (u: { elecKW: number; gasThermsPerHour: number }) => u.elecKW + u.gasThermsPerHour * KW_PER_THERM_H;
+    const e = day.byEndUse;
+    const rooms = roomOccupancyPattern(p, conditions, month, hour);
+    const dl = daylight(climateLat(hotel), month);
+    const elev = sunElevationDeg(climateLat(hotel), month, hour + 0.5);
+    const preview = solarSizeKw(p, baselineElecKWh, undefined, 'rooftop_solar');
+    const other = site(e.kitchen) + site(e.equipment) + site(e.other);
+    const demand = {
+      heating: site(e.heating),
+      cooling: site(e.cooling),
+      ventilation: site(e.ventilation),
+      lighting: site(e.lighting),
+      hotWater: site(e.hotWater),
+      other,
+    };
+    return {
+      month,
+      hour,
+      outdoorTempF: outdoorTempF(p, month, hour + 0.5),
+      sunrise: dl.sunrise,
+      sunset: dl.sunset,
+      sunElevationDeg: elev,
+      sunAzimuthDeg: sunAzimuthDeg(climateLat(hotel), month, hour + 0.5),
+      isDay: elev > 0,
+      rooms: {
+        total: rooms.length,
+        booked: rooms.filter((r) => r.state !== 'vacant').length,
+        present: rooms.filter((r) => r.state === 'occupied').length,
+        setback: rooms.filter((r) => r.setback).length,
+      },
+      demandKW: { ...demand, total: demand.heating + demand.cooling + demand.ventilation + demand.lighting + demand.hotWater + other },
+      elecKW: day.elecKW,
+      gasThermsPerHour: day.gasThermsPerHour,
+      costPerHour: day.costPerHour,
+      solar: {
+        installed: solarId !== null && solarKw > 0,
+        sizeKw: solarKw,
+        kW: solarId !== null ? solarHourKW(p, solarKw, month, hour) : 0,
+        previewSizeKw: preview,
+        previewKW: solarHourKW(p, preview, month, hour),
+      },
+    };
+  },
+);
+
+function climateLat(hotel: ResolvedProfile): number {
+  return hotelData.weather.climates[hotel.profile.climateId]?.latitude ?? 40;
+}
+
+/** The current hour of the twin: outdoor temperature (modeled), sun, rooms, demand by end use, cost and solar. */
+export const selectHourState = (s: TwinState): HourState => {
+  const d = selectDisplayed(s);
+  const ids = d.package?.evaluation.upgradeIds ?? [];
+  const solarId = ids.find((id) => isSolar(id)) ?? null;
+  const solarKw = d.package?.evaluation.sizing.solarKw ?? 0;
+  return hourStateOf(s.hotel, s.baseline.annual.elecKWh, d.result, d.conditions, s.timeMonth, s.timeHour, solarId, solarKw);
+};

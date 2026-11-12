@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ZONE_IDS } from "@/engine/hotel";
+import { renderHook } from "@testing-library/react";
+import { CLOCK_STEP_MS, useTwinClock } from "@/twin/useTwinClock";
 import { useTwin, selectCurrentCost } from "@/store/useTwin";
 import {
   selectCompare,
@@ -15,6 +17,7 @@ import {
   selectTypicalDay,
   selectZoneRows,
   selectUpgradeComparison,
+  selectHourState,
   selectUpgradeBaseline,
 } from "@/store/hotelDerived";
 
@@ -459,5 +462,41 @@ describe("upgrade comparison in the store", () => {
     get().setOptimizeOnScenario(false);
     expect(selectUpgradeComparison(get()).find((r) => r.id === "led_lighting")!.financials.annualSavings.mid).toBeCloseTo(base, 6);
     expect(selectUpgradeBaseline(get())).toBe(get().baseline);
+  });
+});
+
+describe("the twin's hour state and the Year + day clock", () => {
+  beforeEach(() => get().resetHotel());
+
+  it("describes a January night and a July afternoon from the engine", () => {
+    get().setTime({ month: 0, hour: 2 });
+    const jan = selectHourState(get());
+    expect(jan.isDay).toBe(false);
+    expect(jan.outdoorTempF).toBeLessThan(25);
+    expect(jan.solar).toMatchObject({ installed: false, kW: 0, previewKW: 0 });
+    get().setTime({ month: 6, hour: 14 });
+    const jul = selectHourState(get());
+    expect(jul.isDay).toBe(true);
+    expect(jul.outdoorTempF).toBeGreaterThan(75);
+    expect(jul.solar.installed).toBe(false);
+    expect(jul.solar.previewKW).toBeGreaterThan(0); // what a full-roof array would make, not installed
+    expect(jul.demandKW.cooling).toBeGreaterThan(jan.demandKW.cooling);
+    expect(jan.demandKW.heating).toBeGreaterThan(jul.demandKW.heating);
+    expect(selectHourState(get())).toBe(jul); // memoized
+  });
+
+  it("plays each month as one compressed day: the hour advances, then the month", () => {
+    vi.useFakeTimers();
+    get().setTime({ mode: "seasons", month: 0, hour: 22 });
+    get().setPlaying(true);
+    const { unmount } = renderHook(() => useTwinClock());
+    vi.advanceTimersByTime(Math.ceil(CLOCK_STEP_MS.seasons) + 1);
+    expect(get().timeHour).toBe(23);
+    vi.advanceTimersByTime(Math.ceil(CLOCK_STEP_MS.seasons) + 1);
+    expect(get().timeHour).toBe(0);
+    expect(get().timeMonth).toBe(1);
+    unmount();
+    get().setPlaying(false);
+    vi.useRealTimers();
   });
 });

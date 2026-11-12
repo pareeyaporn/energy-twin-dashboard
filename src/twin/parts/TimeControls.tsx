@@ -21,12 +21,12 @@ export function TimeControls() {
   const monthCost = displayed.result.months[month]?.totals.cost ?? 0;
   const reduce = useTwin((s) => s.reduceEffects);
 
-  const day = mode === "day";
+  const day = mode === "day" || mode === "seasons";
   return (
     <section aria-label="Time controls" className="rounded-xl border border-glass-border bg-glass p-3">
       <div className="flex flex-wrap items-center gap-2">
         <div role="group" aria-label="Time mode" className="flex overflow-hidden rounded-lg border border-glass-border text-sm">
-          {(["day", "year"] as const).map((m) => (
+          {(["seasons", "day", "year"] as const).map((m) => (
             <button
               key={m}
               type="button"
@@ -34,7 +34,7 @@ export function TimeControls() {
               onClick={() => setTime({ mode: m })}
               className={`px-3 py-1 ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"}`}
             >
-              {m === "day" ? "Typical day" : "Year"}
+              {m === "day" ? "Typical day" : m === "year" ? "Year" : "Year + day"}
             </button>
           ))}
         </div>

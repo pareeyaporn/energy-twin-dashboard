@@ -290,7 +290,7 @@ export interface HotelData {
     verified: boolean;
   };
   weather: {
-    climates: Record<string, { label: string; meanTempF: number[]; balancePointF: number; latitude?: number; solar?: ClimateSolar }>;
+    climates: Record<string, { label: string; meanTempF: number[]; highTempF?: number[]; lowTempF?: number[]; balancePointF: number; latitude?: number; solar?: ClimateSolar }>;
     cityToClimate: Record<string, string>;
     defaultClimate: string;
     source: string;

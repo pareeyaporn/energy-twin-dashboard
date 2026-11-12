@@ -40,13 +40,41 @@
         ],
         "source": "NLR (formerly NREL) PVWatts v8 API (model version 8.5.0), Chicago 41.88 N 87.63 W, NSRDB PSM V3 typical meteorological year (tmy-2020), 1 kW DC, standard module, open rack, azimuth 180, 14.08% system losses: 1,193.7 kWh per kW a year at 5 degrees tilt (low), 1,240.2 at 10 degrees (mid) and 1,307.2 at 20 degrees (high), typical flat commercial roof tilts. Monthly split from the 10-degree run. Retrieved November 2026 from developer.nlr.gov.",
         "verified": true
-      }
+      },
+      "highTempF": [
+        31.6,
+        35.7,
+        47.0,
+        59.0,
+        70.5,
+        80.4,
+        84.5,
+        82.5,
+        75.5,
+        62.7,
+        48.4,
+        36.6
+      ],
+      "lowTempF": [
+        18.8,
+        21.8,
+        31.0,
+        40.3,
+        50.6,
+        60.8,
+        66.4,
+        65.1,
+        57.1,
+        45.4,
+        34.1,
+        24.4
+      ]
     }
   },
   "cityToClimate": {
     "chicago,il": "chicago"
   },
   "defaultClimate": "chicago",
-  "source": "Temperatures: NOAA NCEI U.S. Climate Normals 1991-2020, monthly, Chicago O'Hare International Airport (USW00094846), MLY-TAVG-NORMAL (annual normals 5,974 heating and 1,003 cooling degree days, base 65 F; Midway: 5,753 and 1,111). The engine computes degree days from monthly means with a 65 F balance point, which gives fewer degree days than the daily normals. Solar: see climates.chicago.solar.",
+  "source": "Temperatures: NOAA NCEI U.S. Climate Normals 1991-2020, monthly, Chicago O'Hare International Airport (USW00094846), MLY-TAVG-NORMAL, with the monthly normal highs and lows (MLY-TMAX-NORMAL, MLY-TMIN-NORMAL) used for the modeled hourly temperature (annual normals 5,974 heating and 1,003 cooling degree days, base 65 F; Midway: 5,753 and 1,111). The engine computes degree days from monthly means with a 65 F balance point, which gives fewer degree days than the daily normals. Solar: see climates.chicago.solar.",
   "verified": true
 }

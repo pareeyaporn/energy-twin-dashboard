@@ -50,7 +50,8 @@ export interface HomeForm {
 }
 
 export type TwinLayer = "zones" | "rooms" | "equipment" | "flow";
-export type TimeMode = "day" | "year";
+/** "day": hours of a typical day; "year": month by month; "seasons": each month plays one compressed day (hour by hour, then the next month). */
+export type TimeMode = "day" | "year" | "seasons";
 export type CompareMode = "before" | "after" | "split";
 
 export interface AdvisorMessage {

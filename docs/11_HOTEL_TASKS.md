@@ -134,7 +134,7 @@ a bill-calibration view, a 12-month forecast band, 3D, and live IoT.
 - [x] 5.8 Ghost upgrades: applying a package shows it on the twin (solar on the roof, LED glow, thermostat icons) with a before/after split view
 - [x] 5.9 Stress-test buttons (heat wave, cold snap, conference week, +20% price): trigger a scenario and show the twin reacting
 - [x] 5.10 Respect `reduceEffects`; keyboard and screen-reader support; component tests for layer switching, zone selection and the time scrubber through the store
-- [ ] 5.11 P2, only if time: lightweight 3D with React Three Fiber
+- [ ] 5.11 Lightweight 3D with React Three Fiber — now planned in detail as **Phase 9** below
       (Built: layered diagram, time scrubber, meter, flow, ghost upgrades, stress tests. Not built: count-up animation of the header numbers; colors fade but numbers do not animate.)
 
 ## Phase 6 — AI advisor (P1) [CC]
@@ -176,6 +176,61 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [x] 7b.5 Calibrate smart room controls to the IL-TRM 4.4.8 Chicago-hotel range (guest-room fan saving while empty); now $1,715 a year for 100 rooms
 - [x] 7b.6 Research pass 2: PVWatts, IL-TRM v14 (GREM, lighting controls, lighting-HVAC interaction, showerheads), eGRID, EPA gas factor, CBECS benchmark. Remaining items are in `docs/08` (A1–A5, B1–B7)
 - [ ] 7b.7 Small UI fixes: one "some inputs are defaults" note instead of a tag on every number; compact number row on mobile; twin split-view labels (CC)
+
+## Phase 9 — 3D digital twin with seasons and day–night (CC; decided November 2026)
+
+A new visualization layer on top of the existing engine and store. **No rewrite of the simulation or the optimizer**; every number shown comes
+from the engine. Decisions: 3D is the default twin view on desktop (2D on phones, without WebGL, or with "reduce effects"); hourly outdoor
+temperature is modeled from NOAA monthly normal highs and lows and labeled "modeled"; solar output shows only for an applied solar package, and
+clicking the rooftop-solar zone without one shows a translucent full-roof preview labeled "Not installed — potential".
+
+### 9A. Clock and engine additions (one pull request)
+- [x] 9.1 Weather data: add NOAA 1991–2020 monthly normal highs and lows (MLY-TMAX-NORMAL, MLY-TMIN-NORMAL, Chicago O'Hare) to `weather.json`,
+      with the source
+- [x] 9.2 Engine `outdoorTempF(profile, month, hour)`: a standard daily curve between the month's normal low (around sunrise) and high (mid
+      afternoon); pure, tested, labeled modeled
+- [x] 9.3 Engine `sunTimes(profile, month)` and `sunElevation(profile, month, hour)`: sunrise, sunset and sun height from the latitude and the
+      mid-month declination (the same math as the solar model), so daylight, sky and solar output agree
+- [x] 9.4 Engine: `typicalDayProfile` also reports each hour's energy by end use (heating, cooling, ventilation, lighting, hot water, kitchen,
+      equipment, other) — additive; the hours still reconcile to the monthly totals
+- [x] 9.5 Engine `solarHourKW(...)`: hourly generation of the applied array (size × location yield × month share × daylight shape) and the
+      same for a full-roof preview; zero at night
+- [x] 9.6 Store selector `selectHourState`: one object for the current month and hour — outdoor temperature, sunrise/sunset, day or night,
+      occupancy (booked, present), demand by end use, electricity kW, gas therms/h, cost per hour, solar (installed kW or "none", preview kW) —
+      memoized; read-only
+- [x] 9.7 One synchronized clock: a new playback mode **"Year + day"** in which each month plays one compressed 24-hour day (about 4 s a
+      month at 1×, a year in about 48 s); the existing "Typical day" and "Year" modes stay
+- [x] 9.8 Tests for all of the above (temperature at its normal high and low, sunrise later in winter, zero solar at night, end uses summing
+      to the hour's total, the clock advancing hour then month)
+
+### 9B. The 3D hotel (one pull request)
+- [ ] 9.9 `src/three/` scene, lazy-loaded (its code downloads only when 3D is shown), client-only (no server rendering), WebGL detection with
+      a fallback to the 2D view and a note
+- [ ] 9.10 Procedural building from the profile (`layout.ts`): podium with lobby and restaurant, guest floors with one window per room, a
+      hallway core, rooftop HVAC unit with a turning fan, hot-water room, ground; windows drawn as one batch
+- [ ] 9.11 Energy colors from the store: zones colored by cost on the same blue → amber → red scale as 2D; the HVAC unit tinted red when
+      heating and blue when cooling, in proportion to that hour's demand
+- [ ] 9.12 Windows from `selectRooms`: lit when a guest is in, dim when booked and out, dark when vacant; set-back rooms marked
+- [ ] 9.13 Interaction: orbit (rotate), zoom, click to select guest rooms, lobby, restaurant, hallways, HVAC, hot water or rooftop solar; the
+      selection highlights and the existing zone panel shows energy, cost, drivers and opportunities; keyboard alternative via the zone list
+- [ ] 9.14 Exploded-floors (cutaway) toggle that separates the floors to show the interior
+- [ ] 9.15 Solar: solid panels at the applied package's size (quarter, half or full roof); otherwise the translucent "Not installed —
+      potential" preview when the solar zone is selected
+- [ ] 9.16 2D / 3D switch in the twin; 3D default on desktop
+
+### 9C. Seasons, day–night and controls (one pull request)
+- [ ] 9.17 Sky and light from 9.3: daytime sun with soft shadows, warm sunrise and sunset light, dark sky with moonlight at night
+- [ ] 9.18 Seasons from the month: winter snow on the ground and roof, bare trees and light snowfall; spring and summer green trees; fall orange
+      foliage (procedural trees drawn as one batch; snowfall as one particle system)
+- [ ] 9.19 Live readout beside the scene from `selectHourState`: date and time, outdoor temperature (modeled), occupancy, heating, cooling and
+      lighting demand, solar output, cost per hour
+- [ ] 9.20 Controls: play/pause, month picker, time-of-day slider, speed, camera reset, and season presets ("January night", "April morning",
+      "July afternoon", "October evening")
+- [ ] 9.21 Count-up animation for the twin's header numbers
+- [ ] 9.22 Performance and accessibility: no auto-rotate, particles or count-up with "reduce effects"; one shadow-casting light; smooth on a
+      typical laptop; responsive layout; screen-reader summary of the scene
+- [ ] 9.23 Verify with screenshots (January night, July afternoon), update `docs/04` (3D spec) and `docs/13`, and record anything visual-only
+      (scenery) as such
 
 ## Phase 8 — Demo hardening (all)
 - [ ] 8.1 Make the three-minute path deterministic (brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

@@ -1,5 +1,9 @@
 # 09 — Pivot: from homes to commercial buildings (offices and retail)
 
+> **Superseded.** The team chose **hotels** as the first commercial segment, with an operational digital twin.
+> See [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md) (the brief) and [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md) (the task list).
+> This file is kept for the general home-to-commercial change inventory; where it conflicts, the hotel docs win.
+
 We are moving the product from single-family homes to **commercial buildings, starting with offices and retail**.
 This is the change list. Items marked **(to confirm)** are proposals, not decisions.
 

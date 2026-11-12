@@ -1,45 +1,50 @@
-# 07 — Demo checklist
+# 07 — Demo checklist (hotel product)
+
+The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task numbers refer to [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md).
 
 ## Freeze rules
 
-- **Hour 36:** 3D frozen (bug fixes only).
+- **Hour 36:** twin and simulator frozen (bug fixes only).
 - **Hour 40:** everything frozen. Only fixes for things that break the demo path.
-- **Hour 34:** record a 30–45 s screen capture of the full wow sequence. Put it in the slides as a backup.
+- **Hour 34:** record a 30–45 s screen capture of the full sequence. Put it in the slides as a backup.
+- Do not sacrifice a working P0 feature for P2 polish.
 
 ## Before rehearsals
 
-- [ ] All data placeholders replaced and `"verified": true` (or clearly labeled "estimated" on screen)
-- [ ] Maya's results sanity-checked against Rewiring America's planner; note the comparison for Q&A
-- [ ] Dollar figures in the pitch script match what the app actually shows
+- [ ] All data placeholders replaced and `"verified": true`, or clearly labeled "estimated" or "synthetic" on screen
+- [ ] The demo hotel's results sanity-checked against an ENERGY STAR Portfolio Manager benchmark; the comparison is noted for Q&A
+- [ ] Dollar, kWh and carbon figures in the pitch script match what the app shows
 - [ ] `npm run build` passes; no console errors on the demo path
 - [ ] Published Lovable URL works in an incognito window
-- [ ] Explanation for Maya + $15k + best value is cached
+- [ ] Advisor answers for the demo questions are cached, and the template fallback is tested by turning the function off
+- [ ] Claims check: nothing says engineering-grade accuracy, verified carbon savings, guaranteed returns or real-time monitoring
 
 ## On the demo laptop
 
 - [ ] Plugged in, battery saver off, notifications off (Do Not Disturb)
 - [ ] Browser zoom 100%, full screen, bookmarks bar hidden
-- [ ] Tested on the actual external screen / projector resolution
-- [ ] 60 fps in Thermal Vision with leaks on; if not, turn on "Reduce effects" and re-check
-- [ ] Phone hotspot ready if venue Wi-Fi fails (app should work offline after load except AI — cached)
+- [ ] Tested on the actual external screen or projector resolution
+- [ ] Phone hotspot ready if venue Wi-Fi fails (everything works offline after load except a live AI answer, which is cached)
 - [ ] Backup video open in another tab
-- [ ] 2D fallback tested (disable WebGL once to confirm it renders)
 
 ## Demo path (3 minutes) — run 5 times in a row without a failure
 
-1. Pick Maya's preset → house assembles
-2. Thermal Vision on → hover attic → card shows its $/yr loss
-3. Budget $15,000, goal "Best 15-year value" → Find my best upgrades → 32 combinations
-4. Package 1 auto-applies → install sequence → bill counter drops
-5. Open plan drawer → explanation + sources
-6. Switch to slides: roadmap + metrics
+1. Introduce a hotel owner with rising energy costs and unclear upgrade choices (30 s)
+2. Open the synthetic 100-room Chicago hotel and show zone-level energy and cost
+3. Change occupancy from 60% to 85%, then enable smart HVAC controls; show the calculated differences and the "why it changed" panel
+4. Enter a $50,000 budget, generate the three packages, compare cost, savings, payback, five-year net and carbon
+5. Ask the advisor: "Why recommend smart thermostats over solar?" and point out that the answer uses the model's numbers
+6. Close with before/after energy, cost and estimated carbon. Core message: *Energy Twin helps hotel owners test energy decisions before spending real money.*
 
 ## Q&A prep
 
 | Question | Answer owner | Short answer |
 | --- | --- | --- |
-| How accurate are the savings? | Engine lead | Public data (ResStock, EIA), shown as ranges; compared with Rewiring America; planning estimate, not an audit |
-| How is this different from Rewiring America? | Pitch lead | Best combination for a fixed budget, built for new buyers, visual explanation of where money leaks |
-| Why would partners pay if you're neutral? | Pitch lead | Ranking ignores who pays; agents/lenders want engaged buyers; contractors want ready-to-buy leads |
-| What if prices fall? | Engine lead | Price-growth slider; insulation still pays back at 0% growth |
-| What's next? | Pitch lead | Rebate API, bill upload, then landlords and schools |
+| How accurate are the savings? | Engine lead | Planning estimates from public and benchmark data, shown as ranges and labeled synthetic where they are; not an engineering audit. Compared against a benchmark; calibration to real bills is on the roadmap |
+| How is this different from Eden? | Pitch lead | Eden designs new net-zero single-family homes for architects and builders. We help operators of **existing** buildings simulate operating decisions and pick investments |
+| How is it different from ENERGY STAR Portfolio Manager? | Pitch lead | Portfolio Manager benchmarks past performance. We simulate what happens next and rank what to buy within a budget |
+| Does the AI make up numbers? | Engine lead | No. A deterministic engine computes everything; the AI only explains, and the app rejects any answer with a number that is not in the results |
+| How do you handle guest comfort? | Engine lead | Comfort is a constraint: setpoint and schedule changes that could hurt guests are flagged and the optimizer respects a comfort margin |
+| What about demand charges and complex tariffs? | Engine lead | Flat rates for now; tariffs are on the roadmap |
+| Why hotels? | Pitch lead | They run 24/7, occupancy swings energy use, and owners often have no energy team |
+| What's next? | Pitch lead | Utility-bill calibration, live building data, multi-property optimization, offices, retail, hospitals and factories |

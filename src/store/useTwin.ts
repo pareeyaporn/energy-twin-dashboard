@@ -375,6 +375,8 @@ export const useTwin = create<TwinState>((set, get) => ({
         scenarioResult: s.scenarioResult,
         plan: s.hotelPlan,
         syntheticDemo: s.hotelPresetId !== null,
+        // Same rule as the optimizer and the comparison cards (selectUpgradeBaseline).
+        measureUpgradesOnScenario: s.optimizeOnScenario,
       },
       q,
     );

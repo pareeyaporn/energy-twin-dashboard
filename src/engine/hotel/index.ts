@@ -38,8 +38,20 @@ export {
 } from './upgrades';
 export type { UpgradeContext } from './upgrades';
 export { upgradeCost, packageCost } from './costs';
-export { calculateFinancialMetrics, DEFAULT_FINANCE } from './finance';
-export { evaluatePackage } from './package';
+export {
+  calculateFinancialMetrics,
+  DEFAULT_FINANCE,
+  BENEFIT_YEARS,
+  financialBreakdown,
+  incentiveLines,
+  netBenefitOver,
+  savingsInYear,
+} from './finance';
+export type { IncentiveOverrides, SavingsStream } from './finance';
+export { evaluatePackage, packageMetrics, solarDegradation } from './package';
+export { compareUpgrades } from './comparison';
+export type { UpgradeComparisonRow } from './comparison';
+export { climateSolar, regionalSolar, solarCostPerW, exportCreditPerKWh, solarYield, daylightShape } from './solar';
 export type { EvaluateOptions } from './package';
 export { optimizeInvestmentPortfolio } from './optimizer';
 export { explainPortfolio } from './explain';

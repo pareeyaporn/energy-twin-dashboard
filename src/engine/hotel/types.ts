@@ -281,13 +281,14 @@ export interface HotelData {
     verified: boolean;
   };
   weather: {
-    climates: Record<string, { label: string; meanTempF: number[]; balancePointF: number }>;
+    climates: Record<string, { label: string; meanTempF: number[]; balancePointF: number; latitude?: number; solar?: ClimateSolar }>;
     cityToClimate: Record<string, string>;
     defaultClimate: string;
     source: string;
     verified: boolean;
   };
-  rates: Record<string, { commercialElecPerKWh: number; commercialGasPerTherm: number; source: string; verified: boolean }>;
+  rates: Record<string, { commercialElecPerKWh: number; commercialGasPerTherm: number; solar?: RegionalSolar; source: string; verified: boolean }>;
+  incentives: { incentives: IncentiveProgram[]; source: string; verified: boolean };
   emissions: {
     elecKgCO2ePerKWh: Record<string, number>;
     gasKgCO2ePerTherm: number;
@@ -339,6 +340,95 @@ export type UpgradeId =
 /** low = pessimistic savings (and cheapest-to-install for cost ranges are separate); high = optimistic. */
 export type SavingsScenario = 'low' | 'mid' | 'high';
 
+/** Location-specific solar output: kWh per kW (DC) per year and the share produced in each month. */
+export interface ClimateSolar {
+  kWhPerKwYear: Range3;
+  monthlyShare: number[];
+  source: string;
+  verified: boolean;
+}
+
+/** Regional solar pricing: installed cost per W (DC) by system size, and the credit for each kWh exported (null = not researched, so $0). */
+export interface RegionalSolar {
+  installedCostPerW: ({ upToKw: number | null } & Range3)[];
+  exportCreditPerKWh: number | null;
+  source: string;
+  verified: boolean;
+}
+
+/** A program that may lower an upgrade's upfront cost. Only applied when its amount and eligibility are confirmed. */
+export interface IncentiveProgram {
+  id: string;
+  label: string;
+  appliesTo: UpgradeId[];
+  /** percent_of_cost: value is a share (0.3 = 30%); per_kw: $ per kW of solar; per_room: $ per guest room; fixed: $. */
+  kind: 'percent_of_cost' | 'per_kw' | 'per_room' | 'fixed';
+  value: number | null;
+  applied: boolean;
+  note: string;
+  source: string;
+  verified: boolean;
+}
+
+/** One incentive line on an upgrade's financial breakdown. */
+export interface IncentiveLine {
+  id: string;
+  label: string;
+  /** Dollar amount at the mid cost; 0 when not applied. */
+  amount: number;
+  applied: boolean;
+  /** "program" (from the incentives data) or "user" (an amount the user entered). */
+  origin: 'program' | 'user';
+  note: string;
+  source: string;
+}
+
+/**
+ * The same financial breakdown for every upgrade and package, so they can be compared fairly. All dollar values are estimates.
+ * Net benefit over N years = sum of yearly savings (first-year savings, solar output falling by its degradation rate, energy prices
+ * rising by the price growth rate) minus the net upfront investment. Ranges pair low savings with high cost and the reverse.
+ */
+export interface FinancialBreakdown {
+  /** 1. Installed cost before incentives. */
+  grossCost: Range3;
+  /** 2. Incentives considered (applied or listed as possible but not applied). */
+  incentives: IncentiveLine[];
+  /** Sum of the applied incentives at the mid cost. */
+  incentivesTotal: number;
+  /** 3. Gross cost minus applied incentives. */
+  netInvestment: Range3;
+  /** 4. Energy saved each year (mid), including solar electricity the hotel no longer buys. */
+  annualEnergySavings: { elecKWh: number; gasTherms: number; siteKBtu: number };
+  /** 5. Money saved each year (first year), including any export credit. */
+  annualSavings: Range3;
+  /** 6. Net investment (mid) divided by first-year savings (mid); null if it does not save money. */
+  simplePaybackYears: number | null;
+  /** 7. Net financial benefit over 5 and 10 years. */
+  netBenefit5: Range3;
+  netBenefit10: Range3;
+  /** 8. CO2 avoided each year, kg. */
+  carbonAvoidedKgPerYear: Range3;
+  /** Solar details when the upgrade includes solar. */
+  solar: SolarDetails | null;
+  /** Plain-language assumptions behind these numbers (shown next to them). */
+  assumptions: string[];
+}
+
+export interface SolarDetails {
+  sizeKw: number;
+  /** Yearly generation (mid). */
+  generationKWh: number;
+  /** Used by the hotel as it is produced. */
+  selfConsumedKWh: number;
+  /** Sent to the grid. */
+  exportedKWh: number;
+  /** Credit per exported kWh used ($0 when not researched). */
+  exportCreditPerKWh: number;
+  /** Installed cost per W used for this size and region (mid). */
+  installedCostPerW: number;
+  degradationPerYear: number;
+}
+
 export interface Range3 {
   low: number;
   mid: number;
@@ -373,7 +463,6 @@ export interface UpgradeDef {
 
 export interface UpgradesData {
   interaction: { coolingOffsetPerSavedLightingKBtu: number; heatingPenaltyPerSavedLightingKBtu: number };
-  solarMonthlyShape: number[];
   comfortScore: { minorPenalty: number; flagPenalty: number };
   upgrades: UpgradeDef[];
   source: string;
@@ -390,7 +479,13 @@ export interface UpgradeSizing {
   /** Share of baseline heating and cooling weather load left before the HVAC step (1 = no reduction). Sizes the equipment cost. */
   hvacSizeFactor: number;
   solarKw: number;
+  /** Solar electricity the hotel uses itself (no longer bought), kWh a year. */
   solarKWhYear: number;
+  /** Total solar generation and the part exported, kWh a year. */
+  solarGenerationKWhYear: number;
+  solarExportKWhYear: number;
+  /** Dollars a year from solar: avoided purchases plus export credit. The part of the savings that degrades with the panels. */
+  solarValuePerYear: number;
 }
 
 export interface UpgradeOutcome {
@@ -413,7 +508,10 @@ export interface FinancialAssumptions {
 }
 
 export interface FinancialMetrics {
+  /** Gross installed cost (mid). The budget is checked against this, because most incentives arrive after installation. */
   cost: number; // mid
+  /** Gross cost minus applied incentives (mid). Payback, net benefit, NPV and ROI use this. */
+  netInvestment: number;
   annualSavings: number; // mid, first year
   paybackYears: number | null; // null if savings <= 0
   /** Sum of yearly savings (with price growth) over the horizon minus cost. No residual value. */
@@ -449,6 +547,8 @@ export interface PackageEvaluation {
   newAnnualCost: number;
   carbonAvoidedKg: Range3;
   metrics: FinancialMetrics;
+  /** The common financial breakdown (gross cost, incentives, net investment, energy and money saved, payback, 5- and 10-year benefit, CO2). */
+  financials: FinancialBreakdown;
   comfort: PackageComfort;
   sizing: UpgradeSizing;
   lineItems: PackageLineItem[];
@@ -470,6 +570,8 @@ export interface OptimizerOptions {
   /** Packages must save at least this share of the current bill to be recommended (so a trivial package is not "fastest"). */
   minSavingsShare?: number;
   assumptions?: Partial<FinancialAssumptions>;
+  /** Confirmed incentive amounts entered by the user, per upgrade (dollars). */
+  incentives?: Partial<Record<UpgradeId, number>>;
   /**
    * Optimize against the hotel under this what-if (savings, payback and ranking are all relative to it). With a plain profile the
    * context is built for you; with a prepared context (`prepareScenarioContext`) it is only recorded in the result.

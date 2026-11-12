@@ -138,41 +138,67 @@ savings are recomputed from the hotel's own loads and **never added as percentag
 - **Energy management** cuts HVAC in the plant, lobby and hallways 4, 7 or 10%. It reaches guest rooms (half the percentage) only when smart room controls are absent; with them the two **overlap** and guest rooms get nothing extra.
 - **HVAC equipment** cuts heating 8, 12 or 16% and cooling 10, 15 or 22%. It is **sized from the reduced load**: the size factor is the share of baseline heating and cooling weather load left before this step (0.6 to 1).
 - **Water heating** cuts hot-water energy 15, 22 or 30%.
-- **Solar** is sized as the smaller of the usable roof (50% of one floor's footprint at 100 ft² per kW) and 10% of electricity use. Each month it offsets at most what the hotel uses (no export credit), using a monthly production shape and 1,100, 1,200 or 1,300 kWh per kW per year.
+- **Solar** (`solar.ts`) is sized to the usable roof (50% of one floor's footprint at 100 ft² per kW), never above what would cover the hotel's yearly electricity use.
+  Output comes from the **climate's** solar data (`weather.json`: kWh per kW per year, low/mid/high, and the monthly split). For each month a typical day is built:
+  generation follows a half-sine between sunrise and sunset (day length from the latitude and the sun's declination), the hotel's load follows its hourly end-use shapes
+  after the other upgrades, and each hour the hotel uses `min(generation, load)`; the rest is **exported** and credited at the **region's export credit** (`rates.json`;
+  `null` = not researched, so $0). Savings = self-used kWh × electricity rate + exported kWh × export credit. Panel output falls 0.5% a year (Jordan and Kurtz 2013, to verify).
+  The typical-day shape ignores day-to-day weather, so the export share is an estimate. Operation and maintenance and inverter replacement are not included.
 
 **Dependencies and exclusions.** The data can name `requires` and `excludes` per upgrade; the engine rejects invalid sets. None are set today (energy management and smart controls overlap rather than depend on each other).
 Smart room controls are ineligible if the hotel already has them.
 
 **Costs (`upgradeCost`, `packageCost`).** Cost = fixed + per room + per floor area + per roof area + per common-area floor area + per kW, each as low, mid and high. HVAC equipment scales its floor-area part by the size factor.
-Equipment size and cost come from the mid scenario so they do not change with the savings scenario. Incentives are 0.
+Solar adds the **region's installed cost per W** for its size (`rates.json`, size tiers). Equipment size and cost come from the mid scenario so they do not change
+with the savings scenario. This is the **gross** cost; incentives are subtracted in the breakdown below, and the **budget is checked against the gross cost** because most
+incentives arrive after installation.
 
-**Financial metrics (`calculateFinancialMetrics`)** at mid, with 2% price growth, a 3% discount rate and the profile's horizon (default 5 years):
-payback = cost / first-year savings (none if savings are not positive); five-year **net benefit** = Σ yearly savings with price growth − cost (nominal, no residual value);
-NPV = the same, discounted; NPV with residual adds the remaining life of long-lived equipment; ROI = net benefit / cost; carbon avoided per year and over the horizon; remaining budget.
+**One savings stream for every figure (`finance.ts`).** Savings in year *t* = (non-solar savings + solar savings × (1 − 0.5%)^(t−1)) × (1 + 2%)^(t−1), where the
+2% price growth (and the 3% discount rate used only for NPV) are placeholders. Every metric below uses this stream and the **net investment** = gross cost − applied incentives.
+
+**Financial metrics (`calculateFinancialMetrics`, `packageMetrics`)** at mid and the profile's horizon (default 5 years): payback = net investment / first-year savings;
+net benefit = Σ yearly savings − net investment (nominal, no residual value); NPV = the same, discounted; NPV with residual adds the remaining life of long-lived equipment;
+ROI = net benefit / net investment; carbon avoided; remaining budget = budget − gross cost. The optimizer ranks with `packageMetrics`, the same function `evaluatePackage` reports.
+
+**The common breakdown (`financialBreakdown`, on every `PackageEvaluation` as `financials`).** For every upgrade and package, solar included:
+1. gross installation cost (low, mid, high); 2. incentives, each listed with its source and marked applied or not; 3. net upfront investment; 4. annual energy saved
+(kWh electricity and therms gas, so an upgrade that adds heating shows negative therms); 5. annual money saved (low, mid, high; including any export credit);
+6. simple payback; 7. five- and ten-year net financial benefit (low pairs low savings with high cost, high the reverse); 8. CO2 avoided per year; plus solar details
+(size, generation, self-used, exported, $/W, export credit, degradation) and plain-language assumptions.
+
+**Incentives (`incentives.json`, `incentiveLines`).** Programs are listed per upgrade (federal Section 48E credit and Illinois Shines for solar, ComEd and Peoples Gas
+efficiency programs for the rest). **None is applied** until the data marks it applied and verified with a value: no amounts are invented. A user can enter a confirmed amount
+per upgrade (`incentives` option), which replaces program amounts for that upgrade.
+
+**Upgrade comparison (`compareUpgrades`, store `selectUpgradeComparison`).** Every eligible upgrade evaluated alone with `evaluatePackage`, against the same situation the
+optimizer uses (the what-if when "optimize for this scenario" is on, else the baseline). The advisor's upgrade figures and the zone opportunities come from the same rows,
+so the cards, the optimizer and the advisor cannot disagree. Tests in `__tests__/financials.test.ts` check this.
 
 **Comfort (`comfortFor`).** Score starts at 1; each upgrade with a minor comfort impact costs 0.05 and each warning flag 0.15. Notes list the impacts and any condition flags
 (smart controls add the recovery-time note). The optimizer will be able to require a minimum score.
 
 **`evaluatePackage`** returns the cost range, annual savings (low, mid, high), new annual cost, carbon avoided, metrics, comfort, sizing and per-item marginal savings (which sum to the package savings and depend on the fixed order).
 
-### Demo hotel, single upgrades (mid; synthetic placeholders)
+### Demo hotel, single upgrades (mid; synthetic placeholders, no incentives applied)
 
-| Upgrade | Cost | Saves per year (low to high) | Payback |
-| --- | --- | --- | --- |
-| Occupancy sensors | $6,600 | $2,478 ($1,469 to $3,486) | 2.7 years |
-| LED lighting | $33,000 | $10,757 ($8,367 to $13,148) | 3.1 years |
-| Water heating and low-flow | $22,000 | $3,239 | 6.8 years |
-| Energy management | $26,000 | $2,570 | 10.1 years |
-| Smart room controls | $26,500 | $1,645 ($987 to $2,303) | 16.1 years |
-| Insulation | $38,500 | $2,328 | 16.5 years |
-| Rooftop solar (55 kW) | $154,000 | $9,273 | 16.6 years |
-| HVAC equipment | $110,000 | $4,036 | 27.3 years |
+| Upgrade | Gross = net cost | kWh / yr | therms / yr | $ / yr | Payback | 5-year net | 10-year net | t CO2 / yr |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Occupancy sensors | $6,600 | 18,363 | −110 | $2,478 | 2.7 y | $6,294 | $20,530 | 3.7 |
+| LED lighting | $33,000 | 79,838 | −495 | $10,757 | 3.1 y | $22,980 | $84,787 | 15.8 |
+| Water heating and low-flow | $22,000 | 12,118 | 1,654 | $3,239 | 6.8 y | −$5,144 | $13,466 | 11.6 |
+| Energy management | $26,000 | 13,961 | 656 | $2,570 | 10.1 y | −$12,623 | $2,146 | 6.7 |
+| Insulation | $38,500 | 10,678 | 891 | $2,328 | 16.5 y | −$26,387 | −$13,014 | 7.2 |
+| Rooftop solar (55 kW, 66,000 kWh, all used on site) | $154,000 | 66,000 | 0 | $9,273 | 16.6 y | −$106,233 | −$54,799 | 15.3 |
+| Smart room controls | $26,500 | 6,761 | 309 | $1,237 | 21.4 y | −$20,061 | −$12,952 | 3.2 |
+| HVAC equipment | $110,000 | 19,924 | 1,332 | $4,036 | 27.3 y | −$88,995 | −$65,804 | 11.7 |
+
+Carbon uses the EIA Illinois generation rate (0.231 kg CO2 per kWh); the demo hotel's baseline is about 309 t CO2 a year.
 
 LED lighting plus occupancy sensors costs $39,600, saves $12,159 a year (payback 3.3 years, five-year net benefit about $23,700). The full package costs $396,000 and saves $33,700.
 All 256 combinations evaluate in about 0.25 seconds.
 
 ### Limits of this version
-- **Smart room controls pay back slowly (16 years)** because their modeled savings are small (see section 7). That is a calibration question, not a product conclusion.
+- **Smart room controls pay back slowly (21 years)** because their modeled savings are small (see section 7) and setback recovery is counted. That is a calibration question, not a product conclusion.
 - **Solar costs more than a $50,000 budget** at the modeled size, so it only appears with a larger budget. A smaller array option is not modeled.
 - **No HVAC alternatives** (for example a heat pump) and no heat-pump water heater, so there are no mutually exclusive options yet.
 - All savings, costs, lifetimes and interaction factors are placeholders until Phase 7.

@@ -11,7 +11,8 @@ research is task 7.13 in [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md); the model is de
 | File | Status |
 | --- | --- |
 | `rates.json` | **Researched** (EIA commercial prices for Illinois and the U.S.). Still to confirm the demand-charge caveat below |
-| `emissions.json` | Gas factor recalled from the EPA hub but not re-checked; **grid factor is illustrative** |
+| `emissions.json` | **Electricity researched** (EIA State Electricity Profiles 2024: Illinois 510 lbs CO2/MWh, U.S. 785); generation-based, so the eGRID subregion is still to check. Gas factor recalled from the EPA hub, not re-checked |
+| `incentives.json` | Programs listed, **no amounts**: nothing is applied until confirmed |
 | `weather.json` | Chicago monthly temperatures **from memory**, unverified |
 | `defaults.json`, `shapes.json`, `equipment.json` | **Placeholders**, not researched |
 | `upgrades.json` | **Placeholders**: every cost, savings value, lifetime, interaction factor and solar parameter is my estimate |
@@ -20,7 +21,9 @@ research is task 7.13 in [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md); the model is de
 Priority **A** = changes the demo story or the optimizer's ranking. Do these first.
 
 ## Network domains to allow (Environment, Network access)
-`epa.gov`, `noaa.gov`, `nrel.gov`, `energystar.gov` (EIA is already allowed; `energy.gov` and `openei.org` help for case studies and tariffs).
+`epa.gov`, `noaa.gov`, `nrel.gov` and **`developer.nrel.gov`** (PVWatts API), `energystar.gov`, `emp.lbl.gov` (Tracking the Sun solar prices), `dsireusa.org` and `irs.gov`
+(incentives), `comed.com`, `peoplesgasdelivery.com` and `illinoisshines.com` (utility rebates, export credit, REC payments). EIA is already allowed; `energy.gov` and `openei.org`
+help for case studies and tariffs.
 
 ## 1. Upgrades (`upgrades.json`) — priority A
 For each upgrade find **low, mid and high** values. Sources: NREL ComStock, DOE Better Buildings hotel case studies, ENERGY STAR hotel guidance, utility program filings, vendor quotes.
@@ -28,15 +31,19 @@ For each upgrade find **low, mid and high** values. Sources: NREL ComStock, DOE 
 - [ ] **A. Smart guest-room thermostats and occupancy sensing:** savings as a share of guest-room HVAC energy (setback degrees, ramp and recovery); installed cost per room and fixed cost; lifetime. *Currently: setback 3/5/7 °F, $250 per room + $1,500.*
 - [ ] **A. LED lighting retrofit:** lighting energy reduction by hotel type (many hotels are partly LED already); cost per ft² or per fixture; lifetime. *Currently: 35/45/55%, $0.60 per ft².*
 - [ ] **A. Occupancy sensors in common areas and hallways:** lighting and ventilation reduction; cost per ft² or per sensor. *Currently: 12/20/28% lighting, 2/5/8% ventilation, $0.40 per ft² of common area.*
-- [ ] **A. Rooftop solar:** installed cost per kW (commercial, Midwest), annual yield per kW for Chicago (PVWatts), usable roof share and ft² per kW, and whether to model smaller arrays. *Currently: $2,800 per kW, 1,200 kWh per kW per year, 50% roof, 100 ft² per kW, sized to 10% of electricity.*
+- [ ] **A. Rooftop solar output (`weather.json` → `climates.chicago.solar`):** NREL PVWatts for Chicago (fixed roof mount; record tilt, azimuth and losses): kWh per kW (DC) per year and the 12 monthly values. *Currently: 1,100/1,200/1,300 kWh per kW and an illustrative monthly split.*
+- [ ] **A. Rooftop solar cost (`rates.json` → `solar.installedCostPerW`):** commercial installed $ per W (DC) for Illinois by size (for example up to 100 kW, 100–500 kW, above 500 kW) from LBNL Tracking the Sun or NREL cost benchmarks. *Currently: one tier, $2.20/$2.80/$3.50 per W.*
+- [ ] **A. Solar export credit (`rates.json` → `solar.exportCreditPerKWh`):** what ComEd credits a commercial customer per exported kWh under current Illinois net metering. *Currently: not researched, so $0 (the demo hotel exports almost nothing).*
+- [ ] Solar sizing: usable roof share and ft² per kW for a flat commercial roof. *Currently: 50% and 100 ft² per kW (about 10 W per ft²).* Panel degradation: confirm 0.5% a year (Jordan and Kurtz 2013).
+- [ ] Solar operation and maintenance ($ per kW per year) and inverter replacement, if we decide to include them. *Currently: not included, and said so on screen.*
 - [ ] Energy management controls: HVAC savings and cost. *Currently: 4/7/10%, $15,000 + $0.20 per ft².*
 - [ ] High-efficiency HVAC equipment: heating and cooling reduction and cost per ft² or ton (and whether a heat-pump option should be added). *Currently: heating 8/12/16%, cooling 10/15/22%, $2.00 per ft².*
 - [ ] Water heating and low-flow fixtures: energy reduction and cost per room. *Currently: 15/22/30%, $220 per room.*
 - [ ] Insulation (roof and envelope): share of weather load removed and cost per ft² of roof. *Currently: 6/10/14%, $3.50 per ft².*
 - [ ] Equipment lifetimes for all eight (used in the residual value).
 - [ ] **A. Lighting-to-HVAC interaction:** cooling saved and heating added per unit of lighting energy saved. *Currently: 0.10 and 0.20 kBtu per kBtu.*
-- [ ] Solar monthly production shape for Chicago. *Currently: an illustrative curve.*
-- [ ] Incentives (optional): federal, Illinois and ComEd programs that apply to commercial upgrades. The engine assumes none.
+- [ ] **A. Incentives (`incentives.json`):** for each listed program, the amount rule (percent of cost, $ per kW, $ per room or fixed), eligibility and source; then set `value`, `applied: true`, `verified: true`. Programs: federal Section 48E credit for solar (deadlines changed by Public Law 119-21; confirm current IRS guidance), Illinois Shines REC payments, ComEd business efficiency incentives, Peoples Gas business rebates. **Do not enter an amount without a source.**
+- [ ] Financial assumptions (`finance.ts`): energy price growth (EIA Annual Energy Outlook commercial price path) and the discount rate. *Currently: 2% and 3%, placeholders.*
 
 ## 2. Baseline energy model (`defaults.json`) — priority A
 - [ ] **A. Energy use intensity** (kBtu per ft² per year) for hotels in a cold climate; compare with ENERGY STAR Portfolio Manager's hotel median and EIA CBECS lodging. *Currently: 92.*

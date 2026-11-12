@@ -3,12 +3,38 @@
     "commercialElecPerKWh": 0.1405,
     "commercialGasPerTherm": 0.929,
     "source": "EIA commercial prices. Electricity: Electric Power Monthly Table 5.6.B, commercial, Illinois, year-to-date through Aug 2026. Gas: Natural Gas Prices, commercial, Illinois, 2025 annual 9.63 $/Mcf divided by 10.37 therms/Mcf. All-in average prices (include fixed charges and demand charges); no separate demand-charge model.",
-    "verified": true
+    "verified": true,
+    "solar": {
+      "installedCostPerW": [
+        {
+          "upToKw": null,
+          "low": 2.2,
+          "mid": 2.8,
+          "high": 3.5
+        }
+      ],
+      "exportCreditPerKWh": null,
+      "source": "PLACEHOLDER. Installed cost of commercial rooftop solar in $ per W (DC) by system size, to be replaced with LBNL Tracking the Sun or NREL cost benchmarks for the state. Export credit per kWh sent to the grid is not researched yet (Illinois net metering rules changed in 2025), so exported energy is credited at $0.",
+      "verified": false
+    }
   },
   "default": {
     "commercialElecPerKWh": 0.1404,
     "commercialGasPerTherm": 1.059,
     "source": "EIA, U.S. average commercial prices: electricity (Table 5.6.B, YTD Aug 2026), gas (2025 annual 10.98 $/Mcf divided by 10.37 therms/Mcf). Used when the state has no entry.",
-    "verified": true
+    "verified": true,
+    "solar": {
+      "installedCostPerW": [
+        {
+          "upToKw": null,
+          "low": 2.2,
+          "mid": 2.8,
+          "high": 3.5
+        }
+      ],
+      "exportCreditPerKWh": null,
+      "source": "PLACEHOLDER. Installed cost of commercial rooftop solar in $ per W (DC) by system size, to be replaced with LBNL Tracking the Sun or NREL cost benchmarks for the state. Export credit per kWh sent to the grid is not researched yet (Illinois net metering rules changed in 2025), so exported energy is credited at $0.",
+      "verified": false
+    }
   }
 }

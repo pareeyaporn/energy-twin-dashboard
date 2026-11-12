@@ -1,0 +1,64 @@
+{
+  "incentives": [
+    {
+      "id": "federal_itc_48e",
+      "label": "Federal clean electricity investment tax credit (Section 48E)",
+      "appliesTo": [
+        "rooftop_solar"
+      ],
+      "kind": "percent_of_cost",
+      "value": null,
+      "applied": false,
+      "note": "Not applied. The 2025 federal budget law (Public Law 119-21) set construction-start and placed-in-service deadlines for solar under this credit; whether a new project qualifies, and at what rate, must be confirmed with current IRS guidance and a tax adviser.",
+      "source": "IRS Section 48E guidance (to research).",
+      "verified": false
+    },
+    {
+      "id": "illinois_shines",
+      "label": "Illinois Shines (renewable energy credit purchases for solar)",
+      "appliesTo": [
+        "rooftop_solar"
+      ],
+      "kind": "per_kw",
+      "value": null,
+      "applied": false,
+      "note": "Not applied. Payments depend on the program block, system size and contract terms; not researched.",
+      "source": "Illinois Power Agency, Illinois Shines program (to research).",
+      "verified": false
+    },
+    {
+      "id": "comed_business_efficiency",
+      "label": "ComEd business energy-efficiency incentives",
+      "appliesTo": [
+        "led_lighting",
+        "occupancy_sensors",
+        "smart_room_controls",
+        "energy_management",
+        "hvac_upgrade"
+      ],
+      "kind": "fixed",
+      "value": null,
+      "applied": false,
+      "note": "Not applied. Incentive amounts vary by measure and program year; not researched.",
+      "source": "ComEd Energy Efficiency Program for business (to research).",
+      "verified": false
+    },
+    {
+      "id": "peoples_gas_business_efficiency",
+      "label": "Peoples Gas business energy-efficiency rebates (Chicago)",
+      "appliesTo": [
+        "water_heating",
+        "insulation",
+        "hvac_upgrade"
+      ],
+      "kind": "fixed",
+      "value": null,
+      "applied": false,
+      "note": "Not applied. Rebate amounts vary by measure and program year; not researched.",
+      "source": "Peoples Gas Energy Efficiency Program for business (to research).",
+      "verified": false
+    }
+  ],
+  "source": "Programs that may lower the upfront cost. None is applied until its amount and eligibility are confirmed from the program's own source; no incentive amounts are invented. A user can enter a confirmed amount per upgrade.",
+  "verified": false
+}

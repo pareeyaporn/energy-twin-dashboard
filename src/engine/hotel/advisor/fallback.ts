@@ -33,11 +33,12 @@ function inSentence(label: string): string {
 
 function describeUpgrade(u: AdvisorUpgrade): string {
   // "would cost … and save" reads correctly for singular and plural labels ("Smart thermostats and sensors").
-  return `${u.label} would cost about ${usd(u.cost)} and save about ${usd(u.annualSavings.mid)} a year (${pct(u.annualSavingsPctOfBill)} of the bill), with ${years(u.paybackYears)}`;
+  const net = u.incentivesApplied > 0 ? ` (${usd(u.netInvestment)} after incentives)` : '';
+  return `${u.label} would cost about ${usd(u.cost)}${net} and save about ${usd(u.annualSavings.mid)} a year (${pct(u.annualSavingsPctOfBill)} of the bill), with ${years(u.paybackYears)}, a five-year net benefit of ${usd(u.netBenefit5Years)} and a ten-year net benefit of ${usd(u.netBenefit10Years)}`;
 }
 
 function describePackage(p: AdvisorPackage): string {
-  return `${p.name}: about ${usd(p.cost)} to install, saving about ${usd(p.annualSavings.mid)} a year (${usd(p.annualSavings.low)} to ${usd(p.annualSavings.high)}), with ${years(p.paybackYears)} and a five-year net benefit of ${usd(p.netBenefit)}`;
+  return `${p.name}: about ${usd(p.cost)} to install, saving about ${usd(p.annualSavings.mid)} a year (${usd(p.annualSavings.low)} to ${usd(p.annualSavings.high)}), with ${years(p.paybackYears)} and a five-year net benefit of ${usd(p.netBenefit5Years)}`;
 }
 
 function general(c: AdvisorContext): string[] {
@@ -89,7 +90,7 @@ function compare(c: AdvisorContext, q: ParsedQuestion): string[] | null {
   const pair: [AdvisorUpgrade, AdvisorUpgrade] = (a.paybackYears ?? Infinity) <= (b.paybackYears ?? Infinity) ? [a, b] : [b, a];
   const [first, second] = pair;
   if (first.paybackYears !== null) {
-    s.push(`On these estimates, ${inSentence(first.label)} pays back faster (${first.paybackYears} years against ${second.paybackYears ?? 'no payback'}), and its five-year net benefit is ${usd(first.netBenefit)} against ${usd(second.netBenefit)}.`);
+    s.push(`On these estimates, ${inSentence(first.label)} pays back faster (${first.paybackYears} years against ${second.paybackYears ?? 'no payback'}), and its ten-year net benefit is ${usd(first.netBenefit10Years)} against ${usd(second.netBenefit10Years)}.`);
   }
   const fit = (u: AdvisorUpgrade) => (u.cost <= c.hotel.budget ? 'fits' : 'does not fit');
   s.push(`With your ${usd(c.hotel.budget)} budget, ${inSentence(a.label)} ${fit(a)} and ${inSentence(b.label)} ${fit(b)}.`);

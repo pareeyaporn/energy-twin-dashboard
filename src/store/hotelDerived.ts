@@ -3,6 +3,7 @@
 import {
   STRESS_TESTS,
   applyScenario,
+  compareUpgrades,
   contextFromBaseline,
   energyFlows,
   opportunitiesByZone,
@@ -16,6 +17,7 @@ import {
   ZONE_LABELS,
 } from "@/engine/hotel";
 import type {
+  UpgradeComparisonRow,
   Conditions,
   EnergyResult,
   HotelInput,
@@ -172,4 +174,20 @@ export const selectHotelBaselineCost = (s: TwinState) => s.baseline.annual.cost;
 const opportunitiesOf = memoLast((hotel: ResolvedProfile, measuredAgainst: EnergyResult) =>
   opportunitiesByZone(contextFromBaseline(hotel, measuredAgainst)),
 );
-export const selectOpportunities = (s: TwinState) => opportunitiesOf(s.hotel, s.scenarioResult?.after ?? s.baseline);
+/**
+ * What upgrades are measured against: the what-if when "optimize for this scenario" is on and a scenario is running, otherwise the
+ * plain baseline. The optimizer, the comparison cards, the zone opportunities and the advisor all follow this one rule.
+ */
+export const selectUpgradeBaseline = (s: TwinState): EnergyResult =>
+  s.optimizeOnScenario && s.scenarioResult ? s.scenarioResult.after : s.baseline;
+
+export const selectOpportunities = (s: TwinState) => opportunitiesOf(s.hotel, selectUpgradeBaseline(s));
+
+const comparisonOf = memoLast((hotel: ResolvedProfile, measuredAgainst: EnergyResult): UpgradeComparisonRow[] =>
+  compareUpgrades(contextFromBaseline(hotel, measuredAgainst)),
+);
+/**
+ * Every eligible upgrade on its own with the common financial breakdown (gross cost, incentives, net investment, kWh and $ saved,
+ * payback, 5- and 10-year net benefit, CO2). Same calculation as the optimizer's packages and the advisor's figures.
+ */
+export const selectUpgradeComparison = (s: TwinState): UpgradeComparisonRow[] => comparisonOf(s.hotel, selectUpgradeBaseline(s));

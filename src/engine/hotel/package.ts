@@ -1,10 +1,16 @@
 import { packageCost } from './costs';
 import { hotelData } from './data';
-import { DEFAULT_FINANCE, calculateFinancialMetrics } from './finance';
+import { DEFAULT_FINANCE, calculateFinancialMetrics, financialBreakdown, incentiveLines } from './finance';
+import type { IncentiveOverrides } from './finance';
+import { exportCreditPerKWh, solarCostPerW } from './solar';
 import { calculateUpgradeSavings, isContext, orderUpgrades, prepareUpgradeContext, upgradeDef } from './upgrades';
 import type { UpgradeContext } from './upgrades';
 import type {
   FinancialAssumptions,
+  FinancialMetrics,
+  Range3,
+  SolarDetails,
+  UpgradeOutcome,
   HotelData,
   HotelInput,
   PackageEvaluation,
@@ -19,6 +25,42 @@ export interface EvaluateOptions {
   budget?: number;
   /** Marginal per-item savings (extra runs). On by default; turn off when scanning many combinations. */
   lineItems?: boolean;
+  /** Confirmed incentive amounts entered by the user, per upgrade. */
+  incentives?: IncentiveOverrides;
+}
+
+/** Yearly degradation of the solar part of the savings (0 if the package has no solar). */
+export function solarDegradation(ids: readonly UpgradeId[], data: HotelData = hotelData): number {
+  return ids.includes('rooftop_solar') ? (upgradeDef('rooftop_solar', data).constants['degradationPerYear'] ?? 0) : 0;
+}
+
+/**
+ * The mid-scenario financial metrics of a package. The optimizer ranks with this and `evaluatePackage` reports it, so the ranking
+ * and the cards always show the same numbers.
+ */
+export function packageMetrics(
+  ctx: UpgradeContext,
+  ids: readonly UpgradeId[],
+  mid: UpgradeOutcome,
+  costs: ReturnType<typeof packageCost>,
+  assumptions: FinancialAssumptions,
+  budget: number,
+  overrides: IncentiveOverrides = {},
+): FinancialMetrics {
+  const d = ctx.data;
+  const inc = incentiveLines(costs.items, ctx.profile, mid.sizing, overrides, d);
+  return calculateFinancialMetrics(
+    {
+      annualSavings: mid.savings.cost,
+      carbonAvoidedKgPerYear: mid.savings.carbonKg,
+      items: costs.items.map((i) => ({ cost: i.cost.mid, lifetimeYears: upgradeDef(i.id, d).lifetimeYears })),
+      budget,
+      incentivesTotal: inc.total.mid,
+      solarValuePerYear: mid.sizing.solarValuePerYear,
+      degradationPerYear: solarDegradation(ids, d),
+    },
+    assumptions,
+  );
 }
 
 /**
@@ -44,15 +86,30 @@ export function evaluatePackage(
   const annualSavings = { low: low.savings.cost, mid: mid.savings.cost, high: high.savings.cost };
   const carbonAvoidedKg = { low: low.savings.carbonKg, mid: mid.savings.carbonKg, high: high.savings.carbonKg };
   const assumptions: FinancialAssumptions = { ...DEFAULT_FINANCE, horizonYears: p.horizonYears, ...options.assumptions };
-  const metrics = calculateFinancialMetrics(
-    {
-      annualSavings: annualSavings.mid,
-      carbonAvoidedKgPerYear: carbonAvoidedKg.mid,
-      items: costs.items.map((i) => ({ cost: i.cost.mid, lifetimeYears: upgradeDef(i.id, d).lifetimeYears })),
-      budget: options.budget ?? p.budget,
-    },
-    assumptions,
-  );
+  const metrics = packageMetrics(ctx, ids, mid, costs, assumptions, options.budget ?? p.budget, options.incentives);
+  const solarValue: Range3 = { low: low.sizing.solarValuePerYear, mid: mid.sizing.solarValuePerYear, high: high.sizing.solarValuePerYear };
+  const solar: SolarDetails | null =
+    ids.includes('rooftop_solar') && mid.sizing.solarKw > 0
+      ? {
+          sizeKw: mid.sizing.solarKw,
+          generationKWh: mid.sizing.solarGenerationKWhYear,
+          selfConsumedKWh: mid.sizing.solarKWhYear,
+          exportedKWh: mid.sizing.solarExportKWhYear,
+          exportCreditPerKWh: exportCreditPerKWh(p, d),
+          installedCostPerW: solarCostPerW(mid.sizing.solarKw, p, d).mid,
+          degradationPerYear: solarDegradation(ids, d),
+        }
+      : null;
+  const financials = financialBreakdown({
+    grossCost: costs.total,
+    incentives: incentiveLines(costs.items, p, mid.sizing, options.incentives, d),
+    annualSavings,
+    solarValue,
+    energy: { elecKWh: mid.savings.elecKWh, gasTherms: mid.savings.gasTherms, siteKBtu: mid.savings.siteKBtu },
+    carbonAvoidedKgPerYear: carbonAvoidedKg,
+    solar,
+    priceGrowth: assumptions.priceGrowth,
+  });
 
   let lineItems: PackageLineItem[] = [];
   if (options.lineItems !== false) {
@@ -75,6 +132,7 @@ export function evaluatePackage(
     newAnnualCost: mid.annual.cost,
     carbonAvoidedKg,
     metrics,
+    financials,
     comfort: mid.comfort,
     sizing: mid.sizing,
     lineItems,

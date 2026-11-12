@@ -3,18 +3,40 @@
     "coolingOffsetPerSavedLightingKBtu": 0.1,
     "heatingPenaltyPerSavedLightingKBtu": 0.2
   },
-  "solarMonthlyShape": [0.045, 0.058, 0.085, 0.1, 0.115, 0.12, 0.122, 0.112, 0.092, 0.068, 0.043, 0.04],
-  "comfortScore": { "minorPenalty": 0.05, "flagPenalty": 0.15 },
+  "comfortScore": {
+    "minorPenalty": 0.05,
+    "flagPenalty": 0.15
+  },
   "upgrades": [
     {
       "id": "smart_room_controls",
       "label": "Smart guest-room thermostats and occupancy sensing",
       "description": "Sets vacant and away rooms back and recovers when a guest returns.",
       "lifetimeYears": 12,
-      "cost": { "fixed": { "low": 1000, "mid": 1500, "high": 2500 }, "perRoom": { "low": 150, "mid": 250, "high": 400 } },
-      "params": { "setbackF": { "low": 3, "mid": 5, "high": 7 } },
+      "cost": {
+        "fixed": {
+          "low": 1000,
+          "mid": 1500,
+          "high": 2500
+        },
+        "perRoom": {
+          "low": 150,
+          "mid": 250,
+          "high": 400
+        }
+      },
+      "params": {
+        "setbackF": {
+          "low": 3,
+          "mid": 5,
+          "high": 7
+        }
+      },
       "constants": {},
-      "comfort": { "impact": "minor", "note": "Rooms need recovery time when a guest returns; check the recovery setting." },
+      "comfort": {
+        "impact": "minor",
+        "note": "Rooms need recovery time when a guest returns; check the recovery setting."
+      },
       "requires": [],
       "excludes": [],
       "source": "PLACEHOLDER. Cost and setback ranges are illustrative; replace with vendor quotes and DOE or utility case studies.",
@@ -25,10 +47,25 @@
       "label": "Roof and envelope insulation",
       "description": "Cuts the weather-driven heating and cooling load.",
       "lifetimeYears": 30,
-      "cost": { "perSqftRoof": { "low": 2, "mid": 3.5, "high": 5.5 } },
-      "params": { "weatherLoadReduction": { "low": 0.06, "mid": 0.1, "high": 0.14 } },
+      "cost": {
+        "perSqftRoof": {
+          "low": 2,
+          "mid": 3.5,
+          "high": 5.5
+        }
+      },
+      "params": {
+        "weatherLoadReduction": {
+          "low": 0.06,
+          "mid": 0.1,
+          "high": 0.14
+        }
+      },
       "constants": {},
-      "comfort": { "impact": "positive", "note": "Steadier room temperatures." },
+      "comfort": {
+        "impact": "positive",
+        "note": "Steadier room temperatures."
+      },
       "requires": [],
       "excludes": [],
       "source": "PLACEHOLDER. Replace with NREL ComStock or DOE hotel measure data and contractor quotes.",
@@ -39,10 +76,25 @@
       "label": "LED lighting retrofit",
       "description": "Replaces remaining non-LED lamps and fixtures throughout the hotel.",
       "lifetimeYears": 15,
-      "cost": { "perSqftFloor": { "low": 0.4, "mid": 0.6, "high": 0.9 } },
-      "params": { "lightingReduction": { "low": 0.35, "mid": 0.45, "high": 0.55 } },
+      "cost": {
+        "perSqftFloor": {
+          "low": 0.4,
+          "mid": 0.6,
+          "high": 0.9
+        }
+      },
+      "params": {
+        "lightingReduction": {
+          "low": 0.35,
+          "mid": 0.45,
+          "high": 0.55
+        }
+      },
       "constants": {},
-      "comfort": { "impact": "none", "note": "" },
+      "comfort": {
+        "impact": "none",
+        "note": ""
+      },
       "requires": [],
       "excludes": [],
       "source": "PLACEHOLDER. Replace with ENERGY STAR or DOE hotel lighting guidance and a lighting audit.",
@@ -53,13 +105,30 @@
       "label": "Occupancy sensors in common areas and hallways",
       "description": "Dims or turns off lighting and trims ventilation in unoccupied public areas.",
       "lifetimeYears": 12,
-      "cost": { "perSqftCommon": { "low": 0.25, "mid": 0.4, "high": 0.65 } },
+      "cost": {
+        "perSqftCommon": {
+          "low": 0.25,
+          "mid": 0.4,
+          "high": 0.65
+        }
+      },
       "params": {
-        "commonLightingReduction": { "low": 0.12, "mid": 0.2, "high": 0.28 },
-        "commonVentilationReduction": { "low": 0.02, "mid": 0.05, "high": 0.08 }
+        "commonLightingReduction": {
+          "low": 0.12,
+          "mid": 0.2,
+          "high": 0.28
+        },
+        "commonVentilationReduction": {
+          "low": 0.02,
+          "mid": 0.05,
+          "high": 0.08
+        }
       },
       "constants": {},
-      "comfort": { "impact": "minor", "note": "A missed detection can leave a space dark; set sensible time delays." },
+      "comfort": {
+        "impact": "minor",
+        "note": "A missed detection can leave a space dark; set sensible time delays."
+      },
       "requires": [],
       "excludes": [],
       "source": "PLACEHOLDER. Replace with DOE or utility occupancy-sensor measure data.",
@@ -70,10 +139,32 @@
       "label": "Energy management controls (scheduling and optimization)",
       "description": "Schedules and tunes the central plant, public-area HVAC and fans.",
       "lifetimeYears": 12,
-      "cost": { "fixed": { "low": 8000, "mid": 15000, "high": 25000 }, "perSqftFloor": { "low": 0.1, "mid": 0.2, "high": 0.35 } },
-      "params": { "hvacReduction": { "low": 0.04, "mid": 0.07, "high": 0.1 } },
-      "constants": { "guestRoomShareWithoutSmartControls": 0.5 },
-      "comfort": { "impact": "minor", "note": "Poorly set schedules can reduce comfort; commissioning matters." },
+      "cost": {
+        "fixed": {
+          "low": 8000,
+          "mid": 15000,
+          "high": 25000
+        },
+        "perSqftFloor": {
+          "low": 0.1,
+          "mid": 0.2,
+          "high": 0.35
+        }
+      },
+      "params": {
+        "hvacReduction": {
+          "low": 0.04,
+          "mid": 0.07,
+          "high": 0.1
+        }
+      },
+      "constants": {
+        "guestRoomShareWithoutSmartControls": 0.5
+      },
+      "comfort": {
+        "impact": "minor",
+        "note": "Poorly set schedules can reduce comfort; commissioning matters."
+      },
       "requires": [],
       "excludes": [],
       "source": "PLACEHOLDER. Replace with DOE Better Buildings or vendor case studies.",
@@ -84,14 +175,31 @@
       "label": "High-efficiency HVAC equipment",
       "description": "Replaces the heating and cooling equipment with higher-efficiency units, sized from the reduced load.",
       "lifetimeYears": 20,
-      "cost": { "perSqftFloor": { "low": 1.2, "mid": 2, "high": 3 } },
+      "cost": {
+        "perSqftFloor": {
+          "low": 1.2,
+          "mid": 2,
+          "high": 3
+        }
+      },
       "sizeScaled": true,
       "params": {
-        "heatingReduction": { "low": 0.08, "mid": 0.12, "high": 0.16 },
-        "coolingReduction": { "low": 0.1, "mid": 0.15, "high": 0.22 }
+        "heatingReduction": {
+          "low": 0.08,
+          "mid": 0.12,
+          "high": 0.16
+        },
+        "coolingReduction": {
+          "low": 0.1,
+          "mid": 0.15,
+          "high": 0.22
+        }
       },
       "constants": {},
-      "comfort": { "impact": "positive", "note": "Newer equipment holds temperature better." },
+      "comfort": {
+        "impact": "positive",
+        "note": "Newer equipment holds temperature better."
+      },
       "requires": [],
       "excludes": [],
       "source": "PLACEHOLDER. Replace with AHRI and DOE equipment efficiency data and contractor quotes.",
@@ -102,10 +210,25 @@
       "label": "High-efficiency water heating and low-flow fixtures",
       "description": "Condensing water heaters and low-flow fixtures.",
       "lifetimeYears": 15,
-      "cost": { "perRoom": { "low": 120, "mid": 220, "high": 350 } },
-      "params": { "hotWaterReduction": { "low": 0.15, "mid": 0.22, "high": 0.3 } },
+      "cost": {
+        "perRoom": {
+          "low": 120,
+          "mid": 220,
+          "high": 350
+        }
+      },
+      "params": {
+        "hotWaterReduction": {
+          "low": 0.15,
+          "mid": 0.22,
+          "high": 0.3
+        }
+      },
       "constants": {},
-      "comfort": { "impact": "minor", "note": "Guests may notice lower flow at fixtures." },
+      "comfort": {
+        "impact": "minor",
+        "note": "Guests may notice lower flow at fixtures."
+      },
       "requires": [],
       "excludes": [],
       "source": "PLACEHOLDER. Replace with ENERGY STAR and DOE hotel water-heating guidance.",
@@ -114,15 +237,23 @@
     {
       "id": "rooftop_solar",
       "label": "Rooftop solar",
-      "description": "Sized to the smaller of the usable roof and a target share of electricity use; offsets purchased electricity, with no export credit.",
+      "description": "Sized to the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit.",
       "lifetimeYears": 25,
-      "cost": { "perKw": { "low": 2200, "mid": 2800, "high": 3500 } },
-      "params": { "kWhPerKwYear": { "low": 1100, "mid": 1200, "high": 1300 } },
-      "constants": { "usableRoofShare": 0.5, "sqftPerKw": 100, "targetShareOfElectricity": 0.1 },
-      "comfort": { "impact": "none", "note": "" },
+      "cost": {},
+      "params": {},
+      "constants": {
+        "usableRoofShare": 0.5,
+        "sqftPerKw": 100,
+        "degradationPerYear": 0.005,
+        "maxShareOfElectricity": 1
+      },
+      "comfort": {
+        "impact": "none",
+        "note": ""
+      },
       "requires": [],
       "excludes": [],
-      "source": "PLACEHOLDER. Replace with NREL PVWatts for the site and commercial installed-cost data. Incentives are not included.",
+      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data. Cost: the region's installed cost per W. Degradation: 0.5% a year, the median reported by Jordan and Kurtz, 'Photovoltaic Degradation Rates: An Analytical Review', Progress in Photovoltaics (2013), to be verified. Operation and maintenance and inverter replacement are not included.",
       "verified": false
     }
   ],

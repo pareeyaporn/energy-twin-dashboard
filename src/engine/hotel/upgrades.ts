@@ -1,9 +1,10 @@
 import { calculateBaselineEnergy, simulate, sumCells } from './baseline';
 import { applyScenario, comfortFlags } from './conditions';
 import { simulateEnergyScenario } from './scenarios';
-import { KBTU_PER_KWH, KBTU_PER_THERM, LOAD_TYPES, UPGRADE_ORDER } from './constants';
+import { DAYS_IN_MONTH, KBTU_PER_KWH, KBTU_PER_THERM, LOAD_TYPES, UPGRADE_ORDER } from './constants';
 import { hotelData } from './data';
 import { isResolved, resolveProfile } from './profile';
+import { climateLatitude, climateSolar, daylightShape, exportCreditPerKWh, solarYield } from './solar';
 import type {
   Cell,
   ComfortFlag,
@@ -50,13 +51,25 @@ export function areasOf(p: HotelProfile, data: HotelData = hotelData) {
   };
 }
 
-/** Solar array size: the smaller of the usable roof and a target share of electricity use. Independent of the savings scenario. */
+/**
+ * Solar array size: what the usable roof holds, but never more than would produce the hotel's yearly electricity use (at the
+ * location's mid output). Independent of the savings scenario.
+ */
 export function solarSizeKw(p: HotelProfile, baselineElecKWh: number, data: HotelData = hotelData): number {
   const def = upgradeDef('rooftop_solar', data);
   const roofCap = (areasOf(p, data).roofSqft * constant(def, 'usableRoofShare')) / constant(def, 'sqftPerKw');
-  const yieldMid = param(def, 'kWhPerKwYear', 'mid');
-  const target = (constant(def, 'targetShareOfElectricity') * baselineElecKWh) / yieldMid;
-  return Math.round(Math.max(0, Math.min(roofCap, target)) * 10) / 10;
+  const yieldMid = solarYield(p, 'mid', data);
+  const useCap = yieldMid > 0 ? (constant(def, 'maxShareOfElectricity') * baselineElecKWh) / yieldMid : 0;
+  return Math.round(Math.max(0, Math.min(roofCap, useCap)) * 10) / 10;
+}
+
+function hourWeights(data: HotelData): Record<string, number[]> {
+  const out: Record<string, number[]> = {};
+  for (const [u, raw] of Object.entries(data.shapes.hourly)) {
+    const sum = raw.reduce((a, b) => a + b, 0);
+    out[u] = raw.map((x) => (sum > 0 ? x / sum : 1 / 24));
+  }
+  return out;
 }
 
 /** Which upgrades make sense for this hotel. */
@@ -258,6 +271,9 @@ export function calculateUpgradeSavings(
   let hvacSizeFactor = 1;
   let solarKw = 0;
   let solarOffsetKWh = 0;
+  let solarGenerationKWh = 0;
+  let solarExportKWh = 0;
+  let exportCredit = 0;
 
   for (const id of ids) {
     const def = upgradeDef(id, d);
@@ -302,15 +318,34 @@ export function calculateUpgradeSavings(
         rescale(cells, (c) => c.endUse === 'hotWater', 1 - param(def, 'hotWaterReduction', scenario), env);
         break;
       case 'rooftop_solar': {
+        // Generation from the location's solar data; each hour of a typical day the hotel uses what it can (its load after the
+        // other upgrades) and the rest is exported at the region's export credit.
         solarKw = solarSizeKw(ctx.profile, ctx.baseline.annual.elecKWh, d);
-        const yieldKwh = param(def, 'kWhPerKwYear', scenario);
+        const sol = climateSolar(ctx.profile, d);
+        const yieldKwh = solarYield(ctx.profile, scenario, d);
+        const lat = climateLatitude(ctx.profile, d);
+        const weights = hourWeights(d);
         for (let m = 0; m < 12; m++) {
           const monthCells = cells.filter((c) => c.month === m);
           const use = monthCells.reduce((s, c) => s + c.elecKWh, 0);
-          if (use <= 0) continue;
-          const produced = solarKw * yieldKwh * (d.upgrades.solarMonthlyShape[m] ?? 0);
-          const self = Math.min(produced, use); // no export credit: only what the hotel uses is offset
+          const days = DAYS_IN_MONTH[m] ?? 30;
+          const produced = solarKw * yieldKwh * (sol.monthlyShare[m] ?? 0);
+          solarGenerationKWh += produced;
+          if (use <= 0) {
+            solarExportKWh += produced;
+            continue;
+          }
+          const sun = daylightShape(lat, m);
+          let selfDay = 0;
+          for (let h = 0; h < 24; h++) {
+            const gen = (produced / days) * (sun[h] ?? 0);
+            const load = monthCells.reduce((s2, c) => s2 + (c.elecKWh / days) * (weights[c.endUse]?.[h] ?? 1 / 24), 0);
+            selfDay += Math.min(gen, load);
+          }
+          const self = Math.min(use, selfDay * days);
           solarOffsetKWh += self;
+          const exported = produced - self;
+          if (exported > 1e-6) solarExportKWh += exported; // ignore floating-point dust
           const f = 1 - self / use;
           for (const c of monthCells) {
             const oldSite = c.siteKBtu;
@@ -324,7 +359,11 @@ export function calculateUpgradeSavings(
     }
   }
 
+  exportCredit = solarExportKWh * exportCreditPerKWhIf(has('rooftop_solar'), ctx, d);
   const annual = sumCells(cells);
+  // The export credit lowers the electricity bill without changing the hotel's own use.
+  annual.elecCost -= exportCredit;
+  annual.cost -= exportCredit;
   const b = ctx.baseline.annual;
   const savings = {
     elecKWh: b.elecKWh - annual.elecKWh,
@@ -335,8 +374,20 @@ export function calculateUpgradeSavings(
     cost: b.cost - annual.cost,
     carbonKg: b.carbonKg - annual.carbonKg,
   };
-  const sizing: UpgradeSizing = { hvacSizeFactor, solarKw, solarKWhYear: solarOffsetKWh };
+  const sizing: UpgradeSizing = {
+    hvacSizeFactor,
+    solarKw,
+    solarKWhYear: solarOffsetKWh,
+    solarGenerationKWhYear: solarGenerationKWh,
+    solarExportKWhYear: solarExportKWh,
+    // Solar is applied last, so its value is exactly the purchases it avoids at the rate, plus the export credit.
+    solarValuePerYear: solarOffsetKWh * env.elecRate + exportCredit,
+  };
   return { upgradeIds: ids, scenario, annual, savings, cells, sizing, comfort: comfortFor(ids, smart?.flags ?? [], d) };
+}
+
+function exportCreditPerKWhIf(on: boolean, ctx: UpgradeContext, d: HotelData): number {
+  return on ? exportCreditPerKWh(ctx.profile, d) : 0;
 }
 
 /** Comfort impact of a package: each minor-impact upgrade and each warning flag lowers the score from 1. */

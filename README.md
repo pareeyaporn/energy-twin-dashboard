@@ -37,12 +37,12 @@ featured upgrades will be chosen after the calibration pass, whichever upgrades 
 | Area | State |
 | --- | --- |
 | Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown, solar, incentives, optimizer, twin data | Built and tested (300+ tests) |
-| Data (`src/data/hotel`) | Researched: EIA prices, CBECS lodging end-use split and fuel mix, AEO2026 price growth, EIA grid CO2. Partly researched: upgrade savings ranges, solar O&M. Placeholder: most upgrade costs, solar $/W and output, export credit (see `docs/08`) |
+| Data (`src/data/hotel`) | **Sourced from primary documents:** EIA prices, price growth (AEO2026) and hotel end uses (CBECS 2018); EPA eGRID2023 grid factors by location and the EPA gas factor; PVWatts solar output; NOAA weather; IL-TRM hotel measures (smart controls, sensors, lighting interaction, hot water); NLR solar O&M and degradation; Chicago hotel sizes and occupancy (Choose Chicago, STR). **Still placeholders:** most installed costs, solar $/W, the solar export credit, and the monthly occupancy shape. Phase 7 is closed except costs (7.6) and solar $/W (7.7). See `docs/08`, `docs/14`, `docs/15` |
 | Store (`src/store`): profile, scenarios, optimizer (scenario-aware), upgrade comparison, twin controls, advisor | Built |
 | 2D digital twin (`src/twin`) | Built |
 | Workspace UI (Lovable, prompts LV1–LV10) | Built. **LV11** (show the full financial breakdown on every card) is next |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
-| Demo hardening (cached answers, reset, rehearsals) | Not started; after calibration |
+| Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |
 | Home-era engine and data | Legacy, unused by the app; home UI components removed |
 
 ## Tech stack

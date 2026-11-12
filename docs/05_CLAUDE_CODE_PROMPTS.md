@@ -6,8 +6,8 @@ Every prompt ends with build + tests + commit + push so Lovable stays in sync. T
 Before each prompt: `git pull`. Read `CLAUDE.md` first. The old home-era prompts (P0–P15) are replaced by this file; their code is still in `src/engine` as legacy.
 
 **Status:** H0–H11 are done (engine, data, store, twin, advisor). Since then, also done outside these prompts: the common financial
-breakdown and solar model (docs/13 section 8) and research pass 1 (docs/08). **Next:** calibration (task 7.13 / 7b.5), research pass 2,
-then **H12 — demo hardening**.
+breakdown and solar model (docs/13 section 8), research passes 1–3 and the first calibration round (docs/14), and the product decisions (docs/15).
+Phase 7 is closed except installed costs (7.6) and solar $/W (7.7). **Next: H12 — demo hardening.**
 
 | Prompt | Status |
 | --- | --- |
@@ -16,7 +16,7 @@ then **H12 — demo hardening**.
 | H6–H8 upgrades, costs, finance, optimizer | Done; extended with the common breakdown |
 | H10 twin component | Done |
 | H11 advisor | Done; live with the Claude API |
-| H12 demo hardening | Not started (after calibration) |
+| H12 demo hardening | **Next** |
 
 ---
 

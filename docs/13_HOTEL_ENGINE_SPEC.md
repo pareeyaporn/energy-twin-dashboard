@@ -205,7 +205,8 @@ At $50,000 the optimizer picks LED lighting plus occupancy sensors ($39,600, $9,
 225–650 therms a year for 100 rooms at 0.75–1.0 ton per room. The setback alone gave 4,903 kWh; with smart controls the simulation now also cuts
 guest-room fan energy 17% while rooms are empty (`defaults.smartControlFan`), giving about 10,800 kWh and 209 therms. **Insulation** scales its
 weather-load reduction by 5 / floors above 5 floors. **Second preset:** `demo-chicago-300` (300 rooms, 20 floors, defaults for floor area and
-occupancy); at $150,000 the optimizer picks LED lighting plus energy management ($147,000, $33,530 a year, 4.4 years). Log: `docs/14`.
+occupancy, then 69.2% occupancy from STR via Choose Chicago); at $150,000 the optimizer picks LED lighting plus energy management ($147,000,
+$34,163 a year, 4.3 years; baseline about $410,400 a year). Log: `docs/14`.
 
 ### Limits of this version
 - **Smart room controls pay back slowly (21 years)** because their modeled savings are small (see section 7) and setback recovery is counted. That is a calibration question, not a product conclusion.

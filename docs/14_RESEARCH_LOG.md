@@ -94,3 +94,26 @@ matter only for larger arrays or lower daytime loads.
 **Effect of the new prices** (100-room hotel): full-roof solar $159,500 (was $154,000), payback 18.5 years (was 17.9); quarter roof $45,540,
 21.1 years; half roof $85,250, 19.8 years. Optimizer picks are unchanged at $50,000 (LED + occupancy sensors); at $150,000 the
 maximum-savings package adds a quarter-roof array; at $250,000 the full roof. 300-room hotel: unchanged at $150,000 (LED + energy management).
+
+## Pass 6 (November 2026, IL-TRM v14.0 Vol. 2 measure lives and costs)
+
+Read from the saved copy of the IL-TRM v14.0 Vol. 2 PDF (downloaded in pass 3; `icc.illinois.gov` is no longer reachable from the build session).
+
+| Item | Before | Now | Source |
+| --- | --- | --- | --- |
+| Roof insulation cost | $3.50/ft² placeholder | low $1.40, mid **$1.91**, high $3.50 per ft² of roof | TRM 4.8.1: $1.40/ft² R-30 ($0.59 material + $0.81 labor; Itron WO017, 2010–12). Mid = ×1.37 CPI-U 2012→2024 (ratio from memory, not fetched) |
+| Roof insulation life | 30 years placeholder | **20 years** | TRM 4.8.1 (DEER 2008) |
+| Water heating cost | $220/room placeholder | mid **$200/room** | TRM 4.3.1 ($6,021 installed, >75 kBtu/h gas storage at 0.90 Et), 4.3.3 ($12 showerhead), 4.3.2 ($8 aerator); three heaters for the demo hotel is an assumption |
+| Water heating life | 15 placeholder | **15 years** (fixtures 10) | TRM 4.3.1, 4.3.2, 4.3.3 |
+| HVAC equipment life | 20 years for all | **central plant 23, RTU 15, PTAC/PTHP 8, VRF 16** | TRM 4.4.6 (chiller 23; boiler 25, 4.4.10), 4.4.15, 4.4.13, 4.4.9 |
+| HVAC cooling reduction, high | 22% | **26%** | TRM 4.4.6 example: 0.405 vs 0.550 kW/ton IPLV |
+| Energy management life | 12 placeholder | **10 years (judgment)** | No EMS measure in the TRM; nearest: Advanced Rooftop Controls 10 (4.4.41), AMI commissioning ~7 (4.9.25) |
+| Hotel hot water use | 20 gal/occupied room-day (checked) | unchanged; faucets 25% of it | TRM 4.3.2 table: hotel 14 gal/room-day, 25% faucets |
+
+**Effect:** insulation now costs $21,010 for the demo hotel and pays back in 11.5 years (was $38,500, 21.0); water heating $20,000, 7.0 years
+(was $22,000, 7.7). The $50,000 recommendation is unchanged (LED + occupancy sensors). At $150,000 the maximum-savings package now adds
+insulation and smart controls instead of a quarter-roof solar array.
+
+**Still blocked:** ComEd incentive worksheets (A2/A4: the worksheets page is a JavaScript app with no file links), 220 ILCS 5/16-107.5
+(`www.ilga.gov` refused by the session's network policy) and DOE Better Buildings case studies (`betterbuildingssolutioncenter.energy.gov`
+refused). `illinoisshines.com` is reachable; its REC payments are incentives, not export credit, and are not applied.

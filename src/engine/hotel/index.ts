@@ -26,6 +26,7 @@ export { typicalDayProfile, simulatedMeter, roomOccupancyPattern, equipmentInven
 export type { HourPoint, MeterReading, RoomPoint, RoomState, EquipmentItem, FlowGraph, FlowNode, FlowLink, ZoneEndUseDay } from './twin';
 export {
   upgradeDef,
+  upgradeLifetime,
   orderUpgrades,
   eligibleUpgrades,
   validateUpgradeSet,

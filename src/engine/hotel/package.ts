@@ -4,7 +4,7 @@ import { DEFAULT_FINANCE, calculateFinancialMetrics, financialBreakdown, incenti
 import type { IncentiveOverrides } from './finance';
 import { exportCreditPerKWh, solarCostPerW } from './solar';
 import { isSolar } from './constants';
-import { calculateUpgradeSavings, isContext, orderUpgrades, prepareUpgradeContext, upgradeDef } from './upgrades';
+import { calculateUpgradeSavings, isContext, orderUpgrades, prepareUpgradeContext, upgradeDef, upgradeLifetime } from './upgrades';
 import type { UpgradeContext } from './upgrades';
 import type {
   FinancialAssumptions,
@@ -58,7 +58,7 @@ export function packageMetrics(
     {
       annualSavings: mid.savings.cost,
       carbonAvoidedKgPerYear: mid.savings.carbonKg,
-      items: costs.items.map((i) => ({ cost: i.cost.mid, lifetimeYears: upgradeDef(i.id, d).lifetimeYears })),
+      items: costs.items.map((i) => ({ cost: i.cost.mid, lifetimeYears: upgradeLifetime(i.id, ctx.profile, d) })),
       budget,
       incentivesTotal: inc.total.mid,
       solarValuePerYear: mid.sizing.solarValuePerYear,
@@ -130,7 +130,7 @@ export function evaluatePackage(
       const marginal = prev - upTo.annual.cost;
       prev = upTo.annual.cost;
       const def = upgradeDef(item.id, d);
-      return { id: item.id, label: def.label, cost: item.cost, annualSavingsMid: marginal, lifetimeYears: def.lifetimeYears, source: def.source };
+      return { id: item.id, label: def.label, cost: item.cost, annualSavingsMid: marginal, lifetimeYears: upgradeLifetime(item.id, p, d), source: def.source };
     });
   }
 

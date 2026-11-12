@@ -50,7 +50,7 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
   **4,903 kWh and 209 therms ($883)**. The electric gap is the larger one: the TRM measure also controls the room's fan, which the model does not.
   Options: (a) add guest-room fan savings when a room is empty, sized so the model lands inside the TRM range; (b) keep the model and show the TRM
   range beside it. Either way the change goes into the shared simulation so the Scenario switch and the upgrade card agree.
-- [ ] **A2. Installed costs** (per ft², per room or per unit) for LED retrofit, occupancy sensors (the TRM gives $55–125 per sensor; needs a coverage
+- [ ] **A2. Installed costs** — *partly done (November 2026): roof insulation ($1.40/ft², IL-TRM 4.8.1, raised to 2024 dollars) and water heating (~$200/room built from IL-TRM 4.3.1–4.3.3) are now sourced. Still placeholders: LED, occupancy sensors, energy management, HVAC equipment (ComEd worksheets still not reachable: the page is a JavaScript app and the worksheet file links are not in it).* (per ft², per room or per unit) for LED retrofit, occupancy sensors (the TRM gives $55–125 per sensor; needs a coverage
   area per sensor), energy management controls, HVAC equipment, water heating plus low-flow fixtures (TRM: about $12 per showerhead) and roof
   insulation. Sources: IL-TRM measure costs where they exist, ComEd and Peoples Gas program data, DOE/NREL cost studies, hotel case studies.
 - [x] **A3. Solar installed $/W by size — done (November 2026).** LBNL *Distributed Solar & Storage, 2025 Data Update*, p. 8: 2024 national
@@ -72,10 +72,10 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
 - [x] **B1. Chicago weather normals — done** (NOAA O'Hare, 1991–2020). Note: (NOAA 1991–2020, O'Hare or Midway) to replace the temperatures written from memory; needs `www.ncei.noaa.gov`.
   Cross-check found: the PVWatts typical year for downtown is 4–8 °F cooler in May to July than the placeholder (lakefront and "typical year"
   effects), so confirm with NOAA before changing.
-- [ ] B2. HVAC equipment: cooling reduction (chiller or RTU replacement) and lifetime; condensing boiler range (IL-TRM boiler measures, NREL ComStock).
-- [ ] B3. Water heating: share of a hotel's hot water used by showers and sinks (to turn the TRM showerhead and aerator flows into a % reduction),
+- [x] B2. HVAC equipment — *done where the TRM allows (November 2026)*: lifetimes by system (central plant 23, RTU 15, PTAC/PTHP 8, VRF 16 years; IL-TRM 4.4.6, 4.4.10, 4.4.15, 4.4.13, 4.4.9); cooling high 26% from the TRM 4.4.6 chiller example. Mid/low cooling, heating range and cost remain placeholders.
+- [ ] B3. Water heating (*partly: faucets are 25% of hotel hot water, 14 gal/room-day, IL-TRM 4.3.2; heater 0.80 to 0.90 Et saves 11%; showerheads 2.67 gpm baseline, 4.3.3; the showers’ share is not in the TRM*): share of a hotel's hot water used by showers and sinks (to turn the TRM showerhead and aerator flows into a % reduction),
   heater efficiency gain, and gallons per occupied room per day (ASHRAE RP-1544 or the IL-TRM hot-water section).
-- [ ] B4. Lifetimes still placeholders: energy management controls, insulation, water heating.
+- [x] B4. Lifetimes — *done (November 2026)*: insulation 20 (IL-TRM 4.8.1), water heating 15 (4.3.1; fixtures 10), energy management 10 (nearest TRM controls measure, 4.4.41; a judgment).
 - [ ] B5. Climate-specific end-use split (CBECS has no lodging-by-climate table; NREL ComStock hotel results by climate zone).
 - [ ] B6. Baseline internals: age factor by year built, zone allocation, central-plant share by HVAC type, driver weights, hourly shapes
   (ComStock hotel profiles), equipment sizing, Chicago seasonal occupancy (STR or Choose Chicago), floor area per room.

@@ -1,4 +1,4 @@
-import type { Category, EndUse, LoadType, ZoneId } from './types';
+import type { Category, EndUse, LoadType, UpgradeId, ZoneId } from './types';
 
 export const ZONE_IDS: ZoneId[] = [
   'guest_rooms',
@@ -67,3 +67,18 @@ export const KBTU_PER_THERM = 100;
 
 /** Calibrating to a bill may scale the benchmark by at most this range; beyond it the result is flagged. */
 export const CALIBRATION_RANGE: [number, number] = [0.4, 2.5];
+
+/**
+ * The fixed order upgrades are applied in, whatever order the caller lists them (so savings are never double counted):
+ * envelope, lighting, controls, equipment, water heating, solar last.
+ */
+export const UPGRADE_ORDER: UpgradeId[] = [
+  'insulation',
+  'led_lighting',
+  'occupancy_sensors',
+  'smart_room_controls',
+  'energy_management',
+  'hvac_upgrade',
+  'water_heating',
+  'rooftop_solar',
+];

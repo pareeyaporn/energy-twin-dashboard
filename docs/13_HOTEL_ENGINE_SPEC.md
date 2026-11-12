@@ -6,8 +6,8 @@ All data values are **synthetic placeholders** (`verified: false`) except the EI
 ## 1. Scope
 **Does:** monthly and annual energy, cost and carbon by zone, end use and month; occupancy, setpoint, schedule, weather and price what-ifs with
 the reasons for each change and comfort flags; hourly "typical day" profiles, room-by-room occupancy, equipment lists and energy flows for the twin.
-**Does not (yet):** hourly or daily simulation of a real year, demand charges and tariff structures, real weather, equipment-level physics, upgrades
-(Phase 2), the optimizer (Phase 3), or measured data. No randomness anywhere: the same input always gives the same output.
+**Does not (yet):** hourly or daily simulation of a real year, demand charges and tariff structures, real weather, equipment-level physics, the optimizer
+(Phase 3), or measured data. Upgrades, costs and financial metrics are in section 8. No randomness anywhere: the same input always gives the same output.
 
 Conventions: electricity in kWh, gas in therms, cost in US dollars (not rounded; round only for display), site energy in kBtu
 (3.412 kBtu per kWh, 100 kBtu per therm), temperatures in °F, a 365-day year.
@@ -122,6 +122,60 @@ They are monthly-resolution approximations of a week-scale event.
 - Prices are all-in averages; there are no demand charges or time-of-use rates.
 - Weather is monthly means only; stress tests are monthly approximations.
 - The home-era engine in `src/engine` is untouched and still exported next to this one (`hotel` namespace) to avoid name clashes.
+
+## 8. Upgrades, costs and financial metrics (Phase 2)
+Eight upgrades (`src/data/hotel/upgrades.json`, all placeholders): smart guest-room thermostats and occupancy sensing, roof and envelope insulation, LED lighting,
+occupancy sensors in common areas, energy management controls, high-efficiency HVAC equipment, high-efficiency water heating and low-flow fixtures, and rooftop solar.
+
+**Savings (`calculateUpgradeSavings`).** Upgrades are applied in a fixed order, whatever order they are listed in: insulation, LED lighting, occupancy sensors,
+smart room controls, energy management, HVAC equipment, water heating, solar last. Each step rescales the affected cells (by load kind where it matters), so
+savings are recomputed from the hotel's own loads and **never added as percentages**. Each upgrade has low, mid and high values; the scenario picks one.
+- **Smart room controls** re-run the simulation with vacant-room setpoints set back 3, 5 or 7 °F (limits 55 and 85 °F), so they act through the same mechanism as a scenario.
+- **Insulation** cuts the *weather* load of heating and cooling by 6, 10 or 14%.
+- **LED lighting** cuts lighting 35, 45 or 55%. **Interaction:** less lighting heat lowers cooling (0.10 kBtu per kBtu of lighting saved) and raises heating (0.20 kBtu per kBtu saved),
+  spread over the existing cooling and heating energy. Occupancy sensors do the same for the lighting they save.
+- **Occupancy sensors** cut common-area and hallway lighting 12, 20 or 28% and their ventilation 2, 5 or 8%.
+- **Energy management** cuts HVAC in the plant, lobby and hallways 4, 7 or 10%. It reaches guest rooms (half the percentage) only when smart room controls are absent; with them the two **overlap** and guest rooms get nothing extra.
+- **HVAC equipment** cuts heating 8, 12 or 16% and cooling 10, 15 or 22%. It is **sized from the reduced load**: the size factor is the share of baseline heating and cooling weather load left before this step (0.6 to 1).
+- **Water heating** cuts hot-water energy 15, 22 or 30%.
+- **Solar** is sized as the smaller of the usable roof (50% of one floor's footprint at 100 ft² per kW) and 10% of electricity use. Each month it offsets at most what the hotel uses (no export credit), using a monthly production shape and 1,100, 1,200 or 1,300 kWh per kW per year.
+
+**Dependencies and exclusions.** The data can name `requires` and `excludes` per upgrade; the engine rejects invalid sets. None are set today (energy management and smart controls overlap rather than depend on each other).
+Smart room controls are ineligible if the hotel already has them.
+
+**Costs (`upgradeCost`, `packageCost`).** Cost = fixed + per room + per floor area + per roof area + per common-area floor area + per kW, each as low, mid and high. HVAC equipment scales its floor-area part by the size factor.
+Equipment size and cost come from the mid scenario so they do not change with the savings scenario. Incentives are 0.
+
+**Financial metrics (`calculateFinancialMetrics`)** at mid, with 2% price growth, a 3% discount rate and the profile's horizon (default 5 years):
+payback = cost / first-year savings (none if savings are not positive); five-year **net benefit** = Σ yearly savings with price growth − cost (nominal, no residual value);
+NPV = the same, discounted; NPV with residual adds the remaining life of long-lived equipment; ROI = net benefit / cost; carbon avoided per year and over the horizon; remaining budget.
+
+**Comfort (`comfortFor`).** Score starts at 1; each upgrade with a minor comfort impact costs 0.05 and each warning flag 0.15. Notes list the impacts and any condition flags
+(smart controls add the recovery-time note). The optimizer will be able to require a minimum score.
+
+**`evaluatePackage`** returns the cost range, annual savings (low, mid, high), new annual cost, carbon avoided, metrics, comfort, sizing and per-item marginal savings (which sum to the package savings and depend on the fixed order).
+
+### Demo hotel, single upgrades (mid; synthetic placeholders)
+
+| Upgrade | Cost | Saves per year (low to high) | Payback |
+| --- | --- | --- | --- |
+| Occupancy sensors | $6,600 | $2,478 ($1,469 to $3,486) | 2.7 years |
+| LED lighting | $33,000 | $10,757 ($8,367 to $13,148) | 3.1 years |
+| Water heating and low-flow | $22,000 | $3,239 | 6.8 years |
+| Energy management | $26,000 | $2,570 | 10.1 years |
+| Smart room controls | $26,500 | $1,645 ($987 to $2,303) | 16.1 years |
+| Insulation | $38,500 | $2,328 | 16.5 years |
+| Rooftop solar (55 kW) | $154,000 | $9,273 | 16.6 years |
+| HVAC equipment | $110,000 | $4,036 | 27.3 years |
+
+LED lighting plus occupancy sensors costs $39,600, saves $12,159 a year (payback 3.3 years, five-year net benefit about $23,700). The full package costs $396,000 and saves $33,700.
+All 256 combinations evaluate in about 0.25 seconds.
+
+### Limits of this version
+- **Smart room controls pay back slowly (16 years)** because their modeled savings are small (see section 7). That is a calibration question, not a product conclusion.
+- **Solar costs more than a $50,000 budget** at the modeled size, so it only appears with a larger budget. A smaller array option is not modeled.
+- **No HVAC alternatives** (for example a heat pump) and no heat-pump water heater, so there are no mutually exclusive options yet.
+- All savings, costs, lifetimes and interaction factors are placeholders until Phase 7.
 
 ---
 

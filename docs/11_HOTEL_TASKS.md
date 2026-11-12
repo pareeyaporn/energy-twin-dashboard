@@ -68,22 +68,22 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
       stress tests move energy and cost in the expected direction
 
 ## Phase 2 — Upgrades, costs and financial metrics (P0) [CC]
-- [ ] 2.1 Upgrade catalog `src/data/hotel/upgrades.json` (8 upgrades, each with cost model, affected zone and category, savings
+- [x] 2.1 Upgrade catalog `src/data/hotel/upgrades.json` (8 upgrades, each with cost model, affected zone and category, savings
       parameters low/mid/high, lifetime, comfort impact, source):
       smart guest-room thermostats and occupancy controls, HVAC equipment upgrade, LED lighting, occupancy sensors (common areas and
       hallways), water-heating upgrade (for example heat-pump water heater), insulation (roof or envelope), rooftop solar,
       energy management controls
-- [ ] 2.2 `calculateUpgradeSavings()` with fixed order and interactions: envelope → lighting (reduces cooling load, adds heating) →
+- [x] 2.2 `calculateUpgradeSavings()` with fixed order and interactions: envelope → lighting (reduces cooling load, adds heating) →
       controls (with an overlap factor between thermostats and the energy management system) → HVAC equipment sized from the reduced load →
       water heating → rooftop solar last (offsets remaining electricity, capped by roof area)
-- [ ] 2.3 Dependencies and exclusions (for example the energy management system builds on thermostats; two HVAC options are mutually exclusive)
-- [ ] 2.4 Cost models per room, per square foot, per kW, per fixture and per ton, with low, mid and high; incentives 0 by default
-- [ ] 2.5 `calculateFinancialMetrics()` reusing `finance.ts`: payback, five-year net benefit (horizon parameter), NPV, ROI,
+- [x] 2.3 Dependencies and exclusions (for example the energy management system builds on thermostats; two HVAC options are mutually exclusive)
+- [x] 2.4 Cost models per room, per square foot, per kW, per fixture and per ton, with low, mid and high; incentives 0 by default
+- [x] 2.5 `calculateFinancialMetrics()` reusing `finance.ts`: payback, five-year net benefit (horizon parameter), NPV, ROI,
       emissions avoided, remaining budget
-- [ ] 2.6 Comfort model: per-upgrade and per-scenario flags (for example setback range, common-area schedules that cut conditioning
+- [x] 2.6 Comfort model: per-upgrade and per-scenario flags (for example setback range, common-area schedules that cut conditioning
       while guests are present) plus a comfort margin the optimizer can constrain on
-- [ ] 2.7 Savings ranges (low, mid, high) for every upgrade and package
-- [ ] 2.8 Tests: order independence; no double counting (package savings < sum of standalone); LED lowers cooling savings overlap;
+- [x] 2.7 Savings ranges (low, mid, high) for every upgrade and package
+- [x] 2.8 Tests: order independence; no double counting (package savings < sum of standalone); LED lowers cooling savings overlap;
       solar capped and applied last; costs; ranges ordered; comfort flags
 
 ## Phase 3 — Budget-constrained optimizer (P0) [CC]

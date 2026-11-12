@@ -314,4 +314,137 @@ export interface HotelData {
     verified: boolean;
   };
   presets: { id: string; label: string; synthetic: boolean; input: HotelInput }[];
+  upgrades: UpgradesData;
+}
+
+// ---- Upgrades, costs and financial metrics (Phase 2) ----
+
+export type UpgradeId =
+  | 'smart_room_controls'
+  | 'insulation'
+  | 'led_lighting'
+  | 'occupancy_sensors'
+  | 'energy_management'
+  | 'hvac_upgrade'
+  | 'water_heating'
+  | 'rooftop_solar';
+
+/** low = pessimistic savings (and cheapest-to-install for cost ranges are separate); high = optimistic. */
+export type SavingsScenario = 'low' | 'mid' | 'high';
+
+export interface Range3 {
+  low: number;
+  mid: number;
+  high: number;
+}
+
+export interface CostModel {
+  fixed?: Range3;
+  perRoom?: Range3;
+  perSqftFloor?: Range3;
+  perSqftRoof?: Range3;
+  perSqftCommon?: Range3;
+  perKw?: Range3;
+}
+
+export interface UpgradeDef {
+  id: UpgradeId;
+  label: string;
+  description: string;
+  lifetimeYears: number;
+  cost: CostModel;
+  /** The floor-area part of the cost scales with the HVAC size factor (equipment sized from the reduced load). */
+  sizeScaled?: boolean;
+  params: Record<string, Range3>;
+  constants: Record<string, number>;
+  comfort: { impact: 'none' | 'minor' | 'positive'; note: string };
+  requires: UpgradeId[];
+  excludes: UpgradeId[];
+  source: string;
+  verified: boolean;
+}
+
+export interface UpgradesData {
+  interaction: { coolingOffsetPerSavedLightingKBtu: number; heatingPenaltyPerSavedLightingKBtu: number };
+  solarMonthlyShape: number[];
+  comfortScore: { minorPenalty: number; flagPenalty: number };
+  upgrades: UpgradeDef[];
+  source: string;
+  verified: boolean;
+}
+
+export interface PackageComfort {
+  /** 1 = no comfort impact; each upgrade with a minor impact and each warning flag lowers it. */
+  score: number;
+  notes: ComfortFlag[];
+}
+
+export interface UpgradeSizing {
+  /** Share of baseline heating and cooling weather load left before the HVAC step (1 = no reduction). Sizes the equipment cost. */
+  hvacSizeFactor: number;
+  solarKw: number;
+  solarKWhYear: number;
+}
+
+export interface UpgradeOutcome {
+  upgradeIds: UpgradeId[];
+  scenario: SavingsScenario;
+  /** Annual totals after the upgrades. */
+  annual: Totals;
+  /** Baseline minus after (positive = saved). */
+  savings: Totals;
+  /** The adjusted cells (rebuild a full result with `toEnergyResult`). */
+  cells: Cell[];
+  sizing: UpgradeSizing;
+  comfort: PackageComfort;
+}
+
+export interface FinancialAssumptions {
+  priceGrowth: number; // per year, for example 0.02
+  discountRate: number; // for example 0.03
+  horizonYears: number;
+}
+
+export interface FinancialMetrics {
+  cost: number; // mid
+  annualSavings: number; // mid, first year
+  paybackYears: number | null; // null if savings <= 0
+  /** Sum of yearly savings (with price growth) over the horizon minus cost. No residual value. */
+  netBenefit: number;
+  /** The same, discounted. */
+  npv: number;
+  /** NPV including the remaining life of the equipment beyond the horizon. */
+  npvWithResidual: number;
+  /** Net benefit divided by cost. null if cost is 0. */
+  roi: number | null;
+  horizonYears: number;
+  carbonAvoidedKgPerYear: number;
+  carbonAvoidedKgHorizon: number;
+  remainingBudget: number;
+}
+
+export interface PackageLineItem {
+  id: UpgradeId;
+  label: string;
+  cost: Range3;
+  /** Marginal annual savings at mid, applying upgrades one at a time in the fixed order. They sum to the package savings. */
+  annualSavingsMid: number;
+  lifetimeYears: number;
+  source: string;
+}
+
+export interface PackageEvaluation {
+  id: string;
+  upgradeIds: UpgradeId[];
+  name: string;
+  cost: Range3;
+  annualSavings: Range3;
+  newAnnualCost: number;
+  carbonAvoidedKg: Range3;
+  metrics: FinancialMetrics;
+  comfort: PackageComfort;
+  sizing: UpgradeSizing;
+  lineItems: PackageLineItem[];
+  /** The mid-scenario outcome (for the twin's before/after). */
+  outcome: UpgradeOutcome;
 }

@@ -87,17 +87,17 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
       solar capped and applied last; costs; ranges ordered; comfort flags
 
 ## Phase 3 — Budget-constrained optimizer (P0) [CC]
-- [ ] 3.1 `optimizeInvestmentPortfolio()`: enumerate all subsets (2^8 = 256), filter by budget, dependencies, exclusions and the comfort constraint
-- [ ] 3.2 Return at least three distinct packages: maximum savings, fastest payback, and balanced (a documented weighted score of
+- [x] 3.1 `optimizeInvestmentPortfolio()`: enumerate all subsets (2^8 = 256), filter by budget, dependencies, exclusions and the comfort constraint
+- [x] 3.2 Return at least three distinct packages: maximum savings, fastest payback, and balanced (a documented weighted score of
       financial return, carbon and comfort); if one package wins twice, take the next best so the three differ. Also support the
       profile's other objectives (highest ROI, maximum carbon)
-- [ ] 3.3 Per package: total cost, annual savings (with range), five-year net savings, payback, carbon impact, remaining budget,
+- [x] 3.3 Per package: total cost, annual savings (with range), five-year net savings, payback, carbon impact, remaining budget,
       comfort notes, line items with marginal savings, a rule-based reason
-- [ ] 3.4 Tests: never exceeds budget; interaction-aware; deterministic; three distinct packages; each objective ranks correctly;
+- [x] 3.4 Tests: never exceeds budget; interaction-aware; deterministic; three distinct packages; each objective ranks correctly;
       a small budget returns a clear empty result; the 100-room, $50,000 case as a snapshot; fast enough to run in the browser
-- [ ] 3.5 Print the demo hotel's three packages and sanity-check realism (plausible percent of the bill, no upgrade that does nothing,
+- [x] 3.5 Print the demo hotel's three packages and sanity-check realism (plausible percent of the bill, no upgrade that does nothing,
       no payback that is absurd); report anything unrealistic before moving on
-- [ ] 3.6 Template explanation for the optimizer (adapt `explain.ts`), used as the AI fallback
+- [x] 3.6 Template explanation for the optimizer (adapt `explain.ts`), used as the AI fallback
 
 ## Phase 4 — Store, dashboard and scenario simulator (P0) [CC store, LV UI]
 - [ ] 4.1 [CC] Extend `useTwin.ts` backwards compatibly (with your approval of the diff): `hotel` profile, `scenario` (occupancy,

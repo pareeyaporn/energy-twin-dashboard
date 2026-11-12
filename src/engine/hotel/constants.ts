@@ -82,3 +82,13 @@ export const UPGRADE_ORDER: UpgradeId[] = [
   'water_heating',
   'rooftop_solar',
 ];
+
+/** Optimizer defaults. These are modeling choices, not sourced data. */
+export const OPTIMIZER_DEFAULTS = {
+  /** Packages below this comfort score are excluded unless the caller changes it. */
+  minComfortScore: 0.7,
+  /** A recommended package must save at least this share of the current bill. */
+  minSavingsShare: 0.01,
+  /** Weights of the balanced score: financial return (five-year net benefit), carbon avoided, guest comfort. */
+  balancedWeights: { financial: 0.5, carbon: 0.3, comfort: 0.2 },
+};

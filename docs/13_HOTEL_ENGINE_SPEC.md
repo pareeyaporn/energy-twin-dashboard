@@ -177,6 +177,39 @@ All 256 combinations evaluate in about 0.25 seconds.
 - **No HVAC alternatives** (for example a heat pump) and no heat-pump water heater, so there are no mutually exclusive options yet.
 - All savings, costs, lifetimes and interaction factors are placeholders until Phase 7.
 
+## 9. Budget optimizer (Phase 3)
+`optimizeInvestmentPortfolio(profile, options)` tests every subset of the eligible upgrades (2^n, so 256 for the demo hotel, the empty set counted but never returned).
+It keeps a package only if it is valid (requirements and exclusions), costs no more than the budget at the **mid** estimate, has a comfort score of at least 0.70, and saves at least 1% of the current bill.
+All numbers come from `evaluatePackage` logic, so interactions between upgrades are included. Evaluating all 256 combinations plus the three winners takes roughly 0.1 seconds.
+
+**Three distinct packages.** Maximum savings (highest annual savings), fastest payback (lowest payback, ties broken by higher savings), and balanced. They are assigned in that order; if one
+package would win two roles, the later role takes its next best and the package carries a note ("runner-up"). Ties are broken by lower cost and then by id, so results are deterministic.
+
+**Balanced score** = 0.5 × five-year net benefit + 0.3 × carbon avoided + 0.2 × comfort score, where net benefit and carbon are min-max normalized across the candidates (placeholder weights in `OPTIMIZER_DEFAULTS`).
+
+**The profile's objective** (annual savings, payback, ROI, carbon, balanced) selects `objectiveWinner`, which may repeat one of the three packages. The UI should highlight it. Highest ROI and maximum carbon are available this way without adding more cards.
+
+**Per package:** cost range, annual savings range, new annual cost, five-year net benefit, payback, ROI, carbon avoided, remaining budget, comfort score and notes, per-item marginal savings, and a one-line rule-based reason.
+`budgetRisk` is true when the high-end cost estimate would exceed the budget.
+
+**When nothing fits** the result is empty with `emptyReason` and `cheapestUseful` (the cheapest single upgrade that saves money). `explainPortfolio(result)` writes 4 to 6 sentences from the result's numbers only (the advisor's fallback).
+
+### Demo hotel, objective "balanced" (mid estimates; synthetic placeholders)
+
+| Budget | Maximum savings | Fastest payback | Balanced |
+| --- | --- | --- | --- |
+| $50,000 | LED + occupancy sensors: $39,600, saves $12,159 a year (8.6% of the bill), payback 3.3 years, five-year net $23,676 | Occupancy sensors alone: $6,600, saves $2,478, payback 2.7 years | LED alone (runner-up): $33,000, saves $10,757, payback 3.1 years |
+| $100,000 | LED + sensors + energy management + water heating: $87,600, saves $17,925 (12.7%), payback 4.9 years | Occupancy sensors alone | LED + sensors + water heating: $61,600, saves $15,398 (10.9%), payback 4.0 years, five-year net $18,532 |
+| $250,000 | Adds rooftop solar: $241,600, saves $27,198 (19.3%), payback 8.9 years, five-year net −$100,059 | Occupancy sensors alone | Same as $100,000 |
+
+At $5,000 nothing fits; the cheapest useful upgrade is occupancy sensors at about $6,600.
+
+### Observations and limits
+- At $50,000 the true balanced winner is the same package as maximum savings, so the "balanced" card shows the runner-up; the highlighted objective winner is LED + sensors.
+- **Smart room controls never appear in a recommendation** at these numbers (16-year payback). Solar appears only with a very large budget and a negative five-year net benefit. Both depend on placeholder inputs.
+- Fastest payback is always a small package (occupancy sensors), because payback ignores size. The 1% savings floor stops anything smaller than that winning.
+- The comfort constraint (0.70) has not rejected anything yet, since no package loses more than 0.20.
+
 ---
 
 ## Appendix A — Store contract proposal (task 1.10, awaiting your OK; nothing in `src/store/` has been changed)

@@ -448,3 +448,68 @@ export interface PackageEvaluation {
   /** The mid-scenario outcome (for the twin's before/after). */
   outcome: UpgradeOutcome;
 }
+
+// ---- Budget optimizer (Phase 3) ----
+
+export type PackageRole = 'max_savings' | 'fastest_payback' | 'balanced' | 'max_roi' | 'max_carbon';
+
+export interface OptimizerOptions {
+  /** Defaults to the profile's budget. */
+  budget?: number;
+  /** Which winner to highlight; defaults to the profile's objective. */
+  objective?: Objective;
+  /** Packages scoring below this comfort score are excluded (see comfortFor). */
+  minComfortScore?: number;
+  /** Packages must save at least this share of the current bill to be recommended (so a trivial package is not "fastest"). */
+  minSavingsShare?: number;
+  assumptions?: Partial<FinancialAssumptions>;
+}
+
+/** The key numbers of every package that was considered, for tables and charts. */
+export interface Candidate {
+  id: string;
+  upgradeIds: UpgradeId[];
+  cost: number; // mid
+  costHigh: number;
+  annualSavings: number; // mid
+  paybackYears: number | null;
+  netBenefit: number;
+  roi: number | null;
+  carbonAvoidedKg: number;
+  comfortScore: number;
+  /** 0 to 1, from the weighted blend of financial return, carbon and comfort. */
+  balancedScore: number;
+}
+
+export interface RankedPackage {
+  role: PackageRole;
+  roleLabel: string;
+  evaluation: PackageEvaluation;
+  /** One rule-based line explaining why this package won its role. */
+  reason: string;
+  /** True when the high-end cost estimate would exceed the budget. */
+  budgetRisk: boolean;
+  /** Set when the role's best package was already taken by another role and the runner-up is shown. */
+  note?: string;
+  balancedScore: number;
+}
+
+export interface PortfolioResult {
+  budget: number;
+  objective: Objective;
+  baselineAnnualCost: number;
+  /** All subsets of the eligible upgrades, including the empty set. */
+  combinationsTested: number;
+  /** Valid, non-empty combinations within the budget and comfort limit. */
+  feasibleCount: number;
+  rejected: { overBudget: number; comfort: number; belowSavingsThreshold: number; invalid: number };
+  minComfortScore: number;
+  minSavingsShare: number;
+  /** At least three distinct packages when enough exist: maximum savings, fastest payback, balanced. */
+  packages: RankedPackage[];
+  /** The winner for the objective (may repeat one of the packages above). */
+  objectiveWinner: RankedPackage | null;
+  candidates: Candidate[];
+  emptyReason: string | null;
+  cheapestUseful: { id: UpgradeId; label: string; cost: number } | null;
+}

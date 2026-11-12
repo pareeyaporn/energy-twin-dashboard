@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -55,6 +56,9 @@ export function BudgetOptimizer({ compact = false }: { compact?: boolean }) {
   const setObjective = useTwin((s) => s.setHotelObjective);
   const run = useTwin((s) => s.runHotelOptimizer);
   const apply = useTwin((s) => s.applyHotelPackage);
+  const optimizerCombinations = useTwin((s) => s.optimizerCombinations);
+  const optimizeOnScenario = useTwin((s) => s.optimizeOnScenario);
+  const setOptimizeOnScenario = useTwin((s) => s.setOptimizeOnScenario);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -82,11 +86,20 @@ export function BudgetOptimizer({ compact = false }: { compact?: boolean }) {
     <section className={cn("grid items-end gap-4 border-y border-border py-5", !compact && "md:grid-cols-[1fr_1fr_auto]")}>
       <div className="space-y-2"><Label htmlFor={compact ? "panel-hotel-budget" : "hotel-budget"}>Investment budget ($)</Label><Input id={compact ? "panel-hotel-budget" : "hotel-budget"} className="num" type="number" min={0} step={500} value={hotel.profile.budget} disabled={optimizing} onChange={(event) => { const value = Number(event.target.value); if (Number.isFinite(value)) setBudget(value); }} /></div>
       <div className="space-y-2"><Label htmlFor={compact ? "panel-hotel-objective" : "hotel-objective"}>Objective</Label><Select value={hotel.profile.objective} disabled={optimizing} onValueChange={(value) => { const option = objectives.find((item) => item.value === value); if (option) setObjective(option.value); }}><SelectTrigger id={compact ? "panel-hotel-objective" : "hotel-objective"}><SelectValue /></SelectTrigger><SelectContent>{objectives.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent></Select></div>
-      <Button variant="accent" className="whitespace-normal" disabled={optimizing} onClick={() => { void run(); }}>{optimizing ? <><Loader2 className="animate-spin motion-reduce:animate-none" />Testing combinations…</> : <><Sparkles />Find the best investments</>}</Button>
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex min-h-9 items-center gap-2">
+          <Switch id={compact ? "panel-optimize-scenario" : "optimize-scenario"} aria-label="Optimize for this scenario" checked={optimizeOnScenario} disabled={optimizing} onCheckedChange={setOptimizeOnScenario} />
+          <Label htmlFor={compact ? "panel-optimize-scenario" : "optimize-scenario"} className="max-w-36 text-xs leading-snug">Optimize for this scenario</Label>
+        </div>
+        <Button variant="accent" className="whitespace-normal" disabled={optimizing} onClick={() => { void run(); }}>{optimizing ? <><Loader2 className="animate-spin motion-reduce:animate-none" />Testing combinations…</> : <><Sparkles />Find the best investments</>}</Button>
+      </div>
     </section>
-    {optimizing && <div role="status" className="space-y-2"><p className="text-sm text-muted-foreground">Testing combinations… <span className="num">{plan ? Math.floor(progress * plan.combinationsTested) : `${Math.floor(progress * 100)}%`}</span></p><progress aria-label="Testing combinations" value={progress} max={1} className="h-2 w-full accent-primary" /></div>}
+    {optimizing && <div role="status" className="space-y-2"><p className="text-sm text-muted-foreground">Testing combinations… <span className="num" data-testid="optimizer-combination-counter" data-count={Math.floor(progress * (optimizerCombinations ?? 0))} data-total={optimizerCombinations ?? 0}>{number(Math.floor(progress * (optimizerCombinations ?? 0)))} / {number(optimizerCombinations ?? 0)}</span></p><progress aria-label="Testing combinations" value={progress} max={1} className="h-2 w-full accent-primary" /></div>}
     {!optimizing && plan && <>
-      <p role="status" className="num text-xs text-muted-foreground">{number(plan.combinationsTested)} combinations tested · {number(plan.feasibleCount)} feasible packages · Estimates</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <p role="status" className="num text-xs text-muted-foreground">{number(plan.combinationsTested)} combinations tested · {number(plan.feasibleCount)} feasible packages · Estimates</p>
+        {plan.scenario && <Badge variant="secondary" className="text-primary">Measured against the current scenario</Badge>}
+      </div>
       {cards.length === 0 ? <section aria-label="No investments found" className="space-y-3 border-l-2 border-heat pl-4"><h2 className="font-semibold">No suitable package</h2><p className="text-sm text-muted-foreground">{plan.emptyReason}</p>{plan.cheapestUseful && <p className="text-sm">Lowest-cost useful investment: {plan.cheapestUseful.label} · <span className="num">{money(plan.cheapestUseful.cost)}</span></p>}</section> : <>
         <section aria-label="Investment packages" className={cn("grid items-start gap-4", !compact && "lg:grid-cols-3")}>{cards.map((pkg) => <InvestmentCard key={`${pkg.role}-${pkg.evaluation.id}`} pkg={pkg} winner={pkg.evaluation.id === winner?.evaluation.id} />)}</section>
         {winner && !cards.some((pkg) => pkg.evaluation.id === winner.evaluation.id) && <section aria-label="Objective winner" className="space-y-3 border-t border-primary/30 pt-4"><h2 className="font-semibold">Objective winner · {winner.roleLabel}</h2><InvestmentCard pkg={winner} winner /></section>}

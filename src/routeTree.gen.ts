@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OptimizerRouteImport } from './routes/optimizer'
 import { Route as OverviewRouteImport } from './routes/overview'
+import { Route as ScenarioRouteImport } from './routes/scenario'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const OverviewRoute = OverviewRouteImport.update({
   path: '/overview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScenarioRoute = ScenarioRouteImport.update({
+  id: '/scenario',
+  path: '/scenario',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
+  '/scenario': typeof ScenarioRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
+  '/scenario': typeof ScenarioRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
+  '/scenario': typeof ScenarioRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/optimizer' | '/overview'
+  fullPaths: '/' | '/optimizer' | '/overview' | '/scenario'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/optimizer' | '/overview'
-  id: '__root__' | '/' | '/optimizer' | '/overview'
+  to: '/' | '/optimizer' | '/overview' | '/scenario'
+  id: '__root__' | '/' | '/optimizer' | '/overview' | '/scenario'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OptimizerRoute: typeof OptimizerRoute
   OverviewRoute: typeof OverviewRoute
+  ScenarioRoute: typeof ScenarioRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OverviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/scenario': {
+      id: '/scenario'
+      path: '/scenario'
+      fullPath: '/scenario'
+      preLoaderRoute: typeof ScenarioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OptimizerRoute: OptimizerRoute,
   OverviewRoute: OverviewRoute,
+  ScenarioRoute: ScenarioRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -32,4 +32,30 @@ describe("Hotel investment selection timing", () => {
     await act(async () => { await vi.advanceTimersByTimeAsync(600); });
     expect(useTwin.getState().activeHotelPackageId).toBe(alternative.evaluation.id);
   });
+
+  it("counts toward optimizerCombinations as soon as the run starts", async () => {
+    render(<BudgetOptimizer />);
+    fireEvent.click(screen.getByRole("button", { name: "Find the best investments" }));
+    const total = useTwin.getState().optimizerCombinations;
+    expect(total).toBeGreaterThan(0);
+    const counter = screen.getByTestId("optimizer-combination-counter");
+    expect(counter).toHaveAttribute("data-total", String(total));
+    const initial = Number(counter.getAttribute("data-count"));
+    await act(async () => { await vi.advanceTimersByTimeAsync(400); });
+    expect(Number(screen.getByTestId("optimizer-combination-counter").getAttribute("data-count"))).toBeGreaterThan(initial);
+    await act(async () => { await vi.advanceTimersByTimeAsync(1600); });
+  });
+
+  it("labels packages measured against the current scenario", async () => {
+    act(() => {
+      useTwin.getState().setScenario({ electricityRateChangePct: 20 });
+      useTwin.getState().setOptimizeOnScenario(true);
+    });
+    const pending = useTwin.getState().runHotelOptimizer();
+    await vi.advanceTimersByTimeAsync(2000);
+    await pending;
+    render(<BudgetOptimizer />);
+    expect(useTwin.getState().hotelPlan?.scenario).not.toBeNull();
+    expect(screen.getByText("Measured against the current scenario")).toBeInTheDocument();
+  });
 });

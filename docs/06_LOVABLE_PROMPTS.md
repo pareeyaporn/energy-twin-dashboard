@@ -6,6 +6,28 @@ Task numbers refer to [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md). The old home-era p
 
 Style for every prompt: polished B2B SaaS look, professional typography, clear financial metrics, intuitive charts (Recharts), responsive controls.
 
+## Store API cheat sheet (already built; read it, do not change it)
+
+Import state and actions from `@/store/useTwin` (`useTwin`) and derived values from `@/store/hotelDerived`. Types and the `STRESS_TESTS` list (labels and descriptions) come from `@/engine/hotel`, read only.
+Call selectors like `useTwin(selectDisplayed)`; they are memoized and safe to use on every render.
+
+| What | Name |
+| --- | --- |
+| Hotel profile entered by the user / with defaults filled in | `hotelInput` / `hotel.profile`; `hotel.defaulted` lists fields that are defaults (show "default (estimate)"), `hotel.notes` explains clamped values |
+| Demo presets | `hotelPresets` (`{ id, label, synthetic }`), `hotelPresetId`, `selectHotelPreset(id)` |
+| Edit the profile | `setHotelInput(patch, clearKeys?)`, `setHotelBudget(n)`, `setHotelObjective('annual_savings' \| 'payback' \| 'roi' \| 'carbon' \| 'balanced')` |
+| Current baseline | `baseline` (`annual`, `byZone`, `byCategory`, `byEndUse`, `months`, `estimated`, `sources`) |
+| What-if | `scenario`, `setScenario(patch, clearKeys?)`, `resetScenario()`, `applyStressTest('heat_wave' \| 'cold_snap' \| 'conference_surge' \| 'price_up_20' \| null)`, `activeStressTest` |
+| What-if result | `scenarioResult` (null when none): `before`, `after`, `delta`, `deltaByZone`, `deltaByCategory`, `drivers` (why it changed), `flags` (comfort notes) |
+| What the screen should show | `selectDisplayed(s)` → `{ kind: 'baseline' \| 'scenario' \| 'package', result }`; `selectCompare(s)` → `{ before, after, kind }`; `selectHotelCost`, `selectHotelBaselineCost`, `selectHotelLabel` |
+| Zones, equipment, flows, time | `selectZoneRows`, `selectEquipment`, `selectFlows`, `selectTypicalDay`, `selectRooms`, `selectMeter`; `selectedZone`/`selectZone`, `twinLayer`/`setTwinLayer`, `timeMode`/`timeMonth`/`timeHour`/`setTime`, `playing`/`setPlaying`, `playbackSpeed`/`setPlaybackSpeed`, `compareMode`/`setCompareMode` |
+| Budget optimizer | `runHotelOptimizer()`, `optimizing`, `hotelPlan` (`packages`, `objectiveWinner`, `combinationsTested`, `feasibleCount`, `emptyReason`, `cheapestUseful`), `applyHotelPackage(id \| null)`, `activeHotelPackageId` |
+| Package fields | `evaluation.cost` and `evaluation.annualSavings` (`low`/`mid`/`high`), `evaluation.metrics` (`paybackYears`, `netBenefit`, `roi`, `remainingBudget`, `carbonAvoidedKgPerYear`), `evaluation.comfort`, `evaluation.lineItems`, plus `role`, `roleLabel`, `reason`, `note`, `budgetRisk` |
+| Saved scenarios | `savedScenarios`, `saveScenario(name?)`, `loadScenario(id)`, `renameScenario(id, name)`, `deleteScenario(id)` |
+| Reset | `resetHotel()` |
+
+Money fields are US dollars (round only for display); energy is kWh and therms; carbon is kg CO2e.
+
 ---
 
 ## LV1 — Clean out the home copy (after H9)
@@ -16,38 +38,49 @@ Rename the left panel to "Hotel profile" and the stage to "Digital twin". Keep t
 src/engine, src/data, src/twin, src/store or supabase.
 ```
 
-## LV2 — Hotel profile form (task 4.2, 4.3)
+## LV2 — Hotel profile form (tasks 4.2, 4.3)
 
 ```
-Replace the home form with a hotel profile form in three collapsible sections: Building (name, city/state/country, guest rooms, floor
-area, floors, year built, operating hours, HVAC type, monthly energy bill, electricity price), Operations (occupancy, occupied hours per room,
-guest-room temperatures, common-area HVAC and lighting schedules, hot-water use, seasonal occupancy) and Financial (budget, investment horizon,
-objective: annual savings, payback, ROI, carbon, or balanced). Every field is optional; show an unset field's default with a small
-"default (estimate)" tag. Read and write through the store's hotel profile and preset actions. Include a preset picker for the demo hotel.
+Replace the home form with a hotel profile form in three collapsible sections: Building (name, city/state/country, guest rooms, floor area,
+floors, year built, operating hours, HVAC type, monthly energy bill, electricity price), Operations (occupancy, occupied hours per room,
+guest-room temperatures, common-area HVAC and lighting hours, hot-water use) and Financial (budget, investment horizon, objective: annual
+savings, payback, ROI, carbon, or balanced). Show a preset picker from useTwin().hotelPresets using selectHotelPreset, and label synthetic ones
+"Synthetic demo". Read values from hotel.profile and write them with setHotelInput(patch, clearKeys); to reset one field to its default pass its
+name in clearKeys. Every field is optional: show a small "default (estimate)" tag when the field's name is in hotel.defaulted, and show any
+hotel.notes as helper text. Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```
 
 ## LV3 — Overview tab (task 4.3)
 
 ```
 Add an Overview view: annual energy use, annual cost, a breakdown by category and by zone (Recharts), estimated emissions, and the top
-three opportunities. Use the store's baseline. Show a small "Estimate" badge next to each total.
+opportunities. Use selectDisplayed (result.annual, result.byCategory, result.byZone) and selectZoneRows. Show an "Estimate" badge next to each
+total, and "Synthetic demo data" when hotelPresetId is set. Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```
 
 ## LV4 — Scenario simulator (task 4.4)
 
 ```
-Add a Scenario simulator: sliders and toggles for occupancy, guest-room setpoint, vacant-room setback, common-area HVAC schedule and
-electricity price change (%). Each change calls the store's scenario action. Show before/after metric tiles (energy, cost, carbon) with
-animated numbers, a monthly before/after chart, and a "Why this changed" panel listing the store's drivers. Add a Reset button.
+Add a Scenario simulator: sliders and toggles for occupancy (0 to 100%), guest-room occupied heating and cooling setpoints, a "Smart room controls"
+toggle, common-area HVAC hours, lighting hours, and electricity price change (%). Each change calls setScenario with the new value (use
+clearKeys to remove a field). Add four stress-test buttons that call applyStressTest (heat_wave, cold_snap, conference_surge, price_up_20; click
+again to clear) using STRESS_TESTS from @/engine/hotel for the labels and descriptions (read only), and a Reset button calling resetScenario. Show before/after metric tiles (energy,
+cost, carbon) from selectCompare with animated numbers, a monthly before/after chart, a list of scenarioResult.drivers ("Why this changed",
+label, dollar change and detail text), and scenarioResult.flags as comfort notes (warn in amber, info in muted). Don't modify src/engine,
+src/data, src/twin, src/store or supabase.
 ```
 
 ## LV5 — Budget optimizer (task 4.5)
 
 ```
-Add a Budget optimizer view: budget input and objective picker, then a "Find the best investments" button that calls runOptimizer().
-While store.optimizing is true show "Testing combinations…". Then show three package cards (maximum savings, fastest payback, balanced) with
-cost, annual savings with range, five-year net savings, payback, carbon impact, remaining budget and comfort notes, plus a comparison table.
-Add a Source chip on each line item that opens the Sources sheet.
+Add a Budget optimizer view: a budget input (setHotelBudget), an objective picker (setHotelObjective) and a "Find the best investments" button
+that calls runHotelOptimizer(). While optimizing is true show "Testing combinations…" counting up to hotelPlan.combinationsTested over 2
+seconds. When hotelPlan appears, show hotelPlan.packages as three cards (role label, name, cost, annual savings with the low-to-high range,
+five-year net benefit, payback, carbon avoided, remaining budget, comfort score and notes, the reason line, and a warning when budgetRisk is
+true). Highlight the card matching hotelPlan.objectiveWinner and show note text when present. Clicking a card (or auto-selecting the winner
+after 600 ms) calls applyHotelPackage(evaluation.id). If hotelPlan.packages is empty, show hotelPlan.emptyReason and cheapestUseful. Add a
+comparison table of the three packages and a Source chip on each line item (evaluation.lineItems[].source) that opens the Sources sheet.
+Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```
 
 ## LV6 — Place the digital twin (after H10)
@@ -61,8 +94,8 @@ Place <HotelTwin /> from src/twin/HotelTwin in the center stage. Don't modify th
 ## LV7 — Saved scenarios (P1, task 4.6)
 
 ```
-Add "Save scenario" and a list of saved scenarios using the store's saved scenarios. Selecting one restores it and updates all charts.
-Allow rename and delete.
+Add "Save scenario" and a list of saved scenarios using savedScenarios, saveScenario, loadScenario, renameScenario and deleteScenario.
+Selecting one restores it and updates all charts. Allow rename and delete.
 ```
 
 ## LV8 — AI advisor panel (after H11, task 6.6)

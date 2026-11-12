@@ -51,7 +51,7 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
       a +20% rate raises the energy cost by 20%; setback saves only when rooms are vacant; cooling peaks in summer and heating in winter;
       calibration hits the bill; determinism and purity
 - [x] 1.9 `src/engine/hotel/index.ts` exports; add to `src/engine/index.ts`
-- [ ] 1.10 (proposal written in `docs/13`, Appendix A; awaiting your OK) Store contract proposal (types only) for Phase 4, shown to you for approval before editing `src/store/`. Include the twin UI state:
+- [x] 1.10 Store contract proposal (approved; see `docs/13`, Appendix A) (types only) for Phase 4, shown to you for approval before editing `src/store/`. Include the twin UI state:
       active layer, time mode (day or year), time index, playing, playback speed, before/after compare, active stress test
 - [x] 1.11 Twin data functions (Tier A). Pure, deterministic (no randomness, no `Date.now()`; time is passed in by the UI):
   - `typicalDayProfile(profile, month)`: hourly electric kW and gas therm/h by zone and category for a typical day, built from the schedules,
@@ -100,10 +100,10 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 - [x] 3.6 Template explanation for the optimizer (adapt `explain.ts`), used as the AI fallback
 
 ## Phase 4 — Store, dashboard and scenario simulator (P0) [CC store, LV UI]
-- [ ] 4.1 [CC] Extend `useTwin.ts` backwards compatibly (with your approval of the diff): `hotel` profile, `scenario` (occupancy,
+- [x] 4.1 [CC] Extend `useTwin.ts` backwards compatibly (with your approval of the diff): `hotel` profile, `scenario` (occupancy,
       setpoints, schedules, rate change %), `baseline`, `scenarioResult`, three packages, `selectedZone`, saved scenarios,
       advisor messages. Add selectors and extend the store tests
-- [ ] 4.2 [CC] Write the Lovable prompts (revised `docs/06`): Overview, Hotel profile form (building, operations and financial sections,
+- [x] 4.2 [CC] Write the Lovable prompts (revised `docs/06`): Overview, Hotel profile form (building, operations and financial sections,
       all optional, defaults shown as "default (estimate)"), Scenario simulator, Budget optimizer, AI advisor, B2B SaaS styling
 - [ ] 4.3 [LV] Overview: annual consumption and cost, breakdown by category, estimated emissions, top opportunities
 - [ ] 4.4 [LV] Scenario simulator: occupancy, guest-room setpoint, vacant-room setback toggle, common-area schedule, electricity

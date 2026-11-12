@@ -212,39 +212,15 @@ At $5,000 nothing fits; the cheapest useful upgrade is occupancy sensors at abou
 
 ---
 
-## Appendix A — Store contract proposal (task 1.10, awaiting your OK; nothing in `src/store/` has been changed)
+## Appendix A — Store contract (task 1.10): approved and built
 
-Additive and backwards compatible: every existing field and action keeps working until the Lovable components are migrated (prompt LV1).
-
-**New state**
-```ts
-// hotel model
-hotelInput: HotelInput;              // what the user entered
-presetId: string | null;
-hotel: ResolvedProfile;              // resolved (profile, defaulted, notes), recomputed when hotelInput changes
-scenario: Scenario;                  // current what-if ({} = none)
-baseline: EnergyResult | null;       // calculateBaselineEnergy(hotel), recomputed when the hotel changes
-scenarioResult: ScenarioResult | null; // simulateEnergyScenario(hotel, scenario), recomputed when either changes
-activeStressTest: StressTest['id'] | null;
-
-// twin UI
-selectedZone: ZoneId | null;
-twinLayer: 'zones' | 'rooms' | 'equipment' | 'flow';
-timeMode: 'day' | 'year';
-timeMonth: number;                   // 0..11
-timeHour: number;                    // 0..23
-playing: boolean;
-playbackSpeed: number;               // 1, 2, 4
-compareMode: 'before' | 'after' | 'split';
-```
-Added later with their phases: three investment packages, saved scenarios, advisor messages.
-
-**New actions:** `setHotelInput(patch)`, `selectHotelPreset(id)`, `setScenario(patch)`, `resetScenario()`, `applyStressTest(id | null)`, `selectZone(z | null)`,
-`setTwinLayer(l)`, `setTime({ mode?, month?, hour? })`, `setPlaying(b)`, `setPlaybackSpeed(n)`, `setCompareMode(m)`.
-The playback clock lives in the UI (it advances `timeHour` or `timeMonth` through `setTime`), so the engine and store stay free of timers.
-
-**New selectors (derived with `useMemo` or plain functions, not stored):** `selectDisplayed` (the scenario result when a scenario is active, else the baseline), `selectZoneRows`,
-`selectTypicalDay(month)`, `selectRooms(month, hour)`, `selectFlows`, `selectEquipment`, `selectMeter`.
-
-**Existing fields kept as they are:** `budget`, `goal` (mapped to the hotel objective later), `results`, `activePackageId`, `drawerOpen`, `reduceEffects`, `thermalMode`, `selectedPart`, `home`.
-Home-only selectors stay until the home components are removed. Tests: extend `src/test/useTwin.test.ts` for the new actions.
+Approved and implemented in `src/store/useTwin.ts` (hotel fields added next to the home-era ones, nothing removed) with helpers and selectors in `src/store/hotelDerived.ts`.
+The Lovable prompts in `docs/06` carry the full API cheat sheet. How the built version differs from the proposal:
+- `baseline` is always present (computed when the store loads, deterministic so the server and browser agree), not `| null`.
+- `scenarioResult` is null when there is nothing to simulate. The effective scenario is the user's scenario with the active stress test laid over it; the stress test wins where both set a field, and the user's own settings are never changed by it.
+- Added with their phases: `hotelPlan` (the optimizer result), `activeHotelPackageId`, `setHotelBudget`, `setHotelObjective`, `runHotelOptimizer` (computes at once, holds `optimizing` for 2 seconds, drops a result that went stale), `applyHotelPackage`, saved scenarios (in memory; ids `scn-1`, `scn-2`, ...), `resetHotel`, and `hotelPresets`.
+- `setHotelInput(patch, clearKeys?)` and `setScenario(patch, clearKeys?)` take a list of keys to clear back to their defaults.
+- Selectors (memoized): `selectDisplayed`, `selectCompare`, `selectZoneRows`, `selectTypicalDay`, `selectRooms`, `selectFlows`, `selectEquipment`, `selectMeter`, `selectHotelLabel`, `selectHotelCost`, `selectHotelBaselineCost`, `selectActiveHotelPackage`.
+- The playback clock stays in the UI (it calls `setTime`), so the store has no timers except the optimizer's 2-second animation hold.
+- Saved scenarios are not stored in `localStorage` yet (avoids server-render mismatches); they last for the session.
+- The advisor messages arrive with Phase 6.

@@ -30,6 +30,12 @@ installed costs, solar $/W and incentive amounts are still labeled placeholders 
   roof), uses location-based output with hour-by-hour self-use and export, regional $/W, degradation and O&M.
 - **Peer benchmark:** the hotel's modeled site energy intensity next to the ENERGY STAR hotel median and the CBECS lodging mean (context only;
   nothing is tuned toward them).
+- **Two ways to invest:** *AI recommended* (below) with "Why this plan", and *Build your own*: a catalog of every modeled upgrade by
+  HVAC & Controls, Lighting, Renewable Energy and Building & Water, with quantities (rooms, % of lighting, ft², solar kW), live totals
+  (gross cost, verified incentives and net investment separately), budget warnings and conflict notes; *Compare* puts the AI plan and up to
+  three custom plans side by side. Custom plans use exactly the optimizer's calculation and are kept in the browser.
+- **Stress tests:** eight events in Weather, Operations and Financial, each with its stated assumptions; normal year vs stress, how the
+  selected plan holds up (extra costs avoided), and for persistent changes payback, NPV and whether the recommendation changes.
 - **Budget optimizer:** tests every valid combination (512; solar sizes exclude each other) and returns three packages (maximum savings, fastest payback, balanced) within the budget
   and a comfort limit, measured against the current scenario when one is running. It uses exactly the numbers on the cards.
 - **AI advisor:** plain-language answers from Claude, grounded in the computed results. The browser rejects any answer with a number that is
@@ -46,12 +52,13 @@ LED lighting plus occupancy sensors, $39,600, about $10,400 a year, payback 3.8 
 
 | Area | State |
 | --- | --- |
-| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (300 tests) |
-| Data (`src/data/hotel`) | **Sourced from primary documents:** EIA prices, price growth (AEO2026) and hotel end uses (CBECS 2018); EPA eGRID2023 grid factors by location and the EPA gas factor; PVWatts solar output; NOAA weather; IL-TRM hotel measures (smart controls, sensors, lighting interaction, hot water); NLR solar O&M and degradation; Chicago hotel sizes and occupancy (Choose Chicago, STR). **Still placeholders:** most installed costs, solar $/W, the solar export credit, and the monthly occupancy shape. Phase 7 is closed except costs (7.6) and solar $/W (7.7). See `docs/08`, `docs/14`, `docs/15` |
+| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (340 tests) |
+| Data (`src/data/hotel`) | **Sourced from primary documents:** EIA prices, price growth (AEO2026) and hotel end uses (CBECS 2018); EPA eGRID2023 grid factors by location and the EPA gas factor; PVWatts solar output; NOAA weather; IL-TRM hotel measures (smart controls, sensors, lighting interaction, hot water); NLR solar O&M and degradation; Chicago hotel sizes and occupancy (Choose Chicago, STR). Solar $/W by size from LBNL's 2025 Data Update (2024 national medians, editable). **Still placeholders:** most installed costs, the solar export credit ($0, editable), and the monthly occupancy shape. Phase 7 is closed except installed costs (7.6). See `docs/08`, `docs/14`, `docs/15` |
 | Store (`src/store`): profile, scenarios, optimizer (scenario-aware), upgrade comparison, twin controls, advisor | Built |
 | Digital twin: 2D (`src/twin`) and 3D (`src/three`, Phase 9) | Built |
-| Workspace UI (Lovable, prompts LV1–LV14) | Built. **LV15** (benchmark card, calmer Invest tab, phone layout, fewer default tags) is running |
-| Flow, Rooms and Equipment tab redesign (animated Sankey, room facade, equipment cards) | Planned next |
+| Workspace UI (Lovable, prompts LV1–LV15) | Built |
+| Flow, Rooms and Equipment layers (animated Sankey, room façade, equipment cards) | Built (Phase 10) |
+| Investment catalog and custom plans; stress tests | Built (Phases 11 and 12) |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
 | Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |
 
@@ -89,6 +96,7 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | `src/data/` | Sourced JSON data |
 | `src/twin/` | Clickable hotel twin (2D layers, controls, the 3D wrapper) |
 | `src/three/` | 3D hotel scene (building, scenery, street, people, camera) |
+| `src/plans/` | Investment modes: AI recommended, Build your own (catalog), Compare |
 | `supabase/functions/` | Backend function: the AI advisor |
 | `docs/` | Specs and plans |
 

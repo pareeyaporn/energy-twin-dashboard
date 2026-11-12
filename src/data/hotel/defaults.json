@@ -243,7 +243,8 @@
     "elecPriceGrowth": 0.0212,
     "gasPriceGrowth": 0.0409,
     "discountRate": 0.08,
-    "source": "Price growth: EIA Annual Energy Outlook 2026 (April 2026), Counterfactual Baseline case, nominal commercial prices, compound annual change 2025 to 2035: electricity 13.48 to 16.62 cents per kWh (Table 8, 2.12% a year), natural gas 10.35 to 15.46 dollars per MMBtu (Table 3, 4.09% a year). Discount rate for NPV: PRODUCT DECISION, 8% default for commercial investment analysis (editable), with 3% as an alternative scenario; not an externally validated figure (docs/15).",
+    "analysisYear": 2026,
+    "source": "Price growth: EIA Annual Energy Outlook 2026 (April 2026), Counterfactual Baseline case, nominal commercial prices, compound annual change 2025 to 2035: electricity 13.48 to 16.62 cents per kWh (Table 8, 2.12% a year), natural gas 10.35 to 15.46 dollars per MMBtu (Table 3, 4.09% a year). Discount rate for NPV: PRODUCT DECISION, 8% default for commercial investment analysis (editable), with 3% as an alternative scenario; not an externally validated figure (docs/15). Analysis year 2026: PRODUCT DECISION, the year the plan is evaluated for; incentives count in the base case only when their program year equals it (docs/15).",
     "verified": true,
     "discountRateAlternatives": [
       0.03

@@ -139,7 +139,33 @@ export interface EndUseSplit {
 
 export type Era = 'pre1980' | '1980_1999' | '2000plus';
 
+export interface Range3 {
+  low: number;
+  mid: number;
+  high: number;
+}
+
+export type CostModel =
+  | ({ type: 'per_sqft_attic' | 'flat' | 'per_window' } & Range3)
+  | { type: 'fixed_plus_per_ton'; fixed: Range3; perTon: Range3 };
+
+/** One entry of src/data/upgrades.json. */
+export interface UpgradeDef {
+  id: UpgradeId;
+  label: string;
+  affects: string[];
+  partReduction?: Partial<Record<PartId, Range3>>;
+  heatingCOP?: Record<string, Range3>; // keyed by climate zone, plus 'default'
+  coolingCOP?: Range3;
+  loadReduction?: Range3;
+  costModel: CostModel;
+  lifetimeYears: number;
+  source: string;
+  verified: boolean;
+}
+
 export interface EngineData {
+  upgrades: UpgradeDef[];
   rates: Record<string, RateEntry>;
   endUseSplits: {
     source: string;

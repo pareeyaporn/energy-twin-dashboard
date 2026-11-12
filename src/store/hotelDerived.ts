@@ -29,6 +29,7 @@ import {
   stressRecommendation,
   stressTestReport,
   upgradeCatalog,
+  portfolioSummary,
 } from "@/engine/hotel";
 import type {
   UpgradeComparisonRow,
@@ -37,6 +38,8 @@ import type {
   HotelInput,
   PlanEvaluation,
   PortfolioResult,
+  PortfolioProperty,
+  PortfolioSummary,
   StressPlanInput,
   StressReport,
   RankedPackage,
@@ -184,7 +187,7 @@ const labelOf = memoLast((hotel: ResolvedProfile, presetId: string | null) => {
   const p = hotel.profile;
   return { title: p.name, city: `${p.city}, ${p.state}`, rooms: p.rooms, synthetic: presetId !== null };
 });
-export const selectHotelLabel = (s: TwinState) => labelOf(s.hotel, s.hotelPresetId);
+export const selectHotelLabel = (s: TwinState) => labelOf(s.hotel, s.activePropertyId ?? s.hotelPresetId);
 export const selectHotelCost = (s: TwinState) => selectDisplayed(s).result.annual.cost;
 export const selectHotelBaselineCost = (s: TwinState) => s.baseline.annual.cost;
 
@@ -304,6 +307,32 @@ const catalogOf = memoLast((ctx: ReturnType<typeof contextFromBaseline>) => upgr
 export const selectCatalog = (s: TwinState) => catalogOf(selectPlanContext(s));
 
 export const selectActiveCustomPlan = (s: TwinState) => s.customPlans.find((p) => p.id === s.activeCustomPlanId) ?? null;
+
+/** The custom plans shown for the open hotel: its own, plus plans made before the portfolio existed (no property). */
+const visiblePlansOf = memoLast((plans: TwinState["customPlans"], propertyId: string | null) =>
+  plans.filter((p) => !p.propertyId || p.propertyId === propertyId),
+);
+export const selectVisibleCustomPlans = (s: TwinState) => visiblePlansOf(s.customPlans, s.activePropertyId);
+
+// ---- Hotel portfolio (Phase 13) ----
+
+let lastItems: { property: PortfolioProperty; input: HotelInput }[] = [];
+/** Each property with its current input: the open one's live input, the others' saved or original input. Stable while unchanged. */
+export function selectPortfolioItems(s: TwinState): { property: PortfolioProperty; input: HotelInput }[] {
+  const next = s.portfolio.properties.map((property) => ({
+    property,
+    input: property.id === s.activePropertyId ? s.hotelInput : (s.propertyStates[property.id]?.hotelInput ?? property.input),
+  }));
+  const same = next.length === lastItems.length && next.every((x, i) => x.property === lastItems[i]!.property && x.input === lastItems[i]!.input);
+  if (!same) lastItems = next;
+  return lastItems;
+}
+const summaryOf = memoLast((items: { property: PortfolioProperty; input: HotelInput }[], discountRate: number) =>
+  portfolioSummary(items, { discountRate }),
+);
+export const selectPortfolioSummary = (s: TwinState): PortfolioSummary => summaryOf(selectPortfolioItems(s), s.hotelDiscountRate);
+export const selectActiveProperty = (s: TwinState): PortfolioProperty | null =>
+  s.portfolio.properties.find((p) => p.id === s.activePropertyId) ?? null;
 
 /** Per-plan memo: re-evaluates a plan only when its items, the context, the budget or the discount rate change. */
 const planEvalCache = new Map<string, { items: unknown; ctx: unknown; budget: number; rate: number; result: PlanEvaluation }>();

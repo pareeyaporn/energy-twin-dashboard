@@ -1,6 +1,6 @@
 export * from './types';
 export * from './constants';
-export { hotelData } from './data';
+export { hotelData, hotelPortfolio } from './data';
 export { resolveProfile, presetProfile, isResolved } from './profile';
 export { baselineConditions, applyScenario, comfortFlags, monthlyOccupancy } from './conditions';
 export {
@@ -89,3 +89,15 @@ export type { CatalogItem, CatalogQuantity, QuantityKind, PlanItem, PlanWarning,
 export { stressRecommendation, stressTestReport } from './stress';
 export type { StressReport, StressPlanInput, StressPlanResult } from './stress';
 export type { StressCategory } from './scenarios';
+
+export {
+  PORTFOLIO_DEFAULTS,
+  PORTFOLIO_OBJECTIVES,
+  PORTFOLIO_DEFINITIONS,
+  prepareProperty,
+  propertyCandidates,
+  portfolioSummary,
+  optimizePortfolioBudget,
+  chooseOnePerGroup,
+} from './portfolio';
+export type { PreparedProperty, PropertySummary, PortfolioSummary, PortfolioAllocation, PortfolioPlan } from './portfolio';

@@ -763,3 +763,51 @@ export interface BenchmarkComparison {
   peers: { id: string; label: string; siteEuiKBtuPerSqft: number; source: string; /** (hotel - peer) / peer; positive = uses more. */ difference: number }[];
   note: string;
 }
+
+// ---- Hotel portfolio (Phase 13) ----
+
+/** 'hotel' is the only type the model simulates; the others are listed for later and are not simulated. */
+export type BuildingType = 'hotel' | 'resort' | 'casino' | 'convention_center' | 'entertainment_venue';
+
+export interface PortfolioProperty {
+  id: string;
+  /** Set when the property uses a single-hotel preset's input (its figures then match that preset). */
+  presetId?: string;
+  neighborhood: string;
+  segment: string;
+  buildingType: BuildingType;
+  lat: number;
+  lng: number;
+  synthetic: boolean;
+  note: string;
+  input: HotelInput;
+}
+
+export interface PortfolioOrganization {
+  id: string;
+  name: string;
+  city: string;
+  synthetic: boolean;
+  note: string;
+  properties: PortfolioProperty[];
+  futureBuildingTypes: { id: string; label: string; note: string }[];
+}
+
+/** What the portfolio optimizer maximizes. 'payback' minimizes the portfolio's simple payback (net investment / annual savings). */
+export type PortfolioObjective = 'annual_savings' | 'npv10' | 'payback' | 'carbon' | 'balanced';
+
+/** One upgrade combination at one property, with the figures the portfolio optimizer ranks on (mid estimates). */
+export interface PropertyCandidate {
+  id: string;
+  propertyId: string;
+  upgradeIds: UpgradeId[];
+  /** Gross installed cost; the budget is compared with this (as in the single-hotel optimizer). */
+  grossCost: number;
+  incentives: number;
+  netInvestment: number;
+  annualSavings: number;
+  npv10: number;
+  carbonAvoidedKg: number;
+  comfortScore: number;
+  paybackYears: number | null;
+}

@@ -8,7 +8,7 @@ backwards compatibly; clickable **2D** twin with the **Tier A** feature set (bel
 `docs/09` superseded; merge the P5 optimizer branch as is.
 
 **Status (November 2026):** Phases 0–6, 7b and 9 are done; Phase 7 is open only for installed costs (7.6). Phases 10–12 (Flow, Rooms and
-Equipment; custom plans; stress tests) are done. Next: Phase 8 (demo hardening).
+Equipment; custom plans; stress tests) are done. Phase 13 P0 and the portfolio optimizer (13.1–13.28) are done; next: Phase 13 P1 (13.29–13.32) or Phase 8 (demo hardening).
 
 Order: Phase 0 → 1 → 2 → 3 are engine and can start now. Phase 7 (data research, TEAM) runs in parallel with all of them.
 Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Phase 6 needs 3.
@@ -259,6 +259,107 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
 - [x] 12.2 Engine: `hvacEnergyChangePct` and `solarOutputChangePct` scenario inputs (new "HVAC equipment condition" driver); `stressTestReport` (normal vs stress, the plan under both with `evaluatePackage`, extra costs avoided, payback and NPV for persistent changes) and `stressRecommendation`
 - [x] 12.3 Temporary vs persistent: temporary events do not switch the optimizer or change returns; persistent changes re-measure, keep the user's plan (`planBeforeStress`) for the comparison, and show whether the optimizer's pick changes
 - [x] 12.4 Panel in the twin: categories, assumptions table, normal vs stress, plan picker (selected, any AI package, any custom plan), reset to baseline; tests
+
+## Phase 13 — City map and hotel portfolio (CC; decided November 2026)
+
+Goal: from one hotel to a **portfolio of hotels** in one place: see them on a Chicago map, compare them, open any one in the existing
+digital twin, and decide where a shared investment budget does the most good. The single-hotel experience is reused, not rebuilt.
+Decisions (user): extend the store (additive); MapLibre with free tiles and an offline fallback; Claude Code adds the route and nav link;
+build P0 and the portfolio optimizer first.
+
+**P0 at a glance** (must have; built first, together with the portfolio optimizer 13.8–13.12):
+- 13.1–13.4 five synthetic Chicago properties (`properties.json`), types, labels, documented assumptions
+- 13.5–13.7 portfolio aggregation in the engine (totals, savings potential, investment required, priority score) and its tests
+- 13.13–13.17 store: active property, `openProperty`, save and restore per property, custom plans per property, selectors, tests
+- 13.18–13.21 MapLibre city map with markers, hover cards, color-by metric, legend, offline fallback, accessibility
+- 13.22–13.28 `/portfolio` page and top-bar link, KPI strip, comparison table, charts, breadcrumb, optimizer panel, tests
+
+P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress tests). P2: 13.33–13.36 (onboarding, venue types, organizations).
+
+### 13A — Properties and data (P0)
+- [x] 13.1 **P0** [CC] `src/data/hotel/properties.json`: one demonstration organization ("Energy Twin Hotels, demonstration portfolio") with five
+      synthetic Chicago hotels, each labeled "Demonstration property": Downtown (Loop), Airport (Rosemont, near O'Hare), Lakeside
+      (Streeterville), Convention (near McCormick Place), Boutique (River North). Each has its own id, name, neighborhood, latitude and
+      longitude, type tag, and full hotel input (rooms, floor area, floors, year built, HVAC type, occupancy, seasonal occupancy, budget).
+      Distinct configurations, never a scaled copy; every value is either a documented assumption or a default the profile flags. — *done: built as "Lakefront Hotel Group" (synthetic chain): Lakeshore Inn (Streeterville), Riverwalk Grand (Loop), O'Hare Gateway Hotel (Rosemont), Lakefront Convention Hotel (McCormick Place), Wells Street Hotel (River North)*
+- [x] 13.2 **P0** [CC] Two of the five reuse the existing presets' inputs (Boutique = the 100-room demo hotel, Downtown = the 300-room preset), so the
+      single-hotel demo numbers stay the same when opened from the portfolio — *done: Lakeshore Inn = the 100-room preset, Riverwalk Grand = the 300-room preset (tested equal)*
+- [x] 13.3 **P0** [CC] Types: `PortfolioProperty`, `PortfolioOrganization`; a `buildingType` field ('hotel' now; resort, casino, convention center,
+      entertainment venue listed as future, not simulated)
+- [x] 13.4 **P0** [CC] Document the property assumptions (docs/13, docs/15); synthetic labels everywhere they are shown
+
+### 13B — Engine: aggregation (P0)
+- [x] 13.5 **P0** [CC] `portfolioSummary(properties)`: per property, the existing baseline (`calculateBaselineEnergy`), energy intensity
+      (`benchmarkComparison`), and its savings potential and investment from the existing optimizer; portfolio totals (properties, rooms,
+      kWh, therms, site energy, cost, CO₂, savings potential). Pure, cached per property
+- [x] 13.6 **P0** [CC] Definitions (product decisions, docs/15): **savings potential** = the annual savings of the property's best package with a
+      positive 10-year NPV, at the portfolio's per-property cap; **investment required** = that package's net investment; **investment
+      priority score** = 10-year NPV per dollar invested, scaled 0–100 across the portfolio — *done: savings potential uses each property's own budget; docs/15 §16*
+- [x] 13.7 **P0** [CC] Tests: totals equal the sum of the properties; each property's numbers equal the single-hotel engine's for the same input
+
+### 13C — Engine: portfolio optimizer (P1, built first with P0)
+- [x] 13.8 **P1, built with P0** [CC] Candidates per property: every valid upgrade combination (same enumeration, budget, comfort and exclusion rules as the
+      single-hotel optimizer), evaluated with the same financial breakdown (gross cost, verified incentives, net investment, savings,
+      NPV, CO₂); savings interactions computed inside each hotel, never summed across upgrades
+- [x] 13.9 **P1, built with P0** [CC] Allocation: one package (or none) per property under the shared budget: a multiple-choice knapsack solved by dynamic programming
+      at $1,000 budget steps, exact for additive objectives (annual savings, 10-year NPV, carbon, balanced score); fastest payback (a ratio)
+      solved exactly by iterating the same dynamic program (Dinkelbach); method stated in the results — *done: fastest payback gives every property a package when the budget allows (docs/15 §16)*
+- [x] 13.10 **P1, built with P0** [CC] Inputs: total budget (default $500,000), objective (annual savings, 10-year NPV, payback, carbon, balanced), discount rate and
+      horizon from the existing settings; the budget is compared with gross cost, as in the single-hotel optimizer (docs/15)
+- [x] 13.11 **P1, built with P0** [CC] Results: per property the recommended package, investment, incentives, annual savings; totals: investment, remaining budget,
+      annual savings, 5- and 10-year NPV, simple payback, carbon reduction, % of portfolio energy cost; "open this hotel's package"
+- [x] 13.12 **P1, built with P0** [CC] Tests: the allocation never exceeds the budget; it matches a brute-force search on a small case; each property's figures equal
+      `evaluatePackage` for that package; the $50,000 single-hotel answer is unchanged
+
+### 13D — Store (P0, additive)
+- [x] 13.13 **P0** [CC] `portfolio` (organization and properties), `activePropertyId`, `propertyInputs` (each property's current input),
+      `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioOptimizing`; actions `openProperty(id)`, `runPortfolioOptimizer()`,
+      `setPortfolioBudget`, `setPortfolioObjective` — *done: built as `propertyStates` (saved snapshot per property) rather than `propertyInputs`; `selectPortfolioItems` gives each property's current input*
+- [x] 13.14 **P0** [CC] `openProperty` loads that property's input into the existing single-hotel state (as the preset switcher does) and saves the
+      previous property's input, what-if, stress test and plan, so returning restores them; the existing screens keep working unchanged
+- [x] 13.15 **P0** [CC] Custom plans gain an optional `propertyId`; the plan builder shows the active property's plans (existing plans stay visible)
+- [x] 13.16 **P0** [CC] Selectors: `selectPortfolioSummary`, `selectPortfolioRows`, `selectActiveProperty`, memoized per property input
+- [x] 13.17 **P0** [CC] Tests: switching properties and back restores state; the demo hotel's figures are identical before and after a round trip
+
+### 13E — City map (P0)
+- [x] 13.18 **P0** [CC] `maplibre-gl` (lazy-loaded) with a free dark basemap (no API key); attribution shown; an offline SVG fallback of Chicago
+      (lakefront, river, major roads) if the tiles cannot load
+- [x] 13.19 **P0** [CC] Glowing markers for each property, keyboard focusable; hover or click opens a card: name, rooms, occupancy, annual energy,
+      annual cost, energy intensity, savings potential, priority score, "Demonstration property", **Explore digital twin**
+- [x] 13.20 **P0** [CC] Color by: energy cost, energy intensity, savings potential, investment priority; legend; a note that larger hotels naturally
+      spend more, so cost is not efficiency
+- [x] 13.21 **P0** [CC] Respect reduce effects (no pulsing); screen-reader list of the properties as an alternative to the map
+
+### 13F — Portfolio dashboard and navigation (P0)
+- [x] 13.22 **P0** [CC, minimal LV edit] Route `/portfolio` (new file, small) and a "Portfolio" link in the top bar (Lovable-owned, minimal edit)
+- [x] 13.23 **P0** [CC] KPI strip: properties, rooms, electricity, natural gas, energy cost, CO₂, savings potential, investment budget
+- [x] 13.24 **P0** [CC] Comparison table: property, location, rooms, floor area, occupancy, energy cost, energy intensity, potential savings,
+      investment required, payback, priority; sortable
+- [x] 13.25 **P0** [CC] Charts: energy cost by property, energy intensity (site kBtu/ft², electricity and gas converted to one unit), savings potential,
+      electricity vs natural gas
+- [x] 13.26 **P0** [CC] Breadcrumb in the twin when a property is open: Portfolio → Chicago → hotel name; "Back to portfolio"
+- [x] 13.27 **P0** [CC] Portfolio optimizer panel (13C results) with budget and objective
+- [x] 13.28 **P0** [CC] Tests: page renders, sort works, "Explore digital twin" opens the property
+
+### 13G — Custom portfolio plan and comparison (P1)
+- [ ] 13.29 **P1** [CC] Build a portfolio plan from each property's custom plan; totals across properties; budget used and remaining
+- [ ] 13.30 **P1** [CC] "Customize AI plan" copies each property's recommended package into that property's custom plan
+- [ ] 13.31 **P1** [CC] AI portfolio vs my portfolio: investment, savings, payback, NPV, carbon, comfort
+
+### 13H — Portfolio stress tests (P1)
+- [ ] 13.32 **P1** [CC] Apply a stress test to one property, a selection or all; per property and total: normal vs stressed cost, with the
+      recommended plan, cost avoided; temporary vs persistent rules as in Phase 12
+
+### 13I — Later (P2)
+- [ ] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
+      optimizer, AI vs custom; skip and reopen
+- [ ] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
+      their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model
+- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data
+- [ ] 13.36 **P2** [CC] Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07)
+
+Known limits: all five hotels share Chicago weather (O'Hare normals); property types differ through size, age, HVAC and occupancy only (the
+model has no ballroom, pool or 24/7 food-service drivers); heat-pump water heaters are not modeled, so the optimizer cannot pick them.
 
 ## Phase 8 — Demo hardening (all)
 - [ ] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

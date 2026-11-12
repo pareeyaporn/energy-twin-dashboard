@@ -7,8 +7,8 @@ Approved decisions: new engine in `src/engine/hotel/` alongside the home engine;
 backwards compatibly; clickable **2D** twin with the **Tier A** feature set (below; 3D is P2); demo hotel = 100 rooms in Chicago; save the brief and mark
 `docs/09` superseded; merge the P5 optimizer branch as is.
 
-**Status (November 2026):** Phases 0–6, 7b and 9 are done; Phase 7 is open only for installed costs (7.6) and solar $/W (7.7). Phase 10 (Flow, Rooms and
-Equipment redesign) is done. Next: Phase 8 (demo hardening).
+**Status (November 2026):** Phases 0–6, 7b and 9 are done; Phase 7 is open only for installed costs (7.6). Phases 10–12 (Flow, Rooms and
+Equipment; custom plans; stress tests) are done. Next: Phase 8 (demo hardening).
 
 Order: Phase 0 → 1 → 2 → 3 are engine and can start now. Phase 7 (data research, TEAM) runs in parallel with all of them.
 Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Phase 6 needs 3.

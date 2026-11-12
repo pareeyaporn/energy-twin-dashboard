@@ -103,11 +103,13 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 
 `useTwin` holds the hotel state: `hotelInput` / `hotel` (resolved profile with `defaulted` and `notes`), `baseline`, `scenario`,
 `activeStressTest`, `scenarioResult`, `optimizeOnScenario` (follows the scenario automatically), `hotelPlan`, `optimizing`,
-`optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, `hotelDiscountRate`, twin controls (`selectedZone`, `twinLayer`, time with modes
+`optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, `hotelDiscountRate`, `customPlans` / `activeCustomPlanId` (local storage),
+`planBeforeStress`, twin controls (`selectedZone`, `twinLayer`, time with modes
 `seasons` / `day` / `year`, `compareMode`)
 and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
 `applyHotelPackage` and `askAdvisor`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
-`selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).
+`selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, `selectCatalog`, `selectCustomPlanEvaluation`,
+`selectPlanExplanation`, `selectStressReport`, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).
 
 Before changing the store, read `src/store/useTwin.ts` and **extend** it, backwards compatibly, rather than replacing it.
 Show the diff and get the user's OK first.

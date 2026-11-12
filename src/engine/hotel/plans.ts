@@ -212,7 +212,15 @@ export function evaluatePlan(
   if (has('led_lighting') || has('occupancy_sensors'))
     warnings.push({ kind: 'overlap', severity: 'info', message: 'Less lighting heat lowers cooling and raises heating; the plan includes that effect.' });
 
-  const evaluation = evaluatePackage(ctx, ids, { ...options, budget, amounts }, d);
+  const raw = evaluatePackage(ctx, ids, { ...options, budget, amounts }, d);
+  // Name solar by its chosen size (the upgrade's own label describes the full-roof preset).
+  const kw = raw.sizing.solarKw;
+  const relabel = (label: string, id: UpgradeId) => (isSolar(id) ? `Rooftop solar (${kw.toLocaleString('en-US', { maximumFractionDigits: 1 })} kW)` : label);
+  const evaluation: PackageEvaluation = {
+    ...raw,
+    name: ids.map((id) => relabel(upgradeDef(id, d).label, id)).join(' + '),
+    lineItems: raw.lineItems.map((li) => ({ ...li, label: relabel(li.label, li.id) })),
+  };
   if (evaluation.financials.grossCost.mid > budget)
     warnings.unshift({ kind: 'budget', severity: 'warn', message: `The plan's gross cost is over the ${fmtUsd(budget)} budget by ${fmtUsd(evaluation.financials.grossCost.mid - budget)}.` });
   else if (evaluation.financials.grossCost.high > budget)

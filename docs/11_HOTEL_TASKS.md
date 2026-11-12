@@ -27,7 +27,7 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 - [x] 0.6 [CC] Rewrite `docs/05` (Claude Code prompts) and `docs/06` (Lovable prompts) for the new phases; update `docs/07` demo
       checklist and Q&A (vs Eden, vs ENERGY STAR Portfolio Manager, accuracy, why hotels)
 - [ ] 0.7 [TEAM] Delete finished branches on GitHub (I cannot delete remote branches); turn on "Automatically delete head branches"
-- [ ] 0.8 [TEAM] Allow the network domains needed for research: `epa.gov`, `noaa.gov` (and `nrel.gov`, `energystar.gov` if used)
+- [x] 0.8 [TEAM] Allow the network domains needed for research: `epa.gov`, `noaa.gov` (and `nrel.gov`, `energystar.gov` if used) — done (EPA, NOAA, NLR, ENERGY STAR, EIA, IRS, ComEd, Choose Chicago reachable)
 
 ## Phase 1 — Hotel data model and baseline simulation (P0) [CC]
 - [x] 1.1 Engine spec `docs/13_HOTEL_ENGINE_SPEC.md`: units, equations, load categories, zones, assumptions, what is *not* modeled
@@ -245,6 +245,14 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
 - [x] 10.3 Equipment: cards grouped by HVAC, water heating, lighting and other: icon, quantity, capacity, efficiency, schedule, modeled status at the hour, system energy and cost, related opportunities; "modeled, not monitored"
 - [x] 10.4 Rooms: floor-by-floor facade with windows lit by state and daylight, set-back sills, transitions; click a room for state, HVAC mode, setpoints and the guest-room average kW (per zone, labeled); same numbering as the 3D windows
 - [x] 10.5 Tests (hourly flows sum to the meter, Sankey layout, room and equipment mapping), screenshots, docs
+
+## Phase 11 — Investment catalog and custom plans (CC; built November 2026)
+- [x] 11.1 Engine: optional coverage per upgrade and a solar size in kW on the optimizer's own path (`evaluatePackage(..., { amounts })`); omitted = the whole hotel, as before (tested equal)
+- [x] 11.2 Data: catalog category and `costStatus` per upgrade (only smart room controls' cost is sourced); not-yet-modeled upgrades listed as experimental, with no figures
+- [x] 11.3 `upgradeCatalog`, `evaluatePlan` (plan checks: budget, conflicts, unavailable, clamped quantities, overlaps), `planFromPackage`, `explainPlan`
+- [x] 11.4 Store: `customPlans` with create, duplicate, rename, delete, add, remove, quantity and "Customize AI plan"; kept in local storage; selectors for the catalog, plan evaluation and why-this-plan
+- [x] 11.5 UI (`src/plans`): AI recommended (with "Why this plan" and "Customize AI plan"), Build your own (catalog by HVAC & Controls, Lighting, Renewable Energy, Building & Water; quantity controls; live totals with gross, verified incentives and net separately; budget bar; notes), Compare (AI plan vs up to three custom plans)
+- [x] 11.6 Tests: a plan copied from any package equals the package; quantities scale cost and savings; combinations recomputed, not summed; store and UI tests
 
 ## Phase 8 — Demo hardening (all)
 - [ ] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

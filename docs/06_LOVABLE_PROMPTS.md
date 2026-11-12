@@ -1,82 +1,80 @@
-# 06 — Lovable prompts, in order
+# 06 — Lovable prompts, in order (hotel product)
 
-The shell prompt (layout, panels, mock data) is done first. These are the follow-ups. One prompt at a time.
-Add **"Don't modify files in src/engine, src/data or src/three."** to any prompt that works near them.
+One prompt at a time, after the matching Claude Code step. Add **"Don't modify files in src/engine, src/data, src/twin, src/store or supabase."**
+to any prompt that works near them. All numbers come from the store; components never hard-code costs, savings or labels with figures.
+Task numbers refer to [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md). The old home-era prompts (L1 to L9) are replaced by this file.
+
+Style for every prompt: polished B2B SaaS look, professional typography, clear financial metrics, intuitive charts (Recharts), responsive controls.
 
 ---
 
-## L1 — After the engine is wired (after Claude Code P6)
+## LV1 — Clean out the home copy (after H9)
 
 ```
-The store in src/store/useTwin.ts now has real numbers from the engine. Make sure every cost, saving, payback and
-value shown in the Home panel, the stage counter, the package cards and the plan drawer reads from the store
-(displayedAnnualCost, baseline, results, activePackageId). Remove any remaining hard-coded mock numbers from components.
-Don't modify files in src/engine, src/data or src/three.
+Remove residential wording from the UI: "Maya", "home", "homeowner", "attic", "house", "furnace" and the house outline on the stage.
+Rename the left panel to "Hotel profile" and the stage to "Digital twin". Keep the layout, colors and components. Don't modify
+src/engine, src/data, src/twin, src/store or supabase.
 ```
 
-## L2 — Optimize button flow
+## LV2 — Hotel profile form (task 4.2, 4.3)
 
 ```
-When "Find my best upgrades" is clicked: call runOptimizer() from the store. While store.optimizing is true, show
-"Testing N of {combinationsTested} combinations…" with N counting up over 2 seconds, and disable the button.
-When it finishes, reveal the 3 package cards with a staggered fade-up. Auto-select package 1 after 600 ms
-by calling applyPackage(results[0].id).
+Replace the home form with a hotel profile form in three collapsible sections: Building (name, city/state/country, guest rooms, floor
+area, floors, year built, operating hours, HVAC type, monthly energy bill, electricity price), Operations (occupancy, occupied hours per room,
+guest-room temperatures, common-area HVAC and lighting schedules, hot-water use, seasonal occupancy) and Financial (budget, investment horizon,
+objective: annual savings, payback, ROI, carbon, or balanced). Every field is optional; show an unset field's default with a small
+"default (estimate)" tag. Read and write through the store's hotel profile and preset actions. Include a preset picker for the demo hotel.
 ```
 
-## L3 — Bill counter
+## LV3 — Overview tab (task 4.3)
 
 ```
-The "Yearly energy cost" counter on the stage shows store.displayedAnnualCost with an animated count up/down
-(1.2 s, ease-out). While store.installing is true, hold the old value; animate when installing becomes false.
-Under it, when a package is active, show a mint "−$X / yr" pill using the package's annualSavings.mid.
+Add an Overview view: annual energy use, annual cost, a breakdown by category and by zone (Recharts), estimated emissions, and the top
+three opportunities. Use the store's baseline. Show a small "Estimate" badge next to each total.
 ```
 
-## L4 — Ranges and sources everywhere
+## LV4 — Scenario simulator (task 4.4)
 
 ```
-Wherever savings are shown, display the range as "$780–$1,050 / yr" using annualSavings.low and .high, with the mid
-value emphasized. Add a small "Source" chip next to each upgrade line item that opens the Sources sheet scrolled to
-the matching source. Add the disclaimer "Planning estimate from public data, not a professional energy audit."
-in the plan drawer footer.
+Add a Scenario simulator: sliders and toggles for occupancy, guest-room setpoint, vacant-room setback, common-area HVAC schedule and
+electricity price change (%). Each change calls the store's scenario action. Show before/after metric tiles (energy, cost, carbon) with
+animated numbers, a monthly before/after chart, and a "Why this changed" panel listing the store's drivers. Add a Reset button.
 ```
 
-## L5 — Plan drawer charts
+## LV5 — Budget optimizer (task 4.5)
 
 ```
-In the plan drawer: (1) grouped bar chart (Recharts) of Heating, Cooling, Water heating, Other — "Now" from
-store.baseline.costs vs "With plan" from the active package outcome.costs; (2) line chart of cumulative net savings
-over 15 years starting at −cost, with a vertical marker at the payback year. Use the theme colors (blue for "With plan",
-muted for "Now", mint for savings line).
+Add a Budget optimizer view: budget input and objective picker, then a "Find the best investments" button that calls runOptimizer().
+While store.optimizing is true show "Testing combinations…". Then show three package cards (maximum savings, fastest payback, balanced) with
+cost, annual savings with range, five-year net savings, payback, carbon impact, remaining budget and comfort notes, plus a comparison table.
+Add a Source chip on each line item that opens the Sources sheet.
 ```
 
-## L6 — AI explanation card
+## LV6 — Place the digital twin (after H10)
 
 ```
-The "Why this plan" card shows the explanation text from the explain backend function (store or hook provided in
-src/lib or src/store — ask if unclear). Show a shimmering skeleton while loading. Label: "Written by AI from the
-calculated numbers" with a sparkle icon. If it fails, the template text is used automatically — no error UI.
+Place <HotelTwin /> from src/twin/HotelTwin in the center stage. Don't modify the component. Add a before/after toggle and a legend.
+When a zone is selected, show the zone panel beside the diagram on wide screens and below it on narrow screens.
 ```
 
-## L7 — Toolbar wiring
+## LV7 — Saved scenarios (P1, task 4.6)
 
 ```
-Wire the stage toolbar: Rotate (toggle auto-rotate in store), Reset view, Cutaway toggle, Season toggle (can be
-disabled with a "soon" tooltip), and "Reduce effects" in the menu calling setReduceEffects. The Thermal Vision switch
-in the top bar calls toggleThermal(); when on, show the blue→red legend bottom-left of the stage.
+Add "Save scenario" and a list of saved scenarios using the store's saved scenarios. Selecting one restores it and updates all charts.
+Allow rename and delete.
 ```
 
-## L8 — Polish pass
+## LV8 — AI advisor panel (after H11, task 6.6)
 
 ```
-Polish pass for a live demo on a 1440×900 and a 1920×1080 screen: no scrollbars, no layout shift when numbers change,
-consistent 8px spacing, all numbers use tabular figures, hover states on all cards, focus rings in cyan.
-Make the selected preset card and the active package card clearly highlighted. Don't modify src/engine, src/data or src/three.
+Add an AI advisor chat panel with suggested questions ("Why is HVAC my biggest cost?", "How does occupancy change my energy use?",
+"Should I start with solar or smart thermostats?", "How should I use $30,000?"). Call the store's advisor action; show a loading state and
+fall back gracefully if it takes longer than 6 seconds (the store handles the fallback text). Label answers "Explains the computed results".
 ```
 
-## L9 — Share
+## LV9 — Polish and disclaimers (task 4.7)
 
 ```
-"Copy summary" copies a plain-text plan: home, budget, goal, chosen package, cost, savings range, payback, 15-year
-value, upgrades with costs, and the sources list. "Share link" encodes presetId, budget, goal and activePackageId in
-the URL query so opening it restores the same view.
+Add a footer disclaimer: "Estimates from synthetic and public data, not an engineering audit. No guaranteed savings." Mark any input or total that
+uses a default with "default (estimate)". Check empty, loading and error states, keyboard focus order and mobile layout. Fix layout shift.
 ```

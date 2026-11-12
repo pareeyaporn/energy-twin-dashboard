@@ -4,20 +4,36 @@ Read this file at the start of every session. It is the source of truth for how 
 
 ## What we are building
 
-**Energy Twin** — "See the savings before you spend."
-A 3D home energy simulator for **new homeowners** (bought in the last 12 months) with a renovation budget.
-They enter (or pick) a home, see in 3D where it loses energy and money ("Thermal Vision"), set a budget,
-and get the **3 best upgrade packages** they can afford — with costs, savings ranges, payback, and sources.
+**Energy Twin** — "Simulate smarter. Spend better. Save energy."
+An AI-powered **operational digital twin for existing commercial buildings, starting with hotels**.
+Hotel owners and operators see where the building spends energy (by zone), test operating decisions
+(occupancy, setpoints, schedules, electricity prices) before changing anything, and get the **3 best investment
+packages** for a budget — with costs, savings ranges, payback, five-year net benefit, carbon and comfort notes.
+An AI advisor explains the computed results in plain language. It never produces numbers.
+
+History: the project began as a home energy simulator (Maya's house). We pivoted because an earlier winner, Eden, covers
+net-zero **new-build** home design. We differentiate on **existing** buildings, operations plus investments. The home engine
+(P3–P5) is still in the repo and is being replaced by `src/engine/hotel/`.
 
 Hackathon: 48 hours. Built in **Lovable**, extended with **Claude Code**, synced through **GitHub**.
-Demo = one flawless path: Maya's preset home (Chicago, 1978, gas) → Thermal Vision → $15k budget →
-Optimize → house upgrades on screen → bill counts down → plan with sources.
+Demo = one flawless 3-minute path: synthetic 100-room hotel (Chicago) → zone-level energy → occupancy 60% to 85% →
+smart HVAC controls on → $50,000 budget → three packages → ask the advisor why thermostats over solar →
+before/after energy, cost and carbon.
 
-Full specs live in `/docs`. Read the relevant spec before working on an area:
-- `docs/02_ENGINE_SPEC.md` — calculations, optimizer, tests
-- `docs/03_DATA_SPEC.md` — JSON data files and sources
-- `docs/04_3D_SPEC.md` — the 3D simulator (the wow)
-- `docs/05_CLAUDE_CODE_PROMPTS.md` — the build order
+Full specs live in `/docs`. Read the relevant doc before working on an area:
+- `docs/10_HOTEL_SPEC.md` — the product brief (what and why, MVP priorities, demo, success criteria)
+- `docs/11_HOTEL_TASKS.md` — the detailed task list by phase (P0, P1, P2). **Start here for what to build next.**
+- `docs/12_BACKEND_ARCHITECTURE.md` — runtime topology, the AI advisor function, guardrails
+- `docs/13_HOTEL_ENGINE_SPEC.md` — equations and assumptions (to be written, task 1.1)
+- `docs/08_DATA_TODO.md` — data and research still to find
+- Home-era docs, still useful as patterns until rewritten: `docs/02_ENGINE_SPEC.md`, `docs/03_DATA_SPEC.md`,
+  `docs/04_3D_SPEC.md`, `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md`; `docs/09` is superseded.
+
+## Honesty rules
+
+- Label outputs as **estimates**. Say when inputs are defaults or synthetic.
+- Never claim engineering-grade accuracy, verified carbon savings, guaranteed returns or real-time monitoring unless implemented and validated.
+- Synthetic data must be labeled synthetic wherever it is shown.
 
 ## Golden rules
 
@@ -36,10 +52,11 @@ Full specs live in `/docs`. Read the relevant spec before working on an area:
 | --- | --- | --- |
 | `src/pages/`, `src/components/` | Lovable | Do NOT edit unless the user explicitly asks |
 | `src/store/` | Shared | Agreed contract. Change only with the user's OK; keep backwards compatible |
-| `src/engine/` | Claude Code | Pure TypeScript. No React, no network, no AI |
-| `src/data/` | Claude Code | JSON only. Every value carries a source |
-| `src/three/` | Claude Code | React Three Fiber components. Lovable only places `<Scene />` |
-| `supabase/functions/` | Claude Code | Backend functions (AI explain, APIs) |
+| `src/engine/` | Claude Code | Pure TypeScript. No React, no network, no AI. `hotel/` is the active engine; the home files are legacy |
+| `src/data/` | Claude Code | JSON only. Every value carries a source; `hotel/` is the active set |
+| `src/twin/` | Claude Code | The clickable 2D hotel diagram (`<HotelTwin />`). Lovable only places it |
+| `src/three/` | Claude Code | Optional lightweight 3D (P2). Lovable only places `<Scene />` |
+| `supabase/functions/` | Claude Code | Backend functions (AI advisor). Keys are read only here |
 | `docs/` | Anyone | Specs and plans |
 
 If a task needs a change in a Lovable-owned file, make the **smallest possible** change and say so in the commit message.
@@ -48,7 +65,7 @@ If a task needs a change in a Lovable-owned file, make the **smallest possible**
 
 - React + TypeScript + Vite + Tailwind + shadcn/ui (from Lovable)
 - State: `zustand` (`src/store/useTwin.ts`)
-- 3D: `three`, `@react-three/fiber`, `@react-three/drei`, `@react-three/postprocessing`, `@react-spring/three`
+- 3D (optional, P2): `three`, `@react-three/fiber`, `@react-three/drei`, `@react-three/postprocessing`, `@react-spring/three` (installed; the P0/P1 twin is 2D SVG)
 - Charts: `recharts`
 - Tests: `vitest`
 - Backend: Lovable Cloud (Supabase edge functions, Deno)
@@ -61,29 +78,31 @@ Never upgrade React itself.
 ## Architecture (data flow)
 
 ```
-Lovable UI panels ──writes──▶ zustand store ◀──reads── 3D Scene (src/three)
+Lovable UI panels ──writes──▶ zustand store ◀──reads── 2D digital twin (src/twin)
                                    │
                                    ▼
-                          src/engine (pure functions)
+                     src/engine/hotel (pure functions, in the browser)
                                    │ reads
                                    ▼
-                          src/data/*.json (sourced numbers)
+                     src/data/hotel/*.json (sourced, labeled synthetic until verified)
 
-store.results ──▶ supabase/functions/explain ──▶ AI text (explanation only)
+store results ──▶ supabase/functions/advisor ──▶ AI text (explanation only) ──▶ validated in the browser
 ```
 
-- The 3D scene does **no math**. Colors, leak particles, labels and the bill counter all read numbers from the store,
-  which the engine computed. If the numbers change, the visuals change.
+- The twin does **no math**. Colors, labels and the metric tiles all read numbers from the store, which the engine computed.
+  If the numbers change, the visuals change.
 - Components never hard-code costs or savings. They read from the store.
+- The advisor receives precomputed results; the browser rejects any answer containing a number not in them. See `docs/12`.
 
-## Store contract (summary — see docs/02_ENGINE_SPEC.md for full types)
+## Store contract (summary — see docs/11, task 1.10, for the hotel contract)
 
-`useTwin` holds: `selectedPresetId`, `home`, `budget`, `goal`, `assumptions`, `thermalMode`, `selectedPart`,
-`baseline` (engine output), `results` (top 3 packages), `activePackageId`, `appliedUpgrades`, `drawerOpen`,
-`reduceEffects`, and actions `setHome`, `selectPreset`, `runOptimizer`, `applyPackage`, `toggleThermal`, `selectPart`.
+Today `useTwin` holds the home-era state: `selectedPresetId`, `home`, `budget`, `goal`, `assumptions`, `thermalMode`,
+`selectedPart`, `results`, `activePackageId`, `drawerOpen`, `reduceEffects`, and actions such as `selectPreset`, `runOptimize`.
+The hotel product adds `hotel` (profile), `scenario`, `baseline`, `scenarioResult`, three packages, `selectedZone`,
+saved scenarios and advisor messages.
 
-Before changing the store, read the existing `src/store/useTwin.ts` (Lovable may have created it) and **extend** it
-rather than replacing it.
+Before changing the store, read the existing `src/store/useTwin.ts` (Lovable created it) and **extend** it, backwards
+compatibly, rather than replacing it. Show the diff and get the user's OK first.
 
 ## Commands
 
@@ -100,11 +119,11 @@ npx vitest run       # engine tests
 - Engine functions are pure and deterministic: same input → same output. No `Date.now()`, no randomness.
 - Money in US dollars, rounded only for display. Energy in kWh (electric) and therms (gas).
 - Every number shown to users comes with a `source` and, where relevant, a `[low, high]` range.
-- 3D components: keep each part in its own file in `src/three/parts/`. Use `useFrame` sparingly. Respect `reduceEffects`.
+- Twin and 3D components: keep each zone or part in its own file. Respect `reduceEffects`. Support keyboard and screen readers.
 - Keep the demo path working at all times. If a feature is half-done, hide it behind a flag.
 
 ## Definition of done (for any task)
 
 - `npm run build` passes, `npx vitest run` passes
-- The demo path still works end to end with Maya's preset
+- The demo path still works end to end with the synthetic 100-room hotel
 - Committed and pushed to `main`, and the change is visible in Lovable's preview

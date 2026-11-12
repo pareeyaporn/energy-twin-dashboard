@@ -84,12 +84,12 @@ npm test        # vitest
 ```
 
 ## Docs
-- [Hotel pivot brief](docs/10_HOTEL_SPEC.md) and [detailed task list](docs/11_HOTEL_TASKS.md)
+- [Idea overview](docs/00_IDEA.md), [hotel pivot brief](docs/10_HOTEL_SPEC.md) and [detailed task list](docs/11_HOTEL_TASKS.md)
 - [Backend architecture](docs/12_BACKEND_ARCHITECTURE.md)
-- [Data and research to-do](docs/08_DATA_TODO.md)
-- [Idea overview](docs/00_IDEA.md), [setup](docs/01_SETUP.md), [demo checklist](docs/07_DEMO_CHECKLIST.md) (still describe the home version until updated)
-- Home-era specs: [engine](docs/02_ENGINE_SPEC.md), [data](docs/03_DATA_SPEC.md), [3D](docs/04_3D_SPEC.md),
-  [Claude Code prompts](docs/05_CLAUDE_CODE_PROMPTS.md), [Lovable prompts](docs/06_LOVABLE_PROMPTS.md), [commercial notes](docs/09_COMMERCIAL_PIVOT.md) (superseded)
+- [Claude Code prompts](docs/05_CLAUDE_CODE_PROMPTS.md), [Lovable prompts](docs/06_LOVABLE_PROMPTS.md), [demo checklist](docs/07_DEMO_CHECKLIST.md)
+- [Data and research to-do](docs/08_DATA_TODO.md) and [setup](docs/01_SETUP.md)
+- Home-era specs, kept as patterns until the hotel versions exist: [engine](docs/02_ENGINE_SPEC.md), [data](docs/03_DATA_SPEC.md),
+  [3D](docs/04_3D_SPEC.md); [commercial notes](docs/09_COMMERCIAL_PIVOT.md) are superseded
 
 ## Working with Lovable
 

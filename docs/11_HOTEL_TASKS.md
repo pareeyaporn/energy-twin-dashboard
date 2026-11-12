@@ -15,13 +15,13 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 ## Phase 0 — Alignment and housekeeping
 - [x] 0.1 [CC] Save the brief as `docs/10_HOTEL_SPEC.md`
 - [x] 0.2 [CC] Mark `docs/09` superseded
-- [ ] 0.3 [CC] Merge the P5 optimizer branch (`engine/optimizer`) as is; it is unused by the hotel product
-- [ ] 0.4 [CC] Update `CLAUDE.md`: "What we are building" (hotels, operational twin), the demo path (brief section 12), folder table
+- [x] 0.3 [CC] Merge the P5 optimizer branch (`engine/optimizer`) as is; it is unused by the hotel product
+- [x] 0.4 [CC] Update `CLAUDE.md`: "What we are building" (hotels, operational twin), the demo path (brief section 12), folder table
       (add `src/engine/hotel/` and `src/twin/`), golden rule 8 stays ("the AI never invents numbers")
-- [ ] 0.5 [CC] Update `README.md` and `docs/00_IDEA.md`: problem, persona (hotel owner or GM), differentiation (existing buildings,
+- [x] 0.5 [CC] Update `README.md` and `docs/00_IDEA.md`: problem, persona (hotel owner or GM), differentiation (existing buildings,
       operations plus investments, not new-build design like Eden)
 - [x] 0.8b [CC] Backend architecture doc `docs/12_BACKEND_ARCHITECTURE.md` and README updated for the hotel pivot
-- [ ] 0.6 [CC] Rewrite `docs/05` (Claude Code prompts) and `docs/06` (Lovable prompts) for the new phases; update `docs/07` demo
+- [x] 0.6 [CC] Rewrite `docs/05` (Claude Code prompts) and `docs/06` (Lovable prompts) for the new phases; update `docs/07` demo
       checklist and Q&A (vs Eden, vs ENERGY STAR Portfolio Manager, accuracy, why hotels)
 - [ ] 0.7 [TEAM] Delete finished branches on GitHub (I cannot delete remote branches); turn on "Automatically delete head branches"
 - [ ] 0.8 [TEAM] Allow the network domains needed for research: `epa.gov`, `noaa.gov` (and `nrel.gov`, `energystar.gov` if used)

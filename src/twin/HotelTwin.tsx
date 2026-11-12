@@ -12,6 +12,7 @@ import { StressTests } from "./parts/StressTests";
 import { TimeControls } from "./parts/TimeControls";
 import { ZonePanel } from "./parts/ZonePanel";
 import { View3D, hasWebGL } from "./parts/View3D";
+import { PortfolioBreadcrumb } from "./parts/PortfolioBreadcrumb";
 import { useTwinClock } from "./useTwinClock";
 import { useCountUp } from "./useCountUp";
 
@@ -58,6 +59,7 @@ export function HotelTwin() {
     <section aria-label="Hotel digital twin" data-reduce-effects={reduce ? "true" : "false"} className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
+          <PortfolioBreadcrumb />
           <h2 className="text-lg font-semibold">{label.title}</h2>
           <p className="text-xs text-muted-foreground">
             {label.city} · {label.rooms} rooms ·{" "}

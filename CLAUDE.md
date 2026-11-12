@@ -60,6 +60,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 | `src/data/` | Claude Code | JSON only. Every value carries a source; `hotel/` is the data set (three home-era files remain only because the store imports them) |
 | `src/twin/` | Claude Code | The clickable 2D hotel diagram (`<HotelTwin />`). Lovable only places it |
 | `src/plans/` | Claude Code | Investment modes: AI plan, Build your own (catalog), Compare. Placed by `BudgetOptimizer` (minimal hook) |
+| `src/portfolio/` | Claude Code | Hotel portfolio page: city map (MapLibre, drawn fallback), totals, comparison, charts, portfolio optimizer. Route `src/routes/portfolio.tsx` |
 | `src/three/` | Claude Code | The 3D hotel twin (built, Phase 9). Loaded by `src/twin/parts/View3D.tsx`; Lovable places only `<HotelTwin />` |
 | `supabase/functions/` | Claude Code | Backend functions (AI advisor). Keys are read only here |
 | `docs/` | Anyone | Specs and plans |
@@ -70,6 +71,7 @@ If a task needs a change in a Lovable-owned file, make the **smallest possible**
 
 - React + TypeScript + Vite + Tailwind + shadcn/ui (from Lovable)
 - State: `zustand` (`src/store/useTwin.ts`)
+- Map: `maplibre-gl` (lazy-loaded, free Carto dark basemap, no key; drawn fallback)
 - 3D: `three`, `@react-three/fiber`, `@react-three/drei` (used, lazy-loaded, 2D fallback); `@react-three/postprocessing`, `@react-spring/three` installed but unused
 - Charts: `recharts`
 - Tests: `vitest`
@@ -106,10 +108,10 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 `optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, `hotelDiscountRate`, `customPlans` / `activeCustomPlanId` (local storage),
 `planBeforeStress`, twin controls (`selectedZone`, `twinLayer`, time with modes
 `seasons` / `day` / `year`, `compareMode`)
-and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
-`applyHotelPackage` and `askAdvisor`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
+the portfolio (`portfolio`, `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
+`applyHotelPackage`, `askAdvisor`, `openProperty` and `runPortfolioOptimizer`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
 `selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, `selectCatalog`, `selectCustomPlanEvaluation`,
-`selectPlanExplanation`, `selectStressReport`, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).
+`selectPlanExplanation`, `selectStressReport`, `selectPortfolioSummary`, `selectVisibleCustomPlans`, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).
 
 Before changing the store, read `src/store/useTwin.ts` and **extend** it, backwards compatibly, rather than replacing it.
 Show the diff and get the user's OK first.

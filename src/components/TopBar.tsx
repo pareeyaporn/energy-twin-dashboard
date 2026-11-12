@@ -1,4 +1,4 @@
-import { BookOpen, ChartNoAxesCombined } from "lucide-react";
+import { BookOpen, Building2, ChartNoAxesCombined } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useTwin } from "@/store/useTwin";
@@ -16,6 +16,7 @@ export function TopBar() {
         </div>
       </div>
       <div className="flex items-center gap-2">
+        <Button asChild variant="ghost" size="sm"><Link to="/portfolio" aria-label="Portfolio"><Building2 /><span className="hidden sm:inline">Portfolio</span></Link></Button>
         <Button asChild variant="ghost" size="sm"><Link to="/overview" aria-label="Report"><ChartNoAxesCombined /><span className="hidden xl:inline">Report</span></Link></Button>
         <Button variant="ghost" size="sm" aria-label="Sources" onClick={() => setSourcesOpen(true)}><BookOpen /><span className="hidden sm:inline">Sources</span></Button>
       </div>

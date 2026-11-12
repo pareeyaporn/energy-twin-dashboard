@@ -317,6 +317,52 @@ An answer with any other number is discarded.
 The template answer (`fallbackAnswer`) is used when the function is not set up, is slow (6 seconds), fails, refuses or is rejected. It is built only from the context, covers the demo questions (why HVAC costs most, how occupancy changes energy, X versus Y, how to use a budget, a what-if, a zone's cost, a general summary), and passes the same number check in tests.
 Question intent is keyword-based and deterministic. The context holds about 20 KB. Details of the function are in `docs/12`, section 6.
 
+## 13. Hotel portfolio (`src/engine/hotel/portfolio.ts`, Phase 13)
+
+Every per-property figure is the single-hotel engine's (baseline, savings with interactions, costs, incentives, financial breakdown); the portfolio
+only adds and chooses.
+
+- `portfolioSummary(items)`: per property the baseline, site energy intensity, savings potential, investment required and priority score
+  (definitions in docs/15 §16); totals are sums.
+- `propertyCandidates(prepared)`: every valid combination at one property that saves money and passes the comfort limit, with gross cost,
+  incentives, net investment, annual savings, 10-year NPV (same discount rate as the single-hotel view) and carbon. Cached per input.
+- `optimizePortfolioBudget(items, { budget, objective })`: a **multiple-choice knapsack** (at most one package per property, total gross cost
+  ≤ budget) solved exactly by dynamic programming over the budget in $1,000 steps, for annual savings, 10-year NPV, carbon and balanced.
+  **Fastest payback** maximizes savings per dollar of net investment, a ratio, solved exactly by Dinkelbach's method: repeat the same program
+  maximizing savings − λ × net investment with λ the current ratio until nothing improves. Tests compare the program with brute force.
+
+### Properties (synthetic; Chicago weather, Illinois rates, ComEd incentives for all)
+
+| Property | Neighborhood | Rooms | Floors | Built | HVAC | Occupancy | Guest hours | Own budget | Source of inputs |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Lakeshore Inn | Streeterville | 100 | 5 | 1998 | central plant | 60% | 14 | $50,000 | the 100-room preset |
+| Riverwalk Grand | The Loop | 300 | 20 | 1985 | central plant | 69.2% | 14 | $150,000 | the 300-room preset (occupancy: STR CBD 2025) |
+| O'Hare Gateway Hotel | Rosemont | 220 | 8 | 1976 | PTAC | 76% | 10 | $100,000 | assumptions |
+| Lakefront Convention Hotel | Near South Side | 480 | 28 | 1990 | central plant | 66% | 14 | $200,000 | assumptions |
+| Wells Street Hotel | River North | 72 | 7 | 2014 | VRF | 78% | 14 | $40,000 | assumptions |
+
+Floor area is defaulted except for Lakeshore Inn (55,000 ft²).
+
+### Figures (mid estimates, 8% discount rate)
+
+| Property | Energy cost / yr | Intensity (kBtu/ft²) | Savings potential / yr | Investment required | Priority |
+| --- | --- | --- | --- | --- | --- |
+| Lakeshore Inn | $120,178 | 86.5 | $9,022 (LED + sensors) | $24,184 | 92 |
+| Riverwalk Grand | $374,741 | 90.5 | $28,480 (LED + sensors) | $72,551 | 100 |
+| O'Hare Gateway Hotel | $370,102 | 97.9 | $16,626 (LED + sensors) | $53,204 | 70 |
+| Lakefront Convention Hotel | $591,679 | 89.1 | $44,781 (LED + sensors) | $116,082 | 97 |
+| Wells Street Hotel | $105,119 | 88.2 | $8,888 (insulation + LED + sensors) | $28,217 | 71 |
+| **Portfolio** (1,172 rooms) | **$1,561,819** | — | **$107,796** | $294,239 | — |
+
+Portfolio optimizer at **$500,000, balanced**: $495,389 gross, $169,973 incentives, $325,416 net; **$114,489 a year** (7.3% of the chain's energy
+cost), payback **2.8 years**, 10-year NPV $504,341, 316 t CO2 a year. LED + sensors at Lakeshore Inn, Riverwalk Grand and the convention hotel;
+insulation + LED + sensors at O'Hare Gateway; LED + water heating at Wells Street. 2,560 combinations tested (512 per hotel).
+
+### Limits
+
+All five hotels share Chicago weather. Hotel types differ only through size, age, HVAC, occupancy and guest hours: the model has no ballroom,
+exhibit-hall, pool or round-the-clock restaurant drivers. Heat-pump water heaters are not modeled. Priority scores are relative to this portfolio.
+
 ---
 
 ## Appendix A — Store contract (task 1.10): approved and built

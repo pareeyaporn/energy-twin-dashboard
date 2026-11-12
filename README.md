@@ -53,13 +53,14 @@ baseline $9,000 a year and 2.7 years).
 
 | Area | State |
 | --- | --- |
-| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (340 tests) |
+| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (376 tests) |
 | Data (`src/data/hotel`) | **Sourced from primary documents:** EIA prices, price growth (AEO2026) and hotel end uses (CBECS 2018); EPA eGRID2023 grid factors by location and the EPA gas factor; PVWatts solar output; NOAA weather; IL-TRM hotel measures (smart controls, sensors, lighting interaction, hot water); NLR solar O&M and degradation; Chicago hotel sizes and occupancy (Choose Chicago, STR). Solar $/W by size from LBNL's 2025 Data Update (2024 national medians, editable). ComEd standard incentives (LED, occupancy sensors, guest-room energy management) from the utility's worksheets. **Still placeholders:** installed costs for LED and energy management and the chiller part of a central plant, the solar export credit ($0, editable), and the monthly occupancy shape. Phase 7 is closed except installed costs (7.6). See `docs/08`, `docs/14`, `docs/15` |
 | Store (`src/store`): profile, scenarios, optimizer (scenario-aware), upgrade comparison, twin controls, advisor | Built |
 | Digital twin: 2D (`src/twin`) and 3D (`src/three`, Phase 9) | Built |
 | Workspace UI (Lovable, prompts LV1–LV15) | Built |
 | Flow, Rooms and Equipment layers (animated Sankey, room façade, equipment cards) | Built (Phase 10) |
 | Investment catalog and custom plans; stress tests | Built (Phases 11 and 12) |
+| Hotel portfolio (`/portfolio`): synthetic five-hotel Chicago chain on a MapLibre map, totals, comparison table, charts, one budget split across hotels, open any hotel in the twin | Built (Phase 13 P0 and the portfolio optimizer) |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
 | Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |
 
@@ -98,6 +99,7 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | `src/twin/` | Clickable hotel twin (2D layers, controls, the 3D wrapper) |
 | `src/three/` | 3D hotel scene (building, scenery, street, people, camera) |
 | `src/plans/` | Investment modes: AI recommended, Build your own (catalog), Compare |
+| `src/portfolio/` | Hotel portfolio page: city map, totals, comparison, charts, portfolio optimizer |
 | `supabase/functions/` | Backend function: the AI advisor |
 | `docs/` | Specs and plans |
 

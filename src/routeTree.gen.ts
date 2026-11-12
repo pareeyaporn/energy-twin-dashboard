@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OptimizerRouteImport } from './routes/optimizer'
 import { Route as OverviewRouteImport } from './routes/overview'
+import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as ScenarioRouteImport } from './routes/scenario'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const OverviewRoute = OverviewRouteImport.update({
   path: '/overview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortfolioRoute = PortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScenarioRoute = ScenarioRouteImport.update({
   id: '/scenario',
   path: '/scenario',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
+  '/portfolio': typeof PortfolioRoute
   '/scenario': typeof ScenarioRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
+  '/portfolio': typeof PortfolioRoute
   '/scenario': typeof ScenarioRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
+  '/portfolio': typeof PortfolioRoute
   '/scenario': typeof ScenarioRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/optimizer' | '/overview' | '/scenario'
+  fullPaths: '/' | '/optimizer' | '/overview' | '/portfolio' | '/scenario'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/optimizer' | '/overview' | '/scenario'
-  id: '__root__' | '/' | '/optimizer' | '/overview' | '/scenario'
+  to: '/' | '/optimizer' | '/overview' | '/portfolio' | '/scenario'
+  id: '__root__' | '/' | '/optimizer' | '/overview' | '/portfolio' | '/scenario'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OptimizerRoute: typeof OptimizerRoute
   OverviewRoute: typeof OverviewRoute
+  PortfolioRoute: typeof PortfolioRoute
   ScenarioRoute: typeof ScenarioRoute
 }
 
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OverviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portfolio': {
+      id: '/portfolio'
+      path: '/portfolio'
+      fullPath: '/portfolio'
+      preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/scenario': {
       id: '/scenario'
       path: '/scenario'
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OptimizerRoute: OptimizerRoute,
   OverviewRoute: OverviewRoute,
+  PortfolioRoute: PortfolioRoute,
   ScenarioRoute: ScenarioRoute,
 }
 export const routeTree = rootRouteImport

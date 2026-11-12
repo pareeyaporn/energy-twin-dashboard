@@ -44,7 +44,8 @@ Call selectors like `useTwin(selectDisplayed)`; they are memoized and safe to us
 | Optimize against the current what-if (for example electricity +20%) | `optimizeOnScenario` (turns on by itself when a scenario or stress test starts and off when it is cleared), `setOptimizeOnScenario(b)`; the plan records `hotelPlan.scenario`, and `hotelPlanBaseline` is what it was measured against |
 | AI advisor | `advisorMessages` (`{ id, role: 'user' \| 'advisor', text, source?: 'ai' \| 'fallback', reason? }`), `advisorBusy`, `askAdvisor(question)`, `clearAdvisor()`; suggested questions: `advisor.ADVISOR_SUGGESTED_QUESTIONS` from `@/engine/hotel` |
 | Saved scenarios | `savedScenarios`, `saveScenario(name?)`, `loadScenario(id)`, `renameScenario(id, name)`, `deleteScenario(id)` |
-| Reset | `resetHotel()` |
+| Hotel portfolio (Phase 13; the page is `/portfolio`, built by Claude Code in `src/portfolio/`) | `portfolio` (the synthetic chain), `activePropertyId`, `openProperty(id)` (loads a hotel into every single-hotel screen, saving the open one), `portfolioBudget`, `setPortfolioBudget(n)`, `portfolioObjective`, `setPortfolioObjective(o)`, `portfolioPlan`, `portfolioOptimizing`, `runPortfolioOptimizer()`; derived: `selectPortfolioSummary(s)`, `selectActiveProperty(s)`, `selectVisibleCustomPlans(s)` |
+| Reset | `resetHotel()` (also resets the portfolio) |
 
 Money fields are US dollars (round only for display); energy is kWh and therms; carbon is kg CO2 (the grid factor is CO2 only).
 

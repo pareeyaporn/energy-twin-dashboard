@@ -278,7 +278,7 @@
       "id": "rooftop_solar_quarter",
       "label": "Rooftop solar (a quarter of the usable roof)",
       "category": "renewable",
-      "costStatus": "placeholder",
+      "costStatus": "sourced",
       "description": "Sized to 25% of the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
       "lifetimeYears": 25,
       "cost": {},
@@ -300,14 +300,14 @@
         "rooftop_solar",
         "rooftop_solar_half"
       ],
-      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W (PLACEHOLDER). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
+      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W by size (rates.json: LBNL Distributed Solar & Storage 2025 Data Update, 2024 national medians, non-residential, before incentives). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
       "verified": false
     },
     {
       "id": "rooftop_solar_half",
       "label": "Rooftop solar (half the usable roof)",
       "category": "renewable",
-      "costStatus": "placeholder",
+      "costStatus": "sourced",
       "description": "Sized to 50% of the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
       "lifetimeYears": 25,
       "cost": {},
@@ -329,14 +329,14 @@
         "rooftop_solar",
         "rooftop_solar_quarter"
       ],
-      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W (PLACEHOLDER). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
+      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W by size (rates.json: LBNL Distributed Solar & Storage 2025 Data Update, 2024 national medians, non-residential, before incentives). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
       "verified": false
     },
     {
       "id": "rooftop_solar",
       "label": "Rooftop solar (full usable roof)",
       "category": "renewable",
-      "costStatus": "placeholder",
+      "costStatus": "sourced",
       "description": "Sized to the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
       "lifetimeYears": 25,
       "cost": {},
@@ -358,7 +358,7 @@
         "rooftop_solar_half",
         "rooftop_solar_quarter"
       ],
-      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W (PLACEHOLDER). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
+      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W by size (rates.json: LBNL Distributed Solar & Storage 2025 Data Update, 2024 national medians, non-residential, before incentives). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
       "verified": false
     }
   ],

@@ -10,6 +10,13 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  vite: {
+    optimizeDeps: {
+      // Prebundle the accordion before the first page load so its React instance cannot
+      // change underneath an already-rendered React DOM tree during dependency discovery.
+      include: ["@radix-ui/react-accordion"],
+    },
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this

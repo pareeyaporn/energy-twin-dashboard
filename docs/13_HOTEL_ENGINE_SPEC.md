@@ -183,24 +183,24 @@ solar comes in three mutually exclusive sizes; the grid factor follows the eGRID
 
 **`evaluatePackage`** returns the cost range, annual savings (low, mid, high), new annual cost, carbon avoided, metrics, comfort, sizing and per-item marginal savings (which sum to the package savings and depend on the fixed order).
 
-### Demo hotel, single upgrades (mid; after research pass 8: ComStock climate split, IL-TRM costs, ComEd incentives)
+### Demo hotel, single upgrades (mid; after research pass 9: ComStock climate split, IL-TRM costs, ComEd incentives)
 
 Baseline: about $120,200 a year, 698,000 kWh, 23,800 therms, 416 t CO2 (eGRID RFCW), 86.5 kBtu/ft² site (ComStock zone-5A hotels 92.3 × age factor 0.947 for 1980–1999; CBECS 2018 lodging 85.7).
 Price growth EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar: PVWatts Chicago, net of $17.63/kW-yr O&M. Lighting interaction: IL-TRM hotel factors.
 
 | Upgrade | Net cost | kWh / yr | therms / yr | $ / yr | Payback | 5-year net | 10-year net | t CO2 / yr |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Occupancy sensors in common areas and hallways ($6,600 − $4,125 ComEd) | $2,475 | 16,704 | −252 | $2,113 | 1.2 y | $8,498 | $20,543 | 5.6 |
+| Occupancy sensors in common areas and hallways ($5,940 − $4,125 ComEd) | $1,815 | 16,704 | −252 | $2,113 | 0.9 y | $9,158 | $21,203 | 5.6 |
 | LED lighting retrofit ($33,000 − $10,631 ComEd) | $22,369 | 62,388 | −1,012 | $7,826 | 2.9 y | $18,258 | $62,810 | 20.5 |
 | High-efficiency water heating and low-flow fixtures | $20,000 | 8,667 | 1,676 | $2,774 | 7.2 y | −$5,201 | $12,174 | 12.5 |
 | Roof and envelope insulation | $21,010 | 11,914 | 844 | $2,458 | 8.5 y | −$8,024 | $6,871 | 9.4 |
 | Energy management controls (scheduling and optimization) | $26,000 | 14,091 | 621 | $2,557 | 10.2 y | −$12,541 | $2,755 | 9.2 |
 | Smart guest-room thermostats and occupancy sensing ($26,000 − $5,625 ComEd) | $20,375 | 10,179 | 280 | $1,690 | 12.1 y | −$11,503 | −$1,493 | 5.7 |
 | Rooftop solar (55 kW at $2.9/W) | $159,500 | 68,211 | 0 | $8,614 | 18.5 y | −$115,021 | −$66,846 | 28.3 |
-| High-efficiency HVAC equipment | $110,000 | 22,231 | 1,367 | $4,393 | 25.0 y | −$86,817 | −$60,302 | 16.5 |
+| High-efficiency HVAC equipment | $109,918 | 22,231 | 1,367 | $4,393 | 25.0 y | −$86,734 | −$60,220 | 16.5 |
 
-At $50,000 the optimizer picks LED lighting plus occupancy sensors ($39,600 gross, $14,756 verified ComEd incentives, $24,844 net, $9,022 a year,
-2.8 years). Net cost and payback use the net investment; the budget is compared with the gross cost (docs/15).
+At $50,000 the optimizer picks LED lighting plus occupancy sensors ($38,940 gross, $14,756 verified ComEd incentives, $24,184 net, $9,022 a year,
+2.7 years). Net cost and payback use the net investment; the budget is compared with the gross cost (docs/15).
 
 **Smart room controls calibration.** IL-TRM v14.0 4.4.8 (Chicago hotel, central hot-water fan coils, gas heat) implies about 6,900–14,700 kWh and
 225–650 therms a year for 100 rooms at 0.75–1.0 ton per room. The setback alone gave 4,903 kWh; with smart controls the simulation now also cuts

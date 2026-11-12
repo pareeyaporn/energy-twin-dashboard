@@ -6,6 +6,30 @@ import type { HotelData, HotelProfile, Range3, UpgradeId, UpgradeSizing } from '
 
 const SCENARIOS = ['low', 'mid', 'high'] as const;
 
+/** The hotel's estimated cooling capacity in tons, by HVAC type (equipment.json placeholders; 0.75 ton per guest room is an assumption). */
+export function coolingTons(p: HotelProfile, data: HotelData = hotelData): number {
+  const e = data.equipment;
+  const publicSqft = p.floorAreaSqft * e.publicAreaShareOfFloorArea;
+  const c = e.central;
+  switch (p.hvacType) {
+    case 'ptac':
+      return p.rooms * (e.guestRoomCoolingTonsPerRoom ?? 0) + publicSqft * c.ptac.tonsPerPublicSqft;
+    case 'pthp':
+      return p.rooms * (e.guestRoomCoolingTonsPerRoom ?? 0) + publicSqft * c.pthp.tonsPerPublicSqft;
+    case 'vrf':
+      return p.rooms * c.vrf.tonsPerRoom;
+    case 'rtu':
+      return p.floorAreaSqft * c.rtu.tonsPerSqft;
+    default:
+      return p.floorAreaSqft * c.central_plant.tonsPerSqft;
+  }
+}
+
+/** Central boiler capacity in kBtu/h (central plant only). */
+export function boilerKBtuH(p: HotelProfile, data: HotelData = hotelData): number {
+  return p.hvacType === 'central_plant' ? p.floorAreaSqft * data.equipment.central.central_plant.boilerKBtuHPerSqft : 0;
+}
+
 /**
  * Installed cost range for one upgrade: fixed + per room + per floor area + per roof area + per common-area floor area + per kW.
  * Equipment sized from the reduced load (HVAC) scales its floor-area part by the package's size factor. Solar adds the region's
@@ -22,7 +46,10 @@ export function upgradeCost(
   const def = upgradeDef(id, data);
   const k = isSolar(id) ? 1 : Math.min(1, Math.max(0, coverage));
   const { roofSqft, commonSqft } = areasOf(p, data);
-  const m = def.cost;
+  const m = def.cost.byHvac?.[p.hvacType] ?? def.cost;
+  const size = def.sizeScaled ? sizing.hvacSizeFactor : 1;
+  const tons = m.perTon ? coolingTons(p, data) : 0;
+  const boiler = m.perBoilerKBtuH ? boilerKBtuH(p, data) : 0;
   const out: Range3 = { low: 0, mid: 0, high: 0 };
   const perW = isSolar(id) && sizing.solarKw > 0 ? solarCostPerW(sizing.solarKw, p, data) : null;
   for (const s of SCENARIOS) {
@@ -30,7 +57,9 @@ export function upgradeCost(
       (m.fixed?.[s] ?? 0) +
       k *
         ((m.perRoom?.[s] ?? 0) * p.rooms +
-          (m.perSqftFloor?.[s] ?? 0) * p.floorAreaSqft * (def.sizeScaled ? sizing.hvacSizeFactor : 1) +
+          (m.perSqftFloor?.[s] ?? 0) * p.floorAreaSqft * size +
+          (m.perTon?.[s] ?? 0) * tons * size +
+          (m.perBoilerKBtuH?.[s] ?? 0) * boiler * size +
           (m.perSqftRoof?.[s] ?? 0) * roofSqft +
           (m.perSqftCommon?.[s] ?? 0) * commonSqft) +
       (m.perKw?.[s] ?? 0) * sizing.solarKw +

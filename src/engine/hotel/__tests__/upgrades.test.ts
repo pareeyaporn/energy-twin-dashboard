@@ -158,11 +158,11 @@ describe('costs', () => {
   it('follow the cost models', () => {
     close(mid('smart_room_controls'), 260 * 100); // IL-TRM $260 per room
     close(mid('led_lighting'), 0.6 * 55000);
-    close(mid('occupancy_sensors'), 0.4 * 55000 * 0.3);
+    close(mid('occupancy_sensors'), 0.36 * 55000 * 0.3); // IL-TRM 4.5.10 per-sensor costs at 250 ft² per sensor (assumption)
     close(mid('insulation'), 1.91 * (55000 / 5)); // IL-TRM 4.8.1 $1.40/ft², in 2024 dollars
     close(mid('water_heating'), 200 * 100); // built from IL-TRM 4.3.1–4.3.3 costs
     close(mid('energy_management'), 15000 + 0.2 * 55000);
-    close(mid('hvac_upgrade'), 2 * 55000);
+    close(mid('hvac_upgrade'), 22.95 * 0.03 * 55000 + 1.31 * 55000); // central plant: IL-TRM boiler $/kBtu/h + chiller placeholder
     close(mid('rooftop_solar'), 3100 * 50); // LBNL 2024 median, 20–50 kW non-residential: $3.10/W
   });
 
@@ -233,7 +233,7 @@ describe('evaluatePackage', () => {
     const e = evaluatePackage(ctx, ['occupancy_sensors', 'led_lighting']);
     expect(e.id).toBe('led_lighting+occupancy_sensors');
     expect(e.upgradeIds).toEqual(['led_lighting', 'occupancy_sensors']);
-    close(e.cost.mid, 33000 + 6600);
+    close(e.cost.mid, 33000 + 0.36 * 16500);
     expect(e.annualSavings.low).toBeLessThanOrEqual(e.annualSavings.mid);
     expect(e.annualSavings.mid).toBeLessThanOrEqual(e.annualSavings.high);
     close(e.newAnnualCost, base.annual.cost - e.annualSavings.mid);

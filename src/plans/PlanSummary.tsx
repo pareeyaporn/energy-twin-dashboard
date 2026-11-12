@@ -30,7 +30,7 @@ export function PlanSummary({ plan, rate, onRemove }: { plan: PlanEvaluation; ra
           </div>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-4">
             <div><dt className="text-muted-foreground">Gross cost</dt><dd className="text-sm font-semibold tabular-nums">{usd(f.grossCost.mid)}</dd><dd className="text-[10px] text-muted-foreground tabular-nums">{usd(f.grossCost.low)}–{usd(f.grossCost.high)}</dd></div>
-            <div><dt className="text-muted-foreground">Verified incentives</dt><dd className="text-sm font-semibold tabular-nums">{verified > 0 ? `−${usd(verified)}` : "$0"}</dd><dd className="text-[10px] text-muted-foreground">{unverified.length ? `${unverified.length} unverified, not counted` : "none listed"}</dd></div>
+            <div><dt className="text-muted-foreground">Utility incentives</dt><dd className="text-sm font-semibold tabular-nums">{verified > 0 ? `−${usd(verified)}` : "$0"}</dd><dd className="text-[10px] text-muted-foreground">{unverified.length ? `published rates; ${unverified.length} more listed, not counted` : "published rates; pre-approval needed"}</dd></div>
             <div><dt className="text-muted-foreground">Net investment</dt><dd className="text-sm font-semibold tabular-nums">{usd(f.netInvestment.mid)}</dd></div>
             <div><dt className="text-muted-foreground">Saves / yr</dt><dd className="text-sm font-semibold tabular-nums text-savings">{usd(f.annualSavings.mid)}</dd><dd className="text-[10px] text-muted-foreground tabular-nums">{usd(f.annualSavings.low)}–{usd(f.annualSavings.high)}</dd></div>
             <div><dt className="text-muted-foreground">Simple payback</dt><dd className="text-sm font-semibold tabular-nums">{years(f.simplePaybackYears)}</dd></div>
@@ -77,7 +77,7 @@ export function PlanSummary({ plan, rate, onRemove }: { plan: PlanEvaluation; ra
         </ul>
       )}
       <p className="text-[10px] text-muted-foreground">
-        Recomputed with all upgrades together (savings are not added up). Estimates: most costs are placeholders; incentives count only when verified.
+        Recomputed with all upgrades together (savings are not added up). Estimates: some installed costs are still placeholders (LED retrofit, energy management, the chiller part of a central plant); incentives use ComEd's published rates, are estimated from the modeled equipment and need the utility's approval.
       </p>
     </section>
   );

@@ -130,8 +130,8 @@ export function CatalogCard({ item, planQuantity, onAdd, onRemove, onQuantity }:
               <div><dt className="text-muted-foreground">CO₂ / yr</dt><dd className="tabular-nums">{tonnes(f.carbonAvoidedKgPerYear.mid)}</dd></div>
               <div className="col-span-2"><dt className="text-muted-foreground">Energy saved / yr</dt><dd className="tabular-nums">{energySaved(f)}</dd></div>
               <div className="col-span-2 text-[11px] text-muted-foreground">
-                Incentives: {verifiedIncentives(f) > 0 ? `${usd(verifiedIncentives(f))} verified` : "none verified"}
-                {unverified.length > 0 && ` · ${unverified.length} listed, unverified ($0 in figures)`}
+                Incentives: {verifiedIncentives(f) > 0 ? `${usd(verifiedIncentives(f))} at published rates (estimate)` : "none counted"}
+                {unverified.length > 0 && ` · ${unverified.length} listed, not counted ($0 in figures)`}
               </div>
             </dl>
           )}

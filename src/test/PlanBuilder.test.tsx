@@ -24,7 +24,7 @@ describe("Invest modes and the plan builder", () => {
     expect(get().customPlans).toHaveLength(1);
     const summary = screen.getByTestId("plan-summary");
     expect(within(summary).getByText(/adds \$[\d,]+ \/ yr/)).toBeInTheDocument();
-    expect(within(summary).getByText("Verified incentives")).toBeInTheDocument();
+    expect(within(summary).getByText("Utility incentives")).toBeInTheDocument();
 
     // Set LEDs to 50%: the plan is recomputed (cost halves)
     const before = get().customPlans[0]!.items[0]!;

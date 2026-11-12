@@ -143,3 +143,30 @@ describe("portfolio P1: my portfolio and stress tests", () => {
     expect(selectPortfolioStressReport(get())!.rows.every((x) => x.planLabel === null)).toBe(true);
   });
 });
+
+describe("Reset demo", () => {
+  it("puts the hotel, scenario, plans, portfolio and saved plans back to the start", async () => {
+    const startCost = get().baseline.annual.cost;
+    get().openProperty("ohare-gateway");
+    get().setScenario({ occupancy: 0.9 });
+    get().createCustomPlan("Temp", [{ id: "led_lighting" }]);
+    get().setPortfolioBudget(200_000);
+    get().setPortfolioStressTest("heat_wave");
+    await runPortfolio();
+    get().setReduceEffects(true);
+    get().resetDemo();
+    const s = get();
+    expect(s.activePropertyId).toBeNull();
+    expect(s.hotelPresetId).toBe("demo-chicago-100");
+    expect(s.baseline.annual.cost).toBeCloseTo(startCost, 6);
+    expect(s.scenario).toEqual({});
+    expect(s.customPlans).toEqual([]);
+    expect(s.portfolioBudget).toBe(500_000);
+    expect(s.portfolioPlan).toBeNull();
+    expect(s.portfolioStressTestId).toBeNull();
+    expect(s.propertyStates).toEqual({});
+    expect(window.localStorage.getItem("energy-twin:custom-plans:v1")).toContain('"plans":[]');
+    expect(s.reduceEffects).toBe(true);
+    get().setReduceEffects(false);
+  });
+});

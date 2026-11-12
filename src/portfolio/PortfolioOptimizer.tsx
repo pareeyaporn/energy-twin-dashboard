@@ -71,6 +71,7 @@ function AiPortfolio({ onExplore }: { onExplore: (id: string) => void }) {
   const run = useTwin((s) => s.runPortfolioOptimizer);
   return (
     <div className="space-y-3">
+      <p className="text-[11px] text-muted-foreground">Picked by the portfolio optimizer, an exact search over every hotel's combinations with the energy model. The AI advisor only explains results.</p>
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-xs">
           <span className="mb-1 block text-muted-foreground">Objective</span>

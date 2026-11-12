@@ -1,4 +1,4 @@
-import { Component, Suspense, lazy, useRef, useState } from "react";
+import { Component, Suspense, lazy, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
 import { ZONE_IDS, ZONE_LABELS } from "@/engine/hotel";
@@ -82,6 +82,14 @@ export function View3D({ fallback }: { fallback: ReactNode }) {
   const scene = useRef<HotelSceneHandle>(null);
   const [exploded, setExploded] = useState(false);
   const [energyView, setEnergyView] = useState(false);
+  // "Reset demo" (store) also returns the 3D view to its starting look.
+  const resets = useTwin((s) => s.demoResets);
+  useEffect(() => {
+    if (resets === 0) return;
+    setExploded(false);
+    setEnergyView(false);
+    scene.current?.resetCamera();
+  }, [resets]);
   const [solarSelected, setSolarSelected] = useState(false);
   const setTime = useTwin((s) => s.setTime);
   const solar = useTwin((s) => selectHourState(s).solar);

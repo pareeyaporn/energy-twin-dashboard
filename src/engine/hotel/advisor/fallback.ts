@@ -18,9 +18,10 @@ const OBJECTIVE_TEXT: Record<string, string> = {
   balanced: 'a balance of savings, carbon and guest comfort',
 };
 
-function limitation(c: AdvisorContext): string[] {
+function limitation(c: AdvisorContext, portfolio = false): string[] {
   const out: string[] = [];
-  if (c.hotel.syntheticDemo) out.push('This hotel is a synthetic demo, so the figures illustrate the method rather than a real property.');
+  if (portfolio && c.portfolio?.syntheticDemo) out.push('The hotels are a synthetic demonstration chain, so the figures illustrate the method rather than real properties.');
+  else if (c.hotel.syntheticDemo) out.push('This hotel is a synthetic demo, so the figures illustrate the method rather than a real property.');
   out.push('These are planning estimates from synthetic and public data, shown as ranges, not an engineering audit or a guarantee of savings.');
   return out;
 }
@@ -156,8 +157,34 @@ const ZONE_LABELS_BY_ID: Record<string, string> = {
 };
 const zoneLabelMatches = (id: string, label: string) => ZONE_LABELS_BY_ID[id] === label;
 
+function portfolio(c: AdvisorContext): string[] | null {
+  const p = c.portfolio;
+  if (!p || p.hotels.length === 0) return null;
+  const [top, second] = p.hotels;
+  const s = [
+    `${p.organization}'s ${p.totals.hotels} hotels spend an estimated ${usd(p.totals.annualCost)} a year on energy; their best packages within each hotel's own budget would save about ${usd(p.totals.savingsPotential)} a year for ${usd(p.totals.investmentRequired)} after incentives.`,
+  ];
+  if (top) {
+    const pay = top.paybackYears === null ? '' : `, paying back in about ${top.paybackYears} years`;
+    s.push(`${top.name} ranks first for investment priority (${top.priorityScore} of 100, the highest 10-year return per dollar): ${top.bestPackage ?? 'its best package'} would save about ${usd(top.savingsPotential)} a year for ${usd(top.investmentRequired)}${pay}.`);
+  }
+  if (second) s.push(`Next is ${second.name} (${second.priorityScore} of 100), saving about ${usd(second.savingsPotential)} a year for ${usd(second.investmentRequired)}.`);
+  const intense = [...p.hotels].sort((a, b) => b.energyIntensity - a.energyIntensity)[0];
+  const spender = [...p.hotels].sort((a, b) => b.annualCost - a.annualCost)[0];
+  if (intense)
+    s.push(`${intense.name} uses the most energy per square foot (${intense.energyIntensity} kBtu a year), the least efficient building in the chain${spender && spender.name !== intense.name ? `, although ${spender.name} spends the most because it is larger` : ''}.`);
+  if (p.plan) {
+    s.push(`With ${usd(p.plan.budget)} for the whole chain (objective: ${p.plan.objective}), the portfolio optimizer spends ${usd(p.plan.grossCost)} before incentives and saves about ${usd(p.plan.annualSavings)} a year (${pct(p.plan.annualSavingsPctOfPortfolioCost)} of the chain's energy cost)${p.plan.paybackYears === null ? '' : `, paying back in about ${p.plan.paybackYears} years`}.`);
+  } else s.push('Run the portfolio optimizer on the Portfolio page to split one budget across the hotels.');
+  return s;
+}
+
 export function fallbackAnswer(q: ParsedQuestion, c: AdvisorContext): string {
   let body: string[] | null = null;
+  if (q.intent === 'portfolio') {
+    const s = portfolio(c);
+    if (s) return [...s, ...limitation(c, true)].join(' ');
+  }
   switch (q.intent) {
     case 'compare':
       body = compare(c, q);

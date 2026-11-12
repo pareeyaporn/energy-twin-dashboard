@@ -364,11 +364,11 @@ model has no ballroom, pool or 24/7 food-service drivers); heat-pump water heate
 ## Phase 8 — Demo hardening (all)
 - [ ] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
       $50,000 budget, an advisor question **chosen after calibration from what the results actually show**, closing before/after with carbon
-- [ ] 8.2 Cache the advisor answers for the demo; no console errors; no layout shift
+- [ ] 8.2 Cache the advisor answers for the demo; no console errors; no layout shift (*waits for the storyline's questions; the advisor now also answers questions about the hotel chain, Phase 13*)
 - [ ] 8.3 Rehearse five times in a row without a failure; record the backup video (30–45 s); test the real projector resolution
 - [ ] 8.4 [TEAM] Slides: tagline "Simulate smarter. Spend better. Save energy.", the three pillars, roadmap (P2 items), and Q&A owners
-- [ ] 8.5 Claims check: nothing says engineering-grade accuracy, verified carbon savings, guaranteed returns or real-time monitoring
-- [ ] 8.7 "Reset demo" control: restores the 100-room preset, baseline, July 3 PM, 3D home view and clears the advisor
+- [x] 8.5 Claims check: nothing says engineering-grade accuracy, verified carbon savings, guaranteed returns or real-time monitoring — *done (November 2026): every screen checked; "Verified incentives" became "Utility incentives (published rates)", the stale "most costs are placeholders" note now names the remaining placeholders, "AI recommended" says the optimizer picks and the advisor only explains, and the "Synthetic demo data" badge now shows for every portfolio hotel (minimal edits in Overview, ScenarioSimulator, BudgetOptimizer, AdvisorPanel)*
+- [x] 8.7 "Reset demo" control: restores the 100-room preset, baseline, July 3 PM, 3D home view and clears the advisor — *done: "Reset demo" in the top bar (`resetDemo()`) restores the starting state (100-room preset, no what-if or stress test, no plans, twin controls at their start: July, 12:00), the 3D home view, the portfolio, and clears the advisor and the custom plans saved in this browser; the time is the app's start time rather than 3 PM, so the storyline can set it*
 - [ ] 8.8 Re-run the demo figures from the engine before each rehearsal and update the script in `docs/07`
 - [x] 8.6 Remove or hide leftover home-only code paths from the demo (home UI removed in LV9; home engine, data, unused home components and specs removed November 2026, verified with an import graph); decide whether to delete the home engine and data after the demo
 

@@ -31,7 +31,7 @@ import type {
   StressTest,
   ZoneId,
 } from "@/engine/hotel";
-import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, selectPortfolioItems, withoutKeys } from "./hotelDerived";
+import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, selectPortfolioItems, selectPortfolioSummary, withoutKeys } from "./hotelDerived";
 import { readStoredPlans, writeStoredPlans } from "./customPlans";
 import type { CustomPlan } from "./customPlans";
 export type { CustomPlan } from "./customPlans";
@@ -189,6 +189,13 @@ export interface TwinState {
   askAdvisor: (question: string) => Promise<void>;
   clearAdvisor: () => void;
   resetHotel: () => void;
+  /**
+   * "Reset demo": everything back to the starting state in one step: the hotel, what-if, stress test, plans, saved scenarios, advisor,
+   * twin controls, the portfolio, and the custom plans saved in this browser. Keeps the reduce-effects preference.
+   */
+  resetDemo: () => void;
+  /** Counts "Reset demo" clicks, so view-only state outside the store (the 3D camera, explode, energy view) can reset too. */
+  demoResets: number;
 
   // ---- Hotel portfolio (Phase 13). The single-hotel fields above always describe the open hotel. ----
   /** The synthetic demonstration hotel chain. */
@@ -523,6 +530,13 @@ export const useTwin = create<TwinState>((set, get) => ({
         syntheticDemo: s.hotelPresetId !== null || s.activePropertyId !== null,
         // Same rule as the optimizer and the comparison cards (selectUpgradeBaseline).
         measureUpgradesOnScenario: s.optimizeOnScenario,
+        portfolio: {
+          organization: s.portfolio.name,
+          summary: selectPortfolioSummary(s),
+          plan: s.portfolioPlan,
+          openHotel: s.activePropertyId ? s.hotel.profile.name : null,
+          syntheticDemo: s.portfolio.synthetic,
+        },
       },
       q,
     );
@@ -537,6 +551,12 @@ export const useTwin = create<TwinState>((set, get) => ({
   },
   clearAdvisor: () => set({ advisorMessages: [], advisorBusy: false }),
   resetHotel: () => set({ ...initialHotelState(), optimizing: false }),
+  demoResets: 0,
+  resetDemo: () => {
+    advisor.clearAdvisorCache();
+    set((s) => ({ ...initialHotelState(), optimizing: false, customPlans: [], activeCustomPlanId: null, nextPlanNumber: 1, customPlansHydrated: true, demoResets: s.demoResets + 1 }));
+    writeStoredPlans([], 1, null);
+  },
 
   openProperty: (id) =>
     set((s) => {

@@ -16,7 +16,7 @@ export const SYSTEM_PROMPT = [
   'Answer in three to six plain sentences. No markdown, no bullet lists, no headings.',
   'Use only numbers that appear in the CONTEXT. Never introduce a number that is not there, and never do arithmetic to make a new one:',
   'do not add, subtract, multiply, divide or average. You may restate a number you were given, or round it.',
-  'Compare options only with the figures in the context (the upgrades list, the plan packages and otherBudgets).',
+  'Compare options only with the figures in the context (the upgrades list, the plan packages and otherBudgets; for questions about the hotel chain, the portfolio section).',
   'If the context cannot answer the question, say what is missing and point to the scenario simulator or the budget optimizer.',
   'Mention one limitation of the estimate, and say when the data is synthetic or defaults were used.',
   'Do not promise savings, call carbon figures verified, or claim engineering-grade accuracy.',

@@ -88,7 +88,7 @@ function MetricTile({ id, label, icon, before, after, prefix = "", suffix }: { i
 
 export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "panel" } = {}) {
   const profile = useTwin((s) => s.hotel.profile);
-  const presetId = useTwin((s) => s.hotelPresetId);
+  const presetId = useTwin((s) => s.hotelPresetId ?? s.activePropertyId);
   const scenario = useTwin((s) => s.scenario);
   const scenarioResult = useTwin((s) => s.scenarioResult);
   const activeStressTest = useTwin((s) => s.activeStressTest);

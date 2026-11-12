@@ -1,6 +1,6 @@
 import type { UpgradeId, ZoneId } from '../types';
 
-export type Intent = 'compare' | 'budget' | 'hvac_cost' | 'occupancy' | 'scenario' | 'zone_cost' | 'general';
+export type Intent = 'portfolio' | 'compare' | 'budget' | 'hvac_cost' | 'occupancy' | 'scenario' | 'zone_cost' | 'general';
 
 export interface ParsedQuestion {
   intent: Intent;
@@ -61,7 +61,10 @@ export function parseQuestion(question: string): ParsedQuestion {
 
   const versus = /\b(over|vs\.?|versus|or|instead of|rather than|before|first|than)\b/.test(q);
   let intent: Intent = 'general';
-  if (upgrades.length >= 2 && versus) intent = 'compare';
+  // Questions about the chain: "which hotel first", "across our hotels", "the portfolio", "which property".
+  const portfolio = /portfolio|\bchain\b|which (hotel|property)|our hotels|all (the |our |five |5 )?hotels|across (the |our |my )?(hotels|properties|portfolio)|\bproperties\b|each hotel|hotels? (should|to) (we |i )?(invest|start|upgrade|prioriti)/.test(q);
+  if (portfolio) intent = 'portfolio';
+  else if (upgrades.length >= 2 && versus) intent = 'compare';
   else if (budgets.length > 0 || /\b(budget|how should i (use|spend)|how much should i|afford)\b/.test(q)) intent = 'budget';
   else if (/hvac|heating|cooling|air.?condition/.test(q) && /(cost|expens|biggest|largest|most|why|high)/.test(q)) intent = 'hvac_cost';
   else if (/occupan|full hotel|fill|guests?\b.*(more|fewer)/.test(q)) intent = 'occupancy';

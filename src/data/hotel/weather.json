@@ -1,0 +1,13 @@
+{
+  "climates": {
+    "chicago": {
+      "label": "Chicago, IL",
+      "meanTempF": [26, 29.5, 39, 49.5, 60, 70, 75, 73.5, 66, 53.5, 41.5, 31],
+      "balancePointF": 65
+    }
+  },
+  "cityToClimate": { "chicago,il": "chicago" },
+  "defaultClimate": "chicago",
+  "source": "PLACEHOLDER. Approximate Chicago monthly mean temperatures (NOAA 1991 to 2020 normals, to be verified). Degree days are computed from monthly means with a 65 F balance point.",
+  "verified": false
+}

@@ -27,33 +27,33 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 - [ ] 0.8 [TEAM] Allow the network domains needed for research: `epa.gov`, `noaa.gov` (and `nrel.gov`, `energystar.gov` if used)
 
 ## Phase 1 — Hotel data model and baseline simulation (P0) [CC]
-- [ ] 1.1 Engine spec `docs/13_HOTEL_ENGINE_SPEC.md`: units, equations, load categories, zones, assumptions, what is *not* modeled
-- [ ] 1.2 `src/engine/hotel/types.ts`
+- [x] 1.1 Engine spec `docs/13_HOTEL_ENGINE_SPEC.md`: units, equations, load categories, zones, assumptions, what is *not* modeled
+- [x] 1.2 `src/engine/hotel/types.ts`
   - `HotelProfile`: name, city/state/country, rooms, floor area, floors, year built, operating hours (default 24/7), HVAC type
     (PTAC, VRF, central plant, RTU), monthly bill, electricity rate, average occupancy, seasonal occupancy, occupied hours per room,
     guest-room setpoints (occupied and vacant), common-area HVAC schedule, lighting schedule, hot-water use, budget, horizon, objective
   - Zones: guest rooms, lobby and common areas, kitchen and restaurant, hallways and shared, central HVAC and mechanical, hot water
   - Load categories: base, occupancy-dependent, weather-dependent, schedule-dependent
   - Every defaulted input carries `source` and `estimated: true` (use the existing `Sourced<T>` pattern)
-- [ ] 1.3 Defaults and data files in `src/data/hotel/` (all `verified: false` and labeled synthetic until Phase 7 fills them):
+- [x] 1.3 Defaults and data files in `src/data/hotel/` (all `verified: false` and labeled synthetic until Phase 7 fills them):
       energy intensity and end-use split for lodging, hot water per occupied room, lighting power and hours, kitchen share,
       equipment efficiency by HVAC type, monthly weather normals per demo city, seasonal occupancy curve, commercial rates by state,
       grid emission factors, schedules
-- [ ] 1.4 `calculateBaselineEnergy()`: monthly and annual kWh and therms by zone × category, cost, and carbon
+- [x] 1.4 `calculateBaselineEnergy()`: monthly and annual kWh and therms by zone × category, cost, and carbon
   - Base loads fixed (elevators, pumps, standby, corridor lighting); occupancy loads scale with occupied rooms
     but **not linearly** (a base share plus a variable share); weather loads from monthly degree-day style factors; schedule loads from hours
   - Calibrate to the entered bill when given (bounded scale factor, flagged `estimated`); otherwise use benchmarks
-- [ ] 1.5 `simulateOccupancyChange()`; `simulateHVACSettings()` (occupied and vacant setpoints, vacant-room setback);
+- [x] 1.5 `simulateOccupancyChange()`; `simulateHVACSettings()` (occupied and vacant setpoints, vacant-room setback);
       `simulateEnergyScenario()` combining occupancy, setpoints, schedules, rate change % and weather offset
-- [ ] 1.6 "Why did it change" drivers: a deterministic list of reasons with their kWh and $ (feeds the UI panel and the advisor)
-- [ ] 1.7 Demo preset: a synthetic 100-room hotel in Chicago, plus one more preset (optional, P1)
-- [ ] 1.8 Tests: occupancy raises energy but sublinearly; base load unchanged by occupancy; zones sum to total; months sum to year;
+- [x] 1.6 "Why did it change" drivers: a deterministic list of reasons with their kWh and $ (feeds the UI panel and the advisor)
+- [x] 1.7 Demo preset: a synthetic 100-room hotel in Chicago (the optional second preset is not built)
+- [x] 1.8 Tests: occupancy raises energy but sublinearly; base load unchanged by occupancy; zones sum to total; months sum to year;
       a +20% rate raises the energy cost by 20%; setback saves only when rooms are vacant; cooling peaks in summer and heating in winter;
       calibration hits the bill; determinism and purity
-- [ ] 1.9 `src/engine/hotel/index.ts` exports; add to `src/engine/index.ts`
-- [ ] 1.10 Store contract proposal (types only) for Phase 4, shown to you for approval before editing `src/store/`. Include the twin UI state:
+- [x] 1.9 `src/engine/hotel/index.ts` exports; add to `src/engine/index.ts`
+- [ ] 1.10 (proposal written in `docs/13`, Appendix A; awaiting your OK) Store contract proposal (types only) for Phase 4, shown to you for approval before editing `src/store/`. Include the twin UI state:
       active layer, time mode (day or year), time index, playing, playback speed, before/after compare, active stress test
-- [ ] 1.11 Twin data functions (Tier A). Pure, deterministic (no randomness, no `Date.now()`; time is passed in by the UI):
+- [x] 1.11 Twin data functions (Tier A). Pure, deterministic (no randomness, no `Date.now()`; time is passed in by the UI):
   - `typicalDayProfile(profile, month)`: hourly electric kW and gas therm/h by zone and category for a typical day, built from the schedules,
     guest arrival and departure curves and the base loads; the profiles reconcile to the monthly totals from 1.4
   - `roomOccupancyPattern(profile, scenario, hour)`: room-by-room occupied, vacant or vacant-with-setback state for all rooms, with a
@@ -63,7 +63,7 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
   - `energyFlows(baseline)`: nodes and links from grid and gas, through the zones, to end uses, in kWh, therms and dollars, for the flow diagram
   - `simulatedMeter(profile, month, hour)`: kW and $/h from the typical-day profile, always labeled simulated
   - Stress-test presets as scenario deltas: heat wave, cold snap, conference week (occupancy spike), +20% electricity price
-- [ ] 1.12 Tests for 1.11: the typical day reconciles to the monthly totals; the energy flows conserve energy and cost; the room map's occupied count
+- [x] 1.12 Tests for 1.11: the typical day reconciles to the monthly totals; the energy flows conserve energy and cost; the room map's occupied count
       matches the scenario; the same inputs always give the same room map; vacant-room setback shows only when rooms are vacant;
       stress tests move energy and cost in the expected direction
 

@@ -7,3 +7,4 @@ export { upgradeCost, packageCost } from './costs';
 export { paybackYears, netValue, financials } from './finance';
 export { optimize, eligibleUpgrades } from './optimizer';
 export { templateExplanation } from './explain';
+export * as hotel from './hotel';

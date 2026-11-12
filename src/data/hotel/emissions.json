@@ -1,0 +1,6 @@
+{
+  "elecKgCO2ePerKWh": { "IL": 0.4, "default": 0.37 },
+  "gasKgCO2ePerTherm": 5.31,
+  "source": "PLACEHOLDER. Gas: EPA GHG Emission Factors Hub, natural gas about 53.06 kg CO2 per MMBtu (about 5.31 kg per therm). Electricity: illustrative regional grid factors, to be replaced with EPA eGRID subregion values. Estimates only; not verified carbon accounting.",
+  "verified": false
+}

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { DefaultEstimate } from "@/components/DefaultEstimate";
+import { DefaultEstimate, DefaultEstimateNotice } from "@/components/DefaultEstimate";
 import type { ReactNode } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { ChevronDown, Leaf, RotateCcw, SlidersHorizontal, Wallet, Zap } from "lucide-react";
@@ -45,8 +45,8 @@ function ScenarioSlider({ label, defaultField, value, displayValue, min, max, st
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <Label className="text-sm font-medium">{label}</Label>
-          <p className="mt-1 text-xs text-muted-foreground">{profileText}</p><DefaultEstimate field={defaultField} active={!overridden} />
+          <span className="flex items-center gap-1"><Label className="text-sm font-medium">{label}</Label><DefaultEstimate field={defaultField} active={!overridden} dot /></span>
+          <p className="mt-1 text-xs text-muted-foreground">{profileText}</p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <span className="num text-sm font-semibold">{displayValue}</span>
@@ -65,9 +65,8 @@ function MetricTile({ id, label, icon, before, after, prefix = "", suffix }: { i
     <section className="min-w-0 rounded-lg border border-border bg-card p-4" aria-label={`${label} before and after`}>
       <div className="mb-4 flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 text-sm font-medium">{icon}{label}</h2>
-        <Badge variant="outline" className="border-primary/25 text-[10px] font-normal text-primary">Estimate</Badge>
+        <span className="flex items-center gap-1"><Badge variant="outline" className="border-primary/25 text-[10px] font-normal text-primary">Estimate</Badge><DefaultEstimate dot /></span>
       </div>
-      <DefaultEstimate />
       <dl className="space-y-3">
         <div className="flex min-w-0 items-center justify-between gap-3 border-b border-border pb-3">
           <dt className="label-caps">Before</dt>
@@ -124,9 +123,12 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
   };
 
   const headerEl = (
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-semibold">Operating assumptions</h2>
-            <Button type="button" variant="outline" size="sm" onClick={resetScenario} disabled={!hasScenario}><RotateCcw />Reset</Button>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-semibold">Operating assumptions</h2>
+              <Button type="button" variant="outline" size="sm" onClick={resetScenario} disabled={!hasScenario}><RotateCcw />Reset</Button>
+            </div>
+            <DefaultEstimateNotice fields={["occupancy", "setpoints.occupiedHeatF", "setpoints.occupiedCoolF", "smartRoomControls", "commonAreaHvacHours", "lightingHoursPerDay"]} />
           </div>
   );
   const occupancyEl = (
@@ -141,8 +143,8 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
   const smartEl = (
           <div className="flex items-start justify-between gap-4 border-t border-border pt-5">
             <div className="space-y-1">
-              <Label htmlFor="scenario-smart-controls" className="text-sm font-medium">Smart room controls</Label>
-              <p className="text-xs text-muted-foreground">Set back vacant guest rooms automatically.</p><DefaultEstimate field="smartRoomControls" active={scenario.smartRoomControls === undefined} />
+              <span className="flex items-center gap-1"><Label htmlFor="scenario-smart-controls" className="text-sm font-medium">Smart room controls</Label><DefaultEstimate field="smartRoomControls" active={scenario.smartRoomControls === undefined} dot /></span>
+              <p className="text-xs text-muted-foreground">Set back vacant guest rooms automatically.</p>
             </div>
             <div className="flex items-center gap-1">
               <Switch id="scenario-smart-controls" checked={smartRoomControls} onCheckedChange={(checked) => setScenario({ smartRoomControls: checked })} />

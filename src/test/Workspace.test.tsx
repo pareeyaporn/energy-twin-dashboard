@@ -15,6 +15,18 @@ describe("Invest tab", () => {
     expect(useTwin.getState().hotel.profile.budget).toBe(50000);
   });
 
+  it("keeps detailed figures hidden until Show all figures is opened", async () => {
+    const pending = useTwin.getState().runHotelOptimizer();
+    await vi.advanceTimersByTimeAsync(2000);
+    await pending;
+    render(<BudgetOptimizer workspace />);
+    expect(screen.queryByText("1 Gross installation cost")).not.toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole("button", { name: "Show all figures" })[0]!);
+    expect(screen.getByText("1 Gross installation cost")).toBeInTheDocument();
+    expect(screen.getByText("Remaining budget")).toBeInTheDocument();
+    expect(screen.getByText("Comfort score")).toBeInTheDocument();
+  });
+
   it("Apply applies the package and switches the twin to split compare", async () => {
     const pending = useTwin.getState().runHotelOptimizer();
     await vi.advanceTimersByTimeAsync(2000);

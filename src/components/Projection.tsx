@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const tone = (n: number) => (n < 0 ? "text-heat" : "text-savings");
-export const PROJECTION_NOTE = "Savings grow with EIA price forecasts; solar output falls 0.5% a year; year 5 and year 10 equal the net benefit shown above. Estimate.";
+export const projectionNote = (f: FinancialBreakdown) => `Savings grow with EIA price forecasts; ${f.solar ? "solar output falls 0.5% a year; " : ""}year 5 and year 10 equal the net benefit shown above. Estimate.`;
 
 export function ProjectionChart({ f }: { f: FinancialBreakdown }) {
   const p = f.projection ?? [];
@@ -32,9 +32,9 @@ export function ProjectionChart({ f }: { f: FinancialBreakdown }) {
       </ResponsiveContainer>
     </div>
     <p className="text-[11px] text-muted-foreground">Bars: savings each year · Line: cumulative net benefit (shaded low to high; crosses zero at payback) · Dashed: Discounted (NPV) at {rate}</p>
-    <div className="overflow-x-auto"><table className="w-full text-[11px]"><caption className="sr-only">10-year projection, estimate</caption><thead><tr className="border-b border-border text-muted-foreground"><th className="p-1 text-left">Year</th><th className="p-1 text-right">Savings</th><th className="p-1 text-right">Cumulative net benefit</th><th className="p-1 text-right">Discounted at {rate}</th></tr></thead>
+    <div className="table-scroll overflow-x-auto"><table className="sticky-first-column w-full min-w-[560px] text-[11px] sm:min-w-0"><caption className="sr-only">10-year projection, estimate</caption><thead><tr className="border-b border-border text-muted-foreground"><th className="p-1 text-left">Year</th><th className="p-1 text-right">Savings</th><th className="p-1 text-right">Cumulative net benefit</th><th className="p-1 text-right">Discounted at {rate}</th></tr></thead>
       <tbody>{p.map((y) => <tr key={y.year} className="border-b border-border/50"><td className="p-1">{y.year}</td><td className={cn("num p-1 text-right", tone(y.savings.mid))}>{money(y.savings.mid)}</td><td className="num whitespace-nowrap p-1 text-right"><span className={tone(y.cumulativeNet.mid)}>{money(y.cumulativeNet.mid)}</span> <span className="text-muted-foreground">({money(y.cumulativeNet.low)} to {money(y.cumulativeNet.high)})</span></td><td className={cn("num p-1 text-right", tone(y.cumulativeNpv))}>{money(y.cumulativeNpv)}</td></tr>)}</tbody></table></div>
-    <p className="text-[11px] text-muted-foreground">{PROJECTION_NOTE}</p>
+    <p className="text-[11px] text-muted-foreground">{projectionNote(f)}</p>
   </div>;
 }
 

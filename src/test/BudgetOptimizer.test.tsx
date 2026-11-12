@@ -14,6 +14,13 @@ describe("Hotel investment selection timing", () => {
     render(<BudgetOptimizer />);
   }
 
+  it("opens the detailed investment comparison only on request", async () => {
+    await optimize();
+    expect(screen.queryByRole("group", { name: "Discount rate" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Compare investments" }));
+    expect(screen.getByRole("group", { name: "Discount rate" })).toBeInTheDocument();
+  });
+
   it("applies the objective winner after 600ms, not before", async () => {
     await optimize();
     expect(useTwin.getState().activeHotelPackageId).toBeNull();

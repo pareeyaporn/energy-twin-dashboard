@@ -1,5 +1,12 @@
 # Task roadmap
 
+## Benchmark and calmer workspace
+
+- [x] Add the modeled peer-benchmark card to the Hotel step and Report KPI area.
+- [x] Consolidate default estimate labels and simplify package cards behind “Show all figures”.
+- [x] Make the projection note solar-specific and refine the 375 px layout.
+- [x] Run focused tests and verify the benchmark, investment cards, tables, and phone layout.
+
 ## Detailed financial comparisons
 
 - [x] Add store-backed discount-rate switches and five/ten-year NPV ranges to both detailed tables, preserving separate solar sizes and simple-payback cards.

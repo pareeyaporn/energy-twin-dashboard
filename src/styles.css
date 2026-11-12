@@ -198,3 +198,18 @@
   }
   .hotel-stage #twin-panel > aside { max-height: 560px; overflow-y: auto; }
 }
+
+.table-scroll { -webkit-overflow-scrolling: touch; }
+@media (max-width: 639px) {
+  .sticky-first-column :is(th, td):first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--card);
+    box-shadow: 1px 0 0 var(--border);
+  }
+  .sticky-first-column thead :is(th, td):first-child { z-index: 2; }
+  .hotel-stage [aria-label="Time controls"] > div:first-child > * { margin-left: 0; }
+  .hotel-stage [aria-label="Time controls"] input[type="range"] { min-width: 0; }
+  .hotel-stage [aria-label="Time controls"] [data-testid="clock-label"] { width: auto; min-width: 5rem; font-size: 12px; }
+}

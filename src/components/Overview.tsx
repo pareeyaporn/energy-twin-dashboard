@@ -1,4 +1,5 @@
 import { DefaultEstimate } from "@/components/DefaultEstimate";
+import { BenchmarkCard } from "@/components/BenchmarkCard";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Leaf, Wallet, Zap } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
@@ -15,7 +16,7 @@ const categories: Record<Category, string> = {
 const chartConfig = { elecCost: { label: "Electricity", color: "var(--primary)" }, gasCost: { label: "Natural gas", color: "var(--heat)" } };
 
 function Estimate() {
-  return <><Badge variant="outline" className="border-primary/25 text-[10px] font-normal text-primary">Estimate</Badge><DefaultEstimate /></>;
+  return <><Badge variant="outline" className="border-primary/25 text-[10px] font-normal text-primary">Estimate</Badge><DefaultEstimate dot /></>;
 }
 
 type BreakdownRow = { id: string; label: string; elecCost: number; gasCost: number; cost: number; elecKWh: number; gasTherms: number };
@@ -41,8 +42,8 @@ function Breakdown({ title, rows }: { title: string; rows: BreakdownRow[] }) {
           <Bar dataKey="gasCost" stackId="cost" fill="var(--color-gasCost)" radius={[0, 3, 3, 0]} barSize={18} isAnimationActive={false} />
         </BarChart>
       </ChartContainer>
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+      <div className="table-scroll overflow-x-auto">
+        <table className="sticky-first-column w-full min-w-[480px] text-xs sm:min-w-0">
           <caption className="sr-only">{title}: estimated annual energy consumption and cost</caption>
           <thead className="text-muted-foreground"><tr className="border-b border-border"><th className="py-2 text-left font-normal">{title === "By category" ? "Category" : "Zone"}</th><th className="px-2 text-right font-normal">kWh</th><th className="px-2 text-right font-normal">Therms</th><th className="py-2 text-right font-normal">Cost ($)</th></tr></thead>
           <tbody>{rows.map((row) => <tr key={row.id} className="border-b border-border/50"><th scope="row" className="py-2.5 pr-2 text-left font-medium">{row.label}</th><td className="num whitespace-nowrap px-2 text-right text-muted-foreground">{number(row.elecKWh)}</td><td className="num whitespace-nowrap px-2 text-right text-muted-foreground">{number(row.gasTherms)}</td><td className="num whitespace-nowrap text-right">{number(row.cost)}</td></tr>)}</tbody>
@@ -67,7 +68,7 @@ export function Overview() {
     .sort((a, b) => b.totalAnnualSavings - a.totalAnnualSavings || a.id.localeCompare(b.id)).slice(0, 3);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-7 p-4 md:p-8">
+    <div className="mx-auto w-full max-w-7xl space-y-7 p-3 sm:p-4 md:p-8">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h1 className="text-2xl font-semibold">Overview</h1><p className="mt-1 text-sm text-muted-foreground">{profile.name} · {profile.city}, {profile.state}</p></div>
         <div className="flex flex-wrap gap-2"><Badge variant="secondary">{displayed.kind === "package" ? "Applied package" : displayed.kind === "scenario" ? "Current scenario" : "Baseline"}</Badge>{presetId !== null && <Badge variant="outline" className="border-heat/30 text-heat">Synthetic demo data</Badge>}</div>
@@ -77,6 +78,7 @@ export function Overview() {
         <div className="min-w-0"><dt className="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground"><Wallet className="h-4 w-4 text-heat" />Annual cost <Estimate /></dt><dd className="num text-2xl font-semibold" data-testid="annual-cost">{money(result.annual.cost)} <span className="text-sm font-normal text-muted-foreground">/ yr</span></dd><dd className="num mt-2 text-xs text-muted-foreground">{money(result.annual.elecCost)} electricity · {money(result.annual.gasCost)} gas</dd></div>
         <div className="min-w-0"><dt className="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground"><Leaf className="h-4 w-4 text-savings" />Estimated emissions <Estimate /></dt><dd className="num text-2xl font-semibold" data-testid="annual-emissions">{number(result.annual.carbonKg)} <span className="text-sm font-normal text-muted-foreground">kg CO₂e / yr</span></dd><dd className="mt-2 text-xs text-muted-foreground">Electricity and natural gas</dd></div>
       </dl>
+      <BenchmarkCard />
       <div className="grid gap-8 lg:grid-cols-2"><Breakdown title="By category" rows={categoryRows} /><Breakdown title="By zone" rows={zones} /></div>
       <section className="space-y-4 border-t border-border pt-6" aria-label="Top opportunities">
         <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-base font-semibold">Top opportunities</h2><span className="text-xs text-muted-foreground">Standalone upgrades · {hasScenario ? "current scenario" : "baseline"} estimates</span></div>

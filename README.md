@@ -46,8 +46,8 @@ Seven acts, scripted with timings in [docs/07](docs/07_DEMO_CHECKLIST.md): the p
 a living building (January night, July afternoon, energy flow) → test an operating decision (occupancy 60% to 85%, smart room controls) →
 spend a $50,000 budget (three packages, 10-year projection, why not solar) → ask the advisor → scale to the 300-room preset and close on
 before/after energy, cost and carbon. **The script follows the results**, whichever upgrades perform best (today, with the 85% scenario:
-LED lighting plus occupancy sensors, $38,940 gross, $24,184 after verified ComEd incentives, about $10,300 a year, payback 2.3 years; on the plain
-baseline $9,000 a year and 2.7 years).
+LED lighting plus occupancy sensors, $38,940, about $10,300 a year, payback 3.8 years; on the plain baseline $9,000 a year and 4.3 years;
+ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustrative rather than counted: $24,184 net and 2.3 years if renewed).
 
 ## Status
 

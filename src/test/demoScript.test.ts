@@ -69,9 +69,16 @@ export async function demoFigures(): Promise<{ figures: Record<string, string>; 
   f["top payback"] = yrs(tf.simplePaybackYears);
   f["top 10-year net benefit"] = usd(tf.netBenefit10.mid);
   f["top CO2 / yr"] = `${Math.round(tf.carbonAvoidedKgPerYear.mid / 1000)} t`;
+  // ComEd's 2025 lighting rate: shown separately, not counted (the program-year rule, docs/15).
+  const ti = tf.illustrativeIncentives;
+  if (ti) {
+    f["top illustrative incentive"] = usd(ti.total);
+    f["top illustrative net"] = usd(ti.netInvestment);
+    f["top illustrative payback"] = yrs(ti.simplePaybackYears);
+  }
   const fast = plan.packages.find((p) => p.role === "fastest_payback");
   if (fast) {
-    names["fastest payback"] = fast.evaluation.name;
+    names["fastest payback package"] = fast.evaluation.name;
     f["fastest payback"] = yrs(fast.evaluation.financials.simplePaybackYears);
   }
   const solar = selectUpgradeComparison(t()).find((r) => r.id === "rooftop_solar");
@@ -93,6 +100,7 @@ export async function demoFigures(): Promise<{ figures: Record<string, string>; 
   f["300 net"] = usd(bf.netInvestment.mid);
   f["300 saves / yr"] = usd(bf.annualSavings.mid);
   f["300 payback"] = yrs(bf.simplePaybackYears);
+  if (bf.illustrativeIncentives) f["300 illustrative net"] = usd(bf.illustrativeIncentives.netInvestment);
 
   // Portfolio (optional act): the chain.
   t().resetDemo();

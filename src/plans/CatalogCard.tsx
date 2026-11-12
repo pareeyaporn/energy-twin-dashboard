@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { SolarAssumptions } from "./SolarAssumptions";
+import { IllustrativeIncentive } from "./IllustrativeIncentive";
 import { energySaved, tonnes, unverifiedIncentives, usd, verifiedIncentives, years } from "./format";
 
 export const UPGRADE_ICON: Partial<Record<UpgradeId, LucideIcon>> = {
@@ -130,9 +131,10 @@ export function CatalogCard({ item, planQuantity, onAdd, onRemove, onQuantity }:
               <div><dt className="text-muted-foreground">CO₂ / yr</dt><dd className="tabular-nums">{tonnes(f.carbonAvoidedKgPerYear.mid)}</dd></div>
               <div className="col-span-2"><dt className="text-muted-foreground">Energy saved / yr</dt><dd className="tabular-nums">{energySaved(f)}</dd></div>
               <div className="col-span-2 text-[11px] text-muted-foreground">
-                Incentives: {verifiedIncentives(f) > 0 ? `${usd(verifiedIncentives(f))} at published rates (estimate)` : "none counted"}
+                Incentives: {verifiedIncentives(f) > 0 ? `${usd(verifiedIncentives(f))} at published 2026 rates (estimate)` : "none counted"}
                 {unverified.length > 0 && ` · ${unverified.length} listed, not counted ($0 in figures)`}
               </div>
+              <IllustrativeIncentive f={f} className="col-span-2" />
             </dl>
           )}
           <p className="mt-1 text-[10px] text-muted-foreground">On its own, before combining with the rest of a plan. Estimate.</p>

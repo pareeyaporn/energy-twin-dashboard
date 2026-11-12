@@ -239,8 +239,10 @@ describe('evaluatePackage', () => {
     close(e.newAnnualCost, base.annual.cost - e.annualSavings.mid);
     expect(e.metrics.cost).toBe(e.cost.mid);
     close(e.metrics.remainingBudget, profile.profile.budget - e.cost.mid);
-    // Payback uses the net investment: gross cost minus verified incentives (ComEd LED and sensor rates apply here).
-    expect(e.financials.incentivesTotal).toBeGreaterThan(0);
+    // Payback uses the net investment: gross cost minus incentives counted in the base case. ComEd's LED and sensor rates are 2025
+    // rates, so for the 2026 analysis they are shown separately (illustrative) and the net investment is the gross cost.
+    expect(e.financials.incentivesTotal).toBe(0);
+    expect(e.financials.illustrativeIncentives!.total).toBeGreaterThan(0);
     expect(e.metrics.paybackYears).toBeCloseTo((e.cost.mid - e.financials.incentivesTotal) / e.annualSavings.mid, 9);
     close(sum(e.lineItems.map((l) => l.annualSavingsMid)), e.annualSavings.mid);
     close(sum(e.lineItems.map((l) => l.cost.mid)), e.cost.mid);

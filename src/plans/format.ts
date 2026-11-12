@@ -12,6 +12,9 @@ export function energySaved(f: FinancialBreakdown): string {
   return parts.join(" · ");
 }
 
-/** Incentives applied (verified, with an amount) and the ones only listed (unverified, $0 in the figures). */
+/**
+ * Incentives counted (verified rates for the analysis year), the ones only listed (unverified, $0 in the figures), and the illustrative
+ * ones (verified rates from another program year, shown separately, $0 in the figures).
+ */
 export const verifiedIncentives = (f: FinancialBreakdown) => f.incentives.filter((i) => i.applied).reduce((s, i) => s + i.amount, 0);
-export const unverifiedIncentives = (f: FinancialBreakdown) => f.incentives.filter((i) => !i.applied);
+export const unverifiedIncentives = (f: FinancialBreakdown) => f.incentives.filter((i) => !i.applied && i.illustrativeAmount === undefined);

@@ -39,3 +39,5 @@ export { upgradeCost, packageCost } from './costs';
 export { calculateFinancialMetrics, DEFAULT_FINANCE } from './finance';
 export { evaluatePackage } from './package';
 export type { EvaluateOptions } from './package';
+export { optimizeInvestmentPortfolio } from './optimizer';
+export { explainPortfolio } from './explain';

@@ -87,17 +87,17 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
       solar capped and applied last; costs; ranges ordered; comfort flags
 
 ## Phase 3 — Budget-constrained optimizer (P0) [CC]
-- [ ] 3.1 `optimizeInvestmentPortfolio()`: enumerate all subsets (2^8 = 256), filter by budget, dependencies, exclusions and the comfort constraint
-- [ ] 3.2 Return at least three distinct packages: maximum savings, fastest payback, and balanced (a documented weighted score of
+- [x] 3.1 `optimizeInvestmentPortfolio()`: enumerate all subsets (2^8 = 256), filter by budget, dependencies, exclusions and the comfort constraint
+- [x] 3.2 Return at least three distinct packages: maximum savings, fastest payback, and balanced (a documented weighted score of
       financial return, carbon and comfort); if one package wins twice, take the next best so the three differ. Also support the
       profile's other objectives (highest ROI, maximum carbon)
-- [ ] 3.3 Per package: total cost, annual savings (with range), five-year net savings, payback, carbon impact, remaining budget,
+- [x] 3.3 Per package: total cost, annual savings (with range), five-year net savings, payback, carbon impact, remaining budget,
       comfort notes, line items with marginal savings, a rule-based reason
-- [ ] 3.4 Tests: never exceeds budget; interaction-aware; deterministic; three distinct packages; each objective ranks correctly;
+- [x] 3.4 Tests: never exceeds budget; interaction-aware; deterministic; three distinct packages; each objective ranks correctly;
       a small budget returns a clear empty result; the 100-room, $50,000 case as a snapshot; fast enough to run in the browser
-- [ ] 3.5 Print the demo hotel's three packages and sanity-check realism (plausible percent of the bill, no upgrade that does nothing,
+- [x] 3.5 Print the demo hotel's three packages and sanity-check realism (plausible percent of the bill, no upgrade that does nothing,
       no payback that is absurd); report anything unrealistic before moving on
-- [ ] 3.6 Template explanation for the optimizer (adapt `explain.ts`), used as the AI fallback
+- [x] 3.6 Template explanation for the optimizer (adapt `explain.ts`), used as the AI fallback
 
 ## Phase 4 — Store, dashboard and scenario simulator (P0) [CC store, LV UI]
 - [ ] 4.1 [CC] Extend `useTwin.ts` backwards compatibly (with your approval of the diff): `hotel` profile, `scenario` (occupancy,
@@ -155,7 +155,12 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [ ] 7.9 Seasonal occupancy pattern (a synthetic curve is acceptable, but cite the basis)
 - [ ] 7.10 Comfort guidance for setpoints (ASHRAE 55)
 - [ ] 7.11 Compare the demo hotel against an ENERGY STAR Portfolio Manager benchmark and note the result for Q&A
-- [ ] 7.12 Update `docs/08_DATA_TODO.md` to this list
+- [x] 7.12 Update `docs/08_DATA_TODO.md` to this list (rewritten as the detailed hotel research to-do, with the current placeholder values and sources to use)
+- [ ] 7.13 **Calibration pass, after everything is built (decided: do not tune numbers before then).** Replace the placeholder savings, costs and interaction factors with
+      reasonable, sourced values, then check the whole result for realism. Start with the items the demo depends on:
+      smart room control savings (setback degrees, per-degree sensitivities, guest-presence curve), the HVAC share of energy, LED and occupancy-sensor savings, the lighting-to-heating/cooling
+      interaction, solar cost and size, and the balanced-score weights. Check: demo hotel total against an ENERGY STAR Portfolio Manager benchmark, package savings as a share of the bill
+      against published hotel case studies, and that the demo question still has an honest answer. Do not pick numbers to fit the story; change the demo question if the numbers say so.
 
 ## Phase 8 — Demo hardening (all)
 - [ ] 8.1 Make the three-minute path deterministic (brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart HVAC on,

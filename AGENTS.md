@@ -35,3 +35,4 @@ use the editor.
 - Zustand selectors that return new objects must be wrapped in `useShallow` to avoid render loops.
 - The index page renders only one layout (desktop or stacked) via a media-query hook, so stage popovers aren't duplicated.
 - Translate legacy sample terminology only at the presentation boundary with `src/lib/presentation.ts`; keep underlying data and calculations unchanged during UI-only wording updates.
+- Hotel profile controls display resolved `hotel.profile` values and commit optional input patches through `setHotelInput`; nested temperature resets preserve other explicit setpoints because the store clears only top-level keys.

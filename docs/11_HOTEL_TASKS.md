@@ -351,8 +351,8 @@ P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress t
       recommended plan, cost avoided; temporary vs persistent rules as in Phase 12 — *done: any of the 8 tests on one, some or all hotels, with the AI portfolio, my portfolio or no plans; persistent tests show payback under the change per hotel; the per-hotel recommendation check stays in each twin (two optimizer runs per hotel)*
 
 ### 13I — Later (P2)
-- [ ] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
-      optimizer, AI vs custom; skip and reopen
+- [x] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
+      optimizer, AI vs custom; skip and reopen — *done (November 2026): a 10-step guided tour for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
 - [ ] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
       their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model
 - [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data

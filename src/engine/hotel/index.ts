@@ -21,8 +21,8 @@ export {
   STRESS_TESTS,
 } from './scenarios';
 export type { StressTest, HvacSettings } from './scenarios';
-export { typicalDayProfile, simulatedMeter, roomOccupancyPattern, equipmentInventory, energyFlows, energyFlowsAt } from './twin';
-export type { HourPoint, MeterReading, RoomPoint, RoomState, EquipmentItem, FlowGraph, FlowNode, FlowLink } from './twin';
+export { typicalDayProfile, simulatedMeter, roomOccupancyPattern, equipmentInventory, energyFlows, energyFlowsAt, typicalDayByZoneEndUse } from './twin';
+export type { HourPoint, MeterReading, RoomPoint, RoomState, EquipmentItem, FlowGraph, FlowNode, FlowLink, ZoneEndUseDay } from './twin';
 export {
   upgradeDef,
   orderUpgrades,

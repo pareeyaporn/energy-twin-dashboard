@@ -296,3 +296,34 @@ export function energyFlowsAt(result: EnergyResult, month: number, hour: number,
   }
   return flowGraph(parts, 'hour');
 }
+
+/** One zone and end use over a typical day: electricity (kW), gas (therms per hour) and cost per hour, 24 values each. */
+export interface ZoneEndUseDay {
+  elecKW: number[];
+  gasThermsPerHour: number[];
+  costPerHour: number[];
+}
+
+/**
+ * A typical day of `month` for every zone and end use, computed exactly like the meter (`typicalDayProfile`), keyed `${zone}|${endUse}`.
+ * Used to show which systems are running at an hour; the model has no per-appliance energy.
+ */
+export function typicalDayByZoneEndUse(result: EnergyResult, month: number, data: HotelData = hotelData): Record<string, ZoneEndUseDay> {
+  const days = DAYS_IN_MONTH[month] ?? 30;
+  const out: Record<string, ZoneEndUseDay> = {};
+  for (const c of result.cells) {
+    if (c.month !== month) continue;
+    const key = `${c.zone}|${c.endUse}`;
+    const d = (out[key] ??= { elecKW: Array(24).fill(0), gasThermsPerHour: Array(24).fill(0), costPerHour: Array(24).fill(0) });
+    const shape = normalizedShape(c.endUse, data);
+    for (let h = 0; h < 24; h++) {
+      const s = shape[h] ?? 0;
+      const kW = (c.elecKWh / days) * s;
+      const th = (c.gasTherms / days) * s;
+      d.elecKW[h] = (d.elecKW[h] ?? 0) + kW;
+      d.gasThermsPerHour[h] = (d.gasThermsPerHour[h] ?? 0) + th;
+      d.costPerHour[h] = (d.costPerHour[h] ?? 0) + kW * result.rates.elecPerKWh + th * result.rates.gasPerTherm;
+    }
+  }
+  return out;
+}

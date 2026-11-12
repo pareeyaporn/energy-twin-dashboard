@@ -155,7 +155,7 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [ ] 7.9 Seasonal occupancy pattern (a synthetic curve is acceptable, but cite the basis)
 - [ ] 7.10 Comfort guidance for setpoints (ASHRAE 55)
 - [ ] 7.11 Compare the demo hotel against an ENERGY STAR Portfolio Manager benchmark and note the result for Q&A
-- [ ] 7.12 Update `docs/08_DATA_TODO.md` to this list
+- [x] 7.12 Update `docs/08_DATA_TODO.md` to this list (rewritten as the detailed hotel research to-do, with the current placeholder values and sources to use)
 - [ ] 7.13 **Calibration pass, after everything is built (decided: do not tune numbers before then).** Replace the placeholder savings, costs and interaction factors with
       reasonable, sourced values, then check the whole result for realism. Start with the items the demo depends on:
       smart room control savings (setback degrees, per-degree sensitivities, guest-presence curve), the HVAC share of energy, LED and occupancy-sensor savings, the lighting-to-heating/cooling

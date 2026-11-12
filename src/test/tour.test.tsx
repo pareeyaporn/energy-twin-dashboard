@@ -1,7 +1,8 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useTwin } from "@/store/useTwin";
-import { TOUR_STEPS } from "@/tour/steps";
+import { TOUR_STEPS, bodyOf } from "@/tour/steps";
+import { finishSummary, insightFor } from "@/tour/insights";
 import { overlaps, placeCard } from "@/tour/layout";
 import { TOUR_STORAGE_KEY, readTourOutcome, useTour } from "@/tour/useTour";
 import { TourButton, resetTourAutoStart } from "@/tour/TourButton";
@@ -48,14 +49,59 @@ describe("tour card placement", () => {
 });
 
 describe("tour steps", () => {
-  it("are 10 short steps for hotel operators, ending with a clear action", () => {
-    expect(TOUR_STEPS).toHaveLength(10);
+  it("are 14 short steps for hotel operators, ending with a clear action", () => {
+    expect(TOUR_STEPS).toHaveLength(14);
     expect(TOUR_STEPS[0]!.id).toBe("welcome");
     expect(TOUR_STEPS.at(-1)!.title).toBe("You're ready to explore!");
     for (const s of TOUR_STEPS) {
       expect(s.title.length).toBeLessThan(45);
-      expect(s.body.split(/(?<=\.)\s/).length).toBeLessThanOrEqual(3);
+      expect(bodyOf(s, useTwin.getState()).split(/(?<=\.)\s/).length).toBeLessThanOrEqual(3);
     }
+  });
+  it("live figures come from the engine for the open hotel (and change with it)", () => {
+    useTwin.getState().resetHotel();
+    const s = useTwin.getState();
+    expect(insightFor("welcome", s)!.value).toBeCloseTo(s.baseline.annual.cost, 6);
+    expect(insightFor("flow", s)!.value).toBeCloseTo(s.baseline.annual.elecCost / s.baseline.annual.cost, 9);
+    const opt = insightFor("optimizer", s)!;
+    expect(opt.value).toBeGreaterThan(0);
+    expect(insightFor("stress", s)!.value).toBeGreaterThan(0);
+    expect(insightFor("portfolio", s)!.note).toMatch(/Top priority/);
+    expect(finishSummary(s)[0]!.value).toBeCloseTo(s.baseline.annual.cost, 6);
+    useTwin.getState().selectHotelPreset("demo-chicago-300");
+    expect(insightFor("welcome", useTwin.getState())!.value).not.toBeCloseTo(s.baseline.annual.cost, 0);
+    // Computing them changes nothing in the app.
+    expect(useTwin.getState().hotelPlan).toBeNull();
+    useTwin.getState().resetHotel();
+  });
+});
+
+describe("tour views", () => {
+  beforeEach(() => {
+    useTwin.getState().resetHotel();
+    useTour.setState({ active: false, index: 0, direction: 1, origin: null, restore: null });
+  });
+  afterEach(() => cleanup());
+  it("plays the time-lapse and the energy flow during their steps, then restores the user's view", () => {
+    pathname = "/";
+    useTwin.getState().setTwinLayer("rooms");
+    render(<TourButton autoStart={false} />);
+    fireEvent.click(screen.getByTestId("take-tour"));
+    act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "seasons") }));
+    expect(useTwin.getState().timeMode).toBe("seasons");
+    expect(useTwin.getState().playing).toBe(true);
+    act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "flow") }));
+    expect(useTwin.getState().twinLayer).toBe("flow");
+    expect(useTwin.getState().playing).toBe(false);
+    act(() => useTour.getState().end("skipped"));
+    expect(useTwin.getState().twinLayer).toBe("rooms");
+    expect(useTwin.getState().timeMode).toBe("day");
+  });
+  it("the finish card's main button asks for Invest and the optimizer", () => {
+    render(<TourButton autoStart={false} />);
+    fireEvent.click(screen.getByTestId("take-tour"));
+    act(() => useTour.getState().end("completed", "optimize"));
+    expect(useTour.getState().restore).toEqual({ path: "/", tab: "Invest", then: "optimize" });
   });
 });
 
@@ -97,11 +143,16 @@ describe("tour flow", () => {
 
   it("Take a tour replays from the first step; Next, Back, Skip and Finish work, and hotel state is unchanged", async () => {
     window.localStorage.setItem(TOUR_STORAGE_KEY, "completed");
-    const before = JSON.stringify({ input: useTwin.getState().hotelInput, scenario: useTwin.getState().scenario, plans: useTwin.getState().customPlans, layer: useTwin.getState().twinLayer });
+    const snap = () => {
+      const t = useTwin.getState();
+      return JSON.stringify({ input: t.hotelInput, scenario: t.scenario, plans: t.customPlans, layer: t.twinLayer, time: [t.timeMode, t.timeMonth, t.timeHour, t.playing, t.playbackSpeed], plan: t.hotelPlan });
+    };
+    const before = snap();
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
-    expect(await screen.findByText("Welcome to Energy Twin")).toBeTruthy();
-    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 10");
+    expect(await screen.findByText("Meet your hotel's digital twin")).toBeTruthy();
+    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 14");
+    expect((await screen.findByTestId("tour-insight")).textContent).toMatch(/a year on energy/);
     fireEvent.click(screen.getByTestId("tour-next"));
     expect(useTour.getState().index).toBe(1);
     act(() => useTour.getState().back());
@@ -112,7 +163,7 @@ describe("tour flow", () => {
     if (useTour.getState().active) act(() => useTour.getState().next());
     expect(useTour.getState().active).toBe(false);
     expect(readTourOutcome()).toBe("completed");
-    const after = JSON.stringify({ input: useTwin.getState().hotelInput, scenario: useTwin.getState().scenario, plans: useTwin.getState().customPlans, layer: useTwin.getState().twinLayer });
+    const after = snap();
     expect(after).toBe(before);
   }, 30000);
 

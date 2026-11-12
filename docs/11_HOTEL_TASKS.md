@@ -350,13 +350,19 @@ P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress t
 - [x] 13.32 **P1** [CC] Apply a stress test to one property, a selection or all; per property and total: normal vs stressed cost, with the
       recommended plan, cost avoided; temporary vs persistent rules as in Phase 12 — *done: any of the 8 tests on one, some or all hotels, with the AI portfolio, my portfolio or no plans; persistent tests show payback under the change per hotel; the per-hotel recommendation check stays in each twin (two optimizer runs per hotel)*
 
+### 13J — Add my hotel (built November 2026)
+- [x] 13.37 **P1** [CC] "Add my hotel" on the Portfolio page: a short form (name, Chicago area, rooms, heating and cooling, optional floors,
+      floor area, year built, occupancy, monthly bill, budget; blanks use documented defaults). The hotel is saved in this browser, appears on
+      the map and in the comparison (tagged "Your hotel", not synthetic), opens in its own twin, and edits under Edit details are saved; it can
+      be removed. Reset demo removes added hotels. Chicago weather only (the model has no other climate).
+
 ### 13I — Later (P2)
 - [x] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
-      optimizer, AI vs custom; skip and reopen — *done (November 2026): a 10-step guided tour for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
-- [ ] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
-      their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model
+      optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 14 steps with live figures, a time-lapse and the energy flow) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
+- [x] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
+      their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model — *done: "More building types (coming later)" cards on the portfolio page, from `properties.json`*
 - [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data
-- [ ] 13.36 **P2** [CC] Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07)
+- [x] 13.36 **P2** [CC] Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07) — *transitions done (marker colors fade between metrics; the twin's figures count up when a hotel opens); the demo script is the storyline owner's (docs/07)*
 
 Known limits: all five hotels share Chicago weather (O'Hare normals); property types differ through size, age, HVAC and occupancy only (the
 model has no ballroom, pool or 24/7 food-service drivers); heat-pump water heaters are not modeled, so the optimizer cannot pick them.

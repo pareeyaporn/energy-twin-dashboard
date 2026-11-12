@@ -179,3 +179,13 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
   and the AI advisor only explains results.
 - **Every portfolio hotel is labeled synthetic** on every screen, not only the two presets.
 - **"Reset demo" clears everything in the browser** (including saved custom plans) but keeps the reduce-effects preference.
+
+## 18. Add my hotel and the tour's live figures (November 2026)
+
+- **Your own hotel is saved only in this browser** (local storage), with no account and nothing sent anywhere; the location is a Chicago area
+  chosen from a list (no address lookup), because the model has Chicago weather only. It is labeled "Your hotel" and "Modeled estimates", not
+  synthetic; blank fields use the documented defaults, marked in the profile.
+- **Reset demo also removes added hotels**, so a demo always starts from the five-hotel sample chain.
+- **The tour shows live figures** computed by the engine for the open hotel (read-only calls, nothing stored). Its time-lapse and energy-flow
+  views are view settings that the tour restores at the end. "Find my best investments" on the last card runs the optimizer because the user
+  pressed it.

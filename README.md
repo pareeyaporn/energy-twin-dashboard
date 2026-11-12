@@ -53,7 +53,7 @@ baseline $9,000 a year and 2.7 years).
 
 | Area | State |
 | --- | --- |
-| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (400 tests) |
+| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (409 tests) |
 | Data (`src/data/hotel`) | **Sourced from primary documents:** EIA prices, price growth (AEO2026) and hotel end uses (CBECS 2018); EPA eGRID2023 grid factors by location and the EPA gas factor; PVWatts solar output; NOAA weather; IL-TRM hotel measures (smart controls, sensors, lighting interaction, hot water); NLR solar O&M and degradation; Chicago hotel sizes and occupancy (Choose Chicago, STR). Solar $/W by size from LBNL's 2025 Data Update (2024 national medians, editable). ComEd standard incentives (LED, occupancy sensors, guest-room energy management) from the utility's worksheets. **Still placeholders:** installed costs for LED and energy management and the chiller part of a central plant, the solar export credit ($0, editable), and the monthly occupancy shape. Phase 7 is closed except installed costs (7.6). See `docs/08`, `docs/14`, `docs/15` |
 | Store (`src/store`): profile, scenarios, optimizer (scenario-aware), upgrade comparison, twin controls, advisor | Built |
 | Digital twin: 2D (`src/twin`) and 3D (`src/three`, Phase 9) | Built |
@@ -62,7 +62,8 @@ baseline $9,000 a year and 2.7 years).
 | Investment catalog and custom plans; stress tests | Built (Phases 11 and 12) |
 | Hotel portfolio (`/portfolio`): synthetic five-hotel Chicago chain on a MapLibre map, totals, comparison table, charts, one budget split across hotels, open any hotel in the twin; my portfolio (custom plan per hotel) vs the AI portfolio; portfolio stress tests | Built (Phase 13 P0 and P1) |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
-| Onboarding tour (10 steps, first visit and replay; `docs/16`) | Built |
+| Onboarding tour (14 steps with live figures, a time-lapse and the energy flow; first visit and replay; `docs/16`) | Built |
+| Add my hotel (saved in the browser, on the map, its own twin) | Built |
 | Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |
 
 ## Tech stack

@@ -69,9 +69,16 @@ export async function demoFigures(): Promise<{ figures: Record<string, string>; 
   f["top payback"] = yrs(tf.simplePaybackYears);
   f["top 10-year net benefit"] = usd(tf.netBenefit10.mid);
   f["top CO2 / yr"] = `${Math.round(tf.carbonAvoidedKgPerYear.mid / 1000)} t`;
+  // ComEd's 2025 lighting rate: shown separately, not counted (the program-year rule, docs/15).
+  const ti = tf.illustrativeIncentives;
+  if (ti) {
+    f["top illustrative incentive"] = usd(ti.total);
+    f["top illustrative net"] = usd(ti.netInvestment);
+    f["top illustrative payback"] = yrs(ti.simplePaybackYears);
+  }
   const fast = plan.packages.find((p) => p.role === "fastest_payback");
   if (fast) {
-    names["fastest payback"] = fast.evaluation.name;
+    names["fastest payback package"] = fast.evaluation.name;
     f["fastest payback"] = yrs(fast.evaluation.financials.simplePaybackYears);
   }
   const solar = selectUpgradeComparison(t()).find((r) => r.id === "rooftop_solar");
@@ -93,6 +100,7 @@ export async function demoFigures(): Promise<{ figures: Record<string, string>; 
   f["300 net"] = usd(bf.netInvestment.mid);
   f["300 saves / yr"] = usd(bf.annualSavings.mid);
   f["300 payback"] = yrs(bf.simplePaybackYears);
+  if (bf.illustrativeIncentives) f["300 illustrative net"] = usd(bf.illustrativeIncentives.netInvestment);
 
   // Portfolio (optional act): the chain.
   t().resetDemo();
@@ -109,7 +117,7 @@ export async function demoFigures(): Promise<{ figures: Record<string, string>; 
 describe("demo script figures (docs/07)", () => {
   it("every figure the script quotes matches the engine", async () => {
     const { figures: f, names } = await demoFigures();
-    if (process.env.DEMO_FIGURES) console.log(Object.entries({ ...f, ...names }).map(([k, v]) => `${k.padEnd(30)} ${v}`).join("\n"));
+    if (process.env["DEMO_FIGURES"]) console.log(Object.entries({ ...f, ...names }).map(([k, v]) => `${k.padEnd(30)} ${v}`).join("\n"));
     const script = readFileSync("docs/07_DEMO_CHECKLIST.md", "utf8");
     const section = script.slice(script.indexOf("## Demo path"), script.indexOf("## Q&A prep"));
     // Each figure must appear in bold, exactly as the app formats it (package names are said in short, so they are printed only).

@@ -43,6 +43,9 @@ export { upgradeCost, packageCost } from './costs';
 export {
   calculateFinancialMetrics,
   DEFAULT_FINANCE,
+  ANALYSIS_YEAR,
+  incentiveStatus,
+  programYearOf,
   BENEFIT_YEARS,
   PROJECTION_YEARS,
   financialBreakdown,

@@ -118,7 +118,7 @@ export function insightFor(stepId: string, s: TwinState): Insight | null {
         value: best.net10,
         format: "usd",
         label: `net over 10 years from the ${best.role.toLowerCase()} package`,
-        note: `${best.name}: ${usd(best.netInvestment)} upfront after incentives${best.paybackYears !== null ? `, paid back in ${best.paybackYears.toFixed(1)} years` : ""}.`,
+        note: `${best.name}: ${usd(best.netInvestment)} upfront after counted incentives${best.paybackYears !== null ? `, paid back in ${best.paybackYears.toFixed(1)} years` : ""}.`,
       };
     }
     case "portfolio": {

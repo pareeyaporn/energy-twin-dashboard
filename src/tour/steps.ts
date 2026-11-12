@@ -157,7 +157,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: "projections",
     title: "See each investment's 10-year payoff",
-    body: "Every package comes with a year-by-year projection: what you pay upfront after incentives, what it saves each year as prices rise, when it pays back and what it is worth after 10 years, with a low-to-high range and a discounted view.",
+    body: "Every package comes with a year-by-year projection: what you pay upfront after confirmed incentives, what it saves each year as prices rise, when it pays back and what it is worth after 10 years, with a low-to-high range and a discounted view.",
     route: "/",
     tab: "Invest",
     target: () => all(visible('aside[aria-label="Workspace"] section[aria-label="Investment packages"]') ?? workspacePanel()),

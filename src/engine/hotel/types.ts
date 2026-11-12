@@ -283,7 +283,16 @@ export interface HotelData {
     /** With smart room controls, the share of guest-room fan energy saved while a room is empty (calibrated to the IL-TRM). */
     smartControlFan: { reductionWhenEmpty: number; source: string };
     /** Energy price growth (nominal, a year) and the discount rate, with their source. */
-    finance: { elecPriceGrowth: number; gasPriceGrowth: number; discountRate: number; discountRateAlternatives: number[]; source: string; verified: boolean };
+    finance: {
+      elecPriceGrowth: number;
+      gasPriceGrowth: number;
+      discountRate: number;
+      /** The year plans are evaluated for: an incentive counts in the base case only when its program year equals it (docs/15). */
+      analysisYear?: number;
+      discountRateAlternatives: number[];
+      source: string;
+      verified: boolean;
+    };
     profileDefaults: {
       rooms: number;
       sqftPerRoom: number;
@@ -408,15 +417,23 @@ export interface IncentiveProgram {
   hvacTypes?: HvacType[];
   /** The program's cap on the incentive as a share of the measure's cost (ComEd: 90%). */
   maxShareOfCost?: number;
-  /** The program year the rate comes from, shown with the amount. */
-  programYear?: string;
+  /**
+   * The program year the rate comes from. With a year, the rate counts in the base case only in that analysis year; a verified rate
+   * from another year is shown separately as illustrative. Null when the program has no researched year; absent in older data (no check).
+   */
+  programYear?: number | string | null;
+  /** Why the program year matters (for example the latest worksheet that could be confirmed). */
+  programYearNote?: string;
   value: number | null;
   applied: boolean;
   note: string;
   source: string;
   verified: boolean;
-  /** 'verified' once the amount and eligibility are confirmed from the program's own source; 'unverified' until then. */
-  status?: 'verified' | 'unverified';
+  /**
+   * 'verified' once the amount and eligibility are confirmed from the program's own source; 'unverified' until then;
+   * 'illustrative' for a verified rate from another program year (shown separately, not in the base case).
+   */
+  status?: 'verified' | 'unverified' | 'illustrative';
 }
 
 /** One incentive line on an upgrade's financial breakdown. */
@@ -430,6 +447,32 @@ export interface IncentiveLine {
   origin: 'program' | 'user';
   note: string;
   source: string;
+  /** The program year of the rate, when known. */
+  programYear?: number;
+  /**
+   * For a verified rate from another program year: the amount it would give (mid), computed exactly like an applied incentive, shown
+   * separately and never counted in the base case. Absent otherwise.
+   */
+  illustrativeAmount?: number;
+}
+
+/** What a plan would look like if verified incentives from another program year were renewed (illustrative, not the base case). */
+export interface IllustrativeIncentives {
+  /** For example "if ComEd renews the 2025 rate". */
+  label: string;
+  /** The program years involved (for example [2025]). */
+  programYears: number[];
+  /** The incentive lines behind it, with their amounts. */
+  lines: { id: string; label: string; amount: number; programYear: number; source: string }[];
+  /** Sum of those incentives (mid). */
+  total: number;
+  /** The base-case figures with them subtracted from the net investment (mid; same savings stream and discount rate). */
+  netInvestment: number;
+  simplePaybackYears: number | null;
+  netBenefit5: number;
+  netBenefit10: number;
+  npv5: number;
+  npv10: number;
 }
 
 /**
@@ -471,6 +514,11 @@ export interface FinancialBreakdown {
   solar: SolarDetails | null;
   /** Plain-language assumptions behind these numbers (shown next to them). */
   assumptions: string[];
+  /**
+   * Set when verified incentives from another program year exist for these upgrades (for example ComEd's 2025 lighting rates): the same
+   * figures if they were renewed. Illustrative only; every other figure here excludes them.
+   */
+  illustrativeIncentives?: IllustrativeIncentives;
 }
 
 export interface ProjectionYear {

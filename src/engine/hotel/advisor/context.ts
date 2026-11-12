@@ -72,6 +72,11 @@ export interface AdvisorUpgrade {
   netInvestment: number;
   /** Incentive programs listed as possible but not applied. */
   incentivesNotApplied: string[];
+  /**
+   * A verified rate from another program year (ComEd's 2025 lighting rate), not counted in any figure: what it would give if renewed.
+   * Optional for older contexts.
+   */
+  illustrativeIncentive?: { note: string; amount: number; netInvestment: number; paybackYears: number | null };
   annualElecKWhSaved: number;
   annualGasThermsSaved: number;
   netBenefit5Years: number;
@@ -374,6 +379,16 @@ export function buildAdvisorContext(input: AdvisorInput, question = ''): Advisor
       incentivesApplied: r0(f.incentivesTotal),
       netInvestment: r0(f.netInvestment.mid),
       incentivesNotApplied: [...new Set(f.incentives.filter((l) => !l.applied).map((l) => l.label))],
+      ...(f.illustrativeIncentives
+        ? {
+            illustrativeIncentive: {
+              note: `Not counted: ${f.illustrativeIncentives.label} (that rate is not yet confirmed for the analysis year); illustrative only.`,
+              amount: r0(f.illustrativeIncentives.total),
+              netInvestment: r0(f.illustrativeIncentives.netInvestment),
+              paybackYears: f.illustrativeIncentives.simplePaybackYears === null ? null : r1(f.illustrativeIncentives.simplePaybackYears),
+            },
+          }
+        : {}),
       annualElecKWhSaved: r0(f.annualEnergySavings.elecKWh),
       annualGasThermsSaved: r0(f.annualEnergySavings.gasTherms),
       netBenefit5Years: r0(f.netBenefit5.mid),

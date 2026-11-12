@@ -77,14 +77,16 @@
           "high": 0.14
         }
       },
-      "constants": {},
+      "constants": {
+        "referenceFloors": 5
+      },
       "comfort": {
         "impact": "positive",
         "note": "Steadier room temperatures."
       },
       "requires": [],
       "excludes": [],
-      "source": "Weather-load reduction mid 10%: consistent with NREL ComStock roof insulation to ASHRAE AEDG levels (about 11% of gas heating and 12% of electric heating, stock-wide). Low and high: PLACEHOLDER. Cost: PLACEHOLDER $3.50 per ft2 of roof (contractor ranges $2 to $7 per ft2 for insulation only). Life: PLACEHOLDER.",
+      "source": "Weather-load reduction mid 10%: consistent with NREL ComStock roof insulation to ASHRAE AEDG levels (about 11% of gas heating and 12% of electric heating, stock-wide). Low and high: PLACEHOLDER. Cost: PLACEHOLDER $3.50 per ft2 of roof (contractor ranges $2 to $7 per ft2 for insulation only). Life: PLACEHOLDER. Scaling: the reduction applies to a building of up to 5 floors and is multiplied by 5 / floors above that, because roof insulation mainly affects the top floors (a modeling assumption, not a sourced value).",
       "verified": false
     },
     {
@@ -270,7 +272,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data. Cost: the region's installed cost per W. Operation and maintenance: $17.63 per kW (DC) a year for commercial PV in 2024 ($14.17 system plus $3.46 administration), NREL/NLR Annual Technology Baseline 2025, Commercial PV (seen in a search excerpt; to confirm in the ATB table). Degradation: 0.5% a year, consistent with Jordan et al. 2022, Progress in Photovoltaics (NREL/TP-5K00-81314): fleet median 0.75% a year, cooler climates 0.48% a year. Inverter replacement is not included.",
+      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W (PLACEHOLDER). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
       "verified": false
     }
   ],

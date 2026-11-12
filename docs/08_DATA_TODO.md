@@ -7,6 +7,7 @@ What is sourced, what is still a placeholder, and what to look up next, for the 
 - **Change the demo story, not the numbers.** Calibration follows evidence, never the script.
 
 The model is described in [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md); tasks are in [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md) (7.x, 7b.x).
+**Every change with before, after and source is logged in [14_RESEARCH_LOG.md](14_RESEARCH_LOG.md).**
 The home-era data files in `src/data/` belong to the legacy home engine and are not used by the hotel app.
 
 ## Status at a glance (November 2026)
@@ -19,22 +20,26 @@ The home-era data files in `src/data/` belong to the legacy home engine and are 
 | Grid and gas emission factors (`emissions.json`) | **Sourced, primary** | EPA eGRID2023 (RFCW 0.4155, U.S. 0.3497 kg CO2e/kWh); EPA GHG Emission Factors Hub 2025 (5.311 kg/therm) |
 | Solar output (`weather.json` → `solar`) | **Sourced, primary** | NLR PVWatts v8.5, Chicago TMY: 1,194 / 1,240 / 1,307 kWh per kW (5°/10°/20° tilt) and the monthly split |
 | Lighting–HVAC interaction (`upgrades.json` → `interaction`) | **Sourced, primary** | IL-TRM v14.0 Vol. 2, section 4.5 table, Hotel/Motel guest and common |
-| Smart room controls cost and life | **Sourced, primary** | IL-TRM v14.0 4.4.8: $260 per room, 15 years |
+| Smart room controls cost, life and savings | **Sourced, primary**; savings **calibrated** | IL-TRM v14.0 4.4.8: $260 per room, 15 years; fan saving calibrated so the model lands in the TRM's Chicago-hotel range |
 | Occupancy-sensor savings and life | **Sourced, primary** | IL-TRM v14.0 4.5.10: 24% (37% with high-end trim), 10 years |
-| Solar O&M and degradation | Sourced, from search excerpts | NLR ATB 2025 ($17.63/kW-yr); Jordan et al. 2022 (0.5%/yr) |
+| Solar O&M and degradation | **Sourced, primary** | NLR ATB 2025 ($17.63/kW-yr); Jordan et al. 2022 (0.48%/yr cooler climates; 0.5% used) |
+| Federal solar credit | Facts recorded, **not applied** | IRS Notice 2025-42; IRS 48E page |
+| Hotel sizes (presets) | **Checked, primary** | Choose Chicago hotel supply list (median 232 rooms) |
 | LED savings range and life; EMS, insulation, condensing-boiler savings | Partly sourced (excerpts, plus TRM rules) | PNNL/GSA, Crowe 2020, NREL ComStock, IL-TRM 4.5.4 |
 | Export credit for solar | Basis known, **no $ value** (so $0) | 220 ILCS 5/16-107.5(n): avoided cost of supply |
 | Incentives (`incentives.json`) | Programs listed, **no amounts applied** | — |
 | **Installed costs** for LED, sensors, EMS, HVAC, water heating, insulation; **solar $/W** | **Placeholders** | — |
-| Weather (`weather.json` temperatures) | **Placeholder** (from memory) | NOAA normals not reachable yet |
+| Weather (`weather.json` temperatures) | **Sourced, primary** | NOAA 1991–2020 normals, Chicago O'Hare |
 | Baseline model internals (age factor, zone allocation, driver weights, shapes, equipment, occupancy curve) | **Placeholders** | — |
 
 **Benchmark check (done):** the demo hotel models at 91.1 kBtu/ft² site energy, 53% electric; CBECS 2018 Table C1 lodging averages 85.7 kBtu/ft²,
-57% electric (national). Plausible for Chicago.
+57% electric (national, includes nursing homes); the ENERGY STAR national median for hotels is 63.0 kBtu/ft² (August 2024). Plausible for a Chicago
+hotel with a restaurant, but on the high side; the default EUI input stays a placeholder (B5).
 
 ## To do — priority A (changes results or the recommendation)
 
-- [ ] **A1. Calibrate smart room controls (decision needed, task 7b.5).** IL-TRM v14.0 4.4.8, Chicago hotel with central hot-water fan coils and gas
+- [x] **A1. Calibrate smart room controls — done (option a).** Guest-room fan energy is cut 17% while rooms are empty, in the shared simulation;
+  the model now saves about 10,800 kWh and 209 therms ($1,715) for 100 rooms, inside the TRM range. Background: IL-TRM v14.0 4.4.8, Chicago hotel with central hot-water fan coils and gas
   heat, deems **92–147 kWh and 3.0–6.5 therms per ton** of guest-room cooling per year (with / without housekeeping setback). At 0.75–1.0 ton per room
   (assumption; the TRM gives no default) that is 6,900–14,700 kWh and 225–650 therms for 100 rooms, about **$1,200–2,700 a year**. The model gives
   **4,903 kWh and 209 therms ($883)**. The electric gap is the larger one: the TRM measure also controls the room's fan, which the model does not.
@@ -53,7 +58,7 @@ The home-era data files in `src/data/` belong to the legacy home engine and are 
 
 ## To do — priority B (improves realism)
 
-- [ ] **B1. Chicago weather normals** (NOAA 1991–2020, O'Hare or Midway) to replace the temperatures written from memory; needs `www.ncei.noaa.gov`.
+- [x] **B1. Chicago weather normals — done** (NOAA O'Hare, 1991–2020). Note: (NOAA 1991–2020, O'Hare or Midway) to replace the temperatures written from memory; needs `www.ncei.noaa.gov`.
   Cross-check found: the PVWatts typical year for downtown is 4–8 °F cooler in May to July than the placeholder (lakefront and "typical year"
   effects), so confirm with NOAA before changing.
 - [ ] B2. HVAC equipment: cooling reduction (chiller or RTU replacement) and lifetime; condensing boiler range (IL-TRM boiler measures, NREL ComStock).
@@ -76,13 +81,14 @@ The home-era data files in `src/data/` belong to the legacy home engine and are 
 ## Validation
 
 - [x] Demo hotel energy intensity against CBECS 2018 lodging (see above).
-- [ ] Against the ENERGY STAR national median for hotels (needs `portfoliomanager.energystar.gov`).
+- [x] Against the ENERGY STAR national median for hotels (63.0 kBtu/ft² site): the demo hotel is 45% above it (see the benchmark note).
 - [ ] Package savings as a share of the bill against published hotel case studies (DOE Better Buildings, utilities).
 - [ ] After A1–A3, re-run the optimizer and write the demo question from what the results say (task 8.1).
 
 ## Network hosts
 
-Reachable now: `www.eia.gov`, `developer.nlr.gov` (PVWatts), `icc.illinois.gov` (IL-TRM), `www.comed.com`, `www.energystar.gov`, `www.epa.gov`.
-Still needed (exact names; `irs.gov` does not cover `www.irs.gov`): `www.ncei.noaa.gov`, `portfoliomanager.energystar.gov`, `www.irs.gov`,
-`www.dsireusa.org`, `atb.nlr.gov` and `docs.nlr.gov` (to confirm O&M and degradation in the primary texts). LBNL: manual download.
+Reachable now: `www.eia.gov`, `developer.nlr.gov`, `atb.nlr.gov`, `docs.nlr.gov`, `icc.illinois.gov`, `www.comed.com`, `www.energystar.gov`,
+`portfoliomanager.energystar.gov`, `www.epa.gov`, `www.ncei.noaa.gov`, `www.irs.gov`, `www.choosechicago.com`. Still needed: `www.dsireusa.org`
+(incentive database). LBNL (`emp.lbl.gov`) blocks automated downloads: download the Tracking the Sun file by hand. ComEd's rebate tables load with
+JavaScript, so their amounts need a PDF catalog or a manual copy.
 NREL is now the National Laboratory of the Rockies (NLR); `developer.nrel.gov` stopped resolving on May 29, 2026.

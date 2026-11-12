@@ -1,7 +1,7 @@
 [
   {
     "id": "demo-chicago-100",
-    "label": "Lakeshore Inn (synthetic demo hotel)",
+    "label": "Lakeshore Inn, 100 rooms (synthetic boutique hotel)",
     "synthetic": true,
     "input": {
       "name": "Lakeshore Inn",
@@ -17,6 +17,28 @@
       "occupancy": 0.6,
       "occupiedHoursPerRoom": 14,
       "budget": 50000,
+      "horizonYears": 5,
+      "objective": "balanced"
+    },
+    "note": "Synthetic. 100 rooms is near the Illinois and U.S. averages but small for Chicago: of 147 hotels on the Choose Chicago hotel supply list (49,526 rooms) the median is 232 rooms and about 18% have fewer than 150; comparable real properties include 89- to 119-room boutique hotels."
+  },
+  {
+    "id": "demo-chicago-300",
+    "label": "Riverwalk Grand, 300 rooms (synthetic downtown full-service hotel)",
+    "synthetic": true,
+    "note": "Synthetic. Sized from the Choose Chicago hotel supply list (147 hotels, 49,526 rooms; median 232, mean 337, middle half 173 to 378 rooms), so 300 rooms is a typical downtown full-service size. Floor area, occupancy and setpoints use the documented defaults; floors and year built are illustrative.",
+    "input": {
+      "name": "Riverwalk Grand",
+      "city": "Chicago",
+      "state": "IL",
+      "country": "US",
+      "rooms": 300,
+      "floors": 20,
+      "yearBuilt": 1985,
+      "operatingHours": 24,
+      "hvacType": "central_plant",
+      "occupiedHoursPerRoom": 14,
+      "budget": 150000,
       "horizonYears": 5,
       "objective": "balanced"
     }

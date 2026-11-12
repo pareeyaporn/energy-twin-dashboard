@@ -293,7 +293,9 @@ export function calculateUpgradeSavings(
     const def = upgradeDef(id, d);
     switch (id) {
       case 'insulation': {
-        const r = param(def, 'weatherLoadReduction', scenario);
+        // The reduction is for a low-rise building; on a taller one the roof is a smaller part of the envelope, so it scales down.
+        const refFloors = constant(def, 'referenceFloors');
+        const r = param(def, 'weatherLoadReduction', scenario) * Math.min(1, refFloors / Math.max(1, ctx.profile.floors));
         rescale(cells, (c) => c.endUse === 'heating' || c.endUse === 'cooling', { weather: 1 - r }, env);
         break;
       }

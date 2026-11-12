@@ -256,6 +256,8 @@ export interface HotelData {
       vacantHeatWarnF: number;
       vacantCoolWarnF: number;
     };
+    /** With smart room controls, the share of guest-room fan energy saved while a room is empty (calibrated to the IL-TRM). */
+    smartControlFan: { reductionWhenEmpty: number; source: string };
     /** Energy price growth (nominal, a year) and the discount rate, with their source. */
     finance: { elecPriceGrowth: number; gasPriceGrowth: number; discountRate: number; source: string; verified: boolean };
     profileDefaults: {
@@ -323,7 +325,7 @@ export interface HotelData {
     source: string;
     verified: boolean;
   };
-  presets: { id: string; label: string; synthetic: boolean; input: HotelInput }[];
+  presets: { id: string; label: string; synthetic: boolean; note?: string; input: HotelInput }[];
   upgrades: UpgradesData;
 }
 

@@ -192,14 +192,16 @@ Price growth EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar: PVWatts C
 | Energy management | $26,000 | 18,680 | 539 | $3,126 | 8.3 y | −$9,591 | $8,936 | 10.6 |
 | Rooftop solar (55 kW, 68,211 kWh, all used on site) | $154,000 | 68,211 | 0 | $8,614 | 17.9 y | −$109,521 | −$61,346 | 28.3 |
 | Insulation | $38,500 | 8,186 | 733 | $1,831 | 21.0 y | −$28,807 | −$17,630 | 7.3 |
-| Smart room controls | $26,000 | 4,903 | 209 | $883 | 29.4 y | −$21,353 | −$16,075 | 3.1 |
+| Smart room controls (fan saving calibrated to IL-TRM) | $26,000 | 10,820 | 209 | $1,715 | 15.2 y | −$17,015 | −$6,918 | 5.6 |
 | HVAC equipment | $110,000 | 15,275 | 1,187 | $3,249 | 33.9 y | −$92,822 | −$73,079 | 12.6 |
 
 At $50,000 the optimizer picks LED lighting plus occupancy sensors ($39,600, $9,098 a year, 4.4 years).
 
-**Calibration flag (smart room controls).** IL-TRM v14.0 4.4.8 (Chicago hotel, central hot-water fan coils, gas heat) implies about 6,900–14,700 kWh and
-225–650 therms a year for 100 rooms at 0.75–1.0 ton per room, about $1,200–2,700; the model gives 4,903 kWh and 209 therms ($883). The model does not
-include guest-room fan savings when rooms are empty. See `docs/08`, item A1.
+**Smart room controls calibration.** IL-TRM v14.0 4.4.8 (Chicago hotel, central hot-water fan coils, gas heat) implies about 6,900–14,700 kWh and
+225–650 therms a year for 100 rooms at 0.75–1.0 ton per room. The setback alone gave 4,903 kWh; with smart controls the simulation now also cuts
+guest-room fan energy 17% while rooms are empty (`defaults.smartControlFan`), giving about 10,800 kWh and 209 therms. **Insulation** scales its
+weather-load reduction by 5 / floors above 5 floors. **Second preset:** `demo-chicago-300` (300 rooms, 20 floors, defaults for floor area and
+occupancy); at $150,000 the optimizer picks LED lighting plus energy management ($147,000, $33,530 a year, 4.4 years). Log: `docs/14`.
 
 ### Limits of this version
 - **Smart room controls pay back slowly (21 years)** because their modeled savings are small (see section 7) and setback recovery is counted. That is a calibration question, not a product conclusion.

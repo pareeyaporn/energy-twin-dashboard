@@ -42,6 +42,7 @@ export {
   calculateFinancialMetrics,
   DEFAULT_FINANCE,
   BENEFIT_YEARS,
+  PROJECTION_YEARS,
   financialBreakdown,
   incentiveLines,
   netBenefitOver,

@@ -210,7 +210,7 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
       hallway core, rooftop HVAC unit with a turning fan, hot-water room, ground; windows drawn as one batch
 - [x] 9.11 Energy colors from the store: zones colored by cost on the same blue → amber → red scale as 2D; the HVAC unit tinted red when
       heating and blue when cooling, in proportion to that hour's demand
-- [~] 9.12 Windows from `selectRooms`: lit when a guest is in, dim when booked and out, dark when vacant; set-back rooms marked (lit/away/dark done; set-back marker still to do)
+- [x] 9.12 Windows from `selectRooms`: lit when a guest is in, dim when booked and out, dark when vacant; set-back rooms marked
 - [x] 9.13 Interaction: orbit (rotate), zoom, click to select guest rooms, lobby, restaurant, hallways, HVAC, hot water or rooftop solar; the
       selection highlights and the existing zone panel shows energy, cost, drivers and opportunities; keyboard alternative via the zone list
 - [x] 9.14 Exploded-floors (cutaway) toggle that separates the floors to show the interior
@@ -226,10 +226,10 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
       lighting demand, solar output, cost per hour
 - [x] 9.20 Controls: play/pause, month picker, time-of-day slider, speed, camera reset, and season presets ("January night", "April morning",
       "July afternoon", "October evening")
-- [ ] 9.21 Count-up animation for the twin's header numbers
-- [ ] 9.22 Performance and accessibility: no auto-rotate, particles or count-up with "reduce effects"; one shadow-casting light; smooth on a
+- [x] 9.21 Count-up animation for the twin's header numbers
+- [x] 9.22 Performance and accessibility: no auto-rotate, particles or count-up with "reduce effects"; one shadow-casting light; smooth on a
       typical laptop; responsive layout; screen-reader summary of the scene
-- [ ] 9.23 Verify with screenshots (January night, July afternoon), update `docs/04` (3D spec) and `docs/13`, and record anything visual-only
+- [x] 9.23 Verify with screenshots (January night, July afternoon), update `docs/04` (3D spec) and `docs/13`, and record anything visual-only
       (scenery) as such
 
 ## Phase 8 — Demo hardening (all)

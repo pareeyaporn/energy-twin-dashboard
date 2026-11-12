@@ -1,6 +1,7 @@
 import { Component, Suspense, lazy, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
+import { ZONE_IDS, ZONE_LABELS } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
 import { selectHourState } from "@/store/hotelDerived";
 import { SEASON_PRESETS } from "@/three/environment";
@@ -52,6 +53,11 @@ export function HourReadout() {
       <div className="mt-1 text-muted-foreground">
         Rooms: {h.rooms.present} occupied · {h.rooms.booked - h.rooms.present} out · {h.rooms.total - h.rooms.booked} vacant
       </div>
+      {h.rooms.setback > 0 && (
+        <div className="flex items-center gap-1.5 text-muted-foreground" data-testid="setback-legend">
+          <span aria-hidden className="inline-block h-1 w-3 rounded-sm bg-[#5b85f0]" /> {h.rooms.setback} rooms set back by smart controls
+        </div>
+      )}
       <dl className="mt-1.5 grid grid-cols-[1fr_auto] gap-x-2 tabular-nums">
         {rows.map(([k, v]) => (
           <div key={k} className="contents">
@@ -78,6 +84,8 @@ export function View3D({ fallback }: { fallback: ReactNode }) {
   const [solarSelected, setSolarSelected] = useState(false);
   const setTime = useTwin((s) => s.setTime);
   const solar = useTwin((s) => selectHourState(s).solar);
+  const selectedZone = useTwin((s) => s.selectedZone);
+  const selectZone = useTwin((s) => s.selectZone);
   return (
     <SceneBoundary fallback={fallback}>
       <div data-testid="twin-3d" className="relative h-[460px] overflow-hidden rounded-lg">
@@ -131,10 +139,37 @@ export function View3D({ fallback }: { fallback: ReactNode }) {
           </span>
         </div>
       </div>
-      <p className="sr-only">
-        Interactive 3D model of the hotel. Click a part of the building to see its energy use; the zone details appear beside the model.
-        Drag to rotate, scroll to zoom.
+      <p className="sr-only" id="twin-3d-help">
+        Interactive 3D model of the hotel. Click a part of the building, or use the zone buttons below, to see its energy use; the zone
+        details appear beside the model. Drag to rotate, scroll to zoom.
       </p>
+      <div role="group" aria-label="Select a zone" aria-describedby="twin-3d-help" className="mt-2 flex flex-wrap gap-1 text-xs">
+        {ZONE_IDS.map((z) => (
+          <button
+            key={z}
+            type="button"
+            aria-pressed={selectedZone === z}
+            onClick={() => {
+              setSolarSelected(false);
+              selectZone(selectedZone === z ? null : z);
+            }}
+            className={`rounded-md border border-glass-border px-2 py-0.5 ${selectedZone === z ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"}`}
+          >
+            {ZONE_LABELS[z]}
+          </button>
+        ))}
+        <button
+          type="button"
+          aria-pressed={solarSelected}
+          onClick={() => {
+            selectZone(null);
+            setSolarSelected(!solarSelected);
+          }}
+          className={`rounded-md border border-glass-border px-2 py-0.5 ${solarSelected ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"}`}
+        >
+          Rooftop solar
+        </button>
+      </div>
     </SceneBoundary>
   );
 }

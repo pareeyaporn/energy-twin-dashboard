@@ -13,6 +13,7 @@ import { TimeControls } from "./parts/TimeControls";
 import { ZonePanel } from "./parts/ZonePanel";
 import { View3D, hasWebGL } from "./parts/View3D";
 import { useTwinClock } from "./useTwinClock";
+import { useCountUp } from "./useCountUp";
 
 const LAYERS: { id: TwinLayer; label: string }[] = [
   { id: "zones", label: "Zones" },
@@ -42,6 +43,8 @@ export function HotelTwin() {
   const displayed = useTwin(selectDisplayed);
   const compare = useTwin(selectCompare);
   const delta = compare.after.annual.cost - compare.before.annual.cost;
+  const shownCost = useCountUp(displayed.result.annual.cost, reduce);
+  const shownDelta = useCountUp(delta, reduce);
   // 3D is the default on desktop when WebGL works and effects are not reduced; decided after mount (the server renders 2D).
   const [view, setView] = useState<"2d" | "3d">("2d");
   const [canUse3D, setCanUse3D] = useState(false);
@@ -68,10 +71,10 @@ export function HotelTwin() {
             {KIND_LABEL[displayed.kind]}
             {displayed.package ? `: ${displayed.package.roleLabel}` : ""}
           </div>
-          <div className="text-2xl font-semibold tabular-nums" data-testid="twin-cost">{usd(displayed.result.annual.cost)} <span className="text-sm font-normal text-muted-foreground">/ yr</span></div>
+          <div className="text-2xl font-semibold tabular-nums" data-testid="twin-cost" aria-label={`${usd(displayed.result.annual.cost)} per year`}>{usd(shownCost)} <span className="text-sm font-normal text-muted-foreground">/ yr</span></div>
           {Math.abs(delta) >= 1 && (
             <div className={`text-sm tabular-nums ${delta < 0 ? "text-savings" : "text-loss"}`} data-testid="twin-delta">
-              {signedUsd(delta)} per year vs before
+              {signedUsd(shownDelta)} per year vs before
             </div>
           )}
         </div>

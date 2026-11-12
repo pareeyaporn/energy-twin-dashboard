@@ -111,6 +111,31 @@ function Windows({ layout, lift }: { layout: ReturnType<typeof buildingLayout>; 
   );
 }
 
+/** Rooms that smart controls have set back (away or vacant, from the engine's room pattern) get a blue sill under the window. */
+function SetbackMarks({ layout, lift }: { layout: ReturnType<typeof buildingLayout>; lift: (floor: number) => number }) {
+  const rooms = useTwin(selectRooms);
+  const ref = useRef<THREE.InstancedMesh>(null);
+  useLayoutEffect(() => {
+    const mesh = ref.current;
+    if (!mesh) return;
+    const m = new THREE.Matrix4();
+    const hidden = new THREE.Matrix4().makeScale(0, 0, 0);
+    layout.windows.forEach((w, i) => {
+      if (rooms[w.index]?.setback) {
+        m.makeTranslation(w.x, w.y - 0.3 + lift(w.floor), w.z + w.side * 0.01);
+        mesh.setMatrixAt(i, m);
+      } else mesh.setMatrixAt(i, hidden);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+  }, [layout, rooms, lift]);
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, layout.windows.length]}>
+      <planeGeometry args={[0.4, 0.07]} />
+      <meshBasicMaterial color={SCENE_COLORS.setbackRing} side={THREE.DoubleSide} toneMapped={false} />
+    </instancedMesh>
+  );
+}
+
 function Fan({ x, y, z, speed }: { x: number; y: number; z: number; speed: number }) {
   const ref = useRef<THREE.Mesh>(null);
   const reduce = useTwin((s) => s.reduceEffects);
@@ -244,6 +269,7 @@ function Building({ exploded, solarSelected, onSelectSolar }: Props) {
       ))}
       <ZoneBox box={{ ...layout.core, y: layout.core.y + ((layout.floors - 1) * gap) / 2, h: layout.core.h + (layout.floors - 1) * gap }} zone="hallways_shared" color={colors.hallways_shared} />
       <Windows layout={layout} lift={lift} />
+      <SetbackMarks layout={layout} lift={lift} />
       {/* Roof slab, snow-covered in winter */}
       <mesh position={[0, top + 0.03, 0]} receiveShadow>
         <boxGeometry args={[layout.width + 0.1, 0.06, layout.depth + 0.1]} />
@@ -304,8 +330,8 @@ function SelectionLabel({ layout, top, gap, solarSelected }: { layout: ReturnTyp
   const where: [number, number, number] = solarSelected ? [-layout.width / 4, top + 0.9, 0] : pos[zone!];
   const text = solarSelected
     ? hour.solar.installed
-      ? `Rooftop solar · ${hour.solar.sizeKw.toFixed(0)} kW · ${hour.solar.kW.toFixed(1)} kW now`
-      : `Rooftop solar · not installed · potential ${hour.solar.previewKW.toFixed(1)} kW now (${hour.solar.previewSizeKw.toFixed(0)} kW array)`
+      ? `Rooftop solar · ${hour.solar.sizeKw.toFixed(0)} kW`
+      : "Rooftop solar · not installed (preview)"
     : `${ZONE_LABELS[zone!]} · ${usd(result.byZone[zone!].cost)} / yr`;
   return (
     <Html position={where} center distanceFactor={14} zIndexRange={[20, 0]}>
@@ -334,7 +360,7 @@ function Environment() {
         position={[sx * 30, sy * 30, sz * 30]}
         intensity={light.sunIntensity}
         color={light.sunColor}
-        castShadow
+        castShadow={!reduce}
         shadow-mapSize={[1024, 1024]}
         shadow-camera-left={-14}
         shadow-camera-right={14}
@@ -366,10 +392,11 @@ const HotelScene = forwardRef<HotelSceneHandle, Props>(function HotelScene(props
   const floors = useTwin((s) => s.hotel.profile.floors);
   const layout = useMemo(() => buildingLayout(rooms, floors), [rooms, floors]);
   const span = Math.max(layout.width, layout.roofY * 1.4);
+  const reduce = useTwin((s) => s.reduceEffects);
   return (
     <Canvas
-      shadows
-      dpr={[1, 1.75]}
+      shadows={!reduce}
+      dpr={reduce ? 1 : [1, 1.75]}
       camera={{ position: [span * 1.45, span * 0.95, span * 1.6], fov: 38, near: 0.1, far: 200 }}
       onPointerMissed={() => {
         useTwin.getState().selectZone(null);
@@ -382,7 +409,7 @@ const HotelScene = forwardRef<HotelSceneHandle, Props>(function HotelScene(props
       <OrbitControls
         ref={controls}
         target={[-1.2, layout.roofY / 2, 0]}
-        enableDamping
+        enableDamping={!reduce}
         minDistance={6}
         maxDistance={60}
         maxPolarAngle={Math.PI / 2.08}

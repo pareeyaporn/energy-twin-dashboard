@@ -271,3 +271,20 @@ describe('roof insulation on a tall building', () => {
     expect(high.annualSavings.mid / low.annualSavings.mid).toBeCloseTo(0.25, 1);
   });
 });
+
+describe('year-by-year projection', () => {
+  it('runs ten years and matches the 5- and 10-year net benefit and NPV for every upgrade', () => {
+    for (const r of rows) {
+      const f = r.financials;
+      const p = f.projection!;
+      expect(p.map((y) => y.year)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      for (const k of ['low', 'mid', 'high'] as const) {
+        close(p[4]!.cumulativeNet[k], f.netBenefit5[k], 1e-9);
+        close(p[9]!.cumulativeNet[k], f.netBenefit10[k], 1e-9);
+      }
+      close(p[4]!.cumulativeNpv, f.npv5!.mid, 1e-9);
+      close(p[9]!.cumulativeNpv, f.npv10!.mid, 1e-9);
+      close(p[0]!.savings.mid, f.annualSavings.mid, 1e-9);
+    }
+  });
+});

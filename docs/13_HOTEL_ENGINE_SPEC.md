@@ -214,6 +214,11 @@ $34,163 a year, 4.3 years; baseline about $410,400 a year). Log: `docs/14`.
 - **No HVAC alternatives** (for example a heat pump) and no heat-pump water heater, so there are no mutually exclusive options yet.
 - All savings, costs, lifetimes and interaction factors are placeholders until Phase 7.
 
+**Year-by-year projection.** `financials.projection` lists years 1 to 10 with each year's savings (low, mid, high), cumulative net benefit
+(savings to date minus net investment; low pairs low savings with high cost, high the reverse) and the mid case discounted at the
+discount rate. It uses the same savings stream as the net benefit and NPV, so year 5 and year 10 equal `netBenefit5`/`netBenefit10` and
+`npv5`/`npv10` (tested). Shown by prompt LV14.
+
 ## 9. Budget optimizer (Phase 3)
 `optimizeInvestmentPortfolio(profile, options)` tests every subset of the eligible upgrades (2^n, so 256 for the demo hotel, the empty set counted but never returned).
 It keeps a package only if it is valid (requirements and exclusions), costs no more than the budget at the **mid** estimate, has a comfort score of at least 0.70, and saves at least 1% of the current bill.
@@ -265,6 +270,14 @@ so it applies to scenarios and to the smart-controls upgrade alike, and it is ze
 A time scrubber plays a typical day or the year, a simulated meter shows modeled kW, therms and dollars per hour, installed upgrades are drawn on the building, and four stress-test buttons lay events over the hotel.
 The zone panel shows energy, cost share, change from before, an hourly electricity chart, equipment, schedules, efficiency assumptions and the zone's improvement opportunities. Files: `HotelTwin.tsx`, `useTwinClock.ts`, `format.ts` and one file per part in `parts/`.
 Lovable only places `<HotelTwin />` (prompt LV6). Everything labeled simulated or estimated stays labeled.
+
+**3D view (Phase 9).** The Zones layer has a 3D view (`src/three`, spec in `docs/04`), default on desktop with WebGL. It adds an hourly
+state of the hotel, `selectHourState(state)`, from engine functions only: `daylight(lat, month)` (sunrise and sunset from declination),
+`sunElevationDeg` and `sunAzimuthDeg`, `outdoorTempF(profile, month, hour)` (modeled: a two-part cosine through the NOAA 1991–2020 normal
+low at sunrise and normal high at 15:00, labeled "modeled"), demand by end use from `typicalDayProfile(...).byEndUse` (gas converted at
+29.3071 kW per therm per hour), cost per hour, rooms (total, booked, present, set back) and solar (`solarHourKW`: the month's PVWatts output
+spread over daylight hours, so the hours add up to the monthly output the engine uses). Scenery (season, snow, trees, sky colors) is visual
+only and comes from the month and the sun's height.
 
 ## 12. The AI advisor (`src/engine/hotel/advisor`, `supabase/functions/advisor`)
 The AI explains; it never calculates. The browser builds a **context** from the store (the hotel, baseline by category and zone, the current what-if and why it changed, every eligible upgrade on its own with cost, savings range, payback, five-year net benefit, carbon, comfort and the zones it helps,

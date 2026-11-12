@@ -12,6 +12,10 @@ export interface MetricDef {
   value: (r: PropertySummary) => number;
   format: (n: number) => string;
   note: string;
+  /** Short label for compact controls, the unit in words and what a high value means (legend). */
+  short: string;
+  unit: string;
+  high: string;
 }
 
 export const eui = (n: number) => `${n.toFixed(1)} kBtu/ft²`;
@@ -20,6 +24,9 @@ export const MAP_METRICS: MetricDef[] = [
   {
     id: "cost",
     label: "Energy cost",
+    short: "Cost",
+    unit: "US dollars a year",
+    high: "spends more",
     kind: "use",
     value: (r) => r.annual.cost,
     format: (n) => `${usd(n)} / yr`,
@@ -28,6 +35,9 @@ export const MAP_METRICS: MetricDef[] = [
   {
     id: "eui",
     label: "Energy intensity",
+    short: "Intensity",
+    unit: "kBtu per ft² a year",
+    high: "uses more energy per ft²",
     kind: "use",
     value: (r) => r.siteEui,
     format: eui,
@@ -36,6 +46,9 @@ export const MAP_METRICS: MetricDef[] = [
   {
     id: "potential",
     label: "Savings potential",
+    short: "Savings",
+    unit: "US dollars a year",
+    high: "bigger savings opportunity",
     kind: "opportunity",
     value: (r) => r.potential?.annualSavings ?? 0,
     format: (n) => `${usd(n)} / yr`,
@@ -44,6 +57,9 @@ export const MAP_METRICS: MetricDef[] = [
   {
     id: "priority",
     label: "Investment priority",
+    short: "Priority",
+    unit: "score out of 100",
+    high: "invest here first",
     kind: "opportunity",
     value: (r) => r.priorityScore,
     format: (n) => `${Math.round(n)} / 100`,

@@ -326,7 +326,8 @@ Question intent is keyword-based and deterministic. The context holds about 20 K
 ## 13. Hotel portfolio (`src/engine/hotel/portfolio.ts`, Phase 13)
 
 Every per-property figure is the single-hotel engine's (baseline, savings with interactions, costs, incentives, financial breakdown); the portfolio
-only adds and chooses.
+only adds and chooses. The city map that shows these figures (display only: colors, ranking by the chosen metric, card, list) is described in
+docs/17.
 
 - `portfolioSummary(items)`: per property the baseline, site energy intensity, savings potential, investment required and priority score
   (definitions in docs/15 §16); totals are sums.

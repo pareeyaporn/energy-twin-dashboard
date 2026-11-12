@@ -172,7 +172,7 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [x] 7b.1 One financial breakdown for every upgrade and package (gross cost, incentives, net investment, kWh and therms, $ saved, payback, 5- and 10-year net benefit, CO2); one savings stream; optimizer, cards, zone opportunities and advisor read the same numbers
 - [x] 7b.2 Solar: location-based output, hour-by-hour self-use and export, regional $/W by size, export credit, degradation and O&M
 - [x] 7b.3 Incentives listed per upgrade with sources; none applied until confirmed; user-entered amounts supported
-- [ ] 7b.4 [LV] LV11: show the breakdown on every upgrade card and in the comparison table
+- [x] 7b.4 [LV] LV11 and LV12: the breakdown on every upgrade card, the package cards and the comparison tables; packages first, comparison collapsed below
 - [ ] 7b.5 Calibrate smart room controls: the model saves about 3% of guest-room HVAC vs 10.8–26.5% measured (DOE/PNNL); check against the IL-TRM per-room figures
 - [ ] 7b.6 Research pass 2 once the hosts are allowed (`docs/08`): PVWatts for Chicago, solar $/W (LBNL file), IL-TRM measures, ENERGY STAR benchmark, eGRID
 - [ ] 7b.7 Small UI fixes: one "some inputs are defaults" note instead of a tag on every number; compact number row on mobile; twin split-view labels (CC)

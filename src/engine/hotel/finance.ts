@@ -214,7 +214,7 @@ export function financialBreakdown(input: {
     applied.length
       ? `Incentives applied: ${applied.map((l) => l.label).join('; ')}.`
       : listed.length
-        ? `No incentives applied; possible programs to check: ${[...new Set(listed.map((l) => l.label))].join('; ')}.`
+        ? 'No incentives applied; possible programs are listed with each upgrade and are applied only once confirmed.'
         : 'No incentive programs are listed for this upgrade.',
     'Simple payback is the net investment divided by first-year savings.',
     input.solar

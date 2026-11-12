@@ -13,7 +13,8 @@ Style for every prompt: polished B2B SaaS look, professional typography, clear f
 | LV1 clean home copy, LV2 profile form, LV3 overview, LV4 scenario simulator, LV5 optimizer, LV6 twin, LV7 saved scenarios, LV8 advisor | Done and reviewed |
 | LV10 one workspace (ran before LV9) | Done and reviewed |
 | LV9 polish | Done |
-| **LV11 upgrade comparison and the financial breakdown** | **Next** |
+| LV11 upgrade comparison and the financial breakdown | Done |
+| LV12 layout fix (packages first, collapsed comparison, shared assumptions, short Source buttons, remaining budget and comfort back) | Done |
 
 ## Store API cheat sheet (already built; read it, do not change it)
 
@@ -179,5 +180,18 @@ generation, used on site and exported (kWh), and $/W. Under each card show finan
 chip with row.source. Add a compact table view toggle with the same columns, sortable. Use the same eight lines in the package cards
 and the comparison table of the budget optimizer (evaluation.financials), replacing the older metrics there so every view shows the
 same numbers. Never compute or round money in the component beyond display formatting. Label everything "Estimate".
+Don't modify src/engine, src/data, src/twin, src/store or supabase.
+```
+
+## LV12 — Layout fix after LV11 (done)
+
+```
+Fix the layout of the upgrade comparison and the package cards. In the Invest tab and on /optimizer, put the budget, objective,
+"Optimize for this scenario", the Find button and the package cards first; move "Compare upgrades" below the packages, collapsed by
+default ("Compare all upgrades"), and open it in the Table view. Show the assumptions once, under the comparison, from the first row's
+financials.assumptions, and on the solar card show only the assumptions that mention solar. Make each Source chip a short "Source"
+button that opens the Sources sheet, with the full source text in a tooltip instead of on the button. In each package card, after the
+eight lines, add back "Remaining budget" (evaluation.metrics.remainingBudget) and "Comfort score" (evaluation.comfort.score as a
+percentage), and add both rows to the Compare investments table. Keep all values from the store; display formatting only.
 Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```

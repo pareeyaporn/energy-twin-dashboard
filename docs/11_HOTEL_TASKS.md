@@ -138,15 +138,15 @@ a bill-calibration view, a 12-month forecast band, 3D, and live IoT.
       (Built: layered diagram, time scrubber, meter, flow, ghost upgrades, stress tests. Not built: count-up animation of the header numbers; colors fade but numbers do not animate.)
 
 ## Phase 6 — AI advisor (P1) [CC]
-- [ ] 6.1 Design note (see [12_BACKEND_ARCHITECTURE.md](12_BACKEND_ARCHITECTURE.md)): the model receives a precomputed context (baseline by zone, current scenario, three packages, and a few precomputed
+- [x] 6.1 Design note (see [12_BACKEND_ARCHITECTURE.md](12_BACKEND_ARCHITECTURE.md)): the model receives a precomputed context (baseline by zone, current scenario, three packages, and a few precomputed
       comparisons such as solar-first vs thermostats-first); it explains, it never calculates. Tool-calling is a later upgrade
-- [ ] 6.2 `supabase/functions/advisor/index.ts` (Deno): input question plus context, 6 s timeout, returns `{ text }`
-- [ ] 6.3 Guardrail (runs in the browser, shared engine code): every number in the answer must appear in the context; if not, discard it and use the fallback
-- [ ] 6.4 Fallback: deterministic template answers for the demo questions (why HVAC is costly, how occupancy changes energy, solar or
+- [x] 6.2 `supabase/functions/advisor/index.ts` (Deno): input question plus context, 6 s timeout, returns `{ text }`
+- [x] 6.3 Guardrail (runs in the browser, shared engine code): every number in the answer must appear in the context; if not, discard it and use the fallback
+- [x] 6.4 Fallback: deterministic template answers for the demo questions (why HVAC is costly, how occupancy changes energy, solar or
       thermostats first, how to use a $30,000 budget), cached for the demo
-- [ ] 6.5 [TEAM] Decide the AI provider and secret name (Lovable Cloud secrets only, never in code)
+- [ ] 6.5 [TEAM] Add the secret `ANTHROPIC_API_KEY` in Lovable Cloud (provider defaulted to the Claude API; secrets only, never in code) and set `ALLOWED_ORIGINS`. See `docs/12`, section 6
 - [ ] 6.6 [LV] Chat panel with suggested questions, a loading state and the timeout fallback
-- [ ] 6.7 Tests: context builder, number-validator, fallback selection
+- [x] 6.7 Tests: context builder, number-validator, fallback selection
 
 ## Phase 7 — Data research (TEAM, runs in parallel)
 Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: true` and name the exact table.

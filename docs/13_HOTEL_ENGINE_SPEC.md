@@ -229,6 +229,13 @@ A time scrubber plays a typical day or the year, a simulated meter shows modeled
 The zone panel shows energy, cost share, change from before, an hourly electricity chart, equipment, schedules, efficiency assumptions and the zone's improvement opportunities. Files: `HotelTwin.tsx`, `useTwinClock.ts`, `format.ts` and one file per part in `parts/`.
 Lovable only places `<HotelTwin />` (prompt LV6). Everything labeled simulated or estimated stays labeled.
 
+## 12. The AI advisor (`src/engine/hotel/advisor`, `supabase/functions/advisor`)
+The AI explains; it never calculates. The browser builds a **context** from the store (the hotel, baseline by category and zone, the current what-if and why it changed, every eligible upgrade on its own with cost, savings range, payback, five-year net benefit, carbon, comfort and the zones it helps,
+an occupancy example, the optimizer's plan, and a plan for any other budget named in the question) with every number rounded. It sends the question and context to the function, then **checks the answer**: each number must match one in the context (exactly, or rounded the usual way to the decimals written or to two or three significant figures; whole numbers up to 12 with no unit are allowed as counts).
+An answer with any other number is discarded.
+The template answer (`fallbackAnswer`) is used when the function is not set up, is slow (6 seconds), fails, refuses or is rejected. It is built only from the context, covers the demo questions (why HVAC costs most, how occupancy changes energy, X versus Y, how to use a budget, a what-if, a zone's cost, a general summary), and passes the same number check in tests.
+Question intent is keyword-based and deterministic. The context holds about 20 KB. Details of the function are in `docs/12`, section 6.
+
 ---
 
 ## Appendix A — Store contract (task 1.10): approved and built

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  advisor,
   calculateBaselineEnergy,
   hotelData,
   optimizeInvestmentPortfolio,
@@ -51,6 +52,15 @@ export type TwinLayer = "zones" | "rooms" | "equipment" | "flow";
 export type TimeMode = "day" | "year";
 export type CompareMode = "before" | "after" | "split";
 
+export interface AdvisorMessage {
+  id: string;
+  role: "user" | "advisor";
+  text: string;
+  /** For advisor messages: "ai" if the model's answer passed the number check, "fallback" if the template answer was used. */
+  source?: "ai" | "fallback";
+  reason?: advisor.FallbackReason;
+}
+
 export interface SavedScenario {
   id: string;
   name: string;
@@ -99,6 +109,9 @@ export interface TwinState {
   activeHotelPackageId: string | null;
   savedScenarios: SavedScenario[];
   nextScenarioNumber: number;
+  advisorMessages: AdvisorMessage[];
+  advisorBusy: boolean;
+  advisorSeq: number;
   selectedZone: ZoneId | null;
   twinLayer: TwinLayer;
   timeMode: TimeMode;
@@ -127,6 +140,8 @@ export interface TwinState {
   setPlaying: (b: boolean) => void;
   setPlaybackSpeed: (n: number) => void;
   setCompareMode: (m: CompareMode) => void;
+  askAdvisor: (question: string) => Promise<void>;
+  clearAdvisor: () => void;
   resetHotel: () => void;
 
   selectPreset: (id: string) => void;
@@ -179,6 +194,9 @@ function initialHotelState() {
     activeHotelPackageId: null as string | null,
     savedScenarios: [] as SavedScenario[],
     nextScenarioNumber: 1,
+    advisorMessages: [] as AdvisorMessage[],
+    advisorBusy: false,
+    advisorSeq: 1,
     selectedZone: null as ZoneId | null,
     twinLayer: "zones" as TwinLayer,
     timeMode: "day" as TimeMode,
@@ -322,6 +340,38 @@ export const useTwin = create<TwinState>((set, get) => ({
   setPlaying: (playing) => set({ playing }),
   setPlaybackSpeed: (n) => set({ playbackSpeed: Number.isFinite(n) && n > 0 ? n : 1 }),
   setCompareMode: (compareMode) => set({ compareMode }),
+  askAdvisor: async (question) => {
+    const q = question.trim();
+    if (!q || get().advisorBusy) return;
+    const n = get().advisorSeq;
+    set((s) => ({
+      advisorBusy: true,
+      advisorSeq: s.advisorSeq + 2,
+      advisorMessages: [...s.advisorMessages, { id: `m-${n}`, role: "user", text: q }],
+    }));
+    const s = get();
+    // The context holds every number the advisor may use; the browser then rejects any answer with a number that is not in it.
+    const context = advisor.buildAdvisorContext(
+      {
+        hotel: s.hotel,
+        baseline: s.baseline,
+        scenario: effectiveScenario(s.scenario, s.activeStressTest),
+        scenarioResult: s.scenarioResult,
+        plan: s.hotelPlan,
+        syntheticDemo: s.hotelPresetId !== null,
+      },
+      q,
+    );
+    const answer = await advisor.askAdvisor(q, context, advisor.getAdvisorConfig());
+    set((st) => ({
+      advisorBusy: false,
+      advisorMessages: [
+        ...st.advisorMessages,
+        { id: `m-${n + 1}`, role: "advisor", text: answer.text, source: answer.source, ...(answer.reason ? { reason: answer.reason } : {}) },
+      ],
+    }));
+  },
+  clearAdvisor: () => set({ advisorMessages: [], advisorBusy: false }),
   resetHotel: () => set({ ...initialHotelState(), optimizing: false }),
 }));
 

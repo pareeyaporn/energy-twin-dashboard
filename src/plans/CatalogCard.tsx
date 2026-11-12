@@ -8,6 +8,7 @@ import { selectPlanContext } from "@/store/hotelDerived";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { SolarAssumptions } from "./SolarAssumptions";
 import { energySaved, tonnes, unverifiedIncentives, usd, verifiedIncentives, years } from "./format";
 
 export const UPGRADE_ICON: Partial<Record<UpgradeId, LucideIcon>> = {
@@ -135,6 +136,7 @@ export function CatalogCard({ item, planQuantity, onAdd, onRemove, onQuantity }:
             </dl>
           )}
           <p className="mt-1 text-[10px] text-muted-foreground">On its own, before combining with the rest of a plan. Estimate.</p>
+          {item.id === "rooftop_solar" && <SolarAssumptions sizeKw={q} />}
 
           <div className="mt-3 flex gap-2">
             {inPlan ? (

@@ -73,3 +73,24 @@ Product decisions taken at the same time (discount rate, optimizer rules, HVAC t
 | --- | --- | --- | --- | --- |
 | Chicago normal highs and lows | monthly means only | **highs** 31.6 … 84.5 °F (Jul), **lows** 18.8 (Jan) … 66.4 °F; used for the modeled hourly temperature in the 3D readout | NOAA NCEI U.S. Climate Normals 1991–2020, Chicago O'Hare (USW00094846), monthly TMAX/TMIN normals | Primary (CSV) |
 | Peer benchmarks in the data | in this log only | `defaults.peerBenchmarks`: ENERGY STAR hotel median **63.0**, CBECS 2018 lodging mean **85.7** kBtu/ft² site; used by `benchmarkComparison` for context only | As in pass 2 | Primary |
+
+## Pass 5 (November 2026, solar prices and net metering)
+
+| Item | Before | Now | Source | Read |
+| --- | --- | --- | --- | --- |
+| Solar installed price by size | one placeholder tier $2.20 / $2.80 / $3.50 per W | **2024 national medians, non-residential, before incentives:** ≤10 kW $3.70; 10–20 $3.30; 20–50 $3.10; 50–100 $2.90; 100–250 $2.50; 250–500 $2.50; 500–1,000 $2.00; >1,000 $1.70 per W (DC). Demo hotel: quarter roof 13.8 kW → $3.30, half 27.5 kW → $3.10, full 55 kW → $2.90. Low/high ±15% is a placeholder | LBNL, *Distributed Solar & Storage, 2025 Data Update* (Oct 2025), p. 8 | **Transcribed by the team** from the PDF; `emp.lbl.gov` not reachable from the build session, so not re-read by Claude Code |
+| Solar export credit | $0 (not researched) | **$0, labeled conservative fallback, editable** | 220 ILCS 5/16-107.5; Illinois Shines program documents (team-provided links) | Not reachable from the build session (`www.ilga.gov`, `illinoisshines.com`) |
+
+**Net metering for the synthetic hotel: what to confirm before applying a credit.** Do not assume residential or small-commercial rules apply.
+1. Eligibility under 220 ILCS 5/16-107.5: the statute's system-size limit for an "eligible customer", and whether a non-residential hotel
+   with a ~14–55 kW array qualifies (the arrays are small relative to the hotel's ~780 MWh a year).
+2. The credit basis for systems interconnected from 2025 (supply-only crediting rather than full retail), and how it applies to the hotel's
+   ComEd delivery class.
+3. Whether the hotel buys supply from ComEd or a retail electric supplier, and whether it is on hourly pricing; the credit value depends on it.
+4. Illinois Shines REC payments are an **incentive**, not an export credit; they belong in `incentives.json` once amounts are verified.
+**Effect today: none.** Both presets use all their solar on site (0 kWh exported), so the export credit does not change any result; it would
+matter only for larger arrays or lower daytime loads.
+
+**Effect of the new prices** (100-room hotel): full-roof solar $159,500 (was $154,000), payback 18.5 years (was 17.9); quarter roof $45,540,
+21.1 years; half roof $85,250, 19.8 years. Optimizer picks are unchanged at $50,000 (LED + occupancy sensors); at $150,000 the
+maximum-savings package adds a quarter-roof array; at $250,000 the full roof. 300-room hotel: unchanged at $150,000 (LED + energy management).

@@ -163,7 +163,7 @@ describe('costs', () => {
     close(mid('water_heating'), 220 * 100);
     close(mid('energy_management'), 15000 + 0.2 * 55000);
     close(mid('hvac_upgrade'), 2 * 55000);
-    close(mid('rooftop_solar'), 2800 * 50);
+    close(mid('rooftop_solar'), 3100 * 50); // LBNL 2024 median, 20–50 kW non-residential: $3.10/W
   });
 
   it('HVAC equipment is cheaper when sized from a reduced load, and ranges are ordered', () => {

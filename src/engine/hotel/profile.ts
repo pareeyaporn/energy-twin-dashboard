@@ -130,6 +130,15 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
     horizonYears,
     objective,
   };
+  // Optional solar assumptions: used only when the user sets them, within plausible bounds.
+  if (input.solarCostPerW !== undefined) {
+    if (Number.isFinite(input.solarCostPerW) && input.solarCostPerW >= 0.5 && input.solarCostPerW <= 10) profile.solarCostPerW = input.solarCostPerW;
+    else notes.push('Solar price per W must be between $0.50 and $10; the size-based benchmark is used instead.');
+  }
+  if (input.solarExportCreditPerKWh !== undefined) {
+    if (Number.isFinite(input.solarExportCreditPerKWh) && input.solarExportCreditPerKWh >= 0 && input.solarExportCreditPerKWh <= 0.5) profile.solarExportCreditPerKWh = input.solarExportCreditPerKWh;
+    else notes.push('Solar export credit must be between $0 and $0.50 per kWh; the default is used instead.');
+  }
   return { profile, defaulted, notes };
 }
 

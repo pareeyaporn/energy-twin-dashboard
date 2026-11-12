@@ -29,12 +29,18 @@ export function solarCostPerW(sizeKw: number, p: HotelProfile, data: HotelData =
   const tiers = regionalSolar(p, data).installedCostPerW;
   const t = tiers.find((x) => x.upToKw === null || sizeKw <= x.upToKw) ?? tiers[tiers.length - 1];
   if (!t) throw new Error('No solar cost tiers.');
+  // A user-entered price replaces the tier's middle value; the tier's low and high spread is kept around it.
+  if (p.solarCostPerW !== undefined && t.mid > 0) {
+    const k = p.solarCostPerW / t.mid;
+    return { low: t.low * k, mid: p.solarCostPerW, high: t.high * k };
+  }
   return { low: t.low, mid: t.mid, high: t.high };
 }
 
 /** Credit per exported kWh; $0 when the region's export compensation has not been researched. */
 export function exportCreditPerKWh(p: HotelProfile, data: HotelData = hotelData): number {
-  return regionalSolar(p, data).exportCreditPerKWh ?? 0;
+  // User value first; otherwise the region's researched credit; otherwise $0, a conservative fallback until the tariff is confirmed.
+  return p.solarExportCreditPerKWh ?? regionalSolar(p, data).exportCreditPerKWh ?? 0;
 }
 
 export function solarYield(p: HotelProfile, scenario: SavingsScenario, data: HotelData = hotelData): number {

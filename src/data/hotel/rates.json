@@ -7,14 +7,56 @@
     "solar": {
       "installedCostPerW": [
         {
+          "upToKw": 10,
+          "low": 3.15,
+          "mid": 3.7,
+          "high": 4.25
+        },
+        {
+          "upToKw": 20,
+          "low": 2.8,
+          "mid": 3.3,
+          "high": 3.79
+        },
+        {
+          "upToKw": 50,
+          "low": 2.63,
+          "mid": 3.1,
+          "high": 3.56
+        },
+        {
+          "upToKw": 100,
+          "low": 2.46,
+          "mid": 2.9,
+          "high": 3.33
+        },
+        {
+          "upToKw": 250,
+          "low": 2.12,
+          "mid": 2.5,
+          "high": 2.88
+        },
+        {
+          "upToKw": 500,
+          "low": 2.12,
+          "mid": 2.5,
+          "high": 2.88
+        },
+        {
+          "upToKw": 1000,
+          "low": 1.7,
+          "mid": 2.0,
+          "high": 2.3
+        },
+        {
           "upToKw": null,
-          "low": 2.2,
-          "mid": 2.8,
-          "high": 3.5
+          "low": 1.44,
+          "mid": 1.7,
+          "high": 1.95
         }
       ],
       "exportCreditPerKWh": null,
-      "source": "PLACEHOLDER installed cost: $2.20/$2.80/$3.50 per W (DC), one tier; no primary 2024-2025 figure for small (100 kW or less) commercial systems could be opened yet (LBNL Distributed Solar and Storage 2025 and 2026 Data Updates split non-residential at 100 kW; NREL ATB 2024 models a 200 kW commercial rooftop at about $1.78 per W for 2023, which understates smaller systems). Export credit: Illinois law (220 ILCS 5/16-107.5(n)) credits exports from systems interconnected from 2025 at the avoided cost of electricity supply; ComEd's large commercial customers are credited against the supply section of the bill. No primary source gives a dollar value per kWh, so exported energy is credited at $0 (the demo hotel exports almost nothing).",
+      "source": "Installed price by system size: LBNL, Distributed Solar & Storage, 2025 Data Update (October 2025), p. 8: 2024 national median gross installed prices for non-residential PV, 2024 $/W (DC), before incentives: up to 10 kW $3.70; 10-20 kW $3.30; 20-50 kW $3.10; 50-100 kW $2.90; 100-250 kW $2.50; 250-500 kW $2.50; 500-1,000 kW $2.00; over 1,000 kW $1.70. National medians, not Chicago contractor quotes. Values transcribed by the team from the PDF (emp.lbl.gov is not reachable from the build session, so not re-checked by Claude Code). The low and high values (-15% and +15% around the median) are a PLACEHOLDER spread: the percentiles were not transcribed. Editable per hotel (solarCostPerW). Export credit: null, so $0 per kWh, a conservative fallback until the applicable tariff is confirmed (see docs/14: Illinois 220 ILCS 5/16-107.5 and the ComEd non-residential rules must be checked for this hotel's customer class). Editable per hotel (solarExportCreditPerKWh).",
       "verified": false
     }
   },
@@ -26,14 +68,56 @@
     "solar": {
       "installedCostPerW": [
         {
+          "upToKw": 10,
+          "low": 3.15,
+          "mid": 3.7,
+          "high": 4.25
+        },
+        {
+          "upToKw": 20,
+          "low": 2.8,
+          "mid": 3.3,
+          "high": 3.79
+        },
+        {
+          "upToKw": 50,
+          "low": 2.63,
+          "mid": 3.1,
+          "high": 3.56
+        },
+        {
+          "upToKw": 100,
+          "low": 2.46,
+          "mid": 2.9,
+          "high": 3.33
+        },
+        {
+          "upToKw": 250,
+          "low": 2.12,
+          "mid": 2.5,
+          "high": 2.88
+        },
+        {
+          "upToKw": 500,
+          "low": 2.12,
+          "mid": 2.5,
+          "high": 2.88
+        },
+        {
+          "upToKw": 1000,
+          "low": 1.7,
+          "mid": 2.0,
+          "high": 2.3
+        },
+        {
           "upToKw": null,
-          "low": 2.2,
-          "mid": 2.8,
-          "high": 3.5
+          "low": 1.44,
+          "mid": 1.7,
+          "high": 1.95
         }
       ],
       "exportCreditPerKWh": null,
-      "source": "PLACEHOLDER. Installed cost of commercial rooftop solar in $ per W (DC) by system size, to be replaced with LBNL Tracking the Sun or NREL cost benchmarks for the state. Export credit per kWh sent to the grid is not researched yet (Illinois net metering rules changed in 2025), so exported energy is credited at $0.",
+      "source": "Installed price by system size: LBNL, Distributed Solar & Storage, 2025 Data Update (October 2025), p. 8: 2024 national median gross installed prices for non-residential PV, 2024 $/W (DC), before incentives: up to 10 kW $3.70; 10-20 kW $3.30; 20-50 kW $3.10; 50-100 kW $2.90; 100-250 kW $2.50; 250-500 kW $2.50; 500-1,000 kW $2.00; over 1,000 kW $1.70. National medians, not Chicago contractor quotes. Values transcribed by the team from the PDF (emp.lbl.gov is not reachable from the build session, so not re-checked by Claude Code). The low and high values (-15% and +15% around the median) are a PLACEHOLDER spread: the percentiles were not transcribed. Editable per hotel (solarCostPerW). Export credit (outside Illinois): null, so $0 per kWh, a conservative fallback until the applicable tariff is confirmed (see docs/14: Illinois 220 ILCS 5/16-107.5 and the ComEd non-residential rules must be checked for this hotel's customer class). Editable per hotel (solarExportCreditPerKWh).",
       "verified": false
     }
   }

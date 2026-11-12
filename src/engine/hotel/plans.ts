@@ -108,7 +108,7 @@ export function upgradeCatalog(ctx: UpgradeContext, data: HotelData = hotelData)
       category: def.category ?? 'building_water',
       quantity: quantityFor(ctx, id, d),
       available,
-      costStatus: def.costStatus ?? 'placeholder',
+      costStatus: def.costStatusByHvac?.[ctx.profile.hvacType] ?? def.costStatus ?? 'placeholder',
       lifetimeYears: upgradeLifetime(id, ctx.profile, d),
       comfort: def.comfort,
       source: def.source,

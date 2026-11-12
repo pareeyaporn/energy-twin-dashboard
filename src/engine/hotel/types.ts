@@ -514,6 +514,12 @@ export interface CostModel {
   perSqftRoof?: Range3;
   perSqftCommon?: Range3;
   perKw?: Range3;
+  /** Per ton of the hotel's cooling capacity (estimated equipment; HVAC equipment). */
+  perTon?: Range3;
+  /** Per kBtu/h of central boiler capacity (estimated equipment). */
+  perBoilerKBtuH?: Range3;
+  /** A different cost model by HVAC type (for equipment replacement); replaces this one for that type. */
+  byHvac?: Partial<Record<HvacType, Omit<CostModel, 'byHvac'>>>;
 }
 
 /**
@@ -534,6 +540,8 @@ export interface UpgradeDef {
   category?: CatalogCategory;
   /** Whether the installed cost is from a source or a placeholder. */
   costStatus?: 'sourced' | 'placeholder';
+  /** Cost status by HVAC type, when the cost depends on it. */
+  costStatusByHvac?: Partial<Record<HvacType, 'sourced' | 'placeholder'>>;
   label: string;
   description: string;
   lifetimeYears: number;

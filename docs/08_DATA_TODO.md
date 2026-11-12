@@ -50,7 +50,7 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
   **4,903 kWh and 209 therms ($883)**. The electric gap is the larger one: the TRM measure also controls the room's fan, which the model does not.
   Options: (a) add guest-room fan savings when a room is empty, sized so the model lands inside the TRM range; (b) keep the model and show the TRM
   range beside it. Either way the change goes into the shared simulation so the Scenario switch and the upgrade card agree.
-- [ ] **A2. Installed costs** — *partly done (November 2026): roof insulation ($1.40/ft², IL-TRM 4.8.1, raised to 2024 dollars) and water heating (~$200/room built from IL-TRM 4.3.1–4.3.3) are now sourced. Still placeholders: LED, occupancy sensors, energy management, HVAC equipment (ComEd worksheets still not reachable: the page is a JavaScript app and the worksheet file links are not in it).* (per ft², per room or per unit) for LED retrofit, occupancy sensors (the TRM gives $55–125 per sensor; needs a coverage
+- [ ] **A2. Installed costs** — *mostly done (November 2026). Sourced from the IL-TRM: smart controls ($260/room), insulation ($1.40/ft², 2024 $), water heating (~$200/room), occupancy sensors ($55–125 per sensor at 250 ft² per sensor, an assumption), HVAC equipment for rooftop units ($895–1,021/ton) and PTAC/PTHP ($1,047/ton), the boiler part of a central plant ($22.95/kBtu/h); solar from LBNL. Still placeholders, because no full retrofit cost is published in reachable sources: LED retrofit (the TRM gives only incremental equipment costs, about $0.70–1.50 per watt removed, a lower bound), energy management systems (no TRM measure), the chiller part of a central plant (TRM gives incremental $/ton only), VRF.* (per ft², per room or per unit) for LED retrofit, occupancy sensors (the TRM gives $55–125 per sensor; needs a coverage
   area per sensor), energy management controls, HVAC equipment, water heating plus low-flow fixtures (TRM: about $12 per showerhead) and roof
   insulation. Sources: IL-TRM measure costs where they exist, ComEd and Peoples Gas program data, DOE/NREL cost studies, hotel case studies.
 - [x] **A3. Solar installed $/W by size — done (November 2026).** LBNL *Distributed Solar & Storage, 2025 Data Update*, p. 8: 2024 national
@@ -62,7 +62,7 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
   Also: ComEd business rebates for LED, controls and HVAC (`www.comed.com` is reachable); Peoples Gas
   rebates; Illinois Shines REC payments; federal Section 48E status for new solar (needs `www.irs.gov`). Enter as `value`, `applied: true`,
   `verified: true` in `incentives.json`.
-- [ ] **A5. Solar export credit $/kWh** for a ComEd non-residential customer (supply-only credit): ComEd tariff or Illinois Commerce Commission filing.
+- [ ] **A5. Solar export credit $/kWh** (*still blocked: `www.ilga.gov` refused by the session's network policy; no effect on either preset, which export 0 kWh*) for a ComEd non-residential customer (supply-only credit): ComEd tariff or Illinois Commerce Commission filing.
   **$0 kept as a labeled conservative fallback, now editable per hotel** (`solarExportCreditPerKWh`). No effect on either preset: both use all
   their solar on site (0 kWh exported). Which rules apply to this hotel is listed in docs/14, pass 5 (to confirm; `www.ilga.gov` and
   `illinoisshines.com` are not reachable from the build session).
@@ -95,7 +95,7 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
 - [x] Against the ENERGY STAR national median for hotels (63.0 kBtu/ft² site): the demo hotel is 45% above it (see the benchmark note).
       Now computed by `benchmarkComparison` and shown in the app (LV15) as context; the model is not tuned toward it.
 - [ ] Package savings as a share of the bill against published hotel case studies (DOE Better Buildings, utilities).
-- [ ] After A1–A3, re-run the optimizer and write the demo question from what the results say (task 8.1).
+- [x] After A1–A3, re-run the optimizer and write the demo question from what the results say — *done (research pass 9): the $50,000 pick stays LED + occupancy sensors; the suggested question is in docs/07. Note for task 8.2: the offline template answer to it does not mention solar.*
 
 ## Network hosts
 

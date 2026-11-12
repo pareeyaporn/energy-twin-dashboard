@@ -22,3 +22,16 @@ describe('upgrade lifetimes (IL-TRM v14.0 measure lives)', () => {
     expect(upgradeLifetime('energy_management', p)).toBe(10);
   });
 });
+
+import { boilerKBtuH, coolingTons, upgradeCost } from '../costs';
+describe('HVAC equipment cost by system (IL-TRM full installed costs)', () => {
+  const at = (hvacType: 'central_plant' | 'ptac' | 'pthp' | 'rtu' | 'vrf') => resolveProfile({ ...input, hvacType }).profile;
+  const mid = (hvacType: Parameters<typeof at>[0]) => upgradeCost(at(hvacType), 'hvac_upgrade', { hvacSizeFactor: 1, solarKw: 0 }).mid;
+  it('prices rooftop units and PTAC/PTHP per ton, and a central plant as boiler plus chiller', () => {
+    expect(mid('rtu')).toBeCloseTo(958 * coolingTons(at('rtu')), 6);
+    expect(mid('ptac')).toBeCloseTo(1047 * coolingTons(at('ptac')), 6);
+    expect(coolingTons(at('ptac'))).toBeCloseTo(100 * 0.75 + 55000 * 0.18 * 0.0025, 6);
+    expect(mid('central_plant')).toBeCloseTo(22.95 * boilerKBtuH(at('central_plant')) + 1.31 * 55000, 6);
+    expect(mid('vrf')).toBeCloseTo(2 * 55000, 6);
+  });
+});

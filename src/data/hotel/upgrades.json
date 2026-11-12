@@ -122,21 +122,21 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Lighting reduction: low 27% (linear LED replacing fluorescent, PNNL evaluation for GSA, search excerpt), high 60% (incandescent-heavy fixtures); mid 45% is a judgment between them for a mixed hotel stock. Life: 12 years, from the IL-TRM v14.0 4.5.4 rule (rated life divided by operating hours, capped at 15 years): about 8 to 11 years at common-area hours (4,542 to 6,138 h a year, IL-TRM 4.5 reference table) and the 15-year cap in guest rooms (777 h). Cost: PLACEHOLDER $0.40/$0.60/$0.90 per ft2.",
+      "source": "Lighting reduction: low 27% (linear LED replacing fluorescent, PNNL evaluation for GSA, search excerpt), high 60% (incandescent-heavy fixtures); mid 45% is a judgment between them for a mixed hotel stock. Life: 12 years, from the IL-TRM v14.0 4.5.4 rule (rated life divided by operating hours, capped at 15 years): about 8 to 11 years at common-area hours (4,542 to 6,138 h a year, IL-TRM 4.5 reference table) and the 15-year cap in guest rooms (777 h). Cost: PLACEHOLDER $0.40/$0.60/$0.90 per ft2 of floor (about $1.55-3.50 per watt removed) for a full retrofit with labor. Cross-check: Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2 4.5.4 gives time-of-sale incremental equipment costs only ($27 downlight for 37 W removed, $53 2x2 troffer for 35 W, $15 4-ft tube for 15 W: about $0.70-1.50 per watt, 2012 DOE prices, no labor), so it is a lower bound, not a retrofit cost.",
       "verified": false
     },
     {
       "id": "occupancy_sensors",
       "label": "Occupancy sensors in common areas and hallways",
       "category": "lighting",
-      "costStatus": "placeholder",
+      "costStatus": "sourced",
       "description": "Dims or turns off lighting and trims ventilation in unoccupied public areas.",
       "lifetimeYears": 10,
       "cost": {
         "perSqftCommon": {
-          "low": 0.25,
-          "mid": 0.4,
-          "high": 0.65
+          "low": 0.22,
+          "mid": 0.36,
+          "high": 0.5
         }
       },
       "params": {
@@ -158,7 +158,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Lighting reduction in common areas and hallways: mid 24%, the energy savings factor for an interior occupancy sensor in the Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2, measure 4.5.10 (based on Williams et al., LBNL 2012); high 37%, the same with high-end trim; low 12% is a PLACEHOLDER (poorly set or partly bypassed controls). Life: 10 years (IL-TRM 4.5.10, lighting controls other than networked or luminaire-level). Cost: PLACEHOLDER $0.25/$0.40/$0.65 per ft2 of common area; the IL-TRM gives $55 to $125 incremental cost per sensor, but no coverage area to convert it. Ventilation reduction: PLACEHOLDER. Read in the primary TRM text.",
+      "source": "Lighting reduction in common areas and hallways: mid 24%, the energy savings factor for an interior occupancy sensor in the Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2, measure 4.5.10 (based on Williams et al., LBNL 2012); high 37%, the same with high-end trim; low 12% is a PLACEHOLDER (poorly set or partly bypassed controls). Life: 10 years (IL-TRM 4.5.10, lighting controls other than networked or luminaire-level). Cost: Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2 4.5.10 incremental costs per sensor: $55 wall-switch, $67 fixture-mounted, $125 remote or wall-mounted; at one sensor per 250 ft2 of common area (ASSUMPTION) that is $0.22 / $0.36 (average of $55 and $125) / $0.50 per ft2. Ventilation reduction: PLACEHOLDER. Read in the primary TRM text.",
       "verified": false
     },
     {
@@ -196,7 +196,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "HVAC reduction 4/7/10%: consistent with a 3% whole-building median saving for lodging retro-commissioning (Crowe, Mills et al. 2020, Energy and Buildings, about 1,500 buildings), which is about 7.6% of HVAC energy if all of it is HVAC (39.5% HVAC share, CBECS 2018 lodging). Cost: PLACEHOLDER $15,000 + $0.20 per ft2; for comparison the retro-commissioning median is $0.26 per ft2 (Crowe 2020), without control hardware. Life 10 years: the TRM has no general energy-management-system measure; the nearest controls measure, Advanced Rooftop Controls (Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2, 4.4.41), is deemed 10 years (CO2-sensor life); AMI-driven commissioning (4.9.25) is about 7. A judgment, not a deemed value. Values seen in search excerpts; to confirm.",
+      "source": "HVAC reduction 4/7/10%: consistent with a 3% whole-building median saving for lodging retro-commissioning (Crowe, Mills et al. 2020, Energy and Buildings, about 1,500 buildings), which is about 7.6% of HVAC energy if all of it is HVAC (39.5% HVAC share, CBECS 2018 lodging). Cost: PLACEHOLDER $15,000 + $0.20 per ft2 (the IL-TRM has no energy-management-system measure or cost); for comparison the retro-commissioning median is $0.26 per ft2 (Crowe 2020), without control hardware. Life 10 years: the TRM has no general energy-management-system measure; the nearest controls measure, Advanced Rooftop Controls (Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2, 4.4.41), is deemed 10 years (CO2-sensor life); AMI-driven commissioning (4.9.25) is about 7. A judgment, not a deemed value. Values seen in search excerpts; to confirm.",
       "verified": false
     },
     {
@@ -211,6 +211,41 @@
           "low": 1.2,
           "mid": 2,
           "high": 3
+        },
+        "byHvac": {
+          "central_plant": {
+            "perBoilerKBtuH": {
+              "low": 12.94,
+              "mid": 22.95,
+              "high": 28.69
+            },
+            "perSqftFloor": {
+              "low": 0.8,
+              "mid": 1.31,
+              "high": 2.0
+            }
+          },
+          "rtu": {
+            "perTon": {
+              "low": 895,
+              "mid": 958,
+              "high": 1021
+            }
+          },
+          "ptac": {
+            "perTon": {
+              "low": 890,
+              "mid": 1047,
+              "high": 1309
+            }
+          },
+          "pthp": {
+            "perTon": {
+              "low": 890,
+              "mid": 1047,
+              "high": 1309
+            }
+          }
         }
       },
       "sizeScaled": true,
@@ -233,7 +268,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Heating reduction mid 13%: replacing an 80% efficient boiler (typical existing stock, GSA evaluation) with a condensing boiler at about 92% seasonal efficiency gives 1 - 0.80/0.92 = 13%; NREL ComStock (Condensing Gas Boilers, 2025) reports 9% site savings for an example building. Life by system (Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2): central plant 23 years (electric chiller 4.4.6; the condensing boiler, 4.4.10, lasts 25), rooftop units 15 (4.4.15), PTAC and PTHP 8 (4.4.13), VRF and other heat pumps 16 (4.4.9). Cooling reduction: high 26% from the TRM 4.4.6 worked example (a 150-ton water-cooled chiller at 0.405 kW/ton IPLV against the 0.550 code baseline: 1 - 0.405/0.550 = 26%); mid 15% and low 10% are a PLACEHOLDER for a standard high-efficiency unit. Heating low and high and the cost: PLACEHOLDER. Values seen in search excerpts; to confirm. Boiler part, for reference: IL-TRM v14.0 4.4.10 High Efficiency Boiler gives a full installed cost of $22.95 per kBtu/h for a condensing hot-water boiler (over 90% combustion efficiency; $12.94 for 85 to 90%) and a 25-year life; at the model's boiler size (0.03 kBtu/h per ft2) that is about $38,000 for the demo hotel. The chiller cost is not sourced, so the combined $2.00 per ft2 stays a PLACEHOLDER.",
+      "source": "Heating reduction mid 13%: replacing an 80% efficient boiler (typical existing stock, GSA evaluation) with a condensing boiler at about 92% seasonal efficiency gives 1 - 0.80/0.92 = 13%; NREL ComStock (Condensing Gas Boilers, 2025) reports 9% site savings for an example building. Life by system (Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2): central plant 23 years (electric chiller 4.4.6; the condensing boiler, 4.4.10, lasts 25), rooftop units 15 (4.4.15), PTAC and PTHP 8 (4.4.13), VRF and other heat pumps 16 (4.4.9). Cooling reduction: high 26% from the TRM 4.4.6 worked example (a 150-ton water-cooled chiller at 0.405 kW/ton IPLV against the 0.550 code baseline: 1 - 0.405/0.550 = 26%); mid 15% and low 10% are a PLACEHOLDER for a standard high-efficiency unit. Heating low and high and the cost: PLACEHOLDER. Values seen in search excerpts; to confirm. Boiler part, for reference: IL-TRM v14.0 4.4.10 High Efficiency Boiler gives a full installed cost of $22.95 per kBtu/h for a condensing hot-water boiler (over 90% combustion efficiency; $12.94 for 85 to 90%) and a 25-year life; at the model's boiler size (0.03 kBtu/h per ft2) that is about $38,000 for the demo hotel. The chiller cost is not sourced, so the combined $2.00 per ft2 stays a PLACEHOLDER. Cost by HVAC type (Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2): rooftop units $895 / $958 / $1,021 per ton full installed cost (base, CEE Tier 1, Tier 2; under 135 kBtu/h; 4.4.15); PTAC and PTHP $1,047 per ton full cost of removing and replacing a unit (4.4.13, early replacement; low and high are a -15% / +25% PLACEHOLDER spread); central plant = condensing boiler at $22.95 per kBtu/h full installed (4.4.10; low $12.94 for 85-90% efficiency; high +25% placeholder) plus the chiller part, still a PLACEHOLDER at $1.31 per ft2 (the TRM gives only incremental chiller costs, $23-830 per ton by size and efficiency, 4.4.6); VRF stays on the $2.00 per ft2 PLACEHOLDER. Tons come from the estimated equipment (0.0025 ton per ft2; 0.75 ton per guest room is an assumption).",
       "verified": false,
       "lifetimeByHvac": {
         "central_plant": 23,
@@ -241,6 +276,13 @@
         "ptac": 8,
         "pthp": 8,
         "vrf": 16
+      },
+      "costStatusByHvac": {
+        "central_plant": "placeholder",
+        "rtu": "sourced",
+        "ptac": "sourced",
+        "pthp": "sourced",
+        "vrf": "placeholder"
       }
     },
     {

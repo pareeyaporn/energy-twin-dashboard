@@ -80,6 +80,8 @@ export const UPGRADE_ORDER: UpgradeId[] = [
   'energy_management',
   'hvac_upgrade',
   'water_heating',
+  'rooftop_solar_quarter',
+  'rooftop_solar_half',
   'rooftop_solar',
 ];
 
@@ -87,8 +89,19 @@ export const UPGRADE_ORDER: UpgradeId[] = [
 export const OPTIMIZER_DEFAULTS = {
   /** Packages below this comfort score are excluded unless the caller changes it. */
   minComfortScore: 0.7,
-  /** A recommended package must save at least this share of the current bill. */
-  minSavingsShare: 0.01,
-  /** Weights of the balanced score: financial return (five-year net benefit), carbon avoided, guest comfort. */
+  /**
+   * Minimum share of the bill a package must save. PRODUCT DECISION: 0 (no floor), because small upgrades can still be financially
+   * attractive; a package must still save money (savings above zero).
+   */
+  minSavingsShare: 0,
+  /**
+   * Weights of the balanced score (PRODUCT DECISION, configurable; normalized to sum to 1). Each objective is scaled to 0..1 first:
+   * financial = net benefit over the horizon, min-max scaled across the feasible packages; carbon = CO2 avoided per year, min-max
+   * scaled the same way; comfort = the package's comfort score (already 0..1, see comfortFor).
+   */
   balancedWeights: { financial: 0.5, carbon: 0.3, comfort: 0.2 },
 };
+
+/** Rooftop solar at three sizes (a quarter, half or all of the usable roof). They exclude each other; at most one is in a package. */
+export const SOLAR_UPGRADES: readonly UpgradeId[] = ['rooftop_solar_quarter', 'rooftop_solar_half', 'rooftop_solar'];
+export const isSolar = (id: UpgradeId): boolean => SOLAR_UPGRADES.includes(id);

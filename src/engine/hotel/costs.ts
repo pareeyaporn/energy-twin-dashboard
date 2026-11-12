@@ -1,6 +1,7 @@
 import { hotelData } from './data';
 import { areasOf, orderUpgrades, upgradeDef } from './upgrades';
 import { solarCostPerW } from './solar';
+import { isSolar } from './constants';
 import type { HotelData, HotelProfile, Range3, UpgradeId, UpgradeSizing } from './types';
 
 const SCENARIOS = ['low', 'mid', 'high'] as const;
@@ -20,7 +21,7 @@ export function upgradeCost(
   const { roofSqft, commonSqft } = areasOf(p, data);
   const m = def.cost;
   const out: Range3 = { low: 0, mid: 0, high: 0 };
-  const perW = id === 'rooftop_solar' && sizing.solarKw > 0 ? solarCostPerW(sizing.solarKw, p, data) : null;
+  const perW = isSolar(id) && sizing.solarKw > 0 ? solarCostPerW(sizing.solarKw, p, data) : null;
   for (const s of SCENARIOS) {
     out[s] =
       (m.fixed?.[s] ?? 0) +

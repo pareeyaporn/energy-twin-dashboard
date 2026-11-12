@@ -2,24 +2,83 @@
   "publicAreaShareOfFloorArea": 0.18,
   "corridorShareOfFloorArea": 0.12,
   "inRoomUnit": {
-    "ptac": { "label": "PTAC unit", "ratedKW": 1.4, "efficiency": "Heat pump PTAC, seasonal COP about 2.3 (assumed)" },
-    "vrf": { "label": "VRF indoor unit", "ratedKW": 0.25, "efficiency": "VRF system, seasonal COP about 3.0 (assumed)" },
-    "central_plant": { "label": "Fan-coil unit", "ratedKW": 0.2, "efficiency": "Served by the central plant (assumed)" },
-    "rtu": { "label": "Duct heater and fan unit", "ratedKW": 0.5, "efficiency": "Served by rooftop units (assumed)" }
+    "ptac": {
+      "label": "PTAC unit (electric resistance heat)",
+      "ratedKW": 1.4,
+      "efficiency": "Electric resistance heat, efficiency 1.0; cooling EER about 10 (assumed)"
+    },
+    "vrf": {
+      "label": "VRF indoor unit",
+      "ratedKW": 0.25,
+      "efficiency": "VRF system, seasonal COP about 3.0 (assumed)"
+    },
+    "central_plant": {
+      "label": "Fan-coil unit",
+      "ratedKW": 0.2,
+      "efficiency": "Served by the central plant (assumed)"
+    },
+    "rtu": {
+      "label": "Duct heater and fan unit",
+      "ratedKW": 0.5,
+      "efficiency": "Served by rooftop units (assumed)"
+    },
+    "pthp": {
+      "label": "PTHP unit (heat pump)",
+      "ratedKW": 1.4,
+      "efficiency": "Heat pump, seasonal heating COP about 2.3 (IL-TRM conversion); cooling EER about 10 (assumed)"
+    }
   },
   "central": {
-    "ptac": { "label": "Common-area rooftop units", "tonsPerPublicSqft": 0.0025, "efficiency": "EER about 10 (assumed)" },
-    "vrf": { "label": "VRF outdoor units", "tonsPerRoom": 0.5, "efficiency": "Seasonal COP about 3.0 (assumed)" },
-    "central_plant": { "label": "Gas boilers and chiller", "boilerKBtuHPerSqft": 0.03, "tonsPerSqft": 0.0025, "efficiency": "Boiler AFUE about 0.80, chiller COP about 4.5 (assumed)" },
-    "rtu": { "label": "Rooftop units", "tonsPerSqft": 0.0025, "efficiency": "EER about 10, gas heat AFUE about 0.80 (assumed)" }
+    "ptac": {
+      "label": "Common-area rooftop units",
+      "tonsPerPublicSqft": 0.0025,
+      "efficiency": "EER about 10 (assumed)"
+    },
+    "vrf": {
+      "label": "VRF outdoor units",
+      "tonsPerRoom": 0.5,
+      "efficiency": "Seasonal COP about 3.0 (assumed)"
+    },
+    "central_plant": {
+      "label": "Gas boilers and chiller",
+      "boilerKBtuHPerSqft": 0.03,
+      "tonsPerSqft": 0.0025,
+      "efficiency": "Boiler AFUE about 0.80, chiller COP about 4.5 (assumed)"
+    },
+    "rtu": {
+      "label": "Rooftop units",
+      "tonsPerSqft": 0.0025,
+      "efficiency": "EER about 10, gas heat AFUE about 0.80 (assumed)"
+    },
+    "pthp": {
+      "label": "Common-area rooftop units",
+      "tonsPerPublicSqft": 0.0025,
+      "efficiency": "EER about 10 (assumed)"
+    }
   },
   "guestRoomLightingKW": 0.15,
   "guestRoomPlugKW": 0.18,
   "lightingWPerSqft": 1.0,
-  "kitchen": { "rangeKBtuHPerRoom": 2.5, "hoods": 2, "hoodKW": 3, "refrigeration": 2, "refrigerationKW": 3 },
-  "elevators": { "perFloors": 3, "ratedKW": 15 },
-  "laundry": { "dryerKBtuH": 300 },
-  "hotWater": { "heaterKBtuHPerRoom": 6, "storageGalPerRoom": 6, "recircPumps": 2, "recircPumpKW": 0.75 },
+  "kitchen": {
+    "rangeKBtuHPerRoom": 2.5,
+    "hoods": 2,
+    "hoodKW": 3,
+    "refrigeration": 2,
+    "refrigerationKW": 3
+  },
+  "elevators": {
+    "perFloors": 3,
+    "ratedKW": 15
+  },
+  "laundry": {
+    "dryerKBtuH": 300
+  },
+  "hotWater": {
+    "heaterKBtuHPerRoom": 6,
+    "storageGalPerRoom": 6,
+    "recircPumps": 2,
+    "recircPumpKW": 0.75
+  },
   "source": "PLACEHOLDER, synthetic rule-of-thumb sizing for display and scaling only. Every item is an estimate.",
   "verified": false
 }

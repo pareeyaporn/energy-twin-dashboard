@@ -53,7 +53,7 @@ describe('the common financial breakdown', () => {
       if (f.annualSavings.mid > 0) close(f.simplePaybackYears!, f.netInvestment.mid / f.annualSavings.mid);
       // 7. net benefit = yearly savings (with price growth and solar degradation) minus net investment
       // electricity savings grow with electricity prices, gas savings with gas prices, solar also degrades
-      const d = id === 'rooftop_solar' ? 0.005 : 0;
+      const d = id.startsWith('rooftop_solar') ? 0.005 : 0;
       const elec = f.annualSavings.mid - gas;
       const solarPart = f.solar ? elec : 0;
       for (const [years, nb] of [[5, f.netBenefit5.mid], [10, f.netBenefit10.mid]] as const) {

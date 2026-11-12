@@ -246,7 +246,7 @@ function recoverySiteKBtu(
   const total = hdd + cdd;
   const share = total > 0 ? (u === 'heating' ? hdd : cdd) / total : 0;
   const thermal = events * depth * k.kBtuPerRoomPerF * share;
-  const eff = u === 'heating' ? k.heatingEfficiency[data.defaults.heatingFuelByHvac[p.hvacType]] : k.coolingCOP;
+  const eff = u === 'heating' ? data.defaults.heatingSystems[p.hvacType].efficiency : k.coolingCOP;
   return eff > 0 ? thermal / eff : 0;
 }
 
@@ -270,7 +270,7 @@ export function simulate(
 
   const elecRate = p.electricityRate * c.elecRateMult;
   const gasRate = p.gasRate * c.gasRateMult;
-  const efElec = data.emissions.elecKgCO2ePerKWh[p.state] ?? data.emissions.elecKgCO2ePerKWh['default'] ?? 0.4;
+  const efElec = data.emissions.subregions[p.gridSubregion]?.kgCO2ePerKWh ?? data.emissions.usKgCO2ePerKWh;
   const efGas = data.emissions.gasKgCO2ePerTherm;
 
   const eui = data.defaults.euiKBtuPerSqft[p.climateId] ?? data.defaults.euiKBtuPerSqft['default'] ?? 92;
@@ -280,7 +280,10 @@ export function simulate(
   const hotWaterScale = c.hotWaterGalPerOccupiedRoomDay / d.benchmarkHotWaterGalPerOccupiedRoomDay;
 
   for (const u of END_USES) {
-    const e0u = siteAnnual * d.endUseShareOfSite[u];
+    // Heating: the CBECS share describes a gas-heated hotel; other systems need reference efficiency / their efficiency as much site energy.
+    const hs = d.heatingSystems;
+    const heatFactor = u === 'heating' ? hs.reference.efficiency / hs[p.hvacType].efficiency : 1;
+    const e0u = siteAnnual * d.endUseShareOfSite[u] * heatFactor;
     const fuel = fuelSplit(u, p, data);
     const w = d.driverWeights[u];
     for (const z of ZONE_IDS) {

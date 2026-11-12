@@ -25,9 +25,11 @@ describe('optimizeInvestmentPortfolio', () => {
 
   it('tests every combination of the eligible upgrades', () => {
     const r = run(50000);
-    expect(r.combinationsTested).toBe(256);
+    // 7 independent upgrades, and solar at none or one of three sizes (the sizes exclude each other)
+    expect(r.combinationsTested).toBe(2 ** 7 * 4);
     expect(r.feasibleCount).toBeGreaterThan(0);
-    expect(r.feasibleCount + r.rejected.overBudget + r.rejected.comfort + r.rejected.invalid).toBe(255); // all but the empty set
+    expect(r.feasibleCount + r.rejected.overBudget + r.rejected.comfort + r.rejected.invalid).toBe(2 ** 7 * 4 - 1); // all but the empty set
+    for (const c of r.candidates) expect(c.upgradeIds.filter((id) => id.startsWith('rooftop_solar')).length).toBeLessThanOrEqual(1);
   });
 
   it('is deterministic', () => {
@@ -179,7 +181,7 @@ describe('optimizeInvestmentPortfolio', () => {
   it('skips upgrades the hotel already has', () => {
     const withControls = prepareUpgradeContext({ ...demo, profile: { ...demo.profile, smartRoomControls: true } });
     const r = optimizeInvestmentPortfolio(withControls, { budget: 250000 });
-    expect(r.combinationsTested).toBe(128);
+    expect(r.combinationsTested).toBe(2 ** 6 * 4);
     expect(r.candidates.every((c) => !c.upgradeIds.includes('smart_room_controls'))).toBe(true);
   });
 

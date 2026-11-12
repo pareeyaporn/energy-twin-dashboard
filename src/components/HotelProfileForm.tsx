@@ -44,8 +44,9 @@ function ProfileInput({ name, label, value, numeric = false, step, onCommit, onR
 }
 
 export const hvacOptions = [
-  { value: "ptac", label: "PTAC — room units" }, { value: "vrf", label: "VRF" },
-  { value: "central_plant", label: "Central plant" }, { value: "rtu", label: "Rooftop units" },
+  { value: "ptac", label: "PTAC — room units, electric resistance heat" }, { value: "pthp", label: "PTHP — room heat pumps" },
+  { value: "central_plant", label: "Central plant — gas boiler and chiller" }, { value: "vrf", label: "VRF heat pump" },
+  { value: "rtu", label: "Rooftop units — gas heat" },
 ];
 const objectiveOptions = [
   { value: "annual_savings", label: "Annual savings" }, { value: "payback", label: "Payback" },

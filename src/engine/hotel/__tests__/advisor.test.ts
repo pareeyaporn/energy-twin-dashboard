@@ -77,7 +77,7 @@ describe('buildAdvisorContext', () => {
     expect(ctx.baseline.annualCost).toBe(Math.round(baseline.annual.cost));
     expect(ctx.baseline.byCategory[0]!.label).toBe('HVAC');
     expect(ctx.baseline.byZone).toHaveLength(6);
-    expect(ctx.upgrades).toHaveLength(8);
+    expect(ctx.upgrades).toHaveLength(10); // 7 upgrades plus solar at three sizes
     expect(ctx.plan!.packages).toHaveLength(3);
     expect(ctx.plan!.budget).toBe(50000);
     expect(ctx.plan!.objectiveWinner).not.toBeNull();

@@ -1,7 +1,7 @@
 import { calculateBaselineEnergy, simulate, sumCells } from './baseline';
 import { applyScenario, comfortFlags } from './conditions';
 import { simulateEnergyScenario } from './scenarios';
-import { DAYS_IN_MONTH, KBTU_PER_KWH, KBTU_PER_THERM, LOAD_TYPES, UPGRADE_ORDER } from './constants';
+import { DAYS_IN_MONTH, KBTU_PER_KWH, KBTU_PER_THERM, LOAD_TYPES, UPGRADE_ORDER, isSolar } from './constants';
 import { hotelData } from './data';
 import { isResolved, resolveProfile } from './profile';
 import { climateLatitude, climateSolar, daylightShape, exportCreditPerKWh, solarYield } from './solar';
@@ -55,9 +55,10 @@ export function areasOf(p: HotelProfile, data: HotelData = hotelData) {
  * Solar array size: what the usable roof holds, but never more than would produce the hotel's yearly electricity use (at the
  * location's mid output). Independent of the savings scenario.
  */
-export function solarSizeKw(p: HotelProfile, baselineElecKWh: number, data: HotelData = hotelData): number {
-  const def = upgradeDef('rooftop_solar', data);
-  const roofCap = (areasOf(p, data).roofSqft * constant(def, 'usableRoofShare')) / constant(def, 'sqftPerKw');
+export function solarSizeKw(p: HotelProfile, baselineElecKWh: number, data: HotelData = hotelData, id: UpgradeId = 'rooftop_solar'): number {
+  const def = upgradeDef(id, data);
+  const fraction = def.constants['roofFraction'] ?? 1;
+  const roofCap = (areasOf(p, data).roofSqft * constant(def, 'usableRoofShare') * fraction) / constant(def, 'sqftPerKw');
   const yieldMid = solarYield(p, 'mid', data);
   const useCap = yieldMid > 0 ? (constant(def, 'maxShareOfElectricity') * baselineElecKWh) / yieldMid : 0;
   return Math.round(Math.max(0, Math.min(roofCap, useCap)) * 10) / 10;
@@ -76,7 +77,7 @@ function hourWeights(data: HotelData): Record<string, number[]> {
 export function eligibleUpgrades(p: HotelProfile, baselineElecKWh = 1, data: HotelData = hotelData): UpgradeId[] {
   return UPGRADE_ORDER.filter((id) => {
     if (id === 'smart_room_controls') return !p.smartRoomControls;
-    if (id === 'rooftop_solar') return solarSizeKw(p, baselineElecKWh, data) > 0;
+    if (isSolar(id)) return solarSizeKw(p, baselineElecKWh, data, id) > 0;
     return true;
   });
 }
@@ -284,6 +285,7 @@ export function calculateUpgradeSavings(
   const cells = (smart ? smart.cells : ctx.baseline.cells).map(cloneCell);
   let hvacSizeFactor = 1;
   let solarKw = 0;
+  let solarId: UpgradeId | null = null;
   let solarOffsetKWh = 0;
   let solarGenerationKWh = 0;
   let solarExportKWh = 0;
@@ -333,10 +335,13 @@ export function calculateUpgradeSavings(
       case 'water_heating':
         rescale(cells, (c) => c.endUse === 'hotWater', 1 - param(def, 'hotWaterReduction', scenario), env);
         break;
+      case 'rooftop_solar_quarter':
+      case 'rooftop_solar_half':
       case 'rooftop_solar': {
         // Generation from the location's solar data; each hour of a typical day the hotel uses what it can (its load after the
         // other upgrades) and the rest is exported at the region's export credit.
-        solarKw = solarSizeKw(ctx.profile, ctx.baseline.annual.elecKWh, d);
+        solarKw = solarSizeKw(ctx.profile, ctx.baseline.annual.elecKWh, d, id);
+        solarId = id;
         const sol = climateSolar(ctx.profile, d);
         const yieldKwh = solarYield(ctx.profile, scenario, d);
         const lat = climateLatitude(ctx.profile, d);
@@ -375,8 +380,8 @@ export function calculateUpgradeSavings(
     }
   }
 
-  exportCredit = solarExportKWh * exportCreditPerKWhIf(has('rooftop_solar'), ctx, d);
-  const solarOm = solarKw > 0 ? solarKw * constant(upgradeDef('rooftop_solar', d), 'omPerKwYear') : 0;
+  exportCredit = solarExportKWh * exportCreditPerKWhIf(solarId !== null, ctx, d);
+  const solarOm = solarId && solarKw > 0 ? solarKw * constant(upgradeDef(solarId, d), 'omPerKwYear') : 0;
   const annual = sumCells(cells);
   // The export credit lowers the electricity bill without changing the hotel's own use; solar upkeep adds an operating cost.
   annual.elecCost -= exportCredit;

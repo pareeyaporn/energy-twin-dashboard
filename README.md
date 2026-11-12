@@ -94,7 +94,8 @@ npx vitest run  # tests
 ## Docs
 - [Idea overview](docs/00_IDEA.md), [hotel pivot brief](docs/10_HOTEL_SPEC.md) and [detailed task list](docs/11_HOTEL_TASKS.md)
 - [Backend architecture](docs/12_BACKEND_ARCHITECTURE.md) and [hotel engine spec](docs/13_HOTEL_ENGINE_SPEC.md) (equations, assumptions, demo figures)
-- [Data status and to-do](docs/08_DATA_TODO.md) and the [research log](docs/14_RESEARCH_LOG.md) (every sourced value, before and after)
+- [Data status and to-do](docs/08_DATA_TODO.md), the [research log](docs/14_RESEARCH_LOG.md) (every sourced value, before and after) and the
+  [product decisions](docs/15_PRODUCT_DECISIONS.md) (choices, not facts: discount rate, optimizer rules, HVAC types, solar sizes, emissions, incentives)
 - [Claude Code prompts](docs/05_CLAUDE_CODE_PROMPTS.md), [Lovable prompts](docs/06_LOVABLE_PROMPTS.md), [demo checklist](docs/07_DEMO_CHECKLIST.md)
 - [Data and research to-do](docs/08_DATA_TODO.md) and [setup](docs/01_SETUP.md)
 - Home-era specs, kept as patterns until the hotel versions exist: [engine](docs/02_ENGINE_SPEC.md), [data](docs/03_DATA_SPEC.md),

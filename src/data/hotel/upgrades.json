@@ -18,6 +18,7 @@
     },
     "heatingKindByHvac": {
       "ptac": "resistance",
+      "pthp": "heatPump",
       "vrf": "heatPump",
       "central_plant": "gas",
       "rtu": "gas"
@@ -253,8 +254,62 @@
       "verified": false
     },
     {
+      "id": "rooftop_solar_quarter",
+      "label": "Rooftop solar (a quarter of the usable roof)",
+      "description": "Sized to 25% of the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
+      "lifetimeYears": 25,
+      "cost": {},
+      "params": {},
+      "constants": {
+        "usableRoofShare": 0.5,
+        "sqftPerKw": 100,
+        "degradationPerYear": 0.005,
+        "maxShareOfElectricity": 1,
+        "omPerKwYear": 17.63,
+        "roofFraction": 0.25
+      },
+      "comfort": {
+        "impact": "none",
+        "note": ""
+      },
+      "requires": [],
+      "excludes": [
+        "rooftop_solar",
+        "rooftop_solar_half"
+      ],
+      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W (PLACEHOLDER). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
+      "verified": false
+    },
+    {
+      "id": "rooftop_solar_half",
+      "label": "Rooftop solar (half the usable roof)",
+      "description": "Sized to 50% of the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
+      "lifetimeYears": 25,
+      "cost": {},
+      "params": {},
+      "constants": {
+        "usableRoofShare": 0.5,
+        "sqftPerKw": 100,
+        "degradationPerYear": 0.005,
+        "maxShareOfElectricity": 1,
+        "omPerKwYear": 17.63,
+        "roofFraction": 0.5
+      },
+      "comfort": {
+        "impact": "none",
+        "note": ""
+      },
+      "requires": [],
+      "excludes": [
+        "rooftop_solar",
+        "rooftop_solar_quarter"
+      ],
+      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W (PLACEHOLDER). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
+      "verified": false
+    },
+    {
       "id": "rooftop_solar",
-      "label": "Rooftop solar",
+      "label": "Rooftop solar (full usable roof)",
       "description": "Sized to the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
       "lifetimeYears": 25,
       "cost": {},
@@ -264,14 +319,18 @@
         "sqftPerKw": 100,
         "degradationPerYear": 0.005,
         "maxShareOfElectricity": 1,
-        "omPerKwYear": 17.63
+        "omPerKwYear": 17.63,
+        "roofFraction": 1
       },
       "comfort": {
         "impact": "none",
         "note": ""
       },
       "requires": [],
-      "excludes": [],
+      "excludes": [
+        "rooftop_solar_half",
+        "rooftop_solar_quarter"
+      ],
       "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data (PVWatts). Cost: the region's installed cost per W (PLACEHOLDER). Operation and maintenance: $17.63 per kW (DC) a year for 2024 ($14.17 system plus $3.46 administration), NLR Annual Technology Baseline 2025, Commercial PV (atb.nlr.gov, read in the primary page). Degradation: 0.5% a year; Jordan et al. 2022, 'Photovoltaic fleet degradation insights', Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75% a year, cooler climates 0.48% a year (read in the primary paper). Inverter replacement is not included.",
       "verified": false
     }

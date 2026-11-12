@@ -100,7 +100,7 @@ describe('optimizing under a scenario', () => {
   it('an empty scenario is the same as none, and a scenario with smart controls removes that upgrade', () => {
     expect(optimizeInvestmentPortfolio(demo, { budget: 50000, scenario: {} })).toEqual(optimizeInvestmentPortfolio(demo, { budget: 50000 }));
     const r = optimizeInvestmentPortfolio(demo, { budget: 250000, scenario: { smartRoomControls: true } });
-    expect(r.combinationsTested).toBe(128);
+    expect(r.combinationsTested).toBe(2 ** 6 * 4); // 6 independent upgrades x (no solar or one of 3 sizes)
     expect(r.candidates.every((c) => !c.upgradeIds.includes('smart_room_controls'))).toBe(true);
   });
 
@@ -149,7 +149,7 @@ describe('opportunities by zone', () => {
 
   it('every eligible upgrade helps at least one zone, and ineligible ones are left out', () => {
     const all = new Set(Object.values(opp).flatMap((l) => l.map((o) => o.id)));
-    expect(all.size).toBe(8);
+    expect(all.size).toBe(10);
     const withCtl = prepareUpgradeContext({ ...demo, profile: { ...demo.profile, smartRoomControls: true } });
     const none = new Set(Object.values(opportunitiesByZone(withCtl)).flatMap((l) => l.map((o) => o.id)));
     expect(none.has('smart_room_controls')).toBe(false);

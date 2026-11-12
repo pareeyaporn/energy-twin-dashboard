@@ -45,6 +45,7 @@ export {
   financialBreakdown,
   incentiveLines,
   netBenefitOver,
+  npvOver,
   savingsInYear,
 } from './finance';
 export type { IncentiveOverrides, SavingsStream } from './finance';
@@ -53,7 +54,7 @@ export { compareUpgrades } from './comparison';
 export type { UpgradeComparisonRow } from './comparison';
 export { climateSolar, regionalSolar, solarCostPerW, exportCreditPerKWh, solarYield, daylightShape } from './solar';
 export type { EvaluateOptions } from './package';
-export { optimizeInvestmentPortfolio } from './optimizer';
+export { optimizeInvestmentPortfolio, normalizedWeights } from './optimizer';
 export { explainPortfolio } from './explain';
 export { opportunitiesByZone } from './opportunities';
 export type { ZoneOpportunity } from './opportunities';

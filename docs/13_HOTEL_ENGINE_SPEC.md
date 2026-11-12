@@ -174,6 +174,10 @@ per upgrade (`incentives` option), which replaces program amounts for that upgra
 optimizer uses (the what-if when "optimize for this scenario" is on, else the baseline). The advisor's upgrade figures and the zone opportunities come from the same rows,
 so the cards, the optimizer and the advisor cannot disagree. Tests in `__tests__/financials.test.ts` check this.
 
+**Product decisions (docs/15).** NPV at 8% (3% alternative) is part of the breakdown (`npv5`, `npv10`); the optimizer has no minimum savings
+share and normalizes configurable balanced weights; heating site energy depends on the system (gas 0.80, resistance 1.0, heat pump COP 2.3);
+solar comes in three mutually exclusive sizes; the grid factor follows the eGRID subregion of the location.
+
 **Comfort (`comfortFor`).** Score starts at 1; each upgrade with a minor comfort impact costs 0.05 and each warning flag 0.15. Notes list the impacts and any condition flags
 (smart controls add the recovery-time note). The optimizer will be able to require a minimum score.
 

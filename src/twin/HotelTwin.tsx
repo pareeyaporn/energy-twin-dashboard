@@ -128,7 +128,7 @@ export function HotelTwin() {
       </div>
 
       <div id="twin-panel" role="tabpanel" aria-labelledby={`twin-tab-${layer}`} className={layer === "zones" ? "grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]" : ""}>
-        <div className="rounded-xl border border-glass-border bg-stage-gradient p-3">
+        <div className="min-w-0 rounded-xl border border-glass-border bg-stage-gradient p-3">
           {layer === "zones" && (view === "3d" && canUse3D ? <View3D fallback={<BuildingDiagram />} /> : <BuildingDiagram />)}
           {layer === "rooms" && <RoomGrid />}
           {layer === "equipment" && <EquipmentLayer />}

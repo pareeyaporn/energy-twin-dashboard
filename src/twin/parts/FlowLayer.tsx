@@ -84,7 +84,7 @@ export function FlowLayer() {
   const total = layout.total;
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       <style>{`
         @keyframes twin-flow { to { stroke-dashoffset: -28; } }
         .twin-flow-dots { animation: twin-flow var(--flow-dur, 1.6s) linear infinite; }
@@ -101,9 +101,10 @@ export function FlowLayer() {
         </span>
       </div>
 
+      <div className="-mx-1 overflow-x-auto px-1" data-testid="flow-scroll">
       <svg
         viewBox={`0 0 ${layout.width} ${layout.height}`}
-        className="h-auto w-full"
+        className="h-auto w-full min-w-[620px] md:min-w-0"
         role="img"
         aria-label={`Energy flow, ${metric === "cost" ? "cost" : "site energy"}, ${period === "year" ? "annual" : `${monthLabel(month)} ${hourLabel(hour)}`}. Details in the table below.`}
         onMouseLeave={() => setHover(null)}
@@ -174,6 +175,7 @@ export function FlowLayer() {
           );
         })}
       </svg>
+      </div>
 
       {sel && selLink && (
         <div data-testid="flow-detail" className="rounded-lg border border-glass-border bg-glass p-3 text-sm">

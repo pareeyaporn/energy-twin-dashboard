@@ -276,6 +276,14 @@ A time scrubber plays a typical day or the year, a simulated meter shows modeled
 The zone panel shows energy, cost share, change from before, an hourly electricity chart, equipment, schedules, efficiency assumptions and the zone's improvement opportunities. Files: `HotelTwin.tsx`, `useTwinClock.ts`, `format.ts` and one file per part in `parts/`.
 Lovable only places `<HotelTwin />` (prompt LV6). Everything labeled simulated or estimated stays labeled.
 
+**Flow, Rooms and Equipment layers (Phase 10).** Flow: an own SVG Sankey over `energyFlows` (annual) or `energyFlowsAt(result, month, hour)`
+(one hour of a typical day, the meter's formula, so the hour's flows add up to the meter); every link carries its electricity and gas parts,
+drawn as cyan and amber bands; width is cost or site energy. The moving dots are illustrative, not measured flow. Equipment: the estimated
+inventory as cards grouped by HVAC, water heating, lighting and other; each item shows the modeled demand of its system
+(`typicalDayByZoneEndUse`, zone × end use by hour) because the model has no per-appliance energy; status is running above 60% of the
+day's peak, idle below 15%. Rooms: a façade of the engine's room pattern (`roomOccupancyPattern`), with setpoints from the displayed
+conditions and the guest-room zone's average kW per room (labeled as an average).
+
 **3D view (Phase 9).** The Zones layer has a 3D view (`src/three`, spec in `docs/04`), default on desktop with WebGL. It adds an hourly
 state of the hotel, `selectHourState(state)`, from engine functions only: `daylight(lat, month)` (sunrise and sunset from declination),
 `sunElevationDeg` and `sunAzimuthDeg`, `outdoorTempF(profile, month, hour)` (modeled: a two-part cosine through the NOAA 1991–2020 normal

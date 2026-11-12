@@ -161,8 +161,8 @@ describe('costs', () => {
     close(mid('occupancy_sensors'), 0.36 * 55000 * 0.3); // IL-TRM 4.5.10 per-sensor costs at 250 ft² per sensor (assumption)
     close(mid('insulation'), 1.91 * (55000 / 5)); // IL-TRM 4.8.1 $1.40/ft², in 2024 dollars
     close(mid('water_heating'), 200 * 100); // built from IL-TRM 4.3.1–4.3.3 costs
-    close(mid('energy_management'), 15000 + 0.2 * 55000);
-    close(mid('hvac_upgrade'), 22.95 * 0.03 * 55000 + 1.31 * 55000); // central plant: IL-TRM boiler $/kBtu/h + chiller placeholder
+    close(mid('energy_management'), 2.53 * 55000); // NREL TP-5500-82117 Table 5: upgrade existing system, average $/ft²
+    close(mid('hvac_upgrade'), 22.95 * 0.03 * 55000 + 1030 * 0.0025 * 55000); // central plant: IL-TRM boiler $/kBtu/h + EIA 2023 chiller $/ton
     close(mid('rooftop_solar'), 3100 * 50); // LBNL 2024 median, 20–50 kW non-residential: $3.10/W
   });
 

@@ -198,3 +198,12 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
 - **Regions are areas of Chicago** (Downtown, North Side, South Side, Airports), not other cities.
 - **Filters narrow every portfolio view**, including the optimizer and the priority score, which is then relative to the hotels shown.
 - **A hotel stays open when the organization changes**; the breadcrumb names its own organization.
+
+## 20. Which NREL scope prices "energy management" (November 2026)
+
+- **Mid = "upgrade existing system" ($2.53 per ft²)**, because an energy management upgrade in an existing hotel replaces automation controllers;
+  **low = front end only ($0.79)** for a hotel whose controllers are recent; **high = complete system ($7.60)** for a hotel with no usable
+  controls. The savings (4–10% of HVAC) are unchanged. The choice moves the 300-room recommendation from LED + energy management to insulation +
+  LED + sensors; the demo script follows (docs/07).
+- **LED keeps an assumed mix** (about 14% of fixtures replaced, the rest relamped) between the two sourced EIA bounds, rather than either extreme.
+- **Validation findings are reported, not tuned**: the model's guest-room controls savings read lower than field studies (docs/14 pass 10).

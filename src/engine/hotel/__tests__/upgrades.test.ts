@@ -239,7 +239,9 @@ describe('evaluatePackage', () => {
     close(e.newAnnualCost, base.annual.cost - e.annualSavings.mid);
     expect(e.metrics.cost).toBe(e.cost.mid);
     close(e.metrics.remainingBudget, profile.profile.budget - e.cost.mid);
-    expect(e.metrics.paybackYears).toBeCloseTo(e.cost.mid / e.annualSavings.mid, 9);
+    // Payback uses the net investment: gross cost minus verified incentives (ComEd LED and sensor rates apply here).
+    expect(e.financials.incentivesTotal).toBeGreaterThan(0);
+    expect(e.metrics.paybackYears).toBeCloseTo((e.cost.mid - e.financials.incentivesTotal) / e.annualSavings.mid, 9);
     close(sum(e.lineItems.map((l) => l.annualSavingsMid)), e.annualSavings.mid);
     close(sum(e.lineItems.map((l) => l.cost.mid)), e.cost.mid);
     expect(e.comfort.score).toBeCloseTo(0.95, 9);
@@ -249,7 +251,7 @@ describe('evaluatePackage', () => {
   it('uses the horizon and assumptions it is given', () => {
     const e = evaluatePackage(ctx, ['led_lighting'], { assumptions: { horizonYears: 10, priceGrowth: 0, gasPriceGrowth: 0 }, budget: 40000, lineItems: false });
     expect(e.metrics.horizonYears).toBe(10);
-    close(e.metrics.netBenefit, 10 * e.annualSavings.mid - e.cost.mid);
+    close(e.metrics.netBenefit, 10 * e.annualSavings.mid - (e.cost.mid - e.financials.incentivesTotal));
     close(e.metrics.remainingBudget, 40000 - e.cost.mid);
     expect(e.lineItems).toEqual([]);
   });

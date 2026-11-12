@@ -92,7 +92,7 @@ export function StressTests() {
         <div className="mt-3 space-y-3 border-t border-glass-border pt-3">
           <div className="text-xs text-muted-foreground" data-testid="stress-description">
             <span className={`mr-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${current.duration === "temporary" ? "bg-heat/15 text-heat" : "bg-primary/15 text-primary"}`} data-testid="stress-kind">
-              {STRESS_KIND_LABEL[stressKind(current)]} · {current.duration === "temporary" ? "temporary" : "persistent"}
+              {STRESS_KIND_LABEL[stressKind(current)]}{stressKind(current) === "operational_scenario" ? ` · ${current.duration}` : ""}
             </span>
             {current.description}
             {result && <span className="ml-1 font-medium text-foreground">Estimated change: {signedUsd(result.delta.cost)} {stressPeriodText(current)}.</span>}
@@ -118,7 +118,7 @@ export function StressTests() {
                   <tbody>
                     <tr><td>Electricity</td><td className="text-right">{kwh(report.normal.elecKWh)}</td><td className="text-right">{kwh(report.stressed.elecKWh)}</td><td className="text-right">{signed(report.delta.elecKWh, "kWh")} <span className="text-[10px] opacity-80">({pctOf(report.delta.elecKWh, report.normal.elecKWh)})</span></td></tr>
                     <tr><td>Natural gas</td><td className="text-right">{therms(report.normal.gasTherms)}</td><td className="text-right">{therms(report.stressed.gasTherms)}</td><td className="text-right">{signed(report.delta.gasTherms, "therms")} <span className="text-[10px] opacity-80">({pctOf(report.delta.gasTherms, report.normal.gasTherms)})</span></td></tr>
-                    <tr><td>Carbon</td><td className="text-right">{Math.round(report.normal.carbonKg / 1000).toLocaleString("en-US")} t</td><td className="text-right">{Math.round(report.stressed.carbonKg / 1000).toLocaleString("en-US")} t</td><td className="text-right">{signed(report.delta.carbonKg, "kg")} <span className="text-[10px] opacity-80">({pctOf(report.delta.carbonKg, report.normal.carbonKg)})</span></td></tr>
+                    <tr><td>Carbon</td><td className="text-right">{Math.round(report.normal.carbonKg / 1000).toLocaleString("en-US")} t</td><td className="text-right">{Math.round(report.stressed.carbonKg / 1000).toLocaleString("en-US")} t</td><td className="text-right">{report.delta.carbonKg >= 0 ? "+" : "−"}{(Math.abs(report.delta.carbonKg) / 1000).toFixed(1)} t <span className="text-[10px] opacity-80">({pctOf(report.delta.carbonKg, report.normal.carbonKg)})</span></td></tr>
                     <tr className="font-medium" data-testid="stress-cost-row"><td>Energy cost</td><td className="text-right">{usd(report.normal.cost)}</td><td className="text-right">{usd(report.stressed.cost)}</td><td className={`text-right ${report.delta.cost > 0 ? "text-heat" : "text-savings"}`}>{signedUsd(report.delta.cost)} <span className="text-[10px] opacity-80">({pctOf(report.delta.cost, report.normal.cost)})</span></td></tr>
                   </tbody>
                 </table>

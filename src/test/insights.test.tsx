@@ -63,6 +63,15 @@ describe("energy insights in the app", () => {
     expect(within(cards[0]!).getByText(/Estimates|baseline|simulation/i)).toBeTruthy();
   });
 
+  it("a hotel above the other hotels' median intensity links to the portfolio comparison", () => {
+    get().openProperty("ohare-gateway");
+    render(<EnergyInsights />);
+    const card = screen.getAllByTestId("insight-card").find((c) => c.getAttribute("data-insight") === "intensity")!;
+    expect(card.textContent).toMatch(/median of the other 4 hotels/);
+    fireEvent.click(within(card).getByTestId("insight-action"));
+    expect(navigate).toHaveBeenCalledWith({ to: "/portfolio" });
+  });
+
   it("the investment button runs the optimizer only when clicked", async () => {
     vi.useFakeTimers();
     render(<EnergyInsights />);

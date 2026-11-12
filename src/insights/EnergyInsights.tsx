@@ -78,7 +78,7 @@ function InsightCard({ insight, onAction }: { insight: EnergyInsight; onAction: 
           </div>
           <h3 className="mt-1 text-sm font-semibold leading-snug">{insight.title}</h3>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="num text-lg font-semibold text-primary" data-testid="insight-metric">{formatMetric(insight.metric)}</span>
+            <span className="num shrink-0 whitespace-nowrap text-lg font-semibold text-primary" data-testid="insight-metric">{formatMetric(insight.metric)}</span>
             <span className="text-[11px] text-muted-foreground">{insight.metric.label}</span>
           </div>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{insight.body}</p>

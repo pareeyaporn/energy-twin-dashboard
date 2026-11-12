@@ -17,7 +17,7 @@ describe("stress test panel", () => {
     for (const c of ["Weather", "Operations", "Financial"]) expect(screen.getByRole("group", { name: c })).toBeInTheDocument();
     expect(within(screen.getByRole("region", { name: "Stress tests" })).getAllByRole("button")).toHaveLength(8);
     fireEvent.click(screen.getByRole("button", { name: "Natural gas +20%" }));
-    expect(screen.getByTestId("stress-kind")).toHaveTextContent(/Persistent financial assumption · persistent/);
+    expect(screen.getByTestId("stress-kind")).toHaveTextContent(/^Persistent financial assumption$/);
     expect(screen.getByRole("table", { name: "Assumptions changed" })).toHaveTextContent(/Natural gas price.*\+20%.*Every year/);
     expect(screen.getByTestId("stress-compare")).toHaveTextContent(/Energy cost.*Carbon|Carbon.*Energy cost/);
     expect(await screen.findByTestId("stress-recommendation", {}, { timeout: 5000 })).toBeInTheDocument();
@@ -29,7 +29,7 @@ describe("stress test panel", () => {
     get().createCustomPlan("Lights", [{ id: "led_lighting" }]);
     render(<StressTests />);
     fireEvent.click(screen.getByRole("button", { name: "Heat wave" }));
-    expect(screen.getByTestId("stress-kind")).toHaveTextContent(/Temporary event · temporary/);
+    expect(screen.getByTestId("stress-kind")).toHaveTextContent(/^Temporary event$/);
     expect(screen.getByTestId("stress-bars")).toBeInTheDocument();
     expect(screen.getByTestId("stress-plan")).toHaveTextContent("Lights");
     expect(screen.getByTestId("stress-avoided")).toHaveTextContent(/in the year it happens/);

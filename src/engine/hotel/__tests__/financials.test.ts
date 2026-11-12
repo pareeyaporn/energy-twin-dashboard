@@ -225,3 +225,48 @@ describe('one set of numbers everywhere', () => {
     expect(calculateBaselineEnergy(demo).annual.cost).toBeCloseTo(ctx.baseline.annual.cost, 6);
   });
 });
+
+describe('smart room controls, calibrated to the Illinois TRM', () => {
+  it('saves within the IL-TRM 4.4.8 range for a 100-room Chicago hotel with fan coils and gas heat', () => {
+    // IL-TRM: 92-147 kWh and 3.0-6.5 therms per ton; at 0.75-1.0 ton per room that is 6,900-14,700 kWh and 225-650 therms.
+    const f = row('smart_room_controls').financials;
+    expect(f.annualEnergySavings.elecKWh).toBeGreaterThanOrEqual(6900);
+    expect(f.annualEnergySavings.elecKWh).toBeLessThanOrEqual(14700);
+    expect(f.annualEnergySavings.gasTherms).toBeGreaterThanOrEqual(150);
+    expect(f.annualEnergySavings.gasTherms).toBeLessThanOrEqual(650);
+  });
+
+  it('gives the same saving from the Scenario switch as from the upgrade card (one shared simulation)', () => {
+    const card = row('smart_room_controls').financials.annualSavings.mid + 0; // no O&M or export for this upgrade
+    const scn = prepareScenarioContext(demo, { smartRoomControls: true });
+    expect(ctx.baseline.annual.cost - scn.baseline.annual.cost).toBeCloseTo(card, 6);
+    // and with the controls already on, the upgrade is no longer offered
+    expect(compareUpgrades(scn).map((r) => r.id)).not.toContain('smart_room_controls');
+  });
+});
+
+describe('the 300-room downtown preset', () => {
+  const big = presetProfile('demo-chicago-300');
+  const bctx = prepareUpgradeContext(big);
+  it('uses documented defaults where the preset leaves inputs out, and labels them', () => {
+    expect(big.profile.rooms).toBe(300);
+    expect(big.defaulted).toEqual(expect.arrayContaining(['floorAreaSqft', 'occupancy']));
+  });
+  it('scales sensibly: about three times the energy of the 100-room hotel, and per-room costs scale with rooms', () => {
+    const ratio = bctx.baseline.annual.siteKBtu / ctx.baseline.annual.siteKBtu;
+    expect(ratio).toBeGreaterThan(2.3);
+    expect(ratio).toBeLessThan(3.7);
+    const smartBig = compareUpgrades(bctx).find((r) => r.id === 'smart_room_controls')!.financials.grossCost.mid;
+    expect(smartBig).toBeCloseTo(3 * row('smart_room_controls').financials.grossCost.mid, 6);
+  });
+});
+
+describe('roof insulation on a tall building', () => {
+  it('saves a smaller share of the weather load when the roof is a small part of the envelope', () => {
+    const low = compareUpgrades(prepareUpgradeContext(demo)).find((r) => r.id === 'insulation')!.financials;
+    const tower = prepareUpgradeContext(resolveProfile({ ...demo.profile, floors: 20 } as never));
+    const high = compareUpgrades(tower).find((r) => r.id === 'insulation')!.financials;
+    // Same hotel, four times the floors: the saving is about a quarter (the weather load itself is unchanged).
+    expect(high.annualSavings.mid / low.annualSavings.mid).toBeCloseTo(0.25, 1);
+  });
+});

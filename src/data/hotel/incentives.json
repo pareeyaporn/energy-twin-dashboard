@@ -9,8 +9,8 @@
       "kind": "percent_of_cost",
       "value": null,
       "applied": false,
-      "note": "Not applied. The 2025 federal budget law (Public Law 119-21) set construction-start and placed-in-service deadlines for solar under this credit; whether a new project qualifies, and at what rate, must be confirmed with current IRS guidance and a tax adviser.",
-      "source": "IRS Section 48E guidance (to research).",
+      "note": "Not applied. IRS Notice 2025-42 (August 2025): under Public Law 119-21 (OBBBA) the Section 48E credit ends for solar facilities placed in service after December 31, 2027 unless construction began by July 4, 2026 (Physical Work Test). A new project would need to be in service by the end of 2027. Rate per the IRS Clean Electricity Investment Credit page (reviewed January 5, 2026): 6% base, up to 30% with prevailing wage and apprenticeship requirements, plus 10 points each for domestic content and energy communities; foreign-entity rules also apply. Confirm eligibility with a tax adviser, then enter the amount.",
+      "source": "IRS Notice 2025-42 (n-25-42.pdf); IRS Clean Electricity Investment Credit page (reviewed 05-Jan-2026).",
       "verified": false
     },
     {

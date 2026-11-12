@@ -152,15 +152,15 @@ a bill-calibration view, a 12-month forecast band, 3D, and live IoT.
 Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: true` and name the exact table.
 - [x] 7.1 Commercial electricity and gas prices for the demo state (EIA commercial price tables); price growth from EIA AEO2026
 - [ ] 7.2 Lodging energy use and end uses by climate (EIA CBECS), plus an energy intensity benchmark (ENERGY STAR). **Partly:** national lodging end-use split and fuel mix from CBECS 2018 Tables E1 and E5; climate split and EUI benchmark still to do
-- [ ] 7.3 Chicago monthly weather normals (NOAA)
+- [x] 7.3 Chicago monthly weather normals (NOAA 1991–2020, O'Hare)
 - [ ] 7.4 Hot water per occupied room, lighting power and hours, kitchen share (ASHRAE or ENERGY STAR guidance)
 - [ ] 7.5 HVAC efficiency by type (PTAC, VRF, central plant, RTU)
 - [ ] 7.6 Upgrade savings and costs for all eight upgrades (NREL ComStock, ENERGY STAR hotel guidance, DOE Better Buildings case studies). **Pass 1 done** from search excerpts (see `docs/08`); most costs still placeholders; confirm in the IL-TRM once `icc.illinois.gov` is allowed
-- [ ] 7.7 Rooftop solar cost per kW and production (PVWatts, now at `developer.nlr.gov`). **Partly:** O&M and degradation sourced; $/W, output and export credit still to do
-- [ ] 7.8 Grid emission factor for the demo region (EPA eGRID). **Partly:** EIA Illinois generation rate (510 lbs CO2/MWh) in use; eGRID subregion still to check
+- [ ] 7.7 Rooftop solar cost per kW and production. **Partly:** output from PVWatts (Chicago TMY), O&M and degradation sourced; $/W (LBNL file, manual download) and export credit $ still to do
+- [x] 7.8 Grid emission factor for the demo region: EPA eGRID2023 RFCW (0.4155 kg CO2e/kWh); gas from the EPA Emission Factors Hub 2025
 - [ ] 7.9 Seasonal occupancy pattern (a synthetic curve is acceptable, but cite the basis)
 - [ ] 7.10 Comfort guidance for setpoints (ASHRAE 55)
-- [ ] 7.11 Compare the demo hotel against an ENERGY STAR Portfolio Manager benchmark and note the result for Q&A
+- [x] 7.11 Compare the demo hotel against an ENERGY STAR Portfolio Manager benchmark: 91.1 vs the hotel median 63.0 kBtu/ft² (and CBECS lodging 85.7); see `docs/14`
 - [x] 7.12 Update `docs/08_DATA_TODO.md` to this list (rewritten as the detailed hotel research to-do, with the current placeholder values and sources to use)
 - [ ] 7.13 **Calibration pass, after everything is built (decided: do not tune numbers before then).** Replace the placeholder savings, costs and interaction factors with
       reasonable, sourced values, then check the whole result for realism. Start with the items the demo depends on:
@@ -173,8 +173,8 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [x] 7b.2 Solar: location-based output, hour-by-hour self-use and export, regional $/W by size, export credit, degradation and O&M
 - [x] 7b.3 Incentives listed per upgrade with sources; none applied until confirmed; user-entered amounts supported
 - [x] 7b.4 [LV] LV11 and LV12: the breakdown on every upgrade card, the package cards and the comparison tables; packages first, comparison collapsed below
-- [ ] 7b.5 Calibrate smart room controls: the model saves about 3% of guest-room HVAC vs 10.8–26.5% measured (DOE/PNNL); check against the IL-TRM per-room figures
-- [ ] 7b.6 Research pass 2 once the hosts are allowed (`docs/08`): PVWatts for Chicago, solar $/W (LBNL file), IL-TRM measures, ENERGY STAR benchmark, eGRID
+- [x] 7b.5 Calibrate smart room controls to the IL-TRM 4.4.8 Chicago-hotel range (guest-room fan saving while empty); now $1,715 a year for 100 rooms
+- [x] 7b.6 Research pass 2: PVWatts, IL-TRM v14 (GREM, lighting controls, lighting-HVAC interaction, showerheads), eGRID, EPA gas factor, CBECS benchmark. Remaining items are in `docs/08` (A1–A5, B1–B7)
 - [ ] 7b.7 Small UI fixes: one "some inputs are defaults" note instead of a tag on every number; compact number row on mobile; twin split-view labels (CC)
 
 ## Phase 8 — Demo hardening (all)

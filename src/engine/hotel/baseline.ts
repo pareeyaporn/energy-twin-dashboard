@@ -303,11 +303,16 @@ export function simulate(
 
         const recovery =
           z === 'guest_rooms' && (u === 'heating' || u === 'cooling') ? recoverySiteKBtu(u, p, c, occ, days, hdd, cdd, data) : 0;
+        // Smart room controls also turn the guest-room fan coil down while a room is empty (IL-TRM 4.4.8; calibrated share).
+        const fanMult =
+          z === 'guest_rooms' && u === 'ventilation' && c.smartRoomControls
+            ? 1 - d.smartControlFan.reductionWhenEmpty * (1 - clamp((occ * c.occupiedHoursPerRoom) / 24, 0, 1))
+            : 1;
         const loadKBtu: Record<LoadType, number> = {
-          base: e0 * w.base * base,
-          occupancy: e0 * w.occupancy * occTerm + recovery,
-          weather: e0 * w.weather * weatherTerm,
-          schedule: e0 * w.schedule * schedTerm,
+          base: e0 * w.base * base * fanMult,
+          occupancy: (e0 * w.occupancy * occTerm) * fanMult + recovery,
+          weather: e0 * w.weather * weatherTerm * fanMult,
+          schedule: e0 * w.schedule * schedTerm * fanMult,
         };
         const siteKBtu = loadKBtu.base + loadKBtu.occupancy + loadKBtu.weather + loadKBtu.schedule;
         const elecKWh = (siteKBtu * fuel.electric) / KBTU_PER_KWH;

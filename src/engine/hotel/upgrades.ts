@@ -225,16 +225,30 @@ const siteOf = (cells: Cell[], match: (c: Cell) => boolean) =>
   cells.reduce((s, c) => (match(c) ? s + c.siteKBtu : s), 0);
 
 /** Less lighting heat: cooling falls and heating rises, in proportion to the lighting energy saved. */
-function lightingInteraction(cells: Cell[], savedKBtu: number, ctx: UpgradeContext, env: Env): void {
-  if (savedKBtu <= 0) return;
+/**
+ * Less lighting heat lowers cooling and raises heating (IL-TRM waste-heat and interaction factors). `saved` is the lighting energy
+ * saved in guest rooms and in all other spaces (site kBtu); factors depend on the space and on how the hotel is heated.
+ */
+function lightingInteraction(cells: Cell[], saved: { guest: number; common: number }, ctx: UpgradeContext, env: Env): void {
   const k = ctx.data.upgrades.interaction;
+  const kind = k.heatingKindByHvac[ctx.profile.hvacType] ?? 'gas';
+  const coolSaved = Math.max(0, saved.guest) * k.guest.coolingPerSavedKBtu + Math.max(0, saved.common) * k.common.coolingPerSavedKBtu;
+  const heatAdded = Math.max(0, saved.guest) * k.guest.heatingPerSavedKBtu[kind] + Math.max(0, saved.common) * k.common.heatingPerSavedKBtu[kind];
+  if (coolSaved <= 0 && heatAdded <= 0) return;
   const isCool = (c: Cell) => c.endUse === 'cooling';
   const isHeat = (c: Cell) => c.endUse === 'heating';
   const cool = siteOf(cells, isCool);
   const heat = siteOf(cells, isHeat);
-  if (cool > 0) rescale(cells, isCool, 1 - Math.min(0.9, (k.coolingOffsetPerSavedLightingKBtu * savedKBtu) / cool), env);
-  if (heat > 0) rescale(cells, isHeat, 1 + (k.heatingPenaltyPerSavedLightingKBtu * savedKBtu) / heat, env);
+  if (cool > 0) rescale(cells, isCool, 1 - Math.min(0.9, coolSaved / cool), env);
+  if (heat > 0) rescale(cells, isHeat, 1 + heatAdded / heat, env);
 }
+
+/** Lighting energy (site kBtu) in guest rooms and in all other spaces. */
+function lightingBySpace(cells: Cell[]): { guest: number; common: number } {
+  const guest = siteOf(cells, (c) => c.endUse === 'lighting' && c.zone === 'guest_rooms');
+  return { guest, common: siteOf(cells, (c) => c.endUse === 'lighting') - guest };
+}
+const savedBetween = (a: { guest: number; common: number }, b: { guest: number; common: number }) => ({ guest: a.guest - b.guest, common: a.common - b.common });
 
 const isHvac = (c: Cell) => c.endUse === 'heating' || c.endUse === 'cooling' || c.endUse === 'ventilation';
 const weatherKBtu = (cells: Cell[]) =>
@@ -279,22 +293,24 @@ export function calculateUpgradeSavings(
     const def = upgradeDef(id, d);
     switch (id) {
       case 'insulation': {
-        const r = param(def, 'weatherLoadReduction', scenario);
+        // The reduction is for a low-rise building; on a taller one the roof is a smaller part of the envelope, so it scales down.
+        const refFloors = constant(def, 'referenceFloors');
+        const r = param(def, 'weatherLoadReduction', scenario) * Math.min(1, refFloors / Math.max(1, ctx.profile.floors));
         rescale(cells, (c) => c.endUse === 'heating' || c.endUse === 'cooling', { weather: 1 - r }, env);
         break;
       }
       case 'led_lighting': {
-        const before = siteOf(cells, (c) => c.endUse === 'lighting');
+        const before = lightingBySpace(cells);
         rescale(cells, (c) => c.endUse === 'lighting', 1 - param(def, 'lightingReduction', scenario), env);
-        lightingInteraction(cells, before - siteOf(cells, (c) => c.endUse === 'lighting'), ctx, env);
+        lightingInteraction(cells, savedBetween(before, lightingBySpace(cells)), ctx, env);
         break;
       }
       case 'occupancy_sensors': {
         const common = (c: Cell) => c.zone === 'lobby_common' || c.zone === 'hallways_shared';
-        const before = siteOf(cells, (c) => common(c) && c.endUse === 'lighting');
+        const before = lightingBySpace(cells);
         rescale(cells, (c) => common(c) && c.endUse === 'lighting', 1 - param(def, 'commonLightingReduction', scenario), env);
         rescale(cells, (c) => common(c) && c.endUse === 'ventilation', 1 - param(def, 'commonVentilationReduction', scenario), env);
-        lightingInteraction(cells, before - siteOf(cells, (c) => common(c) && c.endUse === 'lighting'), ctx, env);
+        lightingInteraction(cells, savedBetween(before, lightingBySpace(cells)), ctx, env);
         break;
       }
       case 'smart_room_controls':

@@ -380,7 +380,10 @@ Downtown, owned). Inputs are assumptions; floor areas are defaulted. Brands, reg
 
 ### Limits
 
-All five hotels share Chicago weather. Hotel types differ only through size, age, HVAC, occupancy and guest hours: the model has no ballroom,
+All five hotels share Chicago weather. **Multi-city (pass 11):** the engine also resolves New York, Miami and Denver (city and state on the hotel
+input) to their own NOAA normals, PVWatts solar, EIA prices, eGRID subregion and ComStock intensity and end-use split; any other city falls back
+to Chicago weather with a note. Utility incentives carry a territory (`states`), so ComEd, Peoples Gas and Illinois Shines apply only in Illinois.
+Hourly shapes, the seasonal occupancy default, the age factor and the TRM-based savings remain Chicago/Illinois values in every city. Hotel types differ only through size, age, HVAC, occupancy and guest hours: the model has no ballroom,
 exhibit-hall, pool or round-the-clock restaurant drivers. Heat-pump water heaters are not modeled. Priority scores are relative to this portfolio.
 
 ---

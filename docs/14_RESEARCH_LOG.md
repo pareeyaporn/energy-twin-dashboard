@@ -311,3 +311,32 @@ HVAC replacement for the 100-room hotel is about $179,000 (was $110,000).
 No Chicago hotel case was found. Whole-building and lighting results agree with the model's range. Guest-room controls sit inside the Illinois
 TRM's deemed savings for a Chicago hotel and below field studies from other climates and baselines (reasons above), so the recommendations
 are conservative for that measure.
+
+## Pass 11 (November 2026, multi-city data: New York, Miami, Denver)
+
+For multi-city portfolios (task 13.35). Every value fetched from the primary source and read in the downloaded file; nothing from search excerpts.
+Chicago values are unchanged (re-running the same queries reproduced them: O'Hare normals and degree days exactly, ComStock zone 5A 92.3 kBtu/ft²
+and the same split; PVWatts today gives 1,246.6 kWh/kW at 10° for the Loop, 0.5% above the stored 1,240.2, kept).
+
+| Item | New York, NY | Miami, FL | Denver, CO | Source |
+| --- | --- | --- | --- | --- |
+| Weather station | Central Park (USW00094728), NOAA's station for the city; JFK airport (USW00094789) has 4,872 HDD / 1,017 CDD | Miami International Airport (USW00012839) | Denver International Airport (USW00003017) | NOAA NCEI U.S. Climate Normals 1991-2020, `normals-monthly` and `normals-annualseasonal` CSV files, www.ncei.noaa.gov |
+| Monthly mean °F (Jan–Dec) | 33.7, 35.9, 42.8, 53.7, 63.2, 72, 77.5, 76.1, 69.2, 57.9, 48, 39.1 | 68.6, 70.7, 73.1, 76.7, 80.1, 82.8, 84.1, 84.2, 83, 80.1, 74.8, 71.2 | 31.7, 32.7, 41.6, 47.8, 57.4, 68.2, 75.1, 72.9, 64.8, 51.1, 39.4, 31.2 | MLY-TAVG-NORMAL |
+| Monthly normal high °F | 39.5, 42.2, 49.9, 61.8, 71.4, 79.7, 84.9, 83.3, 76.2, 64.5, 54, 44.3 | 76.2, 78.2, 80.6, 83.6, 86.7, 89.3, 90.6, 90.7, 89, 85.9, 81.3, 78.2 | 44.6, 45.7, 55.7, 61.7, 71.2, 83.4, 89.9, 87.5, 79.6, 65.3, 52.9, 44 | MLY-TMAX-NORMAL |
+| Monthly normal low °F | 27.9, 29.5, 35.8, 45.5, 55, 64.4, 70.1, 68.9, 62.3, 51.4, 42, 33.8 | 61, 63.2, 65.6, 69.8, 73.4, 76.3, 77.5, 77.7, 76.9, 74.2, 68.3, 64.3 | 18.7, 19.7, 27.5, 33.9, 43.6, 53, 60.2, 58.3, 50, 37, 26, 18.4 | MLY-TMIN-NORMAL |
+| Annual degree days (base 65 °F) | 4,553 heating, 1,222 cooling | 104 heating, 4,656 cooling | 5,862 heating, 850 cooling | ANN-HTDD-NORMAL, ANN-CLDD-NORMAL (Chicago O'Hare 5,974 / 1,003 for comparison) |
+| Solar, kWh per kW a year (5° / 10° / 20° tilt) | 1,186.9 / 1,232.4 / 1,294.0 | 1,487.2 / 1,520.6 / 1,552.8 | 1,449.8 / 1,511.2 / 1,598.3 | NLR PVWatts v8 API (model 8.5.0), NSRDB PSM V3 GOES TMY-2020, downtown coordinates (40.75 N 73.99 W; 25.77 N 80.19 W; 39.74 N 104.99 W), 1 kW DC, standard module, open rack, azimuth 180, 14.08% losses, same as Chicago; monthly split from the 10° run |
+| Commercial electricity | 22.93 ¢/kWh | 11.78 ¢/kWh | 13.37 ¢/kWh | EIA Electric Power Monthly Table 5.6.B, commercial, August 2026 year to date (Illinois 14.05, the stored value, as a check) |
+| Commercial natural gas | 11.47 $/Mcf → $1.106/therm | 12.19 $/Mcf → $1.176/therm | 9.09 $/Mcf → $0.877/therm | EIA Natural Gas Prices, average commercial price by state, 2025 annual (Illinois 9.63, the stored value); ÷ 10.37 therms/Mcf, the same U.S. heat content used for Illinois (EIA gives no per-state factor on that page) |
+| eGRID subregion | NYCW (ZIP 10019, 10036) | FRCC (33131, 33139) | RMPA (80202) | EPA Power Profiler ZIP Code Tool v14.3 with eGRID2023_rev2 data, Zip-subregion sheet (60601 Chicago Loop → RFCW as a check). No state default set: each state spans several subregions |
+| Site EUI, hotel stock | 89.3 kBtu/ft² (zone 4A; large 90.7, small 79.6; 910.5 million ft²) | 84.8 (zone 1A; 85.2 / 78.2; 209.8 million ft²) | 88.4 (zone 5B; 90.8 / 78.8; 181.7 million ft²) | NLR ComStock 2025 Release 3 (AMY 2018), OEDI data lake, `timeseries_aggregates/by_ashrae_iecc_climate_zone_2006/upgrade=0/…/up0-<zone>-largehotel.csv` and `-smallhotel.csv`, area-weighted, same method as Chicago (pass 8) |
+| End-use split (heating / cooling / ventilation / lighting / hot water / kitchen / equipment / other, %) | 14.3 / 14.3 / 8.1 / 9.1 / 20.7 / 15.0 / 2.1 / 16.5 | 1.6 / 29.3 / 9.4 / 8.9 / 18.8 / 13.2 / 2.1 / 16.6 | 17.6 / 12.1 / 7.0 / 9.8 / 20.3 / 14.0 / 2.1 / 17.1 | Same files and grouping as Chicago (kitchen = gas interior equipment; electric equipment + refrigeration split 1.8 : 14.5 as CBECS) |
+
+Climate zones: New York City is IECC 4A, Miami-Dade 1A, Denver 5B (the ComStock files are labeled by the 2006 zone map). Solar pricing in the new states
+uses the national LBNL medians (the default region), with $0 export credit until each state's tariff is checked.
+
+**Not transferred (limits):** the hourly load shapes (`shapes.json`) are ComStock zone 5A (Chicago) and are used for every city; the seasonal
+occupancy default is Chicago's (STR via Choose Chicago); the age factor is relative to Illinois hotels; upgrade savings parameters and the smart
+room controls calibration come from the Illinois TRM (Chicago). **Incentives:** ComEd, Peoples Gas and Illinois Shines programs now carry
+`"states": ["IL"]` and are not listed or applied outside Illinois (they were applied to any hotel before; no effect on the Chicago hotels). No New
+York, Florida or Colorado utility incentive has been researched, so hotels there show none.

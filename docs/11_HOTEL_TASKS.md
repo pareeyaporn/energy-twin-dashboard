@@ -17,7 +17,7 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 
 ## Phase 0 — Alignment and housekeeping
 - [x] 0.1 [CC] Save the brief as `docs/10_HOTEL_SPEC.md`
-- [x] 0.2 [CC] Mark `docs/09` superseded
+- [x] 0.2 [CC] Mark `docs/09` superseded (later removed, November 2026; in git history)
 - [x] 0.3 [CC] Merge the P5 optimizer branch (`engine/optimizer`) as is; it is unused by the hotel product
 - [x] 0.4 [CC] Update `CLAUDE.md`: "What we are building" (hotels, operational twin), the demo path (brief section 12), folder table
       (add `src/engine/hotel/` and `src/twin/`), golden rule 8 stays ("the AI never invents numbers")

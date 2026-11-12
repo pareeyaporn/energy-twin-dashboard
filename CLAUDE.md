@@ -28,7 +28,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 - `docs/13_HOTEL_ENGINE_SPEC.md` — equations, assumptions, the financial breakdown and the demo figures
 - `docs/08_DATA_TODO.md` — data status and research still to find; `docs/14_RESEARCH_LOG.md` — every sourced value; `docs/15_PRODUCT_DECISIONS.md` — team decisions (not facts)
 - `docs/04_3D_SPEC.md` — the 3D hotel twin (what drives each visual); `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md` — prompts and status
-- Home-era docs, still useful as patterns: `docs/02_ENGINE_SPEC.md`, `docs/03_DATA_SPEC.md`; `docs/09` is superseded.
+- Home-era docs, still useful as patterns: `docs/02_ENGINE_SPEC.md`, `docs/03_DATA_SPEC.md`. (`docs/09`, the superseded offices-and-retail plan, was removed; it is in git history.)
 
 ## Honesty rules
 

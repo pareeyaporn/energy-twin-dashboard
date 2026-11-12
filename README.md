@@ -112,7 +112,7 @@ npx vitest run  # tests
 - [Claude Code prompts](docs/05_CLAUDE_CODE_PROMPTS.md), [Lovable prompts](docs/06_LOVABLE_PROMPTS.md), [demo checklist](docs/07_DEMO_CHECKLIST.md)
 - [Data and research to-do](docs/08_DATA_TODO.md) and [setup](docs/01_SETUP.md)
 - [3D twin spec](docs/04_3D_SPEC.md) (what drives each visual)
-- Home-era specs, kept as patterns: [engine](docs/02_ENGINE_SPEC.md), [data](docs/03_DATA_SPEC.md); [commercial notes](docs/09_COMMERCIAL_PIVOT.md) are superseded
+- Home-era specs, kept as patterns: [engine](docs/02_ENGINE_SPEC.md), [data](docs/03_DATA_SPEC.md)
 
 ## Working with Lovable
 

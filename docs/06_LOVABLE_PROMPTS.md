@@ -122,6 +122,10 @@ uses a default with "default (estimate)". Check empty, loading and error states,
 Remove home-era leftovers from the top bar: the "Thermal Vision" switch (nothing reads thermalMode any more), the "1 Hotel profile · 2 Explore
 · 3 Optimize" step bar (it uses the old home step and never advances), and the "Share plan" button (the link does not carry the hotel, scenario
 or package). Delete components nothing imports any more: HomeForm, CostSummary, PresetCard and StageOverlays. In the budget input, keep the
-typed text while editing and commit on blur or Enter, so clearing the field does not set the budget to $0. Don't modify src/engine, src/data,
-src/twin, src/store or supabase.
+typed text while editing and commit on blur or Enter, so clearing the field does not set the budget to $0. Also remove the bottom "Your Plan"
+drawer (PlanDrawer reads the old home package and never shows hotel packages). Show the budget as $50,000 rather than 50000. In the optimizer
+cards keep the Source chip on each line item but move the long source text into the Sources sheet. When the objective winner's card has a
+different role label (for example the objective is Balanced and the winner is "Maximum savings"), label it "Best for your objective
+(Balanced)". In the advisor's MessageResponse, pass no streamdown plugins (answers are a few plain sentences) and drop the cjk, code, math and
+mermaid imports so their bundles are not shipped. Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```

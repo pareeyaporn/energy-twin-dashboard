@@ -67,7 +67,7 @@ export function subTotals(a: Totals, b: Totals): Totals {
   };
 }
 
-const cellTotals = (c: Cell): Totals => ({
+export const cellTotals = (c: Cell): Totals => ({
   elecKWh: c.elecKWh,
   gasTherms: c.gasTherms,
   siteKBtu: c.siteKBtu,
@@ -76,6 +76,45 @@ const cellTotals = (c: Cell): Totals => ({
   cost: c.cost,
   carbonKg: c.carbonKg,
 });
+
+/** Totals of a set of cells. */
+export function sumCells(cells: Cell[]): Totals {
+  return cells.reduce((t, x) => addTotals(t, cellTotals(x)), emptyTotals());
+}
+
+/** Annual, monthly, zone, end-use, category and load-kind aggregates of a set of cells. */
+export function aggregateCells(
+  cells: Cell[],
+  monthMeta: { occupancy: number; hdd: number; cdd: number }[],
+): Pick<EnergyResult, 'annual' | 'months' | 'byZone' | 'byCategory' | 'byEndUse' | 'byLoadType'> {
+  const annual = sumCells(cells);
+  const months: MonthSummary[] = monthMeta.map((meta, m) => ({
+    month: m,
+    days: DAYS_IN_MONTH[m] ?? 30,
+    occupancy: meta.occupancy,
+    hdd: meta.hdd,
+    cdd: meta.cdd,
+    totals: sumCells(cells.filter((x) => x.month === m)),
+  }));
+  const byZone = {} as Record<ZoneId, Totals>;
+  for (const z of ZONE_IDS) byZone[z] = sumCells(cells.filter((x) => x.zone === z));
+  const byEndUse = {} as Record<EndUse, Totals>;
+  for (const u of END_USES) byEndUse[u] = sumCells(cells.filter((x) => x.endUse === u));
+  const byCategory = {} as Record<Category, Totals>;
+  for (const cat of CATEGORIES) byCategory[cat] = sumCells(cells.filter((x) => CATEGORY_OF[x.endUse] === cat));
+  const byLoadType = { base: 0, occupancy: 0, weather: 0, schedule: 0 } as Record<LoadType, number>;
+  for (const x of cells) for (const lt of LOAD_TYPES) byLoadType[lt] += x.loadKBtu[lt];
+  return { annual, months, byZone, byCategory, byEndUse, byLoadType };
+}
+
+/** A full result for a changed set of cells (for example after upgrades), keeping the template's meta. */
+export function toEnergyResult(template: EnergyResult, cells: Cell[]): EnergyResult {
+  const agg = aggregateCells(
+    cells,
+    template.months.map((m) => ({ occupancy: m.occupancy, hdd: m.hdd, cdd: m.cdd })),
+  );
+  return { ...template, cells, ...agg };
+}
 
 function ageFactor(yearBuilt: number, data: HotelData): number {
   const row = data.defaults.ageFactor.find((r) => yearBuilt < r.before);
@@ -258,38 +297,17 @@ export function simulate(
     }
   }
 
-  const annual = cells.reduce((t, x) => addTotals(t, cellTotals(x)), emptyTotals());
-  const months: MonthSummary[] = [];
-  for (let m = 0; m < 12; m++) {
-    months.push({
-      month: m,
-      days: DAYS_IN_MONTH[m] ?? 30,
-      occupancy: c.occupancyByMonth[m] ?? 0,
-      hdd: actual.hdd[m] ?? 0,
-      cdd: actual.cdd[m] ?? 0,
-      totals: cells.filter((x) => x.month === m).reduce((t, x) => addTotals(t, cellTotals(x)), emptyTotals()),
-    });
-  }
-  const byZone = {} as Record<ZoneId, Totals>;
-  for (const z of ZONE_IDS) byZone[z] = cells.filter((x) => x.zone === z).reduce((t, x) => addTotals(t, cellTotals(x)), emptyTotals());
-  const byEndUse = {} as Record<EndUse, Totals>;
-  for (const u of END_USES) byEndUse[u] = cells.filter((x) => x.endUse === u).reduce((t, x) => addTotals(t, cellTotals(x)), emptyTotals());
-  const byCategory = {} as Record<Category, Totals>;
-  for (const cat of CATEGORIES) {
-    byCategory[cat] = cells.filter((x) => CATEGORY_OF[x.endUse] === cat).reduce((t, x) => addTotals(t, cellTotals(x)), emptyTotals());
-  }
-  const byLoadType = { base: 0, occupancy: 0, weather: 0, schedule: 0 } as Record<LoadType, number>;
-  for (const x of cells) for (const lt of LOAD_TYPES) byLoadType[lt] += x.loadKBtu[lt];
+  const monthMeta = Array.from({ length: 12 }, (_, m) => ({
+    occupancy: c.occupancyByMonth[m] ?? 0,
+    hdd: actual.hdd[m] ?? 0,
+    cdd: actual.cdd[m] ?? 0,
+  }));
+  const agg = aggregateCells(cells, monthMeta);
 
   return {
     hotelName: p.name,
     cells,
-    months,
-    annual,
-    byZone,
-    byCategory,
-    byEndUse,
-    byLoadType,
+    ...agg,
     calibration,
     rates: { elecPerKWh: elecRate, gasPerTherm: gasRate },
     emissionFactors: { elecKgPerKWh: efElec, gasKgPerTherm: efGas },

@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { RotateCcw } from "lucide-react";
 import type { HotelInput, HvacType, Objective, Setpoints } from "@/engine/hotel";
+import { hotelData } from "@/engine/hotel";
 import { useShallow } from "zustand/react/shallow";
 import { useTwin } from "@/store/useTwin";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -96,6 +97,12 @@ export function HotelProfileForm() {
           <AccordionContent className="space-y-4">
             {input("name", "Name", false)}
             {input("city", "City", false)}
+            <Field name="gridSubregion" label="Grid region (eGRID)" onReset={() => setHotelInput({}, ["gridSubregion"])}>
+              <Select value={profile.gridSubregion} onValueChange={(gridSubregion) => setHotelInput({ gridSubregion })}>
+                <SelectTrigger id="hotel-gridSubregion" aria-label="Grid region (eGRID)" className="h-auto min-h-9 [&>span]:whitespace-normal [&>span]:text-left"><SelectValue /></SelectTrigger>
+                <SelectContent>{!hotelData.emissions.subregions[profile.gridSubregion] && <SelectItem value={profile.gridSubregion}>{profile.gridSubregion} — U.S. average</SelectItem>}{Object.entries(hotelData.emissions.subregions).map(([acronym, region]) => <SelectItem key={acronym} value={acronym}>{acronym} — {region.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </Field>
             <div className="grid grid-cols-2 gap-3">{input("state", "State", false)}{input("country", "Country", false)}</div>
             <div className="grid grid-cols-2 gap-3">{input("rooms", "Guest rooms", true, 1, 1)}{input("floors", "Floors", true, 1, 1)}</div>
             {input("floorAreaSqft", "Floor area (sq ft)")}

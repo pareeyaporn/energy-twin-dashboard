@@ -3,12 +3,9 @@ import { HotelProfileForm } from "./HotelProfileForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
-export function HomePanel() {
+export function HomePanel({ presetOnly = false }: { presetOnly?: boolean } = {}) {
   const { hotelPresets, hotelPresetId, selectHotelPreset } = useTwin();
-  return (
-    <div className="flex h-full flex-col">
-      <h2 className="px-6 pt-6 text-xl font-semibold">Hotel profile</h2>
-      <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
+  const picker = (
         <section>
           <Label htmlFor="hotel-preset" className="label-caps mb-3 block">Preset</Label>
           <Select value={hotelPresetId ?? ""} onValueChange={selectHotelPreset}>
@@ -16,6 +13,13 @@ export function HomePanel() {
             <SelectContent>{hotelPresets.map((p) => <SelectItem key={p.id} value={p.id}><span className="block">{p.label}</span>{p.synthetic && <span className="block text-[10px] text-muted-foreground">Synthetic demo</span>}</SelectItem>)}</SelectContent>
           </Select>
         </section>
+  );
+  if (presetOnly) return picker;
+  return (
+    <div className="flex h-full flex-col">
+      <h2 className="px-6 pt-6 text-xl font-semibold">Hotel profile</h2>
+      <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
+        {picker}
         <div className="flex items-center gap-3"><div className="h-px flex-1 bg-border" /><span className="label-caps text-[11px]">Or enter your own</span><div className="h-px flex-1 bg-border" /></div>
         <HotelProfileForm />
       </div>

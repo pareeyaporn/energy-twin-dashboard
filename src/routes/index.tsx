@@ -1,15 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TopBar } from "@/components/TopBar";
-import { HomePanel } from "@/components/HomePanel";
 import { Stage } from "@/components/Stage";
-import { OptimizePanel } from "@/components/OptimizePanel";
-import { PlanDrawer } from "@/components/PlanDrawer";
+import { KpiStrip } from "@/components/KpiStrip";
+import { HotelTab } from "@/components/HotelTab";
+import { ScenarioSimulator } from "@/components/ScenarioSimulator";
+import { BudgetOptimizer } from "@/components/BudgetOptimizer";
 import { SourcesSheet } from "@/components/SourcesSheet";
-import { Button } from "@/components/ui/button";
 import { AdvisorPanel } from "@/components/AdvisorPanel";
 
 export const Route = createFileRoute("/")({
@@ -26,17 +24,12 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const ease = { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const };
-
-function CollapseBtn({ side, open, onClick, label }: { side: "left" | "right"; open: boolean; onClick: () => void; label: string }) {
-  const pointLeft = side === "left" ? open : !open;
-  return (
-    <Button variant="glass" size="icon" type="button" onClick={onClick} aria-label={`${open ? "Collapse" : "Expand"} ${label}`}
-      className={`glass absolute top-1/2 z-30 grid h-8 w-5 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground ${side === "left" ? "-right-3" : "-left-3"}`}>
-      {pointLeft ? <ChevronLeft className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-    </Button>
-  );
-}
+const TABS = [
+  { value: "hotel", label: "Hotel" },
+  { value: "scenario", label: "Scenario" },
+  { value: "invest", label: "Invest" },
+  { value: "ask", label: "Ask" },
+] as const;
 
 /** Render only one layout so each stage/popover exists once. */
 function useIsDesktop() {
@@ -50,48 +43,43 @@ function useIsDesktop() {
   return desktop;
 }
 
+function WorkspaceTabs({ tab, setTab, desktop }: { tab: string; setTab: (v: string) => void; desktop: boolean }) {
+  const scroll = desktop ? "min-h-0 flex-1 overflow-y-auto" : "";
+  return (
+    <Tabs value={tab} onValueChange={setTab} className={desktop ? "flex h-full flex-col" : ""}>
+      <TabsList className={`grid w-full shrink-0 grid-cols-4 ${desktop ? "rounded-none" : "glass"}`}>
+        {TABS.map((t, i) => <TabsTrigger key={t.value} value={t.value}><span className="num mr-1 opacity-60">{i + 1}</span>{t.label}</TabsTrigger>)}
+      </TabsList>
+      <TabsContent value="hotel" className={`mt-0 ${scroll} ${desktop ? "" : "panel"}`}><HotelTab /></TabsContent>
+      <TabsContent value="scenario" className={`mt-0 ${scroll} ${desktop ? "" : "panel"}`}><ScenarioSimulator variant="panel" /></TabsContent>
+      <TabsContent value="invest" className={`mt-0 ${scroll} ${desktop ? "" : "panel"}`}><BudgetOptimizer workspace /></TabsContent>
+      <TabsContent value="ask" className={`mt-0 ${desktop ? "min-h-0 flex-1" : "panel h-[650px]"}`}><AdvisorPanel /></TabsContent>
+    </Tabs>
+  );
+}
+
 function Index() {
   const desktop = useIsDesktop();
-  const [leftOpen, setLeftOpen] = useState(true);
-  const [rightOpen, setRightOpen] = useState(false);
-  const [rightTab, setRightTab] = useState("advisor");
-  const [mobileTab, setMobileTab] = useState("home");
+  const [tab, setTab] = useState("hotel");
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <TopBar onOpenAdvisor={() => { setRightOpen(true); setRightTab("advisor"); setMobileTab("advisor"); }} />
+      <TopBar />
       {desktop ? (
-      <div className="flex min-h-0 flex-1 gap-3 p-3">
-        <motion.aside animate={{ width: leftOpen ? 340 : 0 }} transition={ease} className="relative shrink-0">
-          <div className="panel h-full overflow-hidden" style={{ opacity: leftOpen ? 1 : 0, transition: "opacity 300ms" }}>
-            <div className="h-full w-[340px]"><HomePanel /></div>
-          </div>
-          <CollapseBtn side="left" open={leftOpen} onClick={() => setLeftOpen(!leftOpen)} label="Hotel profile panel" />
-        </motion.aside>
-        <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-border">
-          <div className="min-h-0 flex-1 overflow-y-auto"><Stage /></div>
-          <div className="relative h-14 shrink-0"><PlanDrawer /></div>
-        </main>
-        <motion.aside animate={{ width: rightOpen ? 380 : 0 }} transition={ease} className="relative shrink-0">
-          <div className="panel h-full overflow-hidden" style={{ opacity: rightOpen ? 1 : 0, transition: "opacity 300ms" }}>
-            <Tabs value={rightTab} onValueChange={setRightTab} className="ml-auto flex h-full w-[380px] flex-col">
-              <TabsList className="grid w-full shrink-0 grid-cols-2 rounded-none"><TabsTrigger value="optimize">Investments</TabsTrigger><TabsTrigger value="advisor">Advisor</TabsTrigger></TabsList>
-              <TabsContent value="optimize" className="mt-0 min-h-0 flex-1 overflow-y-auto"><OptimizePanel /></TabsContent>
-              <TabsContent value="advisor" className="mt-0 min-h-0 flex-1"><AdvisorPanel /></TabsContent>
-            </Tabs>
-          </div>
-          <CollapseBtn side="right" open={rightOpen} onClick={() => setRightOpen(!rightOpen)} label="Investments and advisor panel" />
-        </motion.aside>
-      </div>
+        <div className="flex min-h-0 flex-1 gap-3 p-3">
+          <aside className="panel w-[380px] shrink-0 overflow-hidden" aria-label="Workspace">
+            <WorkspaceTabs tab={tab} setTab={setTab} desktop />
+          </aside>
+          <main className="flex min-w-0 flex-1 flex-col gap-3 overflow-hidden">
+            <KpiStrip />
+            <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-border"><Stage /></div>
+          </main>
+        </div>
       ) : (
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
-        <div className="min-w-0 shrink-0 rounded-lg border border-border"><Stage /><div className="relative h-14"><PlanDrawer /></div></div>
-        <Tabs value={mobileTab} onValueChange={setMobileTab}>
-          <TabsList className="glass grid w-full grid-cols-3"><TabsTrigger value="home">Hotel profile</TabsTrigger><TabsTrigger value="optimize">Optimize</TabsTrigger><TabsTrigger value="advisor">Advisor</TabsTrigger></TabsList>
-          <TabsContent value="home" className="panel"><HomePanel /></TabsContent>
-          <TabsContent value="optimize" className="panel"><OptimizePanel /></TabsContent>
-          <TabsContent value="advisor" className="panel h-[650px]"><AdvisorPanel /></TabsContent>
-        </Tabs>
-      </div>
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
+          <KpiStrip />
+          <div className="min-w-0 shrink-0 rounded-lg border border-border"><Stage /></div>
+          <WorkspaceTabs tab={tab} setTab={setTab} desktop={false} />
+        </div>
       )}
       <SourcesSheet />
     </div>

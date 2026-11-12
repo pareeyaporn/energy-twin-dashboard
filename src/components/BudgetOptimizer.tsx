@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { BookOpen, Check, Loader2, Sparkles, TriangleAlert } from "lucide-react";
+import { ArrowRight, BookOpen, Check, Loader2, Sparkles, TriangleAlert } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useTwin } from "@/store/useTwin";
 import type { Objective, RankedPackage } from "@/engine/hotel/types";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,27 @@ function InvestmentCard({ pkg, winner }: { pkg: RankedPackage; winner: boolean }
   </article>;
 }
 
-export function BudgetOptimizer({ compact = false }: { compact?: boolean }) {
+const BUDGET_CHIPS = [25_000, 50_000, 100_000];
+
+function CompactInvestmentCard({ pkg, winner }: { pkg: RankedPackage; winner: boolean }) {
+  const active = useTwin((s) => s.activeHotelPackageId === pkg.evaluation.id);
+  const apply = useTwin((s) => s.applyHotelPackage);
+  const setCompareMode = useTwin((s) => s.setCompareMode);
+  const e = pkg.evaluation;
+  return <article className={cn("min-w-0 space-y-3 rounded-lg border bg-card p-3", winner ? "border-primary" : "border-border", active && "ring-1 ring-primary/50")}>
+    <div className="flex flex-wrap items-center justify-between gap-2"><Badge variant="secondary">{pkg.roleLabel}</Badge>{winner && <Badge className="bg-primary text-primary-foreground">Objective winner</Badge>}</div>
+    <h3 className="text-sm font-semibold">{e.name}</h3>
+    <dl className="grid grid-cols-3 gap-2 text-xs">
+      <div><dt className="text-muted-foreground">Investment</dt><dd className="num font-semibold">{money(e.cost.mid)}</dd></div>
+      <div><dt className="text-muted-foreground">Savings / yr</dt><dd className="num font-semibold text-savings">{money(e.annualSavings.mid)}</dd></div>
+      <div><dt className="text-muted-foreground">Payback</dt><dd className="num">{payback(e.metrics.paybackYears)}</dd></div>
+    </dl>
+    <Button size="sm" variant={active ? "secondary" : "accentOutline"} className="w-full" aria-label={`Apply ${pkg.roleLabel}`} aria-pressed={active} onClick={() => { apply(e.id); setCompareMode("split"); }}>{active ? <><Check />Applied</> : "Apply"}</Button>
+  </article>;
+}
+
+export function BudgetOptimizer({ compact = false, workspace = false }: { compact?: boolean; workspace?: boolean }) {
+  if (workspace) compact = true;
   const hotel = useTwin((s) => s.hotel);
   const plan = useTwin((s) => s.hotelPlan);
   const optimizing = useTwin((s) => s.optimizing);
@@ -84,7 +105,7 @@ export function BudgetOptimizer({ compact = false }: { compact?: boolean }) {
   return <div className={cn("space-y-6", compact ? "p-5" : "mx-auto max-w-7xl p-4 md:p-8")}>
     <div className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-xl font-semibold">Budget optimizer</h1><p className="mt-1 text-sm text-muted-foreground">{hotel.profile.name}</p></div>{preset !== null && <Badge variant="outline" className="border-heat/30 text-heat">Synthetic demo data</Badge>}</div>
     <section className={cn("grid items-end gap-4 border-y border-border py-5", !compact && "md:grid-cols-[1fr_1fr_auto]")}>
-      <div className="space-y-2"><Label htmlFor={compact ? "panel-hotel-budget" : "hotel-budget"}>Investment budget ($)</Label><Input id={compact ? "panel-hotel-budget" : "hotel-budget"} className="num" type="number" min={0} step={500} value={hotel.profile.budget} disabled={optimizing} onChange={(event) => { const value = Number(event.target.value); if (Number.isFinite(value)) setBudget(value); }} /></div>
+      <div className="space-y-2"><Label htmlFor={compact ? "panel-hotel-budget" : "hotel-budget"}>Investment budget ($)</Label><Input id={compact ? "panel-hotel-budget" : "hotel-budget"} className="num" type="number" min={0} step={500} value={hotel.profile.budget} disabled={optimizing} onChange={(event) => { const value = Number(event.target.value); if (Number.isFinite(value)) setBudget(value); }} />{workspace && <div className="flex flex-wrap gap-2">{BUDGET_CHIPS.map((amount) => <Button key={amount} type="button" size="sm" variant={hotel.profile.budget === amount ? "secondary" : "outline"} className="h-7 text-xs" disabled={optimizing} onClick={() => setBudget(amount)}>{money(amount)}</Button>)}</div>}</div>
       <div className="space-y-2"><Label htmlFor={compact ? "panel-hotel-objective" : "hotel-objective"}>Objective</Label><Select value={hotel.profile.objective} disabled={optimizing} onValueChange={(value) => { const option = objectives.find((item) => item.value === value); if (option) setObjective(option.value); }}><SelectTrigger id={compact ? "panel-hotel-objective" : "hotel-objective"}><SelectValue /></SelectTrigger><SelectContent>{objectives.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent></Select></div>
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex min-h-9 items-center gap-2">
@@ -100,7 +121,7 @@ export function BudgetOptimizer({ compact = false }: { compact?: boolean }) {
         <p role="status" className="num text-xs text-muted-foreground">{number(plan.combinationsTested)} combinations tested · {number(plan.feasibleCount)} feasible packages · Estimates</p>
         {plan.scenario && <Badge variant="secondary" className="text-primary">Measured against the current scenario</Badge>}
       </div>
-      {cards.length === 0 ? <section aria-label="No investments found" className="space-y-3 border-l-2 border-heat pl-4"><h2 className="font-semibold">No suitable package</h2><p className="text-sm text-muted-foreground">{plan.emptyReason}</p>{plan.cheapestUseful && <p className="text-sm">Lowest-cost useful investment: {plan.cheapestUseful.label} · <span className="num">{money(plan.cheapestUseful.cost)}</span></p>}</section> : <>
+      {workspace && cards.length > 0 ? <><section aria-label="Investment packages" className="space-y-3">{cards.map((pkg) => <CompactInvestmentCard key={`${pkg.role}-${pkg.evaluation.id}`} pkg={pkg} winner={pkg.evaluation.id === winner?.evaluation.id} />)}</section><Button asChild variant="link" className="h-auto px-0"><Link to="/optimizer">Compare in detail<ArrowRight /></Link></Button></> : cards.length === 0 ? <section aria-label="No investments found" className="space-y-3 border-l-2 border-heat pl-4"><h2 className="font-semibold">No suitable package</h2><p className="text-sm text-muted-foreground">{plan.emptyReason}</p>{plan.cheapestUseful && <p className="text-sm">Lowest-cost useful investment: {plan.cheapestUseful.label} · <span className="num">{money(plan.cheapestUseful.cost)}</span></p>}</section> : <>
         <section aria-label="Investment packages" className={cn("grid items-start gap-4", !compact && "lg:grid-cols-3")}>{cards.map((pkg) => <InvestmentCard key={`${pkg.role}-${pkg.evaluation.id}`} pkg={pkg} winner={pkg.evaluation.id === winner?.evaluation.id} />)}</section>
         {winner && !cards.some((pkg) => pkg.evaluation.id === winner.evaluation.id) && <section aria-label="Objective winner" className="space-y-3 border-t border-primary/30 pt-4"><h2 className="font-semibold">Objective winner · {winner.roleLabel}</h2><InvestmentCard pkg={winner} winner /></section>}
         <section aria-label="Package comparison" className="space-y-3 border-t border-border pt-5"><h2 className="font-semibold">Compare investments</h2><div className="overflow-x-auto"><table className="w-full min-w-[640px] text-sm"><caption className="sr-only">Estimated investment package comparison</caption><thead><tr className="border-b border-border"><th className="p-3 text-left">Estimate</th>{cards.map((pkg) => <th key={pkg.role} className={cn("p-3 text-right", pkg.evaluation.id === winner?.evaluation.id && "text-primary")}>{pkg.roleLabel}</th>)}</tr></thead><tbody>{[

@@ -42,7 +42,7 @@ function ProfileInput({ name, label, value, numeric = false, step, onCommit, onR
   </Field>;
 }
 
-const hvacOptions = [
+export const hvacOptions = [
   { value: "ptac", label: "PTAC — room units" }, { value: "vrf", label: "VRF" },
   { value: "central_plant", label: "Central plant" }, { value: "rtu", label: "Rooftop units" },
 ];

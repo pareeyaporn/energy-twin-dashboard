@@ -5,6 +5,7 @@ import {
   calculateBaselineEnergy,
   hotelData,
   optimizeInvestmentPortfolio,
+  planFromPackage,
   prepareScenarioContext,
   prepareUpgradeContext,
   resolveProfile,
@@ -13,6 +14,8 @@ import type {
   EnergyResult,
   HotelInput,
   Objective,
+  PlanItem,
+  UpgradeId,
   PortfolioResult,
   ResolvedProfile,
   Scenario,
@@ -20,7 +23,10 @@ import type {
   StressTest,
   ZoneId,
 } from "@/engine/hotel";
-import { computeScenarioResult, effectiveScenario, mergeInput, withoutKeys } from "./hotelDerived";
+import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, withoutKeys } from "./hotelDerived";
+import { readStoredPlans, writeStoredPlans } from "./customPlans";
+import type { CustomPlan } from "./customPlans";
+export type { CustomPlan } from "./customPlans";
 import presetsJson from "@/data/presetHomes.json";
 import packagesJson from "@/data/mockPackages.json";
 import partsJson from "@/data/mockParts.json";
@@ -151,6 +157,26 @@ export interface TwinState {
   askAdvisor: (question: string) => Promise<void>;
   clearAdvisor: () => void;
   resetHotel: () => void;
+
+  /** Custom investment plans (kept in the browser's local storage; numbers are always recomputed by the engine). */
+  customPlans: CustomPlan[];
+  activeCustomPlanId: string | null;
+  nextPlanNumber: number;
+  /** True once plans were read from local storage (call `hydrateCustomPlans` after mount, in the browser). */
+  customPlansHydrated: boolean;
+  hydrateCustomPlans: () => void;
+  /** Creates a plan (optionally with items) and makes it active; returns its id. */
+  createCustomPlan: (name?: string, items?: PlanItem[]) => string;
+  duplicateCustomPlan: (id: string) => string | null;
+  renameCustomPlan: (id: string, name: string) => void;
+  deleteCustomPlan: (id: string) => void;
+  setActiveCustomPlan: (id: string | null) => void;
+  /** Adds an upgrade to the active plan (creating a plan if there is none); quantity in the catalog's unit, omitted = the whole scope. */
+  addPlanUpgrade: (upgradeId: UpgradeId, quantity?: number) => void;
+  removePlanUpgrade: (upgradeId: UpgradeId) => void;
+  setPlanQuantity: (upgradeId: UpgradeId, quantity: number) => void;
+  /** "Customize AI plan": copies a recommended package into a new custom plan and makes it active; returns its id. */
+  customizeFromPackage: (packageId: string) => string | null;
 
   selectPreset: (id: string) => void;
   updateHome: (patch: Partial<HomeForm>) => void;
@@ -401,7 +427,73 @@ export const useTwin = create<TwinState>((set, get) => ({
   },
   clearAdvisor: () => set({ advisorMessages: [], advisorBusy: false }),
   resetHotel: () => set({ ...initialHotelState(), optimizing: false }),
+
+  customPlans: [] as CustomPlan[],
+  activeCustomPlanId: null as string | null,
+  nextPlanNumber: 1,
+  customPlansHydrated: false,
+  hydrateCustomPlans: () => {
+    if (get().customPlansHydrated) return;
+    const stored = readStoredPlans();
+    set({ customPlans: stored.plans, nextPlanNumber: stored.next, activeCustomPlanId: stored.active, customPlansHydrated: true });
+  },
+  createCustomPlan: (name, items = []) => {
+    const n = get().nextPlanNumber;
+    const id = `plan-${n}-${get().customPlans.length + 1}`;
+    const plan: CustomPlan = { id, name: name?.trim() || `My plan ${n}`, items: dedupeItems(items) };
+    setPlans(set, get, [...get().customPlans, plan], n + 1, id);
+    return id;
+  },
+  duplicateCustomPlan: (id) => {
+    const src = get().customPlans.find((p) => p.id === id);
+    if (!src) return null;
+    return get().createCustomPlan(`${src.name} (copy)`, src.items.map((i) => ({ ...i })));
+  },
+  renameCustomPlan: (id, name) =>
+    setPlans(set, get, get().customPlans.map((p) => (p.id === id ? { ...p, name: name.trim().slice(0, 80) || p.name } : p))),
+  deleteCustomPlan: (id) => {
+    const plans = get().customPlans.filter((p) => p.id !== id);
+    const active = get().activeCustomPlanId === id ? (plans[plans.length - 1]?.id ?? null) : get().activeCustomPlanId;
+    setPlans(set, get, plans, undefined, active);
+  },
+  setActiveCustomPlan: (id) => setPlans(set, get, get().customPlans, undefined, id === null || get().customPlans.some((p) => p.id === id) ? id : get().activeCustomPlanId),
+  addPlanUpgrade: (upgradeId, quantity) => {
+    if (!get().activeCustomPlanId) get().createCustomPlan();
+    editActive(set, get, (items) => (items.some((i) => i.id === upgradeId) ? items : [...items, quantity === undefined ? { id: upgradeId } : { id: upgradeId, quantity }]));
+  },
+  removePlanUpgrade: (upgradeId) => editActive(set, get, (items) => items.filter((i) => i.id !== upgradeId)),
+  setPlanQuantity: (upgradeId, quantity) =>
+    editActive(set, get, (items) => items.map((i) => (i.id === upgradeId && Number.isFinite(quantity) ? { id: i.id, quantity } : i))),
+  customizeFromPackage: (packageId) => {
+    const s = get();
+    const all = s.hotelPlan ? [...s.hotelPlan.packages, ...(s.hotelPlan.objectiveWinner ? [s.hotelPlan.objectiveWinner] : [])] : [];
+    const pkg = all.find((p) => p.evaluation.id === packageId);
+    if (!pkg) return null;
+    const items = planFromPackage(selectPlanContext(s), pkg.evaluation.upgradeIds);
+    const id = s.createCustomPlan(`${pkg.roleLabel} (customized)`, items);
+    setPlans(set, get, get().customPlans.map((p) => (p.id === id ? { ...p, copiedFrom: pkg.roleLabel } : p)));
+    return id;
+  },
 }));
+
+function dedupeItems(items: PlanItem[]): PlanItem[] {
+  const out: PlanItem[] = [];
+  for (const i of items) if (!out.some((x) => x.id === i.id)) out.push({ ...i });
+  return out;
+}
+
+type SetFn = (partial: Partial<TwinState>) => void;
+function setPlans(set: SetFn, get: () => TwinState, plans: CustomPlan[], next?: number, active?: string | null): void {
+  const nextPlanNumber = next ?? get().nextPlanNumber;
+  const activeCustomPlanId = active === undefined ? get().activeCustomPlanId : active;
+  set({ customPlans: plans, nextPlanNumber, activeCustomPlanId });
+  writeStoredPlans(plans, nextPlanNumber, activeCustomPlanId);
+}
+function editActive(set: SetFn, get: () => TwinState, edit: (items: PlanItem[]) => PlanItem[]): void {
+  const id = get().activeCustomPlanId;
+  if (!id) return;
+  setPlans(set, get, get().customPlans.map((p) => (p.id === id ? { ...p, items: edit(p.items) } : p)));
+}
 
 /** Baseline yearly cost: from selected preset, or from the entered monthly bills. */
 export const selectBaselineCost = (s: TwinState) => {

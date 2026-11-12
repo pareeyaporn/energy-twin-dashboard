@@ -5,7 +5,8 @@ export const LIMITS = {
   questionChars: 500,
   contextBytes: 60_000,
   ratePerMinute: 20,
-  timeoutMs: 5_500,
+  // Answers take about 3 s; 7.5 s leaves room for a slow one and still fits the browser's 8-second budget.
+  timeoutMs: 7_500,
 };
 
 export const MODEL_DEFAULT = 'claude-opus-5-5';
@@ -127,7 +128,9 @@ export async function handleAdvisorRequest(req: Request, deps: Deps): Promise<Re
   if (!deps.env['ANTHROPIC_API_KEY']) return reply(503, { error: 'not_configured' });
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), Number(deps.env['ADVISOR_TIMEOUT_MS']) || LIMITS.timeoutMs);
+  // ADVISOR_TIMEOUT_MS may shorten the limit but never lengthen it past what the browser waits for.
+  const timeoutMs = Math.min(Number(deps.env['ADVISOR_TIMEOUT_MS']) || LIMITS.timeoutMs, LIMITS.timeoutMs);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const result = await deps.complete({
       system: SYSTEM_PROMPT,

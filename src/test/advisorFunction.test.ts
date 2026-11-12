@@ -193,8 +193,21 @@ describe('advisor function', () => {
     expect(await res.text()).not.toContain(SECRET);
   });
 
-  it('exports the limits the browser relies on (a six-second budget)', () => {
-    expect(LIMITS.timeoutMs).toBeLessThan(6000);
+  it('stops before the browser gives up (8 seconds), and ADVISOR_TIMEOUT_MS cannot lengthen that', async () => {
+    expect(LIMITS.timeoutMs).toBeLessThan(8000);
+    let waited = 0;
+    const complete: Deps['complete'] = ({ signal }) =>
+      new Promise((_res, rej) => {
+        const t0 = Date.now();
+        signal.addEventListener('abort', () => { waited = Date.now() - t0; rej(Object.assign(new Error('aborted'), { name: 'AbortError' })); });
+      });
+    vi.useFakeTimers();
+    const p = handleAdvisorRequest(req(ask()), deps({ complete }, { ADVISOR_TIMEOUT_MS: '14000' }));
+    await vi.advanceTimersByTimeAsync(LIMITS.timeoutMs);
+    const res = await p;
+    vi.useRealTimers();
+    expect(res.status).toBe(504);
+    expect(waited).toBe(LIMITS.timeoutMs);
     expect(LIMITS.questionChars).toBe(500);
   });
 });

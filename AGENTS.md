@@ -36,3 +36,5 @@ use the editor.
 - The index page renders only one layout (desktop or stacked) via a media-query hook, so stage popovers aren't duplicated.
 - Translate legacy sample terminology only at the presentation boundary with `src/lib/presentation.ts`; keep underlying data and calculations unchanged during UI-only wording updates.
 - Hotel profile controls display resolved `hotel.profile` values and commit optional input patches through `setHotelInput`; nested temperature resets preserve other explicit setpoints because the store clears only top-level keys.
+- The Overview is a separate content route reading `selectDisplayed`, `selectZoneRows`, and `selectOpportunities`; rank unique standalone upgrades by their supplied whole-hotel savings to avoid double-counting zone entries.
+- Place the owner-managed `HotelTwin` unchanged inside Stage; use stage container queries for zone details beside or below the diagram, and keep legacy stage overlays unmounted to avoid duplicate controls and costs.

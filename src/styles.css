@@ -183,3 +183,18 @@
 @keyframes shimmer { 0%, 60% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @utility animate-float { animation: float 6s ease-in-out infinite; }
+
+/* Size the owner's unchanged twin to its available stage, not the viewport. */
+.hotel-stage { container-type: inline-size; contain: inline-size layout paint; overflow-x: clip; }
+.hotel-stage #twin-panel { grid-template-columns: minmax(0, 1fr); }
+.hotel-stage #twin-panel > * { min-width: 0; }
+.hotel-stage[data-zone-selected="false"] #twin-panel > aside { display: none; }
+.hotel-stage #twin-panel > div { width: 100%; max-width: 960px; justify-self: center; }
+.hotel-stage[data-twin-layer="flow"] #twin-panel > div { overflow-x: auto; }
+.hotel-stage[data-twin-layer="flow"] #twin-panel > div > div { min-width: 740px; }
+@container (min-width: 850px) {
+  .hotel-stage[data-zone-selected="true"] #twin-panel:has(> aside) {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+  .hotel-stage #twin-panel > aside { max-height: 560px; overflow-y: auto; }
+}

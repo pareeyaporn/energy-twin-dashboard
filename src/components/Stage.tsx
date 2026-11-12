@@ -1,14 +1,19 @@
-import { StageOverlays } from "./StageOverlays";
+import { HotelTwin } from "@/twin/HotelTwin";
+import { useTwin } from "@/store/useTwin";
+import { Badge } from "@/components/ui/badge";
 
 export function Stage() {
+  const selectedZone = useTwin((s) => s.selectedZone);
+  const layer = useTwin((s) => s.twinLayer);
   return (
-    <div className="relative h-full overflow-hidden rounded-2xl border border-border bg-stage-gradient">
-      <div className="pointer-events-none absolute inset-x-[-30%] bottom-[-20%] h-[70%] stage-grid" />
-      <div className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,var(--background)_100%)]" />
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 pb-16">
-        <h2 className="text-xl font-semibold text-text-muted">Digital twin</h2>
+    <div className="hotel-stage min-w-0 bg-background p-3 md:p-5" data-zone-selected={selectedZone !== null} data-twin-layer={layer}>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-base font-semibold">Digital twin</h1>
+        <Badge variant="outline" className="border-primary/30 text-primary">Simulated data</Badge>
       </div>
-      <StageOverlays />
+      <HotelTwin />
+      {layer === "zones" && <div aria-label="Zone cost legend" className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground"><span>Annual zone cost</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-efficient" />Lower</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-heat" />Mid-range</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-loss" />Higher</span></div>}
+      {layer === "flow" && <div aria-label="Flow legend" className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground"><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-primary" />Energy sources</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-efficient" />Zones</span><span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-heat" />End uses</span></div>}
     </div>
   );
 }

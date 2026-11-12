@@ -24,6 +24,17 @@ describe("hotel profile input wiring", () => {
     expect(useTwin.getState().home).toBe(legacy);
   });
 
+  it("commits an optional eGRID subregion and resets it to a default", () => {
+    fireEvent.click(screen.getByRole("combobox", { name: "Grid region (eGRID)" }));
+    fireEvent.click(screen.getByRole("option", { name: "CAMX — WECC California" }));
+    expect(useTwin.getState().hotelInput.gridSubregion).toBe("CAMX");
+    expect(useTwin.getState().hotel.profile.gridSubregion).toBe("CAMX");
+    expect(useTwin.getState().hotel.defaulted).not.toContain("gridSubregion");
+    fireEvent.click(screen.getByRole("button", { name: "Reset Grid region (eGRID) to default" }));
+    expect(useTwin.getState().hotelInput.gridSubregion).toBeUndefined();
+    expect(useTwin.getState().hotel.defaulted).toContain("gridSubregion");
+  });
+
   it("clearing an optional field restores its default", () => {
     edit("Guest rooms", "150");
     edit("Guest rooms", "");

@@ -1,4 +1,4 @@
-import { BookOpen, Flame, Share2, ChartNoAxesCombined } from "lucide-react";
+import { BookOpen, Flame, Share2, ChartNoAxesCombined, Wallet } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -17,10 +17,10 @@ export function TopBar() {
         <Logo />
         <div className="flex items-baseline gap-3">
           <span className="text-base font-semibold tracking-tight">Energy Twin</span>
-          <span className="hidden truncate text-muted-foreground xl:inline">See the savings before you spend.</span>
+          <span className="hidden truncate text-muted-foreground 2xl:inline">See the savings before you spend.</span>
         </div>
       </div>
-      <nav aria-label="Progress" className="glass hidden items-center gap-1 rounded-full p-1 xl:flex">
+      <nav aria-label="Progress" className="glass hidden items-center gap-1 rounded-full p-1 2xl:flex">
         {steps.map((s, i) => (
           <span key={s} aria-current={step === i + 1 ? "step" : undefined}
             className={cn("rounded-full px-3 py-1 text-xs font-medium transition-colors duration-300",
@@ -31,6 +31,7 @@ export function TopBar() {
       </nav>
       <div className="flex items-center gap-2">
         <Button asChild variant="ghost" size="sm"><Link to="/overview"><ChartNoAxesCombined />Overview</Link></Button>
+        <Button asChild variant="ghost" size="sm"><Link to="/optimizer" aria-label="Budget optimizer"><Wallet /><span className="hidden sm:inline">Investments</span></Link></Button>
         <label className={cn("hidden sm:flex cursor-pointer items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-all duration-300",
           thermalMode ? "bg-heat/10 text-heat [text-shadow:0_0_12px_var(--heat)]" : "text-muted-foreground")}>
           <Flame className="h-4 w-4" />

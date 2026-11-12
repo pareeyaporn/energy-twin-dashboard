@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useTwin, type Fuel } from "@/store/useTwin";
+import { hotelWording } from "@/lib/presentation";
 
 const decades = [1900, 1910, 1920, 1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020];
 
@@ -23,8 +24,8 @@ export function HomeForm() {
           onChange={(e) => updateHome({ zip: e.target.value.replace(/\D/g, "").slice(0, 5) })} />
       </div>
       <div className="grid gap-3">
-        <div className="flex justify-between"><Label className="label-caps">Home size</Label><span className="num text-sm font-medium">{home.sqft.toLocaleString()} sq ft</span></div>
-        <Slider aria-label="Home size in square feet" min={600} max={5000} step={50} value={[home.sqft]} onValueChange={([v]) => v !== undefined && updateHome({ sqft: v })} />
+        <div className="flex justify-between"><Label className="label-caps">Building size</Label><span className="num text-sm font-medium">{home.sqft.toLocaleString()} sq ft</span></div>
+        <Slider aria-label="Building size in square feet" min={600} max={5000} step={50} value={[home.sqft]} onValueChange={([v]) => v !== undefined && updateHome({ sqft: v })} />
       </div>
       <div className="grid gap-2">
         <Label className="label-caps">Year built</Label>
@@ -45,7 +46,7 @@ export function HomeForm() {
         <Label className="label-caps">Heating system</Label>
         <Select value={home.system} onValueChange={(v) => updateHome({ system: v })}>
           <SelectTrigger aria-label="Heating system"><SelectValue /></SelectTrigger>
-          <SelectContent>{["Furnace", "Boiler", "Heat pump", "Electric baseboard"].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+          <SelectContent>{["Furnace", "Boiler", "Heat pump", "Electric baseboard"].map((s) => <SelectItem key={s} value={s}>{hotelWording(s)}</SelectItem>)}</SelectContent>
         </Select>
       </div>
       <div className="grid grid-cols-2 gap-3">
@@ -65,7 +66,7 @@ export function HomeForm() {
         <AnimatePresence initial={false}>
           {notesOpen && (
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
-              <Textarea aria-label="Inspection notes" className="mt-2" rows={4} placeholder="Paste notes from your inspection report" value={home.notes} onChange={(e) => updateHome({ notes: e.target.value })} />
+              <Textarea aria-label="Inspection notes" className="mt-2" rows={4} placeholder="Paste notes from your inspection report" value={hotelWording(home.notes)} onChange={(e) => updateHome({ notes: e.target.value })} />
             </motion.div>
           )}
         </AnimatePresence>

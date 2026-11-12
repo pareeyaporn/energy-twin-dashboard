@@ -10,6 +10,7 @@ import { AnimatedNumber } from "./AnimatedNumber";
 import { InfoTip } from "./InfoTip";
 import { PartCard } from "./PartCard";
 import { toast } from "sonner";
+import { hotelWording } from "@/lib/presentation";
 
 function ToolBtn({ label, onClick, children }: { label: string; onClick?: () => void; children: React.ReactNode }) {
   return (
@@ -24,19 +25,19 @@ export function StageOverlays() {
   const s = useTwin();
   const cost = useTwin(selectCurrentCost);
   const label = useTwin(useShallow(selectHomeLabel));
-  const soon = (what: string) => () => toast(`${what} arrives with the 3D house`);
+  const soon = (what: string) => () => toast(`${what} coming soon`);
   return (
     <>
       <div className="absolute left-4 top-4 flex gap-2">
-        <span className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"><MapPin className="h-3.5 w-3.5 text-primary" />{label.title} · {label.city}</span>
-        <InfoTip text="Your climate zone tells us how cold winters and hot summers get where you live.">
+        <span className="glass flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"><MapPin className="h-3.5 w-3.5 text-primary" />Synthetic profile · {label.city}</span>
+        <InfoTip text="Your climate zone describes winters and summers at the building's location.">
           <span className="glass flex rounded-full px-3 py-1.5 text-xs text-muted-foreground">Climate zone {label.zone}</span>
         </InfoTip>
       </div>
 
       <div className="glass absolute right-4 top-4 rounded-2xl px-5 py-4">
         <p className="label-caps flex items-center gap-1.5"><TrendingDown className="h-3.5 w-3.5 text-savings" />Yearly energy cost</p>
-        <InfoTip text="What this home would cost to run for a year. Pick a package to see the cost with upgrades.">
+        <InfoTip text="Estimated annual building energy cost. Pick a package to see the cost with upgrades.">
           <p className="mt-1 text-4xl font-semibold tracking-tight"><AnimatedNumber value={cost} prefix="$" /><span className="text-base font-normal text-muted-foreground"> / yr</span></p>
         </InfoTip>
       </div>
@@ -50,8 +51,8 @@ export function StageOverlays() {
                 transition={{ delay: i * 0.08, duration: 0.3 }}
                 style={{ left: `${p.pos.x}%`, top: `${p.pos.y}%` }}
                 className="absolute z-10 -translate-x-1/2 whitespace-nowrap rounded-full border border-heat/40 bg-heat/15 px-3 py-1 text-xs font-medium text-heat backdrop-blur-md hover:bg-heat/25"
-                aria-label={`${p.name}, losing $${p.lossPerYear} per year. Open details`}>
-                <span className="num">{p.name} −${p.lossPerYear}/yr</span>
+                aria-label={`${hotelWording(p.name)}, losing $${p.lossPerYear} per year. Open details`}>
+                <span className="num">{hotelWording(p.name)} −${p.lossPerYear}/yr</span>
               </motion.button>
             </PopoverTrigger>
             <PopoverContent className="glass w-auto rounded-2xl border-glass-border bg-panel/80">

@@ -14,9 +14,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Energy Twin — See the savings before you spend" },
-      { name: "description", content: "See where your house wastes energy and which upgrades to buy within your budget." },
+      { name: "description", content: "Explore your hotel profile, digital twin, and estimated energy upgrade packages within your budget." },
       { property: "og:title", content: "Energy Twin — See the savings before you spend" },
-      { property: "og:description", content: "See where your house wastes energy and which upgrades to buy within your budget." },
+      { property: "og:description", content: "Explore your hotel profile, digital twin, and estimated energy upgrade packages within your budget." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -61,7 +61,7 @@ function Index() {
           <div className="panel h-full overflow-hidden" style={{ opacity: leftOpen ? 1 : 0, transition: "opacity 300ms" }}>
             <div className="h-full w-[340px]"><HomePanel /></div>
           </div>
-          <CollapseBtn side="left" open={leftOpen} onClick={() => setLeftOpen(!leftOpen)} label="Your Home panel" />
+          <CollapseBtn side="left" open={leftOpen} onClick={() => setLeftOpen(!leftOpen)} label="Hotel profile panel" />
         </motion.aside>
         <main className="relative min-w-0 flex-1 overflow-hidden rounded-2xl">
           <Stage />
@@ -78,7 +78,7 @@ function Index() {
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
         <div className="relative h-[60vh] shrink-0 overflow-hidden rounded-2xl"><Stage /><PlanDrawer /></div>
         <Tabs defaultValue="home">
-          <TabsList className="glass grid w-full grid-cols-2"><TabsTrigger value="home">Your Home</TabsTrigger><TabsTrigger value="optimize">Optimize</TabsTrigger></TabsList>
+          <TabsList className="glass grid w-full grid-cols-2"><TabsTrigger value="home">Hotel profile</TabsTrigger><TabsTrigger value="optimize">Optimize</TabsTrigger></TabsList>
           <TabsContent value="home" className="panel"><HomePanel /></TabsContent>
           <TabsContent value="optimize" className="panel"><OptimizePanel /></TabsContent>
         </Tabs>

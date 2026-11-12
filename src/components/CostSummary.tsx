@@ -21,7 +21,7 @@ export function CostSummary() {
         <span><span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-efficient" />Electric {elecPct}%</span>
         <span>Gas/fuel {100 - elecPct}%<span className="ml-1 inline-block h-1.5 w-1.5 rounded-full bg-heat" /></span>
       </div>
-      <p className="mt-3 flex items-center gap-1 text-[11px] text-text-muted">Estimated from public data <InfoTip text="Based on typical homes like yours from EIA and NREL ResStock data, adjusted with your bills." /></p>
+      <p className="mt-3 flex items-center gap-1 text-[11px] text-text-muted">Synthetic planning estimate <InfoTip text="Existing sample estimates use EIA and NREL ResStock references, adjusted with your bills; not a validated hotel model." /></p>
     </div>
   );
 }

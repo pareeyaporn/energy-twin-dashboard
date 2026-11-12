@@ -34,3 +34,4 @@ use the editor.
 - Mock data lives in `src/data/*.json`; `src/engine` (calculations) and `src/three` (3D) are reserved for code the owner adds later — don't add logic there.
 - Zustand selectors that return new objects must be wrapped in `useShallow` to avoid render loops.
 - The index page renders only one layout (desktop or stacked) via a media-query hook, so stage popovers aren't duplicated.
+- Translate legacy sample terminology only at the presentation boundary with `src/lib/presentation.ts`; keep underlying data and calculations unchanged during UI-only wording updates.

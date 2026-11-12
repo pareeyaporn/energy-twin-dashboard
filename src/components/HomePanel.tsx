@@ -7,11 +7,11 @@ export function HomePanel() {
   const { presets, selectedPresetId, selectPreset } = useTwin();
   return (
     <div className="flex h-full flex-col">
-      <h2 className="px-6 pt-6 text-xl font-semibold">Your Home</h2>
+      <h2 className="px-6 pt-6 text-xl font-semibold">Hotel profile</h2>
       <div className="flex-1 space-y-6 overflow-y-auto px-6 py-5">
         <section>
-          <p className="label-caps mb-3">Start with a sample home</p>
-          <div role="radiogroup" aria-label="Sample homes" className="space-y-2">
+          <p className="label-caps mb-3">Sample profiles · Synthetic</p>
+          <div role="radiogroup" aria-label="Sample profiles" className="space-y-2">
             {presets.map((p) => <PresetCard key={p.id} preset={p} selected={p.id === selectedPresetId} onSelect={() => selectPreset(p.id)} />)}
           </div>
         </section>

@@ -6,7 +6,7 @@ import { Logo } from "./Logo";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const steps = ["Your Home", "Explore", "Optimize"] as const;
+const steps = ["Hotel profile", "Explore", "Optimize"] as const;
 
 export function TopBar() {
   const { step, thermalMode, setThermal, setSourcesOpen } = useTwin();

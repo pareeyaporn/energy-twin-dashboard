@@ -4,9 +4,9 @@ import { useTwin } from "@/store/useTwin";
 
 const sources = [
   { name: "EIA", desc: "Electricity and natural gas prices by state.", url: "https://www.eia.gov/electricity/data.php" },
-  { name: "NREL ResStock", desc: "Energy use and upgrade savings for typical U.S. homes.", url: "https://resstock.nrel.gov/" },
-  { name: "EIA RECS", desc: "How American homes use energy, by region and type.", url: "https://www.eia.gov/consumption/residential/" },
-  { name: "Rewiring America", desc: "Federal, state and local rebates for home upgrades.", url: "https://www.rewiringamerica.org/" },
+  { name: "NREL ResStock", desc: "Legacy sample energy and upgrade reference; not hotel-specific.", url: "https://resstock.nrel.gov/" },
+  { name: "EIA RECS", desc: "Legacy energy consumption reference; not hotel-specific.", url: "https://www.eia.gov/consumption/residential/" },
+  { name: "Rewiring America", desc: "Legacy upgrade incentive reference; hotel eligibility not verified.", url: "https://www.rewiringamerica.org/" },
   { name: "NREL PVWatts", desc: "Solar production estimates for your location.", url: "https://pvwatts.nrel.gov/" },
 ];
 

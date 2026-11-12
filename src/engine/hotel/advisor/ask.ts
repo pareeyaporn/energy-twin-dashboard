@@ -33,7 +33,7 @@ function hash(s: string): string {
 
 /**
  * Ask the advisor. The browser sends the question and the engine's context to the function, then checks the answer: any number
- * that is not in the context makes it unusable. On a missing setup, a timeout (6 s by default), an error or a rejected answer, the
+ * that is not in the context makes it unusable. On a missing setup, a timeout (8 s by default), an error or a rejected answer, the
  * deterministic template answer is returned instead, so the demo never shows an error. AI answers are cached per question and context.
  */
 export async function askAdvisor(question: string, context: AdvisorContext, config: AdvisorConfig): Promise<AdvisorAnswer> {
@@ -52,7 +52,7 @@ export async function askAdvisor(question: string, context: AdvisorContext, conf
 
   if (!config.endpoint) return fallback('not_configured');
   const doFetch = config.fetchFn ?? fetch;
-  const timeoutMs = config.timeoutMs ?? 6000;
+  const timeoutMs = config.timeoutMs ?? 8000;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {

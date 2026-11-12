@@ -2,8 +2,8 @@ import type { AdvisorConfig } from './ask';
 
 type Env = Record<string, string | undefined>;
 
-// Leaves room for the advisor function's own 14 s limit (ADVISOR_TIMEOUT_MS) before falling back to a template.
-export const ADVISOR_CLIENT_TIMEOUT_MS = 15_000;
+// Answers arrive in about 3 s. Wait up to 8 s (the function stops at 7.5 s), then show the template answer, so the demo never stalls.
+export const ADVISOR_CLIENT_TIMEOUT_MS = 8_000;
 
 /**
  * Where the advisor function lives. `VITE_ADVISOR_URL` wins; otherwise the Lovable Cloud (Supabase) project URL is used with its

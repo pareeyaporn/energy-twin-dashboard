@@ -350,7 +350,7 @@ describe('askAdvisor', () => {
     spy.mockRestore();
   });
 
-  it('gives up after six seconds and shows the template answer', async () => {
+  it('gives up after eight seconds and shows the template answer', async () => {
     vi.useFakeTimers();
     const fetchFn = vi.fn(
       (_url: string, init: RequestInit) =>
@@ -359,7 +359,7 @@ describe('askAdvisor', () => {
         }),
     );
     const p = askAdvisor(q, ctx, config(fetchFn as unknown as typeof fetch));
-    await vi.advanceTimersByTimeAsync(5999);
+    await vi.advanceTimersByTimeAsync(7999);
     let settled = false;
     void p.then(() => (settled = true));
     await Promise.resolve();
@@ -379,8 +379,8 @@ describe('askAdvisor', () => {
 });
 
 describe('advisorConfigFromEnv', () => {
-  it('waits 15 seconds for the advisor before using a template answer', () => {
-    expect(advisorConfigFromEnv({ VITE_SUPABASE_URL: 'https://p.supabase.co' }).timeoutMs).toBe(15000);
+  it('waits 8 seconds for the advisor before using a template answer', () => {
+    expect(advisorConfigFromEnv({ VITE_SUPABASE_URL: 'https://p.supabase.co' }).timeoutMs).toBe(8000);
   });
   it('uses VITE_ADVISOR_URL first, then the Lovable Cloud project URL, else nothing', () => {
     expect(advisorConfigFromEnv({})).toEqual({ endpoint: null, headers: {} });

@@ -1,4 +1,4 @@
-import { BookOpen, Flame, Share2, ChartNoAxesCombined, SlidersHorizontal, Wallet } from "lucide-react";
+import { BookOpen, Flame, Share2, ChartNoAxesCombined, SlidersHorizontal, Wallet, MessageSquare } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const steps = ["Hotel profile", "Explore", "Optimize"] as const;
 
-export function TopBar() {
+export function TopBar({ onOpenAdvisor }: { onOpenAdvisor?: () => void }) {
   const { step, thermalMode, setThermal, setSourcesOpen } = useTwin();
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-border px-3 lg:px-6">
@@ -30,6 +30,7 @@ export function TopBar() {
         ))}
       </nav>
       <div className="flex items-center gap-2">
+        {onOpenAdvisor && <Button variant="ghost" size="sm" aria-label="Open AI advisor" onClick={onOpenAdvisor}><MessageSquare /><span className="hidden xl:inline">Advisor</span></Button>}
         <Button asChild variant="ghost" size="sm"><Link to="/overview"><ChartNoAxesCombined /><span className="hidden xl:inline">Overview</span></Link></Button>
         <Button asChild variant="ghost" size="sm"><Link to="/scenario" aria-label="Scenario simulator"><SlidersHorizontal /><span className="hidden xl:inline">Scenario</span></Link></Button>
         <Button asChild variant="ghost" size="sm"><Link to="/optimizer" aria-label="Budget optimizer"><Wallet /><span className="hidden sm:inline">Investments</span></Link></Button>

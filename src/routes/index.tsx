@@ -10,6 +10,7 @@ import { OptimizePanel } from "@/components/OptimizePanel";
 import { PlanDrawer } from "@/components/PlanDrawer";
 import { SourcesSheet } from "@/components/SourcesSheet";
 import { Button } from "@/components/ui/button";
+import { AdvisorPanel } from "@/components/AdvisorPanel";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -53,9 +54,11 @@ function Index() {
   const desktop = useIsDesktop();
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(false);
+  const [rightTab, setRightTab] = useState("advisor");
+  const [mobileTab, setMobileTab] = useState("home");
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <TopBar />
+      <TopBar onOpenAdvisor={() => { setRightOpen(true); setRightTab("advisor"); setMobileTab("advisor"); }} />
       {desktop ? (
       <div className="flex min-h-0 flex-1 gap-3 p-3">
         <motion.aside animate={{ width: leftOpen ? 340 : 0 }} transition={ease} className="relative shrink-0">
@@ -70,18 +73,23 @@ function Index() {
         </main>
         <motion.aside animate={{ width: rightOpen ? 380 : 0 }} transition={ease} className="relative shrink-0">
           <div className="panel h-full overflow-hidden" style={{ opacity: rightOpen ? 1 : 0, transition: "opacity 300ms" }}>
-            <div className="ml-auto h-full w-[380px]"><OptimizePanel /></div>
+            <Tabs value={rightTab} onValueChange={setRightTab} className="ml-auto flex h-full w-[380px] flex-col">
+              <TabsList className="grid w-full shrink-0 grid-cols-2 rounded-none"><TabsTrigger value="optimize">Investments</TabsTrigger><TabsTrigger value="advisor">Advisor</TabsTrigger></TabsList>
+              <TabsContent value="optimize" className="mt-0 min-h-0 flex-1 overflow-y-auto"><OptimizePanel /></TabsContent>
+              <TabsContent value="advisor" className="mt-0 min-h-0 flex-1"><AdvisorPanel /></TabsContent>
+            </Tabs>
           </div>
-          <CollapseBtn side="right" open={rightOpen} onClick={() => setRightOpen(!rightOpen)} label="Optimize panel" />
+          <CollapseBtn side="right" open={rightOpen} onClick={() => setRightOpen(!rightOpen)} label="Investments and advisor panel" />
         </motion.aside>
       </div>
       ) : (
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-3">
         <div className="min-w-0 shrink-0 rounded-lg border border-border"><Stage /><div className="relative h-14"><PlanDrawer /></div></div>
-        <Tabs defaultValue="home">
-          <TabsList className="glass grid w-full grid-cols-2"><TabsTrigger value="home">Hotel profile</TabsTrigger><TabsTrigger value="optimize">Optimize</TabsTrigger></TabsList>
+        <Tabs value={mobileTab} onValueChange={setMobileTab}>
+          <TabsList className="glass grid w-full grid-cols-3"><TabsTrigger value="home">Hotel profile</TabsTrigger><TabsTrigger value="optimize">Optimize</TabsTrigger><TabsTrigger value="advisor">Advisor</TabsTrigger></TabsList>
           <TabsContent value="home" className="panel"><HomePanel /></TabsContent>
           <TabsContent value="optimize" className="panel"><OptimizePanel /></TabsContent>
+          <TabsContent value="advisor" className="panel h-[650px]"><AdvisorPanel /></TabsContent>
         </Tabs>
       </div>
       )}

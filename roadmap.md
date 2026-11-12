@@ -1,5 +1,10 @@
 # Task roadmap
 
+## AI advisor
+
+- [x] Add the advisor panel, suggested questions, busy state, source labels, and clear action.
+- [x] Test sending and clearing, and verify the conversation on desktop and mobile without changing protected folders.
+
 ## Saved scenarios
 
 - [x] Add named scenario saving and a saved-scenario list.

@@ -256,6 +256,8 @@ export interface HotelData {
       vacantHeatWarnF: number;
       vacantCoolWarnF: number;
     };
+    /** Energy price growth (nominal, a year) and the discount rate, with their source. */
+    finance: { elecPriceGrowth: number; gasPriceGrowth: number; discountRate: number; source: string; verified: boolean };
     profileDefaults: {
       rooms: number;
       sqftPerRoom: number;
@@ -424,6 +426,8 @@ export interface SolarDetails {
   exportedKWh: number;
   /** Credit per exported kWh used ($0 when not researched). */
   exportCreditPerKWh: number;
+  /** Yearly operation and maintenance, already subtracted from the annual savings. */
+  omPerYear: number;
   /** Installed cost per W used for this size and region (mid). */
   installedCostPerW: number;
   degradationPerYear: number;
@@ -486,6 +490,8 @@ export interface UpgradeSizing {
   solarExportKWhYear: number;
   /** Dollars a year from solar: avoided purchases plus export credit. The part of the savings that degrades with the panels. */
   solarValuePerYear: number;
+  /** Yearly operation and maintenance of the solar array, subtracted from the savings. */
+  solarOmPerYear: number;
 }
 
 export interface UpgradeOutcome {
@@ -502,7 +508,10 @@ export interface UpgradeOutcome {
 }
 
 export interface FinancialAssumptions {
-  priceGrowth: number; // per year, for example 0.02
+  /** Electricity price growth a year (nominal), for example 0.0212. */
+  priceGrowth: number;
+  /** Natural gas price growth a year (nominal); defaults to priceGrowth when absent. */
+  gasPriceGrowth?: number;
   discountRate: number; // for example 0.03
   horizonYears: number;
 }

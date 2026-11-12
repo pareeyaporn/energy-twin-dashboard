@@ -156,7 +156,7 @@ describe('costs', () => {
   const mid = (id: UpgradeId, s = sizing) => upgradeCost(p, id, s).mid;
 
   it('follow the cost models', () => {
-    close(mid('smart_room_controls'), 1500 + 250 * 100);
+    close(mid('smart_room_controls'), 260 * 100); // IL-TRM $260 per room
     close(mid('led_lighting'), 0.6 * 55000);
     close(mid('occupancy_sensors'), 0.4 * 55000 * 0.3);
     close(mid('insulation'), 3.5 * (55000 / 5));
@@ -247,7 +247,7 @@ describe('evaluatePackage', () => {
   });
 
   it('uses the horizon and assumptions it is given', () => {
-    const e = evaluatePackage(ctx, ['led_lighting'], { assumptions: { horizonYears: 10, priceGrowth: 0 }, budget: 40000, lineItems: false });
+    const e = evaluatePackage(ctx, ['led_lighting'], { assumptions: { horizonYears: 10, priceGrowth: 0, gasPriceGrowth: 0 }, budget: 40000, lineItems: false });
     expect(e.metrics.horizonYears).toBe(10);
     close(e.metrics.netBenefit, 10 * e.annualSavings.mid - e.cost.mid);
     close(e.metrics.remainingBudget, 40000 - e.cost.mid);

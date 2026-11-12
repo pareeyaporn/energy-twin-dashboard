@@ -58,6 +58,7 @@ export function packageMetrics(
       incentivesTotal: inc.total.mid,
       solarValuePerYear: mid.sizing.solarValuePerYear,
       degradationPerYear: solarDegradation(ids, d),
+      gasSavingsPerYear: mid.savings.gasCost,
     },
     assumptions,
   );
@@ -96,6 +97,7 @@ export function evaluatePackage(
           selfConsumedKWh: mid.sizing.solarKWhYear,
           exportedKWh: mid.sizing.solarExportKWhYear,
           exportCreditPerKWh: exportCreditPerKWh(p, d),
+          omPerYear: mid.sizing.solarOmPerYear,
           installedCostPerW: solarCostPerW(mid.sizing.solarKw, p, d).mid,
           degradationPerYear: solarDegradation(ids, d),
         }
@@ -105,10 +107,12 @@ export function evaluatePackage(
     incentives: incentiveLines(costs.items, p, mid.sizing, options.incentives, d),
     annualSavings,
     solarValue,
+    gasValue: { low: low.savings.gasCost, mid: mid.savings.gasCost, high: high.savings.gasCost },
     energy: { elecKWh: mid.savings.elecKWh, gasTherms: mid.savings.gasTherms, siteKBtu: mid.savings.siteKBtu },
     carbonAvoidedKgPerYear: carbonAvoidedKg,
     solar,
     priceGrowth: assumptions.priceGrowth,
+    gasPriceGrowth: assumptions.gasPriceGrowth ?? assumptions.priceGrowth,
   });
 
   let lineItems: PackageLineItem[] = [];

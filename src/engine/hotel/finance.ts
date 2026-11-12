@@ -12,8 +12,15 @@ import type {
   UpgradeSizing,
 } from './types';
 
-/** PLACEHOLDER rates: energy prices rise 2% a year; future savings are discounted at 3% a year (NPV only). To be sourced (docs/08). */
-export const DEFAULT_FINANCE: Omit<FinancialAssumptions, 'horizonYears'> = { priceGrowth: 0.02, discountRate: 0.03 };
+/**
+ * Electricity and gas prices grow at the EIA Annual Energy Outlook 2026 nominal commercial rates (2025 to 2035); future savings are
+ * discounted at a placeholder 3% a year (NPV only). Source in defaults.json `finance`.
+ */
+export const DEFAULT_FINANCE: Omit<FinancialAssumptions, 'horizonYears'> = {
+  priceGrowth: hotelData.defaults.finance.elecPriceGrowth,
+  gasPriceGrowth: hotelData.defaults.finance.gasPriceGrowth,
+  discountRate: hotelData.defaults.finance.discountRate,
+};
 
 /** The two fixed comparison periods every upgrade is shown over, besides the hotel's own horizon. */
 export const BENEFIT_YEARS = [5, 10] as const;
@@ -25,19 +32,31 @@ export interface CostedItem {
   lifetimeYears: number;
 }
 
-/** What the savings stream depends on: first-year savings, the solar part of them (which degrades) and the rates. */
+/**
+ * What the savings stream depends on: first-year savings, the gas part of them (gas prices grow at their own rate; negative when an
+ * upgrade adds gas use), the solar part (which also degrades) and the rates.
+ */
 export interface SavingsStream {
   firstYear: number;
+  gasFirstYear?: number;
   solarFirstYear: number;
   degradationPerYear: number;
+  /** Electricity price growth. */
   priceGrowth: number;
+  gasPriceGrowth?: number;
 }
 
-/** Savings in year t (t = 1 is the first year): non-solar savings grow with prices; solar savings also fall with panel output. */
+/**
+ * Savings in year t (t = 1 is the first year): electricity savings grow with electricity prices, gas savings with gas prices, and
+ * the solar part of the electricity savings also falls with panel output.
+ */
 export function savingsInYear(s: SavingsStream, t: number): number {
-  const growth = (1 + s.priceGrowth) ** (t - 1);
-  const solar = Math.min(s.solarFirstYear, s.firstYear);
-  return ((s.firstYear - solar) + solar * (1 - s.degradationPerYear) ** (t - 1)) * growth;
+  const gas = s.gasFirstYear ?? 0;
+  const elec = s.firstYear - gas;
+  const solar = Math.max(0, Math.min(s.solarFirstYear, elec));
+  const ge = (1 + s.priceGrowth) ** (t - 1);
+  const gg = (1 + (s.gasPriceGrowth ?? s.priceGrowth)) ** (t - 1);
+  return ((elec - solar) + solar * (1 - s.degradationPerYear) ** (t - 1)) * ge + gas * gg;
 }
 
 /** Sum of yearly savings over N years minus the net investment (nominal, no residual value). */
@@ -65,6 +84,8 @@ export function calculateFinancialMetrics(
     /** Solar part of the first-year savings and its yearly degradation (0 without solar). */
     solarValuePerYear?: number;
     degradationPerYear?: number;
+    /** Gas part of the first-year savings (grows with gas prices). */
+    gasSavingsPerYear?: number;
   },
   a: FinancialAssumptions,
 ): FinancialMetrics {
@@ -73,9 +94,11 @@ export function calculateFinancialMetrics(
   const net = Math.max(0, cost - (input.incentivesTotal ?? 0));
   const stream: SavingsStream = {
     firstYear: input.annualSavings,
+    gasFirstYear: input.gasSavingsPerYear ?? 0,
     solarFirstYear: input.solarValuePerYear ?? 0,
     degradationPerYear: input.degradationPerYear ?? 0,
     priceGrowth: g,
+    gasPriceGrowth: a.gasPriceGrowth ?? g,
   };
   let pv = 0;
   for (let t = 1; t <= H; t++) pv += savingsInYear(stream, t) / (1 + r) ** t;
@@ -156,10 +179,13 @@ export function financialBreakdown(input: {
   annualSavings: Range3;
   /** Solar part of the first-year savings in each scenario (0 without solar). */
   solarValue: Range3;
+  /** Gas part of the first-year savings in each scenario. */
+  gasValue: Range3;
   energy: { elecKWh: number; gasTherms: number; siteKBtu: number };
   carbonAvoidedKgPerYear: Range3;
   solar: SolarDetails | null;
   priceGrowth: number;
+  gasPriceGrowth: number;
 }): FinancialBreakdown {
   const net: Range3 = {
     low: Math.max(0, input.grossCost.low - input.incentives.total.low),
@@ -169,9 +195,11 @@ export function financialBreakdown(input: {
   const d = input.solar?.degradationPerYear ?? 0;
   const stream = (s: (typeof SCENARIOS)[number]): SavingsStream => ({
     firstYear: input.annualSavings[s],
+    gasFirstYear: input.gasValue[s],
     solarFirstYear: input.solarValue[s],
     degradationPerYear: d,
     priceGrowth: input.priceGrowth,
+    gasPriceGrowth: input.gasPriceGrowth,
   });
   // Low pairs the low savings with the high net cost, high the reverse, so the range covers both uncertainties.
   const benefit = (years: number): Range3 => ({
@@ -182,14 +210,16 @@ export function financialBreakdown(input: {
   const applied = input.incentives.lines.filter((l) => l.applied);
   const listed = input.incentives.lines.filter((l) => !l.applied);
   const assumptions = [
-    `First-year savings use today's energy prices; prices are assumed to rise ${round1(input.priceGrowth * 100)}% a year (placeholder).`,
+    `First-year savings use today's energy prices; electricity prices are assumed to rise ${round1(input.priceGrowth * 100)}% a year and gas ${round1(input.gasPriceGrowth * 100)}% a year (EIA Annual Energy Outlook 2026, commercial, nominal).`,
     applied.length
       ? `Incentives applied: ${applied.map((l) => l.label).join('; ')}.`
       : listed.length
         ? `No incentives applied; possible programs to check: ${[...new Set(listed.map((l) => l.label))].join('; ')}.`
         : 'No incentive programs are listed for this upgrade.',
     'Simple payback is the net investment divided by first-year savings.',
-    'Operation, maintenance and replacement costs are not included.',
+    input.solar
+      ? 'Solar operation and maintenance is subtracted from the savings; inverter replacement and other upkeep are not included.'
+      : 'Operation, maintenance and replacement costs are not included.',
     'The budget is compared with the gross cost, because most incentives arrive after installation.',
   ];
   if (input.solar) {

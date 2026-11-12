@@ -179,20 +179,25 @@ so the cards, the optimizer and the advisor cannot disagree. Tests in `__tests__
 
 **`evaluatePackage`** returns the cost range, annual savings (low, mid, high), new annual cost, carbon avoided, metrics, comfort, sizing and per-item marginal savings (which sum to the package savings and depend on the fixed order).
 
-### Demo hotel, single upgrades (mid; synthetic placeholders, no incentives applied)
+### Demo hotel, single upgrades (mid; research pass 1, no incentives applied)
 
-| Upgrade | Gross = net cost | kWh / yr | therms / yr | $ / yr | Payback | 5-year net | 10-year net | t CO2 / yr |
+Baseline after research pass 1 (CBECS 2018 lodging end-use split and fuel mix): about $131,700 a year (electricity $109,900, gas $21,700),
+782,000 kWh, 23,400 therms, 305 t CO2. Price growth: EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar savings are net of $17.63/kW-yr O&M.
+
+| Upgrade | Net cost | kWh / yr | therms / yr | $ / yr | Payback | 5-year net | 10-year net | t CO2 / yr |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Occupancy sensors | $6,600 | 18,363 | −110 | $2,478 | 2.7 y | $6,294 | $20,530 | 3.7 |
-| LED lighting | $33,000 | 79,838 | −495 | $10,757 | 3.1 y | $22,980 | $84,787 | 15.8 |
-| Water heating and low-flow | $22,000 | 12,118 | 1,654 | $3,239 | 6.8 y | −$5,144 | $13,466 | 11.6 |
-| Energy management | $26,000 | 13,961 | 656 | $2,570 | 10.1 y | −$12,623 | $2,146 | 6.7 |
-| Insulation | $38,500 | 10,678 | 891 | $2,328 | 16.5 y | −$26,387 | −$13,014 | 7.2 |
-| Rooftop solar (55 kW, 66,000 kWh, all used on site) | $154,000 | 66,000 | 0 | $9,273 | 16.6 y | −$106,233 | −$54,799 | 15.3 |
-| Smart room controls | $26,500 | 6,761 | 309 | $1,237 | 21.4 y | −$20,061 | −$12,952 | 3.2 |
-| HVAC equipment | $110,000 | 19,924 | 1,332 | $4,036 | 27.3 y | −$88,995 | −$65,804 | 11.7 |
+| Occupancy sensors | $6,600 | 17,544 | −101 | $2,371 | 2.8 y | $5,750 | $19,409 | 3.5 |
+| LED lighting | $33,000 | 60,967 | −378 | $8,214 | 4.0 y | $9,778 | $57,074 | 12.1 |
+| Water heating and low-flow | $22,000 | 8,897 | 1,720 | $2,848 | 7.7 y | −$6,808 | $11,030 | 11.2 |
+| Energy management | $26,000 | 18,680 | 539 | $3,126 | 8.3 y | −$9,591 | $8,936 | 7.2 |
+| Rooftop solar (55 kW, 66,000 kWh, all used on site) | $154,000 | 66,000 | 0 | $8,303 | 18.5 y | −$111,125 | −$64,687 | 15.3 |
+| Insulation | $38,500 | 8,186 | 733 | $1,831 | 21.0 y | −$28,807 | −$17,630 | 5.8 |
+| Smart room controls | $26,000 | 4,903 | 209 | $883 | 29.4 y | −$21,353 | −$16,075 | 2.2 |
+| HVAC equipment | $110,000 | 15,275 | 1,187 | $3,249 | 33.9 y | −$92,822 | −$73,079 | 9.8 |
 
-Carbon uses the EIA Illinois generation rate (0.231 kg CO2 per kWh); the demo hotel's baseline is about 309 t CO2 a year.
+**Calibration flag (smart room controls).** The model saves about 3% (1.8 to 4.3%) of the HVAC energy attributable to guest rooms; a DOE/PNNL field
+study measured 10.8 to 26.5% (average 18.4%), in warmer climates with room units. The setback model (presence, sensitivity, recovery) under-predicts
+against that evidence and is the next calibration item; confirm with the IL-TRM per-room deemed savings.
 
 LED lighting plus occupancy sensors costs $39,600, saves $12,159 a year (payback 3.3 years, five-year net benefit about $23,700). The full package costs $396,000 and saves $33,700.
 All 256 combinations evaluate in about 0.25 seconds.

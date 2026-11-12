@@ -12,7 +12,9 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 ## Before rehearsals
 
 - [ ] All data placeholders replaced and `"verified": true`, or clearly labeled "estimated" or "synthetic" on screen
-- [ ] The demo hotel's results sanity-checked against an ENERGY STAR Portfolio Manager benchmark; the comparison is noted for Q&A
+- [x] The demo hotel's results sanity-checked against the ENERGY STAR hotel median (63.0) and CBECS lodging (85.7): 91.1 kBtu/ft², 45% above
+      the median (cold climate, restaurant). Shown in the app as context (benchmark card, LV15); noted for Q&A
+- [ ] 3D view loads on the demo laptop and projector (WebGL); "reduce effects" and the 2D switch tested as a fallback
 - [ ] Dollar, kWh and carbon figures in the pitch script match what the app shows
 - [ ] `npm run build` passes; no console errors on the demo path
 - [ ] Published Lovable URL works in an incognito window
@@ -30,7 +32,8 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 ## Demo path (3 minutes) — run 5 times in a row without a failure
 
 1. Introduce a hotel owner with rising energy costs and unclear upgrade choices (30 s)
-2. Open the synthetic 100-room Chicago hotel and show zone-level energy and cost
+2. Open the synthetic 100-room Chicago hotel and show zone-level energy and cost. In 3D: let the fly-in play, click a zone (the camera glides),
+   press "January night" (snow, lit windows, the rooftop unit glowing red for heating) and "July afternoon" (cooling), then "Energy view"
 3. Change occupancy from 60% to 85%, then enable smart room controls; show the cost strip and the "why it changed" panel
    (more guests raise the bill; the controls claw part of it back)
 4. Enter a $50,000 budget (Invest tab, "Optimize for this scenario" turns on by itself), generate the three packages, compare cost, savings,

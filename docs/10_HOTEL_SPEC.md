@@ -37,6 +37,9 @@ Users should be able to select zones and change inputs, with visible updates to 
 
 Prefer a functional clickable 2D diagram or lightweight 3D view over expensive photorealistic 3D. Show energy intensity, before/after results and immediate feedback.
 
+*Status (November 2026): both are built. The 2D twin has zone, room, equipment and flow layers; a lightweight procedural 3D view (default on
+desktop) adds seasons, day and night and an hourly readout, all driven by the engine (docs/04).*
+
 ## 6. Energy Simulation Engine
 Estimate consumption from floor area, occupancy, weather, HVAC efficiency, equipment hours, lighting, hot water and rates.
 
@@ -98,7 +101,7 @@ Use an LLM only for interpretation, conversational queries and summaries. Start 
 
 **P1 — Strong differentiators:** clickable digital twin; grounded AI advisor; saved scenarios; guest comfort constraints; five-year financial projections.
 
-**P2 — Later:** detailed 3D; live IoT; utility-bill calibration; advanced hourly simulations; multi-property optimization; complex tariffs; other building types.
+**P2 — Later:** detailed 3D (*a lightweight 3D twin is built*); live IoT; utility-bill calibration; advanced hourly simulations; multi-property optimization; complex tariffs; other building types.
 
 Do not sacrifice working P0 features for P2 polish.
 

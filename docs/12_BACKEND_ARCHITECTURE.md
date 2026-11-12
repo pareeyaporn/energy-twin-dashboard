@@ -29,7 +29,7 @@ is built today, and what we will add. Product context is in [10_HOTEL_SPEC.md](1
                         ┌─────────────────────────── Browser ───────────────────────────┐
                         │  React UI (Lovable)  ◀──▶  zustand store (src/store/useTwin)  │
                         │        │                          │                           │
-                        │   Hotel twin (src/twin)           ▼                           │
+                        │   Twin 2D (src/twin), 3D (src/three) ▼                        │
                         │                        src/engine/hotel (pure functions)      │
                         │                                   │ reads                     │
                         │                        src/data/hotel/*.json (bundled)        │
@@ -131,6 +131,8 @@ The UI keeps a short "testing combinations…" state for the animation. Target: 
 - Scenario update under 50 ms; optimizer under 100 ms (both asserted in tests).
 - Memoize the baseline; recompute only the changed scenario.
 - If the engine ever blocks the UI, move it into a Web Worker. Not needed for the MVP.
+- The 3D scene is a separate lazy chunk (about 257 KB gzipped, mostly three.js), loaded only when the 3D view is shown; one shadow-casting light,
+  instanced windows; "reduce effects" turns off shadows, particles and animation.
 
 ## 11. Build, deploy, environments
 - `npm run build` must pass before every commit. Lovable syncs `main` and rebuilds the preview.

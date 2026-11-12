@@ -8,21 +8,29 @@ investments that pay back best within a budget.
 
 Built for a 48-hour hackathon in [Lovable](https://lovable.dev), extended with Claude Code, and synced through GitHub.
 
-All P0 and P1 features are built and run on a synthetic 100-room Chicago hotel. Numbers are **estimates**: part of the data is researched
-(EIA prices, end-use split, price growth and grid emissions), the rest is labeled placeholder until the calibration pass. See the status below.
+All P0 and P1 features are built, plus an interactive 3D twin, and run on a synthetic 100-room Chicago hotel (a 300-room preset is also included).
+Numbers are **estimates**: most inputs are now sourced from primary documents (EIA, EPA eGRID, NOAA, PVWatts, IL-TRM, CBECS, ENERGY STAR);
+installed costs, solar $/W and incentive amounts are still labeled placeholders or unverified. See the status below.
 
 ## What it does
 - **One workspace:** four numbered tabs (1 Hotel, 2 Scenario, 3 Invest, 4 Ask) beside the digital twin, with a cost / energy / carbon
   strip that shows before → after for whatever is being tested. Overview ("Report"), full scenario and full optimizer pages are one click away.
 - **Hotel profile:** rooms, floor area, HVAC, bills, occupancy, schedules, budget. Every input is optional; defaults are labeled "default (estimate)".
-- **Digital twin (2D):** six clickable zones (guest rooms, lobby and common areas, kitchen and restaurant, hallways, central HVAC, hot water)
-  colored by cost, plus room, equipment and energy-flow layers, a typical-day clock, stress tests and a before/after split view with upgrade markers.
+- **Digital twin (3D and 2D):** six clickable zones (guest rooms, lobby and common areas, kitchen and restaurant, hallways, central HVAC, hot water).
+  The **3D view** (default on desktop) shows the hotel with seasons, day and night, lit windows per room, rooms set back by smart controls,
+  rooftop HVAC heating or cooling, solar panels (or a "not installed" preview), a street with people whose number follows the guests out,
+  a camera that glides to the selected zone, an "Energy view" heat map and an hourly readout (modeled temperature, demand by end use, cost).
+  The **2D view** adds room, equipment and energy-flow layers. Both share one clock ("Year + day" plays every hour of every month), stress tests
+  and a before/after split view with upgrade markers. Without WebGL, on phones or with "reduce effects", the 2D view is used.
 - **Scenario simulator:** occupancy, setpoints, smart room controls, schedules, electricity price, four stress tests, "why this changed" and comfort notes.
   Saved scenarios (per browser session).
 - **Upgrade comparison:** eight upgrades, solar included, each with the same breakdown: gross cost, incentives (listed, applied only when confirmed),
-  net investment, kWh and therms saved, $ saved, simple payback, 5- and 10-year net benefit and CO2 avoided. Solar is sized to the roof,
-  uses location-based output with hour-by-hour self-use and export, regional $/W, degradation and O&M.
-- **Budget optimizer:** tests every combination (256) and returns three packages (maximum savings, fastest payback, balanced) within the budget
+  net investment, kWh and therms saved, $ saved, simple payback, 5- and 10-year net benefit and CO2 avoided, NPV at 8% (or 3%) and a
+  **10-year projection** (savings each year, cumulative net benefit with a range, discounted). Solar comes at three sizes (quarter, half and full
+  roof), uses location-based output with hour-by-hour self-use and export, regional $/W, degradation and O&M.
+- **Peer benchmark:** the hotel's modeled site energy intensity next to the ENERGY STAR hotel median and the CBECS lodging mean (context only;
+  nothing is tuned toward them).
+- **Budget optimizer:** tests every valid combination (512; solar sizes exclude each other) and returns three packages (maximum savings, fastest payback, balanced) within the budget
   and a comfort limit, measured against the current scenario when one is running. It uses exactly the numbers on the cards.
 - **AI advisor:** plain-language answers from Claude, grounded in the computed results. The browser rejects any answer with a number that is
   not in the results and falls back to a template answer; nothing is invented.
@@ -30,17 +38,19 @@ All P0 and P1 features are built and run on a synthetic 100-room Chicago hotel. 
 ## Demo path (3 minutes)
 Synthetic 100-room hotel → zone-level energy → occupancy 60% to 85% → smart room controls on → $50,000 budget → three packages →
 ask the advisor → before/after energy, cost and carbon. **The script follows the calibrated results:** the advisor question and the
-featured upgrades will be chosen after the calibration pass, whichever upgrades perform best (today: LED lighting plus occupancy sensors at $50,000).
+featured upgrades follow the results, whichever upgrades perform best (today: LED lighting plus occupancy sensors at $50,000, about $9,100 a year,
+payback 4.4 years). Open the twin in 3D for the January-night and July-afternoon moments.
 
 ## Status
 
 | Area | State |
 | --- | --- |
-| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown, solar, incentives, optimizer, twin data | Built and tested (300+ tests) |
+| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (338 tests) |
 | Data (`src/data/hotel`) | **Sourced from primary documents:** EIA prices, price growth (AEO2026) and hotel end uses (CBECS 2018); EPA eGRID2023 grid factors by location and the EPA gas factor; PVWatts solar output; NOAA weather; IL-TRM hotel measures (smart controls, sensors, lighting interaction, hot water); NLR solar O&M and degradation; Chicago hotel sizes and occupancy (Choose Chicago, STR). **Still placeholders:** most installed costs, solar $/W, the solar export credit, and the monthly occupancy shape. Phase 7 is closed except costs (7.6) and solar $/W (7.7). See `docs/08`, `docs/14`, `docs/15` |
 | Store (`src/store`): profile, scenarios, optimizer (scenario-aware), upgrade comparison, twin controls, advisor | Built |
-| 2D digital twin (`src/twin`) | Built |
-| Workspace UI (Lovable, prompts LV1–LV10) | Built. **LV11** (show the full financial breakdown on every card) is next |
+| Digital twin: 2D (`src/twin`) and 3D (`src/three`, Phase 9) | Built |
+| Workspace UI (Lovable, prompts LV1–LV14) | Built. **LV15** (benchmark card, calmer Invest tab, phone layout, fewer default tags) is running |
+| Flow, Rooms and Equipment tab redesign (animated Sankey, room facade, equipment cards) | Planned next |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
 | Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |
 | Home-era engine and data | Legacy, unused by the app; home UI components removed |
@@ -49,13 +59,14 @@ featured upgrades will be chosen after the calibration pass, whichever upgrades 
 - TanStack Start (React, TypeScript, Vite), Tailwind, shadcn/ui, built to a Cloudflare Worker target
 - State: `zustand`
 - Charts: `recharts`
+- 3D: `three`, `@react-three/fiber`, `@react-three/drei` (procedural geometry, no model files; lazy-loaded)
 - Tests: `vitest`
 - Backend: Lovable Cloud (Supabase) edge function for the AI advisor only; key in Lovable Cloud secrets
 
 ## Architecture
 
 ```
-UI panels ──writes──▶ zustand store ◀──reads── 2D digital twin (src/twin)
+UI panels ──writes──▶ zustand store ◀──reads── digital twin: 2D (src/twin) and 3D (src/three)
                           │
                           ▼
               src/engine/hotel (pure functions, runs in the browser)
@@ -76,7 +87,8 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | `src/store/` | Shared state contract |
 | `src/engine/` | Pure TypeScript calculations (`hotel/` is the active engine; the rest is legacy) |
 | `src/data/` | Sourced JSON data |
-| `src/twin/` | Clickable hotel twin |
+| `src/twin/` | Clickable hotel twin (2D layers, controls, the 3D wrapper) |
+| `src/three/` | 3D hotel scene (building, scenery, street, people, camera) |
 | `supabase/functions/` | Backend function: the AI advisor |
 | `docs/` | Specs and plans |
 
@@ -98,8 +110,8 @@ npx vitest run  # tests
   [product decisions](docs/15_PRODUCT_DECISIONS.md) (choices, not facts: discount rate, optimizer rules, HVAC types, solar sizes, emissions, incentives)
 - [Claude Code prompts](docs/05_CLAUDE_CODE_PROMPTS.md), [Lovable prompts](docs/06_LOVABLE_PROMPTS.md), [demo checklist](docs/07_DEMO_CHECKLIST.md)
 - [Data and research to-do](docs/08_DATA_TODO.md) and [setup](docs/01_SETUP.md)
-- Home-era specs, kept as patterns until the hotel versions exist: [engine](docs/02_ENGINE_SPEC.md), [data](docs/03_DATA_SPEC.md),
-  [3D](docs/04_3D_SPEC.md); [commercial notes](docs/09_COMMERCIAL_PIVOT.md) are superseded
+- [3D twin spec](docs/04_3D_SPEC.md) (what drives each visual)
+- Home-era specs, kept as patterns: [engine](docs/02_ENGINE_SPEC.md), [data](docs/03_DATA_SPEC.md); [commercial notes](docs/09_COMMERCIAL_PIVOT.md) are superseded
 
 ## Working with Lovable
 

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { advisorAnswerStore } from "./advisorAnswers";
 import {
   DEFAULT_FINANCE,
   PORTFOLIO_DEFAULTS,
@@ -590,7 +591,8 @@ export const useTwin = create<TwinState>((set, get) => ({
       },
       q,
     );
-    const answer = await advisor.askAdvisor(q, context, advisor.getAdvisorConfig());
+    // Validated AI answers are also kept in local storage, so a rehearsed demo question answers the same way at once (task 8.2).
+    const answer = await advisor.askAdvisor(q, context, { ...advisor.getAdvisorConfig(), store: advisorAnswerStore });
     set((st) => ({
       advisorBusy: false,
       advisorMessages: [

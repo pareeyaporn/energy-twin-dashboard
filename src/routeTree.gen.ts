@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OptimizerRouteImport } from './routes/optimizer'
 import { Route as OverviewRouteImport } from './routes/overview'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OptimizerRoute = OptimizerRouteImport.update({
+  id: '/optimizer',
+  path: '/optimizer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OverviewRoute = OverviewRouteImport.update({
@@ -25,27 +31,31 @@ const OverviewRoute = OverviewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/overview'
+  fullPaths: '/' | '/optimizer' | '/overview'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/overview'
-  id: '__root__' | '/' | '/overview'
+  to: '/' | '/optimizer' | '/overview'
+  id: '__root__' | '/' | '/optimizer' | '/overview'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  OptimizerRoute: typeof OptimizerRoute
   OverviewRoute: typeof OverviewRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/optimizer': {
+      id: '/optimizer'
+      path: '/optimizer'
+      fullPath: '/optimizer'
+      preLoaderRoute: typeof OptimizerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/overview': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  OptimizerRoute: OptimizerRoute,
   OverviewRoute: OverviewRoute,
 }
 export const routeTree = rootRouteImport

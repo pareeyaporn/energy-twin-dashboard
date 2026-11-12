@@ -8,9 +8,11 @@
 // hosting already compresses at the edge.
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 
 export default defineConfig({
   vite: {
+    plugins: [mcpPlugin()],
     optimizeDeps: {
       // Prebundle lazy panel dependencies together with React before the first page load.
       // Late discovery otherwise replaces shared React chunks under a mounted tree.
@@ -32,6 +34,9 @@ export default defineConfig({
         "nanoid",
         "streamdown",
         "use-stick-to-bottom",
+        "use-webmcp-tool",
+        "@supabase/supabase-js",
+        "@lovable.dev/cloud-auth-js",
       ],
     },
   },

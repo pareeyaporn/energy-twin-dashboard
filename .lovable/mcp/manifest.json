@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "sdk_version": "3.5.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://myoljuvvuvzlfytszkdr.supabase.co/auth/v1",
+    "require_oauth_client_claim": true,
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "energy-twin-dashboard",
+      "version": "0.1.0",
+      "title": "Energy Twin Dashboard"
+    },
+    "tools": [
+      {
+        "name": "list_hotel_presets",
+        "title": "List synthetic hotel demos",
+        "description": "List the app's synthetic hotel preset catalog, not a user's current profile or saved scenarios.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_stress_tests",
+        "title": "List hotel stress tests",
+        "description": "List available simulated stress tests and descriptions; this does not change a browser scenario.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

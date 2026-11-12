@@ -207,3 +207,19 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
   LED + sensors; the demo script follows (docs/07).
 - **LED keeps an assumed mix** (about 14% of fixtures replaced, the rest relamped) between the two sourced EIA bounds, rather than either extreme.
 - **Validation findings are reported, not tuned**: the model's guest-room controls savings sit inside the Illinois TRM range and below field studies from other climates (docs/14 pass 10).
+
+## 21. The program-year rule for incentives (November 2026)
+
+- **An incentive counts in the base case only when it is verified and its program year equals the analysis year** (`finance.analysisYear`,
+  2026, in defaults.json). The rule is general (`incentiveStatus` in `src/engine/hotel/finance.ts`); it does not single out a program.
+- **A verified rate from another year is shown separately as illustrative**, computed exactly like an applied incentive (same eligibility,
+  basis and 90% cap) with the same savings stream and discount rate; only the net investment is lower. The breakdown carries it as
+  `illustrativeIncentives` ("if ComEd renews the 2025 rate": amount, net investment, payback, 5- and 10-year net benefit and NPV), and the
+  plan views, the package lines and the comparison show it labeled "Illustrative". It never enters the optimizer's ranking, the portfolio
+  totals or any other figure.
+- **Today this affects ComEd's LED ($0.75 per W reduced) and occupancy-sensor ($0.25 per W controlled) rates**: they come from the 2025 Indoor
+  Lighting worksheet; the 2026 lighting worksheet could not be reached and a secondary page is not a confirmed 2026 amount. The 2026 guest-room
+  energy management rates (2026 HVAC worksheet) stay applied. When the 2026 lighting worksheet confirms a rate, set its `programYear` to 2026.
+- **Effect on the demo** (the user's choice, "exclude, show separately"): at $50,000 on the 85% scenario, LED + sensors is $38,940 net (was
+  $24,184), payback 3.8 years (was 2.3); illustrative with the 2025 rate: $24,184 net, 2.3 years. The packages chosen did not change for the
+  demo hotel; at the portfolio level O'Hare Gateway and Wells Street pick different packages.

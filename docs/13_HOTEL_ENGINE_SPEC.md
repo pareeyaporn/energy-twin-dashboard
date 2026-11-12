@@ -199,8 +199,10 @@ Price growth EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar: PVWatts C
 | Rooftop solar (55 kW at $2.9/W) | $159,500 | 68,211 | 0 | $8,614 | 18.5 y | −$115,021 | −$66,846 | 28.3 |
 | High-efficiency HVAC equipment | $109,918 | 22,231 | 1,367 | $4,393 | 25.0 y | −$86,734 | −$60,220 | 16.5 |
 
-At $50,000 the optimizer picks LED lighting plus occupancy sensors ($38,940 gross, $14,756 verified ComEd incentives, $24,184 net, $9,022 a year,
-2.7 years). Net cost and payback use the net investment; the budget is compared with the gross cost (docs/15).
+At $50,000 the optimizer picks LED lighting plus occupancy sensors ($38,940 gross and net, $9,022 a year, 4.3 years). ComEd's lighting
+incentives are 2025 rates, so under the program-year rule (docs/15 §21) they are not counted for the 2026 analysis; shown separately, "if
+ComEd renews the 2025 rate" they would give $14,756, $24,184 net and 2.7 years. Net cost and payback use the net investment; the budget is
+compared with the gross cost (docs/15).
 
 **Smart room controls calibration.** IL-TRM v14.0 4.4.8 (Chicago hotel, central hot-water fan coils, gas heat) implies about 6,900–14,700 kWh and
 225–650 therms a year for 100 rooms at 0.75–1.0 ton per room. The setback alone gave 4,903 kWh; with smart controls the simulation now also cuts
@@ -212,7 +214,7 @@ heating alone shows a small increase (about $39 a year) because the recovery cha
 the IL-TRM range. **Insulation** scales its
 weather-load reduction by 5 / floors above 5 floors. **Second preset:** `demo-chicago-300` (300 rooms, 20 floors, defaults for floor area and
 occupancy, then 69.2% occupancy from STR via Choose Chicago); at $150,000 the optimizer's maximum-savings package is roof insulation, LED lighting and occupancy sensors ($132,578 gross,
-$88,309 net after $44,269 of ComEd incentives, $30,323 a year, 2.9 years; baseline about $374,700 a year). Energy management dropped out when
+$132,578 net (no counted incentives; $88,309 if ComEd renews its 2025 lighting rates), $30,323 a year, 4.4 years; baseline about $374,700 a year). Energy management dropped out when
 its cost was sourced (research pass 10: NREL, about $2.53 per ft² instead of a $0.47 per ft² placeholder). Log: `docs/14`.
 
 ### Limits of this version
@@ -353,16 +355,18 @@ Floor area is defaulted except for Lakeshore Inn (55,000 ft²).
 
 | Property | Energy cost / yr | Intensity (kBtu/ft²) | Savings potential / yr | Investment required | Priority |
 | --- | --- | --- | --- | --- | --- |
-| Lakeshore Inn | $120,178 | 86.5 | $9,022 (LED + sensors) | $24,184 | 92 |
-| Riverwalk Grand | $374,741 | 90.5 | $28,480 (LED + sensors) | $72,551 | 100 |
-| O'Hare Gateway Hotel | $370,102 | 97.9 | $16,626 (LED + sensors) | $53,204 | 70 |
-| Lakefront Convention Hotel | $591,679 | 89.1 | $44,781 (LED + sensors) | $116,082 | 97 |
-| Wells Street Hotel | $105,119 | 88.2 | $8,888 (insulation + LED + sensors) | $28,217 | 71 |
-| **Portfolio** (1,172 rooms) | **$1,561,819** | — | **$107,796** | $294,239 | — |
+| Lakeshore Inn | $120,178 | 86.5 | $9,022 (LED + sensors) | $38,940 | 89 |
+| Riverwalk Grand | $374,741 | 90.5 | $28,480 (LED + sensors) | $116,820 | 100 |
+| O'Hare Gateway Hotel | $370,102 | 97.9 | $18,735 (insulation + sensors + water heating) | $85,957 | 82 |
+| Lakefront Convention Hotel | $591,679 | 89.1 | $44,781 (LED + sensors) | $186,912 | 96 |
+| Wells Street Hotel | $105,119 | 88.2 | $8,888 (LED + water heating) | $38,160 | 95 |
+| **Portfolio** (1,172 rooms) | **$1,561,819** | — | **$109,905** | $466,789 | — |
 
-Portfolio optimizer at **$500,000, balanced**: $495,389 gross, $169,973 incentives, $325,416 net; **$114,489 a year** (7.3% of the chain's energy
-cost), payback **2.8 years**, 10-year NPV $504,341, 316 t CO2 a year. LED + sensors at Lakeshore Inn, Riverwalk Grand and the convention hotel;
-insulation + LED + sensors at O'Hare Gateway; LED + water heating at Wells Street. 2,560 combinations tested (512 per hotel).
+(November 2026, after the program-year rule: investments no longer subtract ComEd's 2025 lighting incentives.)
+
+Portfolio optimizer at **$500,000, balanced**: $491,066 gross and net (no counted incentives); **$113,686 a year** (7.3% of the chain's energy
+cost), payback **4.3 years**, 10-year NPV $336,417, 330 t CO2 a year. LED + sensors at Riverwalk Grand and the convention hotel; LED + sensors +
+water heating at Lakeshore Inn and Wells Street; insulation + sensors + water heating at O'Hare Gateway. 2,560 combinations tested (512 per hotel).
 
 ### My portfolio and stress tests (`portfolioPlans.ts`, Phase 13 P1)
 

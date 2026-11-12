@@ -311,3 +311,11 @@ HVAC replacement for the 100-room hotel is about $179,000 (was $110,000).
 No Chicago hotel case was found. Whole-building and lighting results agree with the model's range. Guest-room controls sit inside the Illinois
 TRM's deemed savings for a Chicago hotel and below field studies from other climates and baselines (reasons above), so the recommendations
 are conservative for that measure.
+
+## Program-year check (November 2026)
+
+The ComEd LED and occupancy-sensor rates ($0.75 per W reduced, $0.25 per W controlled) are from the 2025 Indoor Lighting Incentives
+Worksheet (January 1 – December 31, 2025, updated November 5, 2025). The 2026 lighting worksheet is on a host this environment cannot reach; a
+May 2026 secondary page states the same rates, which is not a confirmed 2026 amount. Under the program-year rule (docs/15 §21) they are no
+longer counted in the base case for the 2026 analysis and are shown separately as illustrative. The guest-room energy management rates
+($75 / $100 per ton) are from the 2026 HVAC and VSD worksheet (updated May 4, 2026) and stay applied.

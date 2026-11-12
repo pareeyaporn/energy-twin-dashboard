@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useTwin } from "@/store/useTwin";
 import { Logo } from "./Logo";
+import { TourButton } from "@/tour/TourButton";
 
 export function TopBar() {
   const setSourcesOpen = useTwin((s) => s.setSourcesOpen);
@@ -20,6 +21,7 @@ export function TopBar() {
       <div className="flex items-center gap-2">
         <Button asChild variant="ghost" size="sm"><Link to="/portfolio" aria-label="Portfolio"><Building2 /><span className="hidden sm:inline">Portfolio</span></Link></Button>
         <Button asChild variant="ghost" size="sm"><Link to="/overview" aria-label="Report"><ChartNoAxesCombined /><span className="hidden xl:inline">Report</span></Link></Button>
+        <TourButton />
         <Button variant="ghost" size="sm" aria-label="Reset demo" data-testid="reset-demo" onClick={() => { resetDemo(); toast("Demo reset to the starting state"); }}><RotateCcw /><span className="hidden lg:inline">Reset demo</span></Button>
         <Button variant="ghost" size="sm" aria-label="Sources" onClick={() => setSourcesOpen(true)}><BookOpen /><span className="hidden sm:inline">Sources</span></Button>
       </div>

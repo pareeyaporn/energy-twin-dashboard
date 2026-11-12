@@ -120,5 +120,23 @@
       "source": "Installed price by system size: LBNL, Distributed Solar & Storage, 2025 Data Update (October 2025), p. 8: 2024 national median gross installed prices for non-residential PV, 2024 $/W (DC), before incentives: up to 10 kW $3.70; 10-20 kW $3.30; 20-50 kW $3.10; 50-100 kW $2.90; 100-250 kW $2.50; 250-500 kW $2.50; 500-1,000 kW $2.00; over 1,000 kW $1.70. National medians, not Chicago contractor quotes. Values transcribed by the team from the PDF (emp.lbl.gov is not reachable from the build session, so not re-checked by Claude Code). The low and high values (-15% and +15% around the median) are a PLACEHOLDER spread: the percentiles were not transcribed. Editable per hotel (solarCostPerW). Export credit (outside Illinois): null, so $0 per kWh, a conservative fallback until the applicable tariff is confirmed (see docs/14: Illinois 220 ILCS 5/16-107.5 and the ComEd non-residential rules must be checked for this hotel's customer class). Editable per hotel (solarExportCreditPerKWh).",
       "verified": false
     }
+  },
+  "NY": {
+    "commercialElecPerKWh": 0.2293,
+    "commercialGasPerTherm": 1.106,
+    "source": "EIA commercial prices, New York. Electricity: EIA Electric Power Monthly Table 5.6.B, commercial, year-to-date through Aug 2026 (22.93 cents/kWh). Gas: EIA Natural Gas Prices, average commercial price by state, 2025 annual (11.47 $/Mcf) divided by 10.37 therms/Mcf (the same U.S. heat content used for Illinois). All-in average prices (include fixed charges and demand charges); no separate demand-charge model. Solar pricing: the national LBNL medians (default region). Retrieved November 2026.",
+    "verified": true
+  },
+  "FL": {
+    "commercialElecPerKWh": 0.1178,
+    "commercialGasPerTherm": 1.176,
+    "source": "EIA commercial prices, Florida. Electricity: EIA Electric Power Monthly Table 5.6.B, commercial, year-to-date through Aug 2026 (11.78 cents/kWh). Gas: EIA Natural Gas Prices, average commercial price by state, 2025 annual (12.19 $/Mcf) divided by 10.37 therms/Mcf (the same U.S. heat content used for Illinois). All-in average prices (include fixed charges and demand charges); no separate demand-charge model. Solar pricing: the national LBNL medians (default region). Retrieved November 2026.",
+    "verified": true
+  },
+  "CO": {
+    "commercialElecPerKWh": 0.1337,
+    "commercialGasPerTherm": 0.877,
+    "source": "EIA commercial prices, Colorado. Electricity: EIA Electric Power Monthly Table 5.6.B, commercial, year-to-date through Aug 2026 (13.37 cents/kWh). Gas: EIA Natural Gas Prices, average commercial price by state, 2025 annual (9.09 $/Mcf) divided by 10.37 therms/Mcf (the same U.S. heat content used for Illinois). All-in average prices (include fixed charges and demand charges); no separate demand-charge model. Solar pricing: the national LBNL medians (default region). Retrieved November 2026.",
+    "verified": true
   }
 }

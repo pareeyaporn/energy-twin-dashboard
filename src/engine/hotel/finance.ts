@@ -218,6 +218,8 @@ export function incentiveLines(
     for (const prog of data.incentives.incentives) {
       if (!prog.appliesTo.includes(item.id)) continue;
       if (prog.hvacTypes && !prog.hvacTypes.includes(p.hvacType)) continue;
+      // A utility's program only reaches hotels in its territory (approximated by state; ComEd serves northern Illinois).
+      if (prog.states && !prog.states.includes(p.state)) continue;
       const status = incentiveStatus(prog, analysisYear);
       const usable = !userSet && status === 'applied';
       const illustrative = !userSet && status === 'illustrative';

@@ -14,7 +14,8 @@ The home-era data files were removed, except `presetHomes.json`, `mockPackages.j
 
 | Data | State | Source |
 | --- | --- | --- |
-| Electricity and gas prices (`rates.json`) | **Sourced, primary** | EIA Electric Power Monthly Table 5.6.B (IL, YTD Aug 2026); EIA natural gas prices (IL 2025) |
+| Electricity and gas prices (`rates.json`) | **Sourced, primary** | EIA Electric Power Monthly Table 5.6.B (IL, NY, FL, CO; YTD Aug 2026); EIA natural gas prices (2025) |
+| Other cities: New York, Miami, Denver (`weather.json`, `rates.json`, `emissions.json`, `defaults.json`) | **Sourced, primary** (pass 11) | NOAA 1991-2020 normals, PVWatts v8, EIA prices, EPA Power Profiler ZIP tool (eGRID2023), NLR ComStock 2025 R3 by climate zone. Hourly shapes, seasonal occupancy, age factor and TRM savings still Chicago/Illinois-based |
 | Price growth (`defaults.json` → `finance`) | **Sourced, primary** | EIA AEO2026 Tables 8 and 3: electricity 2.12%, gas 4.09% a year (nominal, 2025–2035) |
 | End-use split and fuel mix (`defaults.json`) | **Sourced, primary** (national lodging) | EIA CBECS 2018 Tables E1 and E5 |
 | Grid and gas emission factors (`emissions.json`) | **Sourced, primary** | EPA eGRID2023 (RFCW 0.4155, U.S. 0.3497 kg CO2e/kWh); EPA GHG Emission Factors Hub 2025 (5.311 kg/therm) |
@@ -27,7 +28,7 @@ The home-era data files were removed, except `presetHomes.json`, `mockPackages.j
 | Hotel sizes (presets) | **Checked, primary** | Choose Chicago hotel supply list (median 232 rooms) |
 | LED savings range and life; EMS, insulation, condensing-boiler savings | Partly sourced (excerpts, plus TRM rules) | PNNL/GSA, Crowe 2020, NREL ComStock, IL-TRM 4.5.4 |
 | Export credit for solar | Basis known, **no $ value** (so $0) | 220 ILCS 5/16-107.5(n): avoided cost of supply |
-| Incentives (`incentives.json`) | **ComEd amounts applied** (LED, sensors, guest room energy management; 90% cap); HVAC equipment, EMS, gas, Illinois Shines, 48E listed only | ComEd worksheets 2025 lighting, 2026 HVAC (team-provided) |
+| Incentives (`incentives.json`) | **ComEd amounts applied** (Illinois hotels only, `states`) (LED, sensors, guest room energy management; 90% cap); HVAC equipment, EMS, gas, Illinois Shines, 48E listed only | ComEd worksheets 2025 lighting, 2026 HVAC (team-provided) |
 | Installed costs | **Sourced:** smart controls, insulation, water heating (IL-TRM), solar $/W (LBNL). **Placeholders:** LED, sensors, EMS, HVAC equipment | IL-TRM v14.0; LBNL 2025 Data Update |
 | Weather (`weather.json` temperatures) | **Sourced, primary** | NOAA 1991–2020 normals, Chicago O'Hare |
 | Hot water per room | **Checked, primary** | IL-TRM 4.3.2 / ASHRAE: 14 gal per hotel room per day (default consistent) |

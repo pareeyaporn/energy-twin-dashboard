@@ -3,7 +3,10 @@
   "benchmarkHotWaterGalPerOccupiedRoomDay": 20,
   "euiKBtuPerSqft": {
     "default": 92,
-    "chicago": 92.3
+    "chicago": 92.3,
+    "new_york": 89.3,
+    "miami": 84.8,
+    "denver": 88.4
   },
   "ageFactor": [
     {
@@ -308,8 +311,38 @@
       "kitchen": 0.1504,
       "equipment": 0.02,
       "other": 0.1608
+    },
+    "new_york": {
+      "heating": 0.1426,
+      "cooling": 0.143,
+      "ventilation": 0.0806,
+      "lighting": 0.0914,
+      "hotWater": 0.2072,
+      "kitchen": 0.1498,
+      "equipment": 0.0205,
+      "other": 0.1649
+    },
+    "miami": {
+      "heating": 0.0157,
+      "cooling": 0.2932,
+      "ventilation": 0.0944,
+      "lighting": 0.0891,
+      "hotWater": 0.1884,
+      "kitchen": 0.1322,
+      "equipment": 0.0206,
+      "other": 0.1664
+    },
+    "denver": {
+      "heating": 0.1757,
+      "cooling": 0.1211,
+      "ventilation": 0.0705,
+      "lighting": 0.0978,
+      "hotWater": 0.2027,
+      "kitchen": 0.1401,
+      "equipment": 0.0212,
+      "other": 0.1709
     }
   },
-  "endUseClimateSource": "Chicago (ASHRAE 5A) end-use split: NLR (formerly NREL) ComStock 2025 Release 3 (AMY 2018), OEDI data lake, end-use-load-profiles-for-us-building-stock/2025/comstock_amy2018_release_3 (CC-BY-4.0), timeseries aggregates by ASHRAE IECC climate zone 2006 = 5A, baseline (upgrade 0), large and small hotels combined (667.6 million ft2 represented): heating 21.9% (all fuels), cooling 10.6% (incl. heat rejection), ventilation 6.4% (fans 5.1, pumps 1.2, heat recovery 0.2), lighting 8.9% (interior 7.0, exterior 1.9), hot water 19.1%, kitchen 15.0% (natural gas interior equipment, mainly cooking), electric interior equipment and refrigeration 18.1%, split between 'equipment' and 'other' in the CBECS ratio (1.8 : 14.5). Other climates keep the CBECS 2018 national lodging split (endUseShareOfSite).",
-  "euiSource": "Site EUI for Chicago 92.3 kBtu/ft2: NLR (formerly NREL) ComStock 2025 Release 3 (AMY 2018), OEDI data lake, end-use-load-profiles-for-us-building-stock/2025/comstock_amy2018_release_3 (CC-BY-4.0), zone 5A hotels (large 93.5, small 84.7; Illinois hotels 93.6 from the by-state annual results). The default 92 for other climates stays a placeholder. Age factor (relative to the Illinois hotel average 93.6, area-weighted, ComStock Illinois annual results, 264 hotel samples): built before 1980 96.9 kBtu/ft2 (x1.035), 1980-1999 88.6 (x0.947), 2000 and later 95.9 (x1.025). Vintage is confounded with HVAC system type (PTAC with electric heat about 77, fan coils with chiller and boiler about 121 kBtu/ft2), so the factor is a stock average, not an effect of age alone. CBECS 2018 Table C1 (all buildings) shows no consistent trend by year constructed (62-80 kBtu/ft2)."
+  "endUseClimateSource": "Chicago (ASHRAE 5A) end-use split: NLR (formerly NREL) ComStock 2025 Release 3 (AMY 2018), OEDI data lake, end-use-load-profiles-for-us-building-stock/2025/comstock_amy2018_release_3 (CC-BY-4.0), timeseries aggregates by ASHRAE IECC climate zone 2006 = 5A, baseline (upgrade 0), large and small hotels combined (667.6 million ft2 represented): heating 21.9% (all fuels), cooling 10.6% (incl. heat rejection), ventilation 6.4% (fans 5.1, pumps 1.2, heat recovery 0.2), lighting 8.9% (interior 7.0, exterior 1.9), hot water 19.1%, kitchen 15.0% (natural gas interior equipment, mainly cooking), electric interior equipment and refrigeration 18.1%, split between 'equipment' and 'other' in the CBECS ratio (1.8 : 14.5). Same method for other cities (ComStock 2025 R3 zone aggregates, retrieved November 2026): New York (zone 4A): heating 14.3%, cooling 14.3%, ventilation 8.1%, lighting 9.1%, hot water 20.7%, kitchen 15.0%, equipment 2.1%, other 16.5%; Miami (zone 1A): heating 1.6%, cooling 29.3%, ventilation 9.4%, lighting 8.9%, hot water 18.8%, kitchen 13.2%, equipment 2.1%, other 16.6%; Denver (zone 5B): heating 17.6%, cooling 12.1%, ventilation 7.0%, lighting 9.8%, hot water 20.3%, kitchen 14.0%, equipment 2.1%, other 17.1%. Climates without an entry keep the CBECS 2018 national lodging split (endUseShareOfSite).",
+  "euiSource": "Site EUI for Chicago 92.3 kBtu/ft2: NLR (formerly NREL) ComStock 2025 Release 3 (AMY 2018), OEDI data lake, end-use-load-profiles-for-us-building-stock/2025/comstock_amy2018_release_3 (CC-BY-4.0), zone 5A hotels (large 93.5, small 84.7; Illinois hotels 93.6 from the by-state annual results). Other cities, same release and method (timeseries_aggregates/by_ashrae_iecc_climate_zone_2006/upgrade=0, large and small hotels combined, area-weighted, retrieved November 2026): New York (zone 4A) 89.3 kBtu/ft2 (large 90.7, small 79.6; 910.5 million ft2 represented); Miami (zone 1A) 84.8 kBtu/ft2 (large 85.2, small 78.2; 209.8 million ft2 represented); Denver (zone 5B) 88.4 kBtu/ft2 (large 90.8, small 78.8; 181.7 million ft2 represented). The default 92 for climates without an entry stays a placeholder. The age factor is relative to Illinois hotels and is applied in every city (not re-derived per state). Age factor (relative to the Illinois hotel average 93.6, area-weighted, ComStock Illinois annual results, 264 hotel samples): built before 1980 96.9 kBtu/ft2 (x1.035), 1980-1999 88.6 (x0.947), 2000 and later 95.9 (x1.025). Vintage is confounded with HVAC system type (PTAC with electric heat about 77, fan coils with chiller and boiler about 121 kBtu/ft2), so the factor is a stock average, not an effect of age alone. CBECS 2018 Table C1 (all buildings) shows no consistent trend by year constructed (62-80 kBtu/ft2)."
 }

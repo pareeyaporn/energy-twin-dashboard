@@ -23,7 +23,7 @@ Call selectors like `useTwin(selectDisplayed)`; they are memoized and safe to us
 | Zones, equipment, flows, time | `selectZoneRows`, `selectEquipment`, `selectFlows`, `selectTypicalDay`, `selectRooms`, `selectMeter`; `selectedZone`/`selectZone`, `twinLayer`/`setTwinLayer`, `timeMode`/`timeMonth`/`timeHour`/`setTime`, `playing`/`setPlaying`, `playbackSpeed`/`setPlaybackSpeed`, `compareMode`/`setCompareMode` |
 | Budget optimizer | `runHotelOptimizer()`, `optimizing`, `optimizerCombinations` (set when a run starts), `hotelPlan` (`packages`, `objectiveWinner`, `combinationsTested`, `feasibleCount`, `emptyReason`, `cheapestUseful`), `applyHotelPackage(id \| null)`, `activeHotelPackageId` |
 | Package fields | `evaluation.cost` and `evaluation.annualSavings` (`low`/`mid`/`high`), `evaluation.metrics` (`paybackYears`, `netBenefit`, `roi`, `remainingBudget`, `carbonAvoidedKgPerYear`), `evaluation.comfort`, `evaluation.lineItems`, plus `role`, `roleLabel`, `reason`, `note`, `budgetRisk` |
-| Optimize against the current what-if (for example electricity +20%) | `optimizeOnScenario`, `setOptimizeOnScenario(b)`; the plan records `hotelPlan.scenario`, and `hotelPlanBaseline` is what it was measured against |
+| Optimize against the current what-if (for example electricity +20%) | `optimizeOnScenario` (turns on by itself when a scenario or stress test starts and off when it is cleared), `setOptimizeOnScenario(b)`; the plan records `hotelPlan.scenario`, and `hotelPlanBaseline` is what it was measured against |
 | AI advisor | `advisorMessages` (`{ id, role: 'user' \| 'advisor', text, source?: 'ai' \| 'fallback', reason? }`), `advisorBusy`, `askAdvisor(question)`, `clearAdvisor()`; suggested questions: `advisor.ADVISOR_SUGGESTED_QUESTIONS` from `@/engine/hotel` |
 | Saved scenarios | `savedScenarios`, `saveScenario(name?)`, `loadScenario(id)`, `renameScenario(id, name)`, `deleteScenario(id)` |
 | Reset | `resetHotel()` |
@@ -148,5 +148,7 @@ drawer (PlanDrawer reads the old home package and never shows hotel packages). S
 cards keep the Source chip on each line item but move the long source text into the Sources sheet. When the objective winner's card has a
 different role label (for example the objective is Balanced and the winner is "Maximum savings"), label it "Best for your objective
 (Balanced)". In the advisor's MessageResponse, pass no streamdown plugins (answers are a few plain sentences) and drop the cjk, code, math and
-mermaid imports so their bundles are not shipped. Don't modify src/engine, src/data, src/twin, src/store or supabase.
+mermaid imports so their bundles are not shipped. In the top bar, remove the Scenario and Investments links (the workspace tabs cover
+them; the full pages stay reachable from "Compare in detail" and the Scenario tab). Don't modify src/engine, src/data, src/twin, src/store
+or supabase.
 ```

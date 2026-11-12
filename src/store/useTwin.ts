@@ -170,6 +170,18 @@ const homeFromPreset = (p: PresetHome): HomeForm => ({
 const stalePlan = (s: TwinState) =>
   s.hotelPlan?.scenario ? { hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null } : {};
 
+/**
+ * "Optimize for this scenario" follows the scenario automatically: it turns on when a what-if or stress test starts and off when
+ * the last one is cleared, so an applied package is measured against what the user is looking at. The user can still switch it
+ * off while a scenario is active. When it flips, any plan is cleared, because it was measured against the other situation.
+ */
+const autoOptimize = (s: TwinState, scenario: Scenario, stress: StressTest["id"] | null) => {
+  const was = Object.keys(s.scenario).length > 0 || s.activeStressTest !== null;
+  const now = Object.keys(scenario).length > 0 || stress !== null;
+  if (was === now || s.optimizeOnScenario === now) return {};
+  return { optimizeOnScenario: now, hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null };
+};
+
 const clampInt = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Math.round(n)));
 
 /** Resolve the profile and compute its baseline. Deterministic, so the server and the browser agree. */
@@ -290,11 +302,11 @@ export const useTwin = create<TwinState>((set, get) => ({
   setScenario: (patch, clear) =>
     set((s) => {
       const scenario = { ...withoutKeys(s.scenario, clear), ...patch };
-      return { scenario, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(scenario, s.activeStressTest)), ...stalePlan(s) };
+      return { scenario, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(scenario, s.activeStressTest)), ...stalePlan(s), ...autoOptimize(s, scenario, s.activeStressTest) };
     }),
-  resetScenario: () => set((s) => ({ scenario: {}, activeStressTest: null, scenarioResult: null, ...stalePlan(s) })),
+  resetScenario: () => set((s) => ({ scenario: {}, activeStressTest: null, scenarioResult: null, ...stalePlan(s), ...autoOptimize(s, {}, null) })),
   applyStressTest: (activeStressTest) =>
-    set((s) => ({ activeStressTest, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(s.scenario, activeStressTest)), ...stalePlan(s) })),
+    set((s) => ({ activeStressTest, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(s.scenario, activeStressTest)), ...stalePlan(s), ...autoOptimize(s, s.scenario, activeStressTest) })),
   runHotelOptimizer: async () => {
     if (get().optimizing) return;
     const started = get().hotel;
@@ -328,7 +340,7 @@ export const useTwin = create<TwinState>((set, get) => ({
       const saved = s.savedScenarios.find((x) => x.id === id);
       if (!saved) return {};
       const scenario = { ...saved.scenario };
-      return { scenario, activeStressTest: saved.stressTest, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(scenario, saved.stressTest)), ...stalePlan(s) };
+      return { scenario, activeStressTest: saved.stressTest, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(scenario, saved.stressTest)), ...stalePlan(s), ...autoOptimize(s, scenario, saved.stressTest) };
     }),
   renameScenario: (id, name) =>
     set((s) => ({ savedScenarios: s.savedScenarios.map((x) => (x.id === id ? { ...x, name: name.trim() || x.name } : x)) })),

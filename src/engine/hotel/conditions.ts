@@ -118,6 +118,18 @@ export function applyScenario(
 export function comfortFlags(c: Conditions, data: HotelData = hotelData): ComfortFlag[] {
   const k = data.defaults.comfort;
   const out: ComfortFlag[] = [];
+  // Heating set above cooling: a real system would heat and cool at once. Flag it rather than silently change the input.
+  const crossed = [
+    c.setpoints.occupiedHeatF > c.setpoints.occupiedCoolF ? `occupied rooms (heating ${c.setpoints.occupiedHeatF} F, cooling ${c.setpoints.occupiedCoolF} F)` : null,
+    c.setpoints.vacantHeatF > c.setpoints.vacantCoolF ? `vacant rooms (heating ${c.setpoints.vacantHeatF} F, cooling ${c.setpoints.vacantCoolF} F)` : null,
+  ].filter((x): x is string => x !== null);
+  if (crossed.length > 0) {
+    out.push({
+      id: 'setpoints-crossed',
+      severity: 'warn',
+      message: `The heating setpoint is above the cooling setpoint for ${crossed.join(' and ')}, so the system would heat and cool at the same time. Set heating at or below cooling; this estimate counts both.`,
+    });
+  }
   if (c.setpoints.occupiedHeatF < k.occupiedHeatMinF) {
     out.push({
       id: 'occupied-heat-low',

@@ -104,6 +104,17 @@ describe('scenarios', () => {
     expect(simulateEnergyScenario(demo, { lightingHoursPerDay: 16 }).flags.map((f) => f.id)).toContain('lighting-hours');
   });
 
+  it('warns when heating is set above cooling, and does not change the inputs', () => {
+    const s = simulateHVACSettings(demo, { setpoints: { occupiedHeatF: 75, occupiedCoolF: 68 } });
+    const flag = s.flags.find((f) => f.id === 'setpoints-crossed');
+    expect(flag?.severity).toBe('warn');
+    expect(flag?.message).toMatch(/occupied rooms \(heating 75 F, cooling 68 F\)/);
+    expect(s.after.annual.cost).toBeGreaterThan(s.before.annual.cost);
+    const ok = simulateHVACSettings(demo, { setpoints: { occupiedHeatF: 70, occupiedCoolF: 70 } });
+    expect(ok.flags.map((f) => f.id)).not.toContain('setpoints-crossed');
+    expect(simulateEnergyScenario(demo, {}).flags.map((f) => f.id)).not.toContain('setpoints-crossed');
+  });
+
   it('stress tests move energy and cost the expected way', () => {
     const byId = Object.fromEntries(STRESS_TESTS.map((t) => [t.id, t.scenario]));
     const heat = simulateEnergyScenario(demo, byId['heat_wave']!);

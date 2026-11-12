@@ -2,20 +2,21 @@
   "benchmarkOccupancy": 0.62,
   "benchmarkHotWaterGalPerOccupiedRoomDay": 20,
   "euiKBtuPerSqft": {
-    "default": 92
+    "default": 92,
+    "chicago": 92.3
   },
   "ageFactor": [
     {
       "before": 1980,
-      "factor": 1.1
+      "factor": 1.035
     },
     {
       "before": 2000,
-      "factor": 1.0
+      "factor": 0.947
     },
     {
       "before": 10000,
-      "factor": 0.92
+      "factor": 1.025
     }
   ],
   "endUseShareOfSite": {
@@ -295,5 +296,19 @@
       "siteEuiKBtuPerSqft": 85.7,
       "source": "EIA Commercial Buildings Energy Consumption Survey 2018, Table C1: lodging, mean site EUI 85.7 kBtu/ft2. National, all climates; the lodging category includes nursing homes and dormitories."
     }
-  ]
+  ],
+  "endUseShareOfSiteByClimate": {
+    "chicago": {
+      "heating": 0.2194,
+      "cooling": 0.1057,
+      "ventilation": 0.0643,
+      "lighting": 0.0887,
+      "hotWater": 0.1907,
+      "kitchen": 0.1504,
+      "equipment": 0.02,
+      "other": 0.1608
+    }
+  },
+  "endUseClimateSource": "Chicago (ASHRAE 5A) end-use split: NLR (formerly NREL) ComStock 2025 Release 3 (AMY 2018), OEDI data lake, end-use-load-profiles-for-us-building-stock/2025/comstock_amy2018_release_3 (CC-BY-4.0), timeseries aggregates by ASHRAE IECC climate zone 2006 = 5A, baseline (upgrade 0), large and small hotels combined (667.6 million ft2 represented): heating 21.9% (all fuels), cooling 10.6% (incl. heat rejection), ventilation 6.4% (fans 5.1, pumps 1.2, heat recovery 0.2), lighting 8.9% (interior 7.0, exterior 1.9), hot water 19.1%, kitchen 15.0% (natural gas interior equipment, mainly cooking), electric interior equipment and refrigeration 18.1%, split between 'equipment' and 'other' in the CBECS ratio (1.8 : 14.5). Other climates keep the CBECS 2018 national lodging split (endUseShareOfSite).",
+  "euiSource": "Site EUI for Chicago 92.3 kBtu/ft2: NLR (formerly NREL) ComStock 2025 Release 3 (AMY 2018), OEDI data lake, end-use-load-profiles-for-us-building-stock/2025/comstock_amy2018_release_3 (CC-BY-4.0), zone 5A hotels (large 93.5, small 84.7; Illinois hotels 93.6 from the by-state annual results). The default 92 for other climates stays a placeholder. Age factor (relative to the Illinois hotel average 93.6, area-weighted, ComStock Illinois annual results, 264 hotel samples): built before 1980 96.9 kBtu/ft2 (x1.035), 1980-1999 88.6 (x0.947), 2000 and later 95.9 (x1.025). Vintage is confounded with HVAC system type (PTAC with electric heat about 77, fan coils with chiller and boiler about 121 kBtu/ft2), so the factor is a stock average, not an effect of age alone. CBECS 2018 Table C1 (all buildings) shows no consistent trend by year constructed (62-80 kBtu/ft2)."
 }

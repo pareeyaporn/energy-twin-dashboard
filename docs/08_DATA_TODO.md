@@ -37,7 +37,7 @@ The home-era data files were removed, except `presetHomes.json`, `mockPackages.j
 | Hourly outdoor temperature (3D readout) | **Modeled** from sourced normals | NOAA 1991–2020 O'Hare normal highs and lows; low at sunrise, high at 15:00 |
 | Baseline model internals (age factor, zone allocation, driver weights, shapes, equipment, monthly occupancy shape) | **Placeholders** | monthly occupancy is not published |
 
-**Benchmark check (done):** the demo hotel models at 91.1 kBtu/ft² site energy, 53% electric; CBECS 2018 Table C1 lodging averages 85.7 kBtu/ft²,
+**Benchmark check (done; updated in research pass 8 to 86.5 kBtu/ft²):** the demo hotel models at 91.1 kBtu/ft² site energy, 53% electric; CBECS 2018 Table C1 lodging averages 85.7 kBtu/ft²,
 57% electric (national, includes nursing homes); the ENERGY STAR national median for hotels is 63.0 kBtu/ft² (August 2024). Plausible for a Chicago
 hotel with a restaurant, but on the high side; the default EUI input stays a placeholder (B5).
 
@@ -73,13 +73,13 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
   Cross-check found: the PVWatts typical year for downtown is 4–8 °F cooler in May to July than the placeholder (lakefront and "typical year"
   effects), so confirm with NOAA before changing.
 - [x] B2. HVAC equipment — *done where the TRM allows (November 2026)*: lifetimes by system (central plant 23, RTU 15, PTAC/PTHP 8, VRF 16 years; IL-TRM 4.4.6, 4.4.10, 4.4.15, 4.4.13, 4.4.9); cooling high 26% from the TRM 4.4.6 chiller example. Mid/low cooling, heating range and cost remain placeholders.
-- [ ] B3. Water heating (*partly: faucets are 25% of hotel hot water, 14 gal/room-day, IL-TRM 4.3.2; heater 0.80 to 0.90 Et saves 11%; showerheads 2.67 gpm baseline, 4.3.3; the showers’ share is not in the TRM*): share of a hotel's hot water used by showers and sinks (to turn the TRM showerhead and aerator flows into a % reduction),
+- [ ] B3. Water heating (*still open: the showers' share is not in the IL-TRM or in ComStock's results, which report water heating as one end use*; *partly: faucets are 25% of hotel hot water, 14 gal/room-day, IL-TRM 4.3.2; heater 0.80 to 0.90 Et saves 11%; showerheads 2.67 gpm baseline, 4.3.3; the showers’ share is not in the TRM*): share of a hotel's hot water used by showers and sinks (to turn the TRM showerhead and aerator flows into a % reduction),
   heater efficiency gain, and gallons per occupied room per day (ASHRAE RP-1544 or the IL-TRM hot-water section).
 - [x] B4. Lifetimes — *done (November 2026)*: insulation 20 (IL-TRM 4.8.1), water heating 15 (4.3.1; fixtures 10), energy management 10 (nearest TRM controls measure, 4.4.41; a judgment).
-- [ ] B5. Climate-specific end-use split (CBECS has no lodging-by-climate table; NREL ComStock hotel results by climate zone).
-- [ ] B6. Baseline internals: age factor by year built, zone allocation, central-plant share by HVAC type, driver weights, hourly shapes
+- [x] B5. Climate-specific end-use split — *done (November 2026)*: NLR ComStock 2025 Release 3, zone-5A large and small hotels (heating 21.9, cooling 10.6, ventilation 6.4, lighting 8.9, hot water 19.1, kitchen 15.0, equipment and other 18.1%); other climates keep CBECS national.
+- [ ] B6. Baseline internals — *partly done (November 2026)*: site EUI for Chicago 92.3 kBtu/ft² and the age factor (×1.035 / 0.947 / 1.025) from ComStock (zone 5A; Illinois hotels by vintage); hourly load shapes from ComStock zone-5A hotels. *Still unsourced:* zone allocation, central-plant share by HVAC type, driver weights (calibration choices), equipment sizing, monthly occupancy (STR publishes annual only), floor area per room. Originally: age factor by year built, zone allocation, central-plant share by HVAC type, driver weights, hourly shapes
   (ComStock hotel profiles), equipment sizing, Chicago seasonal occupancy (STR or Choose Chicago), floor area per room.
-- [ ] B7. Comfort limits and setpoint references (ASHRAE 55).
+- [x] B7. Comfort limits and setpoint references — *closed as a product decision (November 2026)*: ASHRAE 55 is a paid standard and was not purchased; the limits are team choices (docs/15 section 7). Sourced reference kept: IL-TRM 4.4.8 and the ComEd 2026 worksheet require at least a 5 °F unoccupied setback for guest-room controls (the model's default).
 
 ## Decisions (not facts) — decided, see [15_PRODUCT_DECISIONS.md](15_PRODUCT_DECISIONS.md)
 

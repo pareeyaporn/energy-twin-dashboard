@@ -103,7 +103,7 @@ They are monthly-resolution approximations of a week-scale event.
 
 | Metric | Result |
 | --- | --- |
-| Energy | 866,000 kWh and 20,500 therms; EUI 91 kBtu/ft² |
+| Energy | 866,000 kWh and 20,500 therms; EUI 91 kBtu/ft² (historical, before research) |
 | Cost | $140,700 per year ($1,407 per room; $11,700 a month) |
 | Carbon | about 455 t CO2e (illustrative) |
 | Share of cost by zone | central HVAC 26%, guest rooms 22%, hallways 20%, kitchen 13%, hot water 10%, lobby 9% |
@@ -183,31 +183,31 @@ solar comes in three mutually exclusive sizes; the grid factor follows the eGRID
 
 **`evaluatePackage`** returns the cost range, annual savings (low, mid, high), new annual cost, carbon avoided, metrics, comfort, sizing and per-item marginal savings (which sum to the package savings and depend on the fixed order).
 
-### Demo hotel, single upgrades (mid; research pass 2, no incentives applied)
+### Demo hotel, single upgrades (mid; after research pass 8: ComStock climate split, IL-TRM costs, ComEd incentives)
 
-Baseline: about $131,700 a year, 782,000 kWh, 23,400 therms, 449 t CO2 (eGRID RFCW), 91.1 kBtu/ft² site (CBECS 2018 lodging: 85.7).
+Baseline: about $120,200 a year, 698,000 kWh, 23,800 therms, 416 t CO2 (eGRID RFCW), 86.5 kBtu/ft² site (ComStock zone-5A hotels 92.3 × age factor 0.947 for 1980–1999; CBECS 2018 lodging 85.7).
 Price growth EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar: PVWatts Chicago, net of $17.63/kW-yr O&M. Lighting interaction: IL-TRM hotel factors.
 
 | Upgrade | Net cost | kWh / yr | therms / yr | $ / yr | Payback | 5-year net | 10-year net | t CO2 / yr |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Occupancy sensors ($6,600 − $4,125 ComEd) | $2,475 | 17,396 | −251 | $2,211 | 1.1 y | $9,009 | $21,622 | 5.9 |
-| LED lighting ($33,000 − $10,631 ComEd) | $22,369 | 62,186 | −1,008 | $7,800 | 2.9 y | $18,126 | $62,534 | 20.5 |
-| Water heating and low-flow (cost from IL-TRM 4.3.1–4.3.3) | $20,000 | 8,897 | 1,720 | $2,848 | 7.0 y | −$4,808 | $13,030 | 12.8 |
-| Energy management | $26,000 | 18,680 | 539 | $3,126 | 8.3 y | −$9,591 | $8,936 | 10.6 |
-| Rooftop solar (55 kW at $2.90/W, LBNL 2024 median; 68,211 kWh, all used on site) | $159,500 | 68,211 | 0 | $8,614 | 18.5 y | −$115,021 | −$66,846 | 28.3 |
-| Insulation (IL-TRM 4.8.1 $1.40/ft², 2024 $) | $21,010 | 8,186 | 733 | $1,831 | 11.5 y | −$11,317 | −$140 | 7.3 |
-| Smart room controls (fan saving calibrated to IL-TRM; $26,000 − $5,625 ComEd) | $20,375 | 10,820 | 209 | $1,715 | 11.9 y | −$11,390 | −$1,293 | 5.6 |
-| HVAC equipment | $110,000 | 15,275 | 1,187 | $3,249 | 33.9 y | −$92,822 | −$73,079 | 12.6 |
+| Occupancy sensors in common areas and hallways ($6,600 − $4,125 ComEd) | $2,475 | 16,704 | −252 | $2,113 | 1.2 y | $8,498 | $20,543 | 5.6 |
+| LED lighting retrofit ($33,000 − $10,631 ComEd) | $22,369 | 62,388 | −1,012 | $7,826 | 2.9 y | $18,258 | $62,810 | 20.5 |
+| High-efficiency water heating and low-flow fixtures | $20,000 | 8,667 | 1,676 | $2,774 | 7.2 y | −$5,201 | $12,174 | 12.5 |
+| Roof and envelope insulation | $21,010 | 11,914 | 844 | $2,458 | 8.5 y | −$8,024 | $6,871 | 9.4 |
+| Energy management controls (scheduling and optimization) | $26,000 | 14,091 | 621 | $2,557 | 10.2 y | −$12,541 | $2,755 | 9.2 |
+| Smart guest-room thermostats and occupancy sensing ($26,000 − $5,625 ComEd) | $20,375 | 10,179 | 280 | $1,690 | 12.1 y | −$11,503 | −$1,493 | 5.7 |
+| Rooftop solar (55 kW at $2.9/W) | $159,500 | 68,211 | 0 | $8,614 | 18.5 y | −$115,021 | −$66,846 | 28.3 |
+| High-efficiency HVAC equipment | $110,000 | 22,231 | 1,367 | $4,393 | 25.0 y | −$86,817 | −$60,302 | 16.5 |
 
-At $50,000 the optimizer picks LED lighting plus occupancy sensors ($39,600 gross, $14,756 verified ComEd incentives, $24,844 net, $9,098 a year,
-2.7 years). Net cost and payback use the net investment; the budget is compared with the gross cost (docs/15).
+At $50,000 the optimizer picks LED lighting plus occupancy sensors ($39,600 gross, $14,756 verified ComEd incentives, $24,844 net, $9,022 a year,
+2.8 years). Net cost and payback use the net investment; the budget is compared with the gross cost (docs/15).
 
 **Smart room controls calibration.** IL-TRM v14.0 4.4.8 (Chicago hotel, central hot-water fan coils, gas heat) implies about 6,900–14,700 kWh and
 225–650 therms a year for 100 rooms at 0.75–1.0 ton per room. The setback alone gave 4,903 kWh; with smart controls the simulation now also cuts
 guest-room fan energy 17% while rooms are empty (`defaults.smartControlFan`), giving about 10,800 kWh and 209 therms. **Insulation** scales its
 weather-load reduction by 5 / floors above 5 floors. **Second preset:** `demo-chicago-300` (300 rooms, 20 floors, defaults for floor area and
 occupancy, then 69.2% occupancy from STR via Choose Chicago); at $150,000 the optimizer picks LED lighting plus energy management ($147,000 gross,
-$115,106 net after $31,894 ComEd LED incentive, $34,163 a year, 3.4 years; baseline about $410,400 a year). Log: `docs/14`.
+$115,106 net after $31,894 ComEd LED incentive, $32,521 a year, 3.5 years; baseline about $374,700 a year). Log: `docs/14`.
 
 ### Limits of this version
 - **Smart room controls pay back slowly (21 years)** because their modeled savings are small (see section 7) and setback recovery is counted. That is a calibration question, not a product conclusion.
@@ -222,7 +222,7 @@ discount rate. It uses the same savings stream as the net benefit and NPV, so ye
 
 **Peer benchmark.** `benchmarkComparison(result, floorAreaSqft)` returns the modeled site EUI and its difference from published
 peers in `defaults.peerBenchmarks` (ENERGY STAR hotel median 63.0 and CBECS 2018 lodging mean 85.7 kBtu/ft², both national, all
-climates). Comparison only: nothing in the model is adjusted toward them. The demo hotel (91.1) sits 45% above the ENERGY STAR
+climates). Comparison only: nothing in the model is adjusted toward them. The demo hotel (86.5) sits 37% above the ENERGY STAR
 median, partly explained by Chicago's climate and the restaurant; this is shown, not tuned away. Shown by prompt LV15.
 
 **Custom plans (Phase 11).** `evaluatePackage(ctx, ids, { amounts })` takes optional `coverage` (0–1 per upgrade) and `solarKw`. Coverage

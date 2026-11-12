@@ -30,8 +30,10 @@ The model's inputs today, with their status. Details and before/after values are
 
 | Input | Value in the model | Source | Status | Pass |
 | --- | --- | --- | --- | --- |
-| End-use split and fuel mix | CBECS 2018 lodging | EIA CBECS Tables E1, E5 | Primary (national, not by climate) | 1 |
-| Site energy intensity default | 92 kBtu/ft² | — | Placeholder (demo hotel models 91.1; CBECS lodging 85.7; ENERGY STAR hotel median 63.0) | 2 |
+| End-use split | Chicago: ComStock zone-5A hotels; other climates CBECS 2018 lodging | NLR ComStock 2025 R3; EIA CBECS E1 | Primary | 8 (1) |
+| Fuel mix | CBECS 2018 lodging | EIA CBECS Table E5 | Primary (national) | 1 |
+| Hourly load shapes | ComStock zone-5A hotels, average day per end use | NLR ComStock 2025 R3 | Primary (downloaded) | 8 |
+| Site energy intensity | Chicago 92.3 kBtu/ft² × age factor (1.035 before 1980, 0.947 for 1980–1999, 1.025 from 2000); other climates 92 (placeholder) | NLR ComStock 2025 R3: zone-5A hotels; Illinois hotels by vintage | Primary (downloaded) | 8 |
 | Peer benchmarks | ENERGY STAR 63.0, CBECS 85.7 kBtu/ft² | ENERGY STAR (Aug 2024); CBECS Table C1 | Primary (context only) | 2, 4 |
 | Hot water | 20 gal per occupied room-day; faucets 25% of it | IL-TRM v14.0 4.3.2 (14 gal per room-day) | Primary (cross-check) | 3, 6 |
 | Heating efficiency by HVAC type | gas 0.80; resistance 1.0; heat pump COP 2.3 | IL-TRM conversion | Primary / assumption | 3 |
@@ -73,6 +75,7 @@ The model's inputs today, with their status. Details and before/after values are
 | EPA eGRID2023; GHG Emission Factors Hub 2025 | emissions | Primary, downloaded (xlsx) |
 | NOAA NCEI 1991–2020 normals (O'Hare) | weather | Primary, downloaded (CSV) |
 | NLR (formerly NREL) PVWatts v8.5; ATB 2025; Jordan et al. 2022 | solar output, O&M, degradation | Primary (API, page, PDF) |
+| NLR ComStock 2025 Release 3 (AMY 2018), OEDI data lake, CC-BY-4.0 | end-use split, EUI, age factor, hourly shapes (Chicago) | Primary (downloaded CSV) |
 | Illinois Statewide TRM v14.0, Vol. 2 (effective Jan 1, 2026) | savings, costs, lives, interaction factors | Primary (PDF downloaded in pass 3; `icc.illinois.gov` no longer reachable, the saved copy was used in pass 6) |
 | ENERGY STAR "U.S. EUI by Property Type" (Aug 2024) | benchmark | Primary |
 | Choose Chicago hotel supply; STR via Choose Chicago 2025 | hotel sizes, occupancy | Primary (page, PDF) |
@@ -88,8 +91,8 @@ The model's inputs today, with their status. Details and before/after values are
   (e.g., $55–125 per sensor) that need a per-ft² coverage assumption to use.
 - **2026 lighting incentive rates**: the applied LED and sensor rates are from the 2025 worksheet.
 - **Export credit tariff** for a non-residential ComEd hotel (pass 5 checklist); needs `www.ilga.gov` or a ComEd tariff document.
-- **Energy intensity**: the demo hotel's 91.1 kBtu/ft² is 45% above the ENERGY STAR hotel median; climate and the restaurant explain part.
-  A climate-specific end-use split (NREL ComStock) would improve it (docs/08 B5).
+- **Energy intensity**: the demo hotel now models 86.5 kBtu/ft² (ComStock zone-5A hotel stock), 37% above the ENERGY STAR national median;
+  ComStock's fan-coil hotels with chiller and boiler (like the demo) average about 121 in Illinois, so the demo may be conservative.
 - **Showers' share of hotel hot water** (docs/08 B3); **ASHRAE 55** comfort references (B7); **case-study validation** of package
   savings (needs `betterbuildingssolutioncenter.energy.gov`).
 
@@ -227,3 +230,31 @@ measure cost or project cost, whichever is less (modeled as 90% of the upgrade's
 **Effect (100-room hotel):** LED $10,631 (net $22,369, payback 2.9 years, was 4.2); occupancy sensors $4,125 (net $2,475, 1.1 years, was 3.0); smart
 room controls $5,625 (net $20,375, 11.9 years, was 15.2). The recommendations do not change: at $50,000 LED + sensors ($24,844 net; 2.4 years under
 the demo's 85%-occupancy scenario, 2.7 on the baseline). 300-room hotel at $150,000: LED + energy management, $115,106 net, 3.4 years.
+
+## Pass 8 (November 2026, NLR ComStock for Chicago hotels)
+
+Source: NLR (formerly NREL) ComStock 2025 Release 3 (AMY 2018), OEDI data lake (`oedi-data-lake.s3.amazonaws.com`), CC-BY-4.0. Files read:
+`timeseries_aggregates/by_ashrae_iecc_climate_zone_2006/upgrade=0/.../5A/up0-5a-largehotel.csv` and `up0-5a-smallhotel.csv` (baseline, 15-minute,
+577 and 91 million ft² represented) and `metadata_and_annual_results_aggregates/by_state/full/csv/state=IL/IL_upgrade0_agg.csv.gz`
+(264 hotel samples with weights).
+
+| Item | Before | Now | Read |
+| --- | --- | --- | --- |
+| Site EUI, Chicago | 92 (placeholder) | **92.3** kBtu/ft² (zone-5A hotels; large 93.5, small 84.7; Illinois hotels 93.6) | Primary |
+| Age factor | 1.10 / 1.00 / 0.92 (placeholder) | **1.035 / 0.947 / 1.025** (before 1980 / 1980–1999 / 2000+; Illinois hotels by vintage: 96.9 / 88.6 / 95.9 kBtu/ft²) | Primary; confounded with HVAC type |
+| End-use split, Chicago | CBECS national (heating 18.1, cooling 6.9, ventilation 14.5, lighting 8.4, hot water 18.6, kitchen 17.2, equipment 1.8, other 14.5%) | **21.9 / 10.6 / 6.4 / 8.9 / 19.1 / 15.0 / 2.0 / 16.1%** | Primary; kitchen = gas interior equipment, equipment+other = electric interior equipment + refrigeration split in the CBECS ratio |
+| Hourly load shapes | synthetic placeholders | **ComStock average day per end use** (e.g. cooling peaks 13:00 at 1.5× average; hot water peaks 20:00; lighting 23:00) | Primary; time zone per ComStock docs (not re-checked) |
+| Guest presence by hour | synthetic | unchanged (not in ComStock) | — |
+| CBECS age check | — | CBECS 2018 Table C1, all buildings: no consistent EUI trend by year constructed (62–80 kBtu/ft²) | Primary |
+
+Cross-checks (not applied): Illinois hotel EUI by HVAC system: PTAC with electric coil 77, PTHP 79, PTAC with gas boiler 90, fan coils with chiller
+and boiler 121 kBtu/ft²; 63% of hotel floor area is gas-heated.
+
+**Effect:** the 100-room demo baseline is now $120,178 a year (was $131,666), 86.5 kBtu/ft² (was 91.1); central HVAC $34,152, guest rooms $21,587.
+Occupancy 60% → 85% adds $12,869; smart controls then save $1,014. January 9 pm heating 80 kW (was 64), July 3 pm cooling 102 kW (was 85).
+The $50,000 recommendation is unchanged (LED + sensors: $24,844 net, $10,302 a year, 2.4 years under the 85% scenario). Insulation pays back faster
+(8.5 years; heating and cooling are a larger share), energy management slower (10.2; less ventilation). 300-room hotel at $150,000: maximum savings
+unchanged (LED + energy management, $32,521 a year, 3.5 years); balanced now adds insulation.
+
+Also fixed: the advisor context now carries the what-if's own numbers (for example the 20% in "Electricity price changed 20%"), so a template answer
+that repeats them passes the number check.

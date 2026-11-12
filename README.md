@@ -32,7 +32,7 @@ ask the advisor "Why recommend smart thermostats over solar?" → before/after e
 | Store (`src/store`): hotel profile, scenarios, optimizer, twin controls, memoized selectors | Built |
 | 2D digital twin (`src/twin`): zones, rooms, equipment, energy flow, time scrubber, stress tests, before/after | Built |
 | Dashboard screens (profile form, overview, scenario simulator, optimizer): Lovable | Prompts ready in `docs/06`; not built yet |
-| AI advisor (`supabase/functions/advisor`) | Planned |
+| AI advisor (`supabase/functions/advisor` and `src/engine/hotel/advisor`): context, number check, template answers, store actions | Built; needs the `ANTHROPIC_API_KEY` secret in Lovable Cloud to use the model, and the chat panel from Lovable (prompt LV8) |
 | Home-era UI shell, home engine and home data | Legacy; to be removed after the hotel dashboard replaces them |
 
 ## Tech stack

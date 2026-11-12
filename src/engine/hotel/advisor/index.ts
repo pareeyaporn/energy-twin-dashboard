@@ -1,0 +1,10 @@
+export { parseQuestion, parseBudgets, ADVISOR_SUGGESTED_QUESTIONS } from './intent';
+export type { Intent, ParsedQuestion } from './intent';
+export { buildAdvisorContext } from './context';
+export type { AdvisorContext, AdvisorInput, AdvisorPackage, AdvisorPlan, AdvisorUpgrade } from './context';
+export { validateAdvisorText, extractNumbers, collectNumbers } from './validate';
+export type { Validation } from './validate';
+export { fallbackAnswer } from './fallback';
+export { askAdvisor, clearAdvisorCache } from './ask';
+export type { AdvisorAnswer, AdvisorConfig, AdvisorSource, FallbackReason } from './ask';
+export { advisorConfigFromEnv, getAdvisorConfig, setAdvisorConfig } from './config';

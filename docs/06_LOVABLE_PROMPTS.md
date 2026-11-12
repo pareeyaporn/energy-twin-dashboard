@@ -23,6 +23,8 @@ Call selectors like `useTwin(selectDisplayed)`; they are memoized and safe to us
 | Zones, equipment, flows, time | `selectZoneRows`, `selectEquipment`, `selectFlows`, `selectTypicalDay`, `selectRooms`, `selectMeter`; `selectedZone`/`selectZone`, `twinLayer`/`setTwinLayer`, `timeMode`/`timeMonth`/`timeHour`/`setTime`, `playing`/`setPlaying`, `playbackSpeed`/`setPlaybackSpeed`, `compareMode`/`setCompareMode` |
 | Budget optimizer | `runHotelOptimizer()`, `optimizing`, `hotelPlan` (`packages`, `objectiveWinner`, `combinationsTested`, `feasibleCount`, `emptyReason`, `cheapestUseful`), `applyHotelPackage(id \| null)`, `activeHotelPackageId` |
 | Package fields | `evaluation.cost` and `evaluation.annualSavings` (`low`/`mid`/`high`), `evaluation.metrics` (`paybackYears`, `netBenefit`, `roi`, `remainingBudget`, `carbonAvoidedKgPerYear`), `evaluation.comfort`, `evaluation.lineItems`, plus `role`, `roleLabel`, `reason`, `note`, `budgetRisk` |
+| Optimize against the current what-if (for example electricity +20%) | `optimizeOnScenario`, `setOptimizeOnScenario(b)`; the plan records `hotelPlan.scenario`, and `hotelPlanBaseline` is what it was measured against |
+| AI advisor | `advisorMessages` (`{ id, role: 'user' \| 'advisor', text, source?: 'ai' \| 'fallback', reason? }`), `advisorBusy`, `askAdvisor(question)`, `clearAdvisor()`; suggested questions: `advisor.ADVISOR_SUGGESTED_QUESTIONS` from `@/engine/hotel` |
 | Saved scenarios | `savedScenarios`, `saveScenario(name?)`, `loadScenario(id)`, `renameScenario(id, name)`, `deleteScenario(id)` |
 | Reset | `resetHotel()` |
 
@@ -101,9 +103,12 @@ Selecting one restores it and updates all charts. Allow rename and delete.
 ## LV8 — AI advisor panel (after H11, task 6.6)
 
 ```
-Add an AI advisor chat panel with suggested questions ("Why is HVAC my biggest cost?", "How does occupancy change my energy use?",
-"Should I start with solar or smart thermostats?", "How should I use $30,000?"). Call the store's advisor action; show a loading state and
-fall back gracefully if it takes longer than 6 seconds (the store handles the fallback text). Label answers "Explains the computed results".
+Add an AI advisor chat panel. Show useTwin().advisorMessages as a conversation (user messages right, advisor messages left). Under the input,
+show the four suggested questions from advisor.ADVISOR_SUGGESTED_QUESTIONS (import { advisor } from "@/engine/hotel") as clickable chips. Sending
+calls askAdvisor(question); while advisorBusy is true show a "Thinking…" bubble and disable the input. Under each advisor message show a small
+label: "Explains the computed results" when source is "ai", and "Template answer" when source is "fallback" (the app switches to the template
+automatically if the AI is slow, unavailable or states a number it was not given; do not show errors). Add a "Clear" button calling
+clearAdvisor(). Keep the answer text exactly as given. Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```
 
 ## LV9 — Polish and disclaimers (task 4.7)

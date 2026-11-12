@@ -230,6 +230,8 @@ export interface DriverWeights {
 
 export interface HotelData {
   defaults: {
+    /** Published peer site EUIs, for comparison only (they do not change the model). Optional for older data files. */
+    peerBenchmarks?: { id: string; label: string; siteEuiKBtuPerSqft: number; source: string }[];
     benchmarkOccupancy: number;
     benchmarkHotWaterGalPerOccupiedRoomDay: number;
     euiKBtuPerSqft: Record<string, number>;
@@ -687,4 +689,11 @@ export interface PortfolioResult {
   candidates: Candidate[];
   emptyReason: string | null;
   cheapestUseful: { id: UpgradeId; label: string; cost: number } | null;
+}
+
+/** The hotel's modeled site energy intensity against published peers (comparison only; see `benchmarkComparison`). */
+export interface BenchmarkComparison {
+  siteEuiKBtuPerSqft: number;
+  peers: { id: string; label: string; siteEuiKBtuPerSqft: number; source: string; /** (hotel - peer) / peer; positive = uses more. */ difference: number }[];
+  note: string;
 }

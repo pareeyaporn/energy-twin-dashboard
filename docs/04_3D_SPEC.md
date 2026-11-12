@@ -26,6 +26,21 @@ tabs). It is a visualization layer only: every energy number and color comes fro
 | Season (snow, bare / green / orange trees, snowfall) | the month (meteorological seasons) |
 | Readout: date and time, outdoor °F, rooms, kW by end use, solar, cost this hour | `selectHourState` (outdoor temperature modeled from NOAA normal highs and lows) |
 
+## Look: realistic by default, energy view on demand
+
+The default look is realistic: stone guest floors, a dark glass podium with shopfronts that glow at night, a metal rooftop plant
+(glowing red when heating dominates the hour, blue when cooling does), window frames, slab bands, a parapet, an entrance canopy,
+a physical sky by day (scattering from the engine's sun position), a street with sidewalks, cars and streetlights (light pools and
+headlights at night). The selected zone always shows its cost color. **Energy view** fades every zone to the cost scale.
+
+**People.** Low-poly pedestrians walk the sidewalk and the entrance path. Their number follows the engine: guests booked but out at
+this hour (`pedestrianCounts(guestsOut, rooms)`, up to 12 on the street and 4 at the door), so the street is busy by day and quiet at
+night. Their movement and the traffic are illustrative, not modeled. Both freeze with "reduce effects".
+
+**Camera.** A short fly-in from a wide view when the scene opens; selecting a zone (in the scene or with the zone buttons) glides to a
+close view of it (`cameraViews(layout)`), and clearing the selection or "Reset view" glides home. The home view and the fog scale with
+the building, so a 20-floor tower fits. Instant with "reduce effects".
+
 ## Controls
 
 Orbit (drag), zoom (scroll), click a zone (selects it; the existing zone panel shows energy, cost, drivers and opportunities), keyboard

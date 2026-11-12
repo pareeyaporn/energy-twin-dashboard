@@ -81,6 +81,7 @@ export function HourReadout() {
 export function View3D({ fallback }: { fallback: ReactNode }) {
   const scene = useRef<HotelSceneHandle>(null);
   const [exploded, setExploded] = useState(false);
+  const [energyView, setEnergyView] = useState(false);
   const [solarSelected, setSolarSelected] = useState(false);
   const setTime = useTwin((s) => s.setTime);
   const solar = useTwin((s) => selectHourState(s).solar);
@@ -90,7 +91,7 @@ export function View3D({ fallback }: { fallback: ReactNode }) {
     <SceneBoundary fallback={fallback}>
       <div data-testid="twin-3d" className="relative h-[460px] overflow-hidden rounded-lg">
         <Suspense fallback={<div className="grid h-full place-items-center text-sm text-muted-foreground">Loading 3D hotel…</div>}>
-          <HotelScene ref={scene} exploded={exploded} solarSelected={solarSelected} onSelectSolar={setSolarSelected} />
+          <HotelScene ref={scene} exploded={exploded} energyView={energyView} solarSelected={solarSelected} onSelectSolar={setSolarSelected} />
         </Suspense>
         <HourReadout />
         {solarSelected && (
@@ -120,6 +121,15 @@ export function View3D({ fallback }: { fallback: ReactNode }) {
             </button>
           ))}
           <span className="ml-auto flex gap-1.5">
+            <button
+              type="button"
+              aria-pressed={energyView}
+              onClick={() => setEnergyView(!energyView)}
+              title="Color every zone by its yearly cost (blue lower, red higher)"
+              className={`rounded-md border border-glass-border px-2 py-1 ${energyView ? "bg-primary text-primary-foreground" : "bg-background/85 hover:bg-accent"}`}
+            >
+              Energy view
+            </button>
             <button
               type="button"
               aria-pressed={exploded}

@@ -16,7 +16,8 @@ Style for every prompt: polished B2B SaaS look, professional typography, clear f
 | LV11 upgrade comparison and the financial breakdown | Done |
 | LV12 layout fix (packages first, collapsed comparison, shared assumptions, short Source buttons, remaining budget and comfort back) | Done |
 | LV13 NPV with an 8% / 3% switch, grid subregion field | Done |
-| **LV14 year-by-year projection chart** (after the 3D twin PR is merged) | **Next** |
+| LV14 year-by-year projection chart | Done |
+| **LV15 polish: benchmark card, calmer Invest tab, phone layout, fewer default tags** (after the camera/realism PR is merged) | **Next** |
 
 ## Store API cheat sheet (already built; read it, do not change it)
 
@@ -229,4 +230,31 @@ In the Compare investments table add a "Projection" row with a small sparkline o
 chart in a dialog on click. In Compare all upgrades (table view), add the same sparkline column from row.financials.projection.
 Use the store values only; display formatting only; negative values in amber, positive in the savings color.
 Don't modify src/engine, src/data, src/twin, src/three, src/store or supabase.
+```
+
+## LV15 — Polish: peer benchmark, calmer Invest tab, phone layout, fewer default tags (after the camera/realism PR is merged)
+
+```
+1. Peer benchmark. In the Hotel step under the profile summary, and in the overview KPI area, add a small "How this hotel compares"
+card. Get the values with useMemo from benchmarkComparison(baseline, hotel.profile.floorAreaSqft) imported from "@/engine/hotel"
+(state.baseline and state.hotel from useTwin). Show the hotel's siteEuiKBtuPerSqft ("kBtu per ft² a year, modeled") and one row per
+peers[] entry: label, its siteEuiKBtuPerSqft, and the difference as "+45% vs" or "-8% vs" (difference as a percentage), plus a thin
+horizontal bar chart of the three values. Show the note text in small muted type and each peer's source in a tooltip (Source button).
+Label it "Estimate". Do not color it as good or bad; it is context.
+
+2. Fewer "default (estimate)" tags. Where several fields in one card are defaulted, show one line at the top of the card instead:
+"Some values are defaults (estimates) — marked with •", and mark the defaulted fields with a small dot with a tooltip "Default
+(estimate)". Keep the "Estimate" badges on results.
+
+3. Calmer Invest tab. Collapse each package card to: name, net investment, $ saved per year, payback, 10-year net benefit, CO2, and a
+"Show all figures" toggle that opens the full eight lines, remaining budget, comfort and the projection toggle. Keep the winner badge.
+Keep Compare investments and Compare all upgrades as they are, collapsed by default.
+
+4. Projection note. In Projection.tsx only say "solar output falls 0.5% a year" when f.solar is not null; otherwise drop that clause.
+
+5. Phone layout (under 640 px): stack the KPI strip in a two-column grid with smaller numbers, make the step tabs horizontally
+scrollable, make the twin full width with its controls wrapping, make tables horizontally scrollable with the first column sticky, and
+make package cards full width. Check that no text overflows at 375 px.
+
+Display formatting only. Don't modify src/engine, src/data, src/twin, src/three, src/store or supabase.
 ```

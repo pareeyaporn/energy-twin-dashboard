@@ -72,3 +72,4 @@ export { explainPortfolio } from './explain';
 export { opportunitiesByZone } from './opportunities';
 export type { ZoneOpportunity } from './opportunities';
 export * as advisor from './advisor';
+export { benchmarkComparison } from './benchmark';

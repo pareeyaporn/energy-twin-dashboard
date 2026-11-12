@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import {
   DEFAULT_FINANCE,
+  STRESS_TESTS,
   advisor,
   calculateBaselineEnergy,
   hotelData,
@@ -110,6 +111,8 @@ export interface TwinState {
   scenarioResult: ScenarioResult | null;
   /** Result of the budget optimizer (three packages and the objective winner). */
   hotelPlan: PortfolioResult | null;
+  /** The plan in place when a stress test started (kept so the stress panel can test it if the optimizer re-runs). */
+  planBeforeStress: PortfolioResult | null;
   /** The situation the plan was measured against: the baseline, or the scenario's result if the optimizer ran on a scenario. */
   hotelPlanBaseline: EnergyResult | null;
   /** Discount rate for NPV (product decision: 8% default, 3% alternative); NPV only, payback and net benefit do not use it. */
@@ -235,6 +238,7 @@ function initialHotelState() {
     activeStressTest: null as StressTest["id"] | null,
     scenarioResult: null as ScenarioResult | null,
     hotelPlan: null as PortfolioResult | null,
+    planBeforeStress: null as PortfolioResult | null,
     hotelPlanBaseline: null as EnergyResult | null,
     optimizerCombinations: null as number | null,
     hotelDiscountRate: DEFAULT_FINANCE.discountRate,
@@ -340,8 +344,18 @@ export const useTwin = create<TwinState>((set, get) => ({
       return { scenario, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(scenario, s.activeStressTest)), ...stalePlan(s), ...autoOptimize(s, scenario, s.activeStressTest) };
     }),
   resetScenario: () => set((s) => ({ scenario: {}, activeStressTest: null, scenarioResult: null, ...stalePlan(s), ...autoOptimize(s, {}, null) })),
+  // Persistent changes (prices, worn equipment) become the basis for investing, as before: the optimizer switches to them. The plan the
+  // user had is kept in `planBeforeStress`, so the stress panel can test it. Temporary events (weather, occupancy, a cloudy year) do not
+  // switch the optimizer: they must not change long-term returns, so the current plan stays.
   applyStressTest: (activeStressTest) =>
-    set((s) => ({ activeStressTest, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(s.scenario, activeStressTest)), ...stalePlan(s), ...autoOptimize(s, s.scenario, activeStressTest) })),
+    set((s) => {
+      const scenarioResult = computeScenarioResult(s.hotel, effectiveScenario(s.scenario, activeStressTest));
+      const persistent = (id: StressTest["id"] | null) => STRESS_TESTS.find((t) => t.id === id)?.duration === "persistent";
+      const planBeforeStress = activeStressTest === null ? null : (s.planBeforeStress ?? s.hotelPlan);
+      if (persistent(activeStressTest) || persistent(s.activeStressTest))
+        return { activeStressTest, scenarioResult, planBeforeStress, ...stalePlan(s), ...autoOptimize(s, s.scenario, activeStressTest) };
+      return { activeStressTest, scenarioResult, planBeforeStress, ...(s.hotelPlan?.scenario ? stalePlan(s) : {}) };
+    }),
   runHotelOptimizer: async () => {
     if (get().optimizing) return;
     const started = get().hotel;

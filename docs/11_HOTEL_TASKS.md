@@ -254,6 +254,12 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
 - [x] 11.5 UI (`src/plans`): AI recommended (with "Why this plan" and "Customize AI plan"), Build your own (catalog by HVAC & Controls, Lighting, Renewable Energy, Building & Water; quantity controls; live totals with gross, verified incentives and net separately; budget bar; notes), Compare (AI plan vs up to three custom plans)
 - [x] 11.6 Tests: a plan copied from any package equals the package; quantities scale cost and savings; combinations recomputed, not summed; store and UI tests
 
+## Phase 12 — Stress tests (CC; built November 2026)
+- [x] 12.1 Eight tests in Weather (heat wave, cold snap, low solar production), Operations (conference surge, low occupancy, HVAC efficiency decline) and Financial (electricity +20%, natural gas +20%); each states what changes, by how much and for how long
+- [x] 12.2 Engine: `hvacEnergyChangePct` and `solarOutputChangePct` scenario inputs (new "HVAC equipment condition" driver); `stressTestReport` (normal vs stress, the plan under both with `evaluatePackage`, extra costs avoided, payback and NPV for persistent changes) and `stressRecommendation`
+- [x] 12.3 Temporary vs persistent: temporary events do not switch the optimizer or change returns; persistent changes re-measure, keep the user's plan (`planBeforeStress`) for the comparison, and show whether the optimizer's pick changes
+- [x] 12.4 Panel in the twin: categories, assumptions table, normal vs stress, plan picker (selected, any AI package, any custom plan), reset to baseline; tests
+
 ## Phase 8 — Demo hardening (all)
 - [ ] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
       $50,000 budget, an advisor question **chosen after calibration from what the results actually show**, closing before/after with carbon

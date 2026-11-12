@@ -17,7 +17,8 @@ Style for every prompt: polished B2B SaaS look, professional typography, clear f
 | LV12 layout fix (packages first, collapsed comparison, shared assumptions, short Source buttons, remaining budget and comfort back) | Done |
 | LV13 NPV with an 8% / 3% switch, grid subregion field | Done |
 | LV14 year-by-year projection chart | Done |
-| **LV15 polish: benchmark card, calmer Invest tab, phone layout, fewer default tags** (after the camera/realism PR is merged) | **Next** |
+| LV15 polish: benchmark card, calmer Invest tab, phone layout, fewer default tags | Done |
+| (none queued) — the Scenario screen's stress buttons now list all eight tests automatically from `STRESS_TESTS` | — |
 
 ## Store API cheat sheet (already built; read it, do not change it)
 

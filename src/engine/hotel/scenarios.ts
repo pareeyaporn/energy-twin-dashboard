@@ -21,21 +21,90 @@ import type {
 const usd = (n: number) => `${n < 0 ? '-' : '+'}$${Math.round(Math.abs(n)).toLocaleString('en-US')}`;
 const kwh = (n: number) => `${n < 0 ? '-' : '+'}${Math.round(Math.abs(n)).toLocaleString('en-US')} kWh`;
 
-/** Monthly-resolution events for the twin's stress-test buttons (a heat wave is modeled as a hotter month). */
+export type StressCategory = 'weather' | 'operations' | 'financial';
+
+/**
+ * Stress tests for the twin. `temporary` events last a stated period (one month, a season or one year) and do not change long-term
+ * investment returns, because how often they recur is not modeled; `persistent` changes last until something is done about them, so
+ * returns and the recommendation are re-evaluated under them. Magnitudes are illustrative what-ifs, not forecasts.
+ */
 export interface StressTest {
-  id: 'heat_wave' | 'cold_snap' | 'conference_surge' | 'price_up_20';
+  id:
+    | 'heat_wave'
+    | 'cold_snap'
+    | 'low_solar'
+    | 'conference_surge'
+    | 'low_occupancy'
+    | 'hvac_decline'
+    | 'price_up_20'
+    | 'gas_up_20';
   label: string;
   description: string;
+  category: StressCategory;
+  duration: 'temporary' | 'persistent';
+  /** The exact assumptions changed: what, by how much, for how long. */
+  assumptions: { what: string; change: string; period: string }[];
   scenario: Scenario;
 }
 
 const monthDelta = (idx: number, value: number): number[] => Array.from({ length: 12 }, (_, i) => (i === idx ? value : 0));
+const monthsDelta = (idx: number[], value: number): number[] => Array.from({ length: 12 }, (_, i) => (idx.includes(i) ? value : 0));
+
+export const STRESS_CATEGORIES: { id: StressCategory; label: string }[] = [
+  { id: 'weather', label: 'Weather' },
+  { id: 'operations', label: 'Operations' },
+  { id: 'financial', label: 'Financial' },
+];
 
 export const STRESS_TESTS: StressTest[] = [
-  { id: 'heat_wave', label: 'Heat wave', description: 'July runs 10 F hotter than normal (monthly resolution).', scenario: { weatherOffsetF: monthDelta(6, 10) } },
-  { id: 'cold_snap', label: 'Cold snap', description: 'January runs 12 F colder than normal (monthly resolution).', scenario: { weatherOffsetF: monthDelta(0, -12) } },
-  { id: 'conference_surge', label: 'Conference surge', description: 'Occupancy rises 25 points in September (monthly resolution).', scenario: { occupancyDeltaPts: monthDelta(8, 0.25) } },
-  { id: 'price_up_20', label: 'Electricity +20%', description: 'The electricity price rises 20% all year.', scenario: { electricityRateChangePct: 20 } },
+  {
+    id: 'heat_wave', label: 'Heat wave', category: 'weather', duration: 'temporary',
+    description: 'July runs 10 F hotter than normal (monthly resolution).',
+    assumptions: [{ what: 'Outdoor temperature', change: '+10 °F vs the NOAA normal', period: 'July only (one month)' }],
+    scenario: { weatherOffsetF: monthDelta(6, 10) },
+  },
+  {
+    id: 'cold_snap', label: 'Cold snap', category: 'weather', duration: 'temporary',
+    description: 'January runs 12 F colder than normal (monthly resolution).',
+    assumptions: [{ what: 'Outdoor temperature', change: '−12 °F vs the NOAA normal', period: 'January only (one month)' }],
+    scenario: { weatherOffsetF: monthDelta(0, -12) },
+  },
+  {
+    id: 'low_solar', label: 'Low solar production', category: 'weather', duration: 'temporary',
+    description: 'A cloudier year: solar arrays produce 15% less than the typical year. Affects plans with solar only.',
+    assumptions: [{ what: 'Solar output', change: '−15% vs the PVWatts typical year', period: 'One year' }],
+    scenario: { solarOutputChangePct: -15 },
+  },
+  {
+    id: 'conference_surge', label: 'Conference surge', category: 'operations', duration: 'temporary',
+    description: 'Occupancy rises 25 points in September (monthly resolution).',
+    assumptions: [{ what: 'Occupancy', change: '+25 percentage points', period: 'September only (one month)' }],
+    scenario: { occupancyDeltaPts: monthDelta(8, 0.25) },
+  },
+  {
+    id: 'low_occupancy', label: 'Low occupancy (off-season)', category: 'operations', duration: 'temporary',
+    description: 'A weak off-season: occupancy 20 points lower from January to March.',
+    assumptions: [{ what: 'Occupancy', change: '−20 percentage points', period: 'January–March (one season)' }],
+    scenario: { occupancyDeltaPts: monthsDelta([0, 1, 2], -0.2) },
+  },
+  {
+    id: 'hvac_decline', label: 'HVAC efficiency decline', category: 'operations', duration: 'persistent',
+    description: 'Worn or poorly maintained heating and cooling equipment uses 10% more energy until it is serviced or replaced.',
+    assumptions: [{ what: 'Heating and cooling energy', change: '+10% for the same load (illustrative)', period: 'Every year until fixed' }],
+    scenario: { hvacEnergyChangePct: 10 },
+  },
+  {
+    id: 'price_up_20', label: 'Electricity +20%', category: 'financial', duration: 'persistent',
+    description: 'The electricity price rises 20% all year.',
+    assumptions: [{ what: 'Electricity price', change: '+20%', period: 'Every year from now' }],
+    scenario: { electricityRateChangePct: 20 },
+  },
+  {
+    id: 'gas_up_20', label: 'Natural gas +20%', category: 'financial', duration: 'persistent',
+    description: 'The natural gas price rises 20% all year.',
+    assumptions: [{ what: 'Natural gas price', change: '+20%', period: 'Every year from now' }],
+    scenario: { gasRateChangePct: 20 },
+  },
 ];
 
 function toResolved(input: HotelInput | ResolvedProfile, data: HotelData): ResolvedProfile {
@@ -56,6 +125,7 @@ const GROUP_LABEL: Record<Group, string> = {
   setpoints: 'Setpoints and room controls',
   schedules: 'Common-area schedules',
   weather: 'Weather',
+  equipment: 'HVAC equipment condition',
   rates: 'Energy prices',
 };
 
@@ -69,6 +139,8 @@ function groupFields(g: Group, c: Conditions): unknown {
       return [c.commonAreaHvacHours, c.lightingHoursPerDay];
     case 'weather':
       return c.weatherOffsetF;
+    case 'equipment':
+      return c.hvacEnergyMult ?? 1;
     case 'rates':
       return [c.elecRateMult, c.gasRateMult];
   }
@@ -84,6 +156,8 @@ function applyGroup(g: Group, from: Conditions, to: Conditions): Conditions {
       return { ...from, commonAreaHvacHours: to.commonAreaHvacHours, lightingHoursPerDay: to.lightingHoursPerDay };
     case 'weather':
       return { ...from, weatherOffsetF: [...to.weatherOffsetF] };
+    case 'equipment':
+      return { ...from, hvacEnergyMult: to.hvacEnergyMult ?? 1 };
     case 'rates':
       return { ...from, elecRateMult: to.elecRateMult, gasRateMult: to.gasRateMult };
   }
@@ -117,7 +191,7 @@ function detailFor(before: EnergyResult, after: EnergyResult): string {
 
 /** Explain a change by applying the scenario's parts one at a time, in a fixed order. The split depends on that order. */
 function explain(p: ResolvedProfile['profile'], from: Conditions, to: Conditions, data: HotelData, start: EnergyResult): Driver[] {
-  const order: Group[] = ['occupancy', 'setpoints', 'schedules', 'weather', 'rates'];
+  const order: Group[] = ['occupancy', 'setpoints', 'schedules', 'weather', 'equipment', 'rates'];
   const drivers: Driver[] = [];
   let cond = from;
   let current = start;

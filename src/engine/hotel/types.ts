@@ -124,6 +124,10 @@ export interface Scenario {
   electricityRateChangePct?: number; // 20 = +20%
   gasRateChangePct?: number;
   weatherOffsetF?: number | number[]; // degrees F added to the monthly mean temperature
+  /** Heating and cooling equipment uses this much more energy (10 = +10%), for example worn equipment (stress test). */
+  hvacEnergyChangePct?: number;
+  /** Solar arrays produce this much more or less (−30 = a cloudier year); affects plans with solar only. */
+  solarOutputChangePct?: number;
 }
 
 /** The effective operating conditions the simulation runs on. */
@@ -138,6 +142,10 @@ export interface Conditions {
   weatherOffsetF: number[];
   elecRateMult: number;
   gasRateMult: number;
+  /** Multiplier on heating and cooling energy (1 = as modeled). Optional for backwards compatibility. */
+  hvacEnergyMult?: number;
+  /** Multiplier on solar output (1 = the location's typical year). */
+  solarOutputMult?: number;
 }
 
 export interface Totals {
@@ -206,7 +214,7 @@ export interface ComfortFlag {
 }
 
 export interface Driver {
-  id: 'occupancy' | 'setpoints' | 'schedules' | 'weather' | 'rates';
+  id: 'occupancy' | 'setpoints' | 'schedules' | 'weather' | 'equipment' | 'rates';
   label: string;
   deltaElecKWh: number;
   deltaGasTherms: number;

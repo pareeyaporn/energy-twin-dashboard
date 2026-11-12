@@ -350,7 +350,12 @@ describe("optimizing under a scenario", () => {
     expect(get().optimizeOnScenario).toBe(true);
     get().resetScenario();
     expect(get().optimizeOnScenario).toBe(false);
+    // A temporary event (heat wave) is a check of the plan, not a new basis for investing: the optimizer stays on the baseline.
     get().applyStressTest("heat_wave");
+    expect(get().optimizeOnScenario).toBe(false);
+    get().applyStressTest(null);
+    // A persistent change (electricity +20%) is: the optimizer switches to it, and back when it is cleared.
+    get().applyStressTest("price_up_20");
     expect(get().optimizeOnScenario).toBe(true);
     get().applyStressTest(null);
     expect(get().optimizeOnScenario).toBe(false);

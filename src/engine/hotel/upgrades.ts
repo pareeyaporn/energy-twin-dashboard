@@ -366,7 +366,7 @@ export function calculateUpgradeSavings(
             : solarSizeKw(ctx.profile, ctx.baseline.annual.elecKWh, d, id);
         solarId = id;
         const sol = climateSolar(ctx.profile, d);
-        const yieldKwh = solarYield(ctx.profile, scenario, d);
+        const yieldKwh = solarYield(ctx.profile, scenario, d) * (ctx.baseline.conditions.solarOutputMult ?? 1);
         const lat = climateLatitude(ctx.profile, d);
         const weights = hourWeights(d);
         for (let m = 0; m < 12; m++) {

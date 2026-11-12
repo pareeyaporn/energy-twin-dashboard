@@ -19,6 +19,7 @@ export {
   simulateOccupancyChange,
   simulateHVACSettings,
   STRESS_TESTS,
+  STRESS_CATEGORIES,
 } from './scenarios';
 export type { StressTest, HvacSettings } from './scenarios';
 export { typicalDayProfile, simulatedMeter, roomOccupancyPattern, equipmentInventory, energyFlows, energyFlowsAt, typicalDayByZoneEndUse } from './twin';
@@ -84,3 +85,6 @@ export {
   explainPlan,
 } from './plans';
 export type { CatalogItem, CatalogQuantity, QuantityKind, PlanItem, PlanWarning, PlanWarningKind, PlanEvaluation } from './plans';
+export { stressRecommendation, stressTestReport } from './stress';
+export type { StressReport, StressPlanInput, StressPlanResult } from './stress';
+export type { StressCategory } from './scenarios';

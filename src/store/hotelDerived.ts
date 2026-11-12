@@ -25,6 +25,9 @@ import {
   ZONE_LABELS,
   evaluatePlan,
   explainPlan,
+  planAmounts,
+  stressRecommendation,
+  stressTestReport,
   upgradeCatalog,
 } from "@/engine/hotel";
 import type {
@@ -34,6 +37,8 @@ import type {
   HotelInput,
   PlanEvaluation,
   PortfolioResult,
+  StressPlanInput,
+  StressReport,
   RankedPackage,
   ResolvedProfile,
   Scenario,
@@ -326,4 +331,65 @@ export function selectPlanExplanation(s: TwinState, packageId?: string): string[
   // Explain against the context the plan was measured against (scenario or baseline).
   const ctx = planContextOf(s.hotel, s.hotelPlanBaseline ?? s.baseline);
   return explainOf(ctx, plan, pkg);
+}
+
+// ---- Stress tests ----
+
+/** Which plan a stress test evaluates: chosen explicitly, or automatically (the applied AI package, else the active custom plan, else the AI's pick). */
+export type StressPlanChoice = { kind: "auto" } | { kind: "ai"; role: string } | { kind: "custom"; id: string } | { kind: "none" };
+
+export function stressPlanInput(s: TwinState, choice: StressPlanChoice = { kind: "auto" }): StressPlanInput | null {
+  // The plan the user had before the stress test (the optimizer may have re-run under a persistent change).
+  const base = s.planBeforeStress ?? s.hotelPlan;
+  const pkgs = base ? [...base.packages, ...(base.objectiveWinner ? [base.objectiveWinner] : [])] : [];
+  const fromPkg = (pkg: RankedPackage | undefined): StressPlanInput | null =>
+    pkg ? { label: `AI · ${pkg.roleLabel}`, source: "ai", ids: pkg.evaluation.upgradeIds } : null;
+  const fromCustom = (id: string | null): StressPlanInput | null => {
+    const plan = s.customPlans.find((p) => p.id === id);
+    if (!plan || !plan.items.length) return null;
+    const a = planAmounts(selectPlanContext(s), plan.items);
+    return { label: plan.name, source: "custom", ids: a.ids, amounts: a.amounts };
+  };
+  if (choice.kind === "none") return null;
+  if (choice.kind === "ai") return fromPkg(pkgs.find((p) => p.role === choice.role));
+  if (choice.kind === "custom") return fromCustom(choice.id);
+  const applied = pkgs.find((p) => p.evaluation.id === s.activeHotelPackageId);
+  return fromPkg(applied) ?? fromCustom(s.activeCustomPlanId) ?? fromPkg(base?.objectiveWinner ?? pkgs[0]);
+}
+
+const stressCache = new Map<string, { deps: unknown[]; result: StressReport }>();
+/** The active stress test against the normal year (the user's what-if without the stress), with the chosen plan. Null when no test is active. */
+export function selectStressReport(s: TwinState, choice: StressPlanChoice = { kind: "auto" }): StressReport | null {
+  const test = STRESS_TESTS.find((t) => t.id === s.activeStressTest);
+  if (!test) return null;
+  const plan = stressPlanInput(s, choice);
+  const key = JSON.stringify(choice);
+  const deps = [s.hotel, s.scenario, test, JSON.stringify(plan ? { ...plan, amounts: plan.amounts ?? null } : null), s.hotel.profile.budget, s.hotel.profile.objective, s.hotelDiscountRate];
+  const hit = stressCache.get(key);
+  if (hit && hit.deps.every((d, i) => Object.is(d, deps[i]))) return hit.result;
+  const result = stressTestReport(s.hotel, test, s.scenario, effectiveScenario(s.scenario, test.id), plan, {
+    budget: s.hotel.profile.budget,
+    objective: s.hotel.profile.objective,
+    discountRate: s.hotelDiscountRate,
+    recommend: false, // computed separately (selectStressRecommendation), so the panel appears at once
+  });
+  stressCache.set(key, { deps, result });
+  return result;
+}
+
+const recCache: { deps: unknown[]; result: StressReport["recommendation"] } = { deps: [], result: null };
+/** For a persistent stress test: does the optimizer's pick change? Slow (two optimizer runs); call it after the panel has rendered. */
+export function computeStressRecommendation(s: TwinState): StressReport["recommendation"] {
+  const test = STRESS_TESTS.find((t) => t.id === s.activeStressTest);
+  if (!test || test.duration !== "persistent") return null;
+  const deps = [s.hotel, s.scenario, test, s.hotel.profile.budget, s.hotel.profile.objective, s.hotelDiscountRate];
+  if (recCache.deps.length && recCache.deps.every((d, i) => Object.is(d, deps[i]))) return recCache.result;
+  const result = stressRecommendation(s.hotel, s.scenario, effectiveScenario(s.scenario, test.id), {
+    budget: s.hotel.profile.budget,
+    objective: s.hotel.profile.objective,
+    discountRate: s.hotelDiscountRate,
+  });
+  recCache.deps = deps;
+  recCache.result = result;
+  return result;
 }

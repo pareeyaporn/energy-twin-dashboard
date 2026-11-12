@@ -111,6 +111,8 @@ export function applyScenario(
     weatherOffsetF,
     elecRateMult: base.elecRateMult * (1 + (s.electricityRateChangePct ?? 0) / 100),
     gasRateMult: base.gasRateMult * (1 + (s.gasRateChangePct ?? 0) / 100),
+    hvacEnergyMult: Math.max(0.5, (base.hvacEnergyMult ?? 1) * (1 + (s.hvacEnergyChangePct ?? 0) / 100)),
+    solarOutputMult: Math.max(0, (base.solarOutputMult ?? 1) * (1 + (s.solarOutputChangePct ?? 0) / 100)),
   };
 }
 

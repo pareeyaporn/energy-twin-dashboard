@@ -12,9 +12,27 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 export default defineConfig({
   vite: {
     optimizeDeps: {
-      // Prebundle the accordion before the first page load so its React instance cannot
-      // change underneath an already-rendered React DOM tree during dependency discovery.
-      include: ["@radix-ui/react-accordion"],
+      // Prebundle lazy panel dependencies together with React before the first page load.
+      // Late discovery otherwise replaces shared React chunks under a mounted tree.
+      include: [
+        "react",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+        "react-dom/client",
+        "@radix-ui/react-accordion",
+        "@radix-ui/react-dropdown-menu",
+        "@radix-ui/react-hover-card",
+        "@radix-ui/react-separator",
+        "@streamdown/cjk",
+        "@streamdown/code",
+        "@streamdown/math",
+        "@streamdown/mermaid",
+        "cmdk",
+        "motion/react",
+        "nanoid",
+        "streamdown",
+        "use-stick-to-bottom",
+      ],
     },
   },
   tanstackStart: {

@@ -40,3 +40,4 @@ use the editor.
 - Place the owner-managed `HotelTwin` unchanged inside Stage; use stage container queries for zone details beside or below the diagram, and keep legacy stage overlays unmounted to avoid duplicate controls and costs.
 - Budget optimizer views share hotel actions and package presentation; never recalculate financial values in UI, label net benefit with the result's actual horizon, and delay winner application by 600ms without overriding manual selection.
 - The advisor panel uses AI Elements and the existing store actions; preserve returned text and source labels without adding inference, error messages, or fallback logic in the UI.
+- Prebundle lazy panel dependencies and React together in Vite's optimizeDeps include list to prevent late discovery replacing React chunks beneath mounted components.

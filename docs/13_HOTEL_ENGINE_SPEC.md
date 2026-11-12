@@ -220,7 +220,7 @@ and the before and after views for an applied package compare against the situat
 
 **Setback recovery.** A set-back guest room needs energy to return to the occupied setpoint. For every booked room, `returns per day × days` events each cost `setback depth × 0.15 kBtu per °F`, spread over heating or cooling months by degree days and divided by the equipment efficiency
 (0.8 for gas heat, 2.3 for electric heat, COP 3 for cooling). The number of returns scales with how much time guests are away (14 occupied hours is the reference) and is zero when guests are always in their rooms. It is added to guest-room heating and cooling as occupancy-driven load,
-so it applies to scenarios and to the smart-controls upgrade alike, and it is zero whenever there is no setback, so the baseline is unchanged. At the placeholder values it cuts the smart controls' modeled saving roughly in half. The parameters are placeholders; if research shows the published per-degree savings are already net of recovery, set `kBtuPerRoomPerF` to 0.
+so it applies to scenarios and to the smart-controls upgrade alike, and it is zero whenever there is no setback, so the baseline is unchanged. At the placeholder values it takes about a quarter off the smart controls' modeled saving ($407 of $1,645 a year, leaving $1,237). The parameters are placeholders; if research shows the published per-degree savings are already net of recovery, set `kBtuPerRoomPerF` to 0.
 
 ## 11. The twin UI (`src/twin`)
 `<HotelTwin />` is a layered 2D view that reads everything from the store and does no math. Zones: a building cross-section with six clickable zones colored by yearly cost (blue lower, red higher), with before, after and split views. Rooms: every room by floor

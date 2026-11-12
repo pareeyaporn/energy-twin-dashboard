@@ -222,6 +222,13 @@ and the before and after views for an applied package compare against the situat
 (0.8 for gas heat, 2.3 for electric heat, COP 3 for cooling). The number of returns scales with how much time guests are away (14 occupied hours is the reference) and is zero when guests are always in their rooms. It is added to guest-room heating and cooling as occupancy-driven load,
 so it applies to scenarios and to the smart-controls upgrade alike, and it is zero whenever there is no setback, so the baseline is unchanged. At the placeholder values it cuts the smart controls' modeled saving roughly in half. The parameters are placeholders; if research shows the published per-degree savings are already net of recovery, set `kBtuPerRoomPerF` to 0.
 
+## 11. The twin UI (`src/twin`)
+`<HotelTwin />` is a layered 2D view that reads everything from the store and does no math. Zones: a building cross-section with six clickable zones colored by yearly cost (blue lower, red higher), with before, after and split views. Rooms: every room by floor
+(guest in room, booked and guest out, vacant, set back). Equipment: the estimated equipment list per zone with schedule and efficiency. Flow: a Sankey of grid and gas to zones to uses, plus a text table for screen readers.
+A time scrubber plays a typical day or the year, a simulated meter shows modeled kW, therms and dollars per hour, installed upgrades are drawn on the building, and four stress-test buttons lay events over the hotel.
+The zone panel shows energy, cost share, change from before, an hourly electricity chart, equipment, schedules, efficiency assumptions and the zone's improvement opportunities. Files: `HotelTwin.tsx`, `useTwinClock.ts`, `format.ts` and one file per part in `parts/`.
+Lovable only places `<HotelTwin />` (prompt LV6). Everything labeled simulated or estimated stays labeled.
+
 ---
 
 ## Appendix A — Store contract (task 1.10): approved and built

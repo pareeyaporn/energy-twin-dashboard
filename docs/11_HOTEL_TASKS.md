@@ -122,19 +122,20 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 Needs Phases 1–2. In scope (**Tier A**): room grid, zone heat-map, equipment layer, time scrubber, simulated live meter, energy flow diagram,
 ghost upgrades, stress-test events. Out of scope for now: fault injection and anomaly detection, an operational playbook optimizer,
 a bill-calibration view, a 12-month forecast band, 3D, and live IoT.
-- [ ] 5.1 New folder `src/twin/` (Claude Code owned; add it to the CLAUDE.md folder table). `<HotelTwin />` is a layered SVG diagram; it reads everything
+- [x] 5.1 New folder `src/twin/` (Claude Code owned; add it to the CLAUDE.md folder table). `<HotelTwin />` is a layered SVG diagram; it reads everything
       from the store and does no math; Lovable only places it
-- [ ] 5.2 Layer switcher: **Zones** (heat-map by energy intensity or cost share), **Rooms**, **Equipment** and **Flow**, plus a before/after toggle and animated numbers
-- [ ] 5.3 Room grid: all rooms by floor, showing occupied, vacant and vacant-with-setback; follows the occupancy scenario and the time scrubber
-- [ ] 5.4 Equipment layer and zone panel on click: energy, cost share, equipment list with load, schedule and efficiency, and improvement opportunities
+- [x] 5.2 Layer switcher: **Zones** (heat-map by energy intensity or cost share), **Rooms**, **Equipment** and **Flow**, plus a before/after toggle and animated numbers
+- [x] 5.3 Room grid: all rooms by floor, showing occupied, vacant and vacant-with-setback; follows the occupancy scenario and the time scrubber
+- [x] 5.4 Equipment layer and zone panel on click: energy, cost share, equipment list with load, schedule and efficiency, and improvement opportunities
       (all from the engine)
-- [ ] 5.5 Time scrubber: play, pause and scrub a typical day (24 hours) and the year (12 months), with speed control; colors, room states and numbers follow time
-- [ ] 5.6 Simulated live meter: a ticking kW and cost readout driven by the time scrubber, always labeled "simulated"
-- [ ] 5.7 Energy flow diagram: Sankey from grid and gas through the zones to end uses, with cost on each flow (Recharts)
-- [ ] 5.8 Ghost upgrades: applying a package shows it on the twin (solar on the roof, LED glow, thermostat icons) with a before/after split view
-- [ ] 5.9 Stress-test buttons (heat wave, cold snap, conference week, +20% price): trigger a scenario and show the twin reacting
-- [ ] 5.10 Respect `reduceEffects`; keyboard and screen-reader support; component tests for layer switching, zone selection and the time scrubber through the store
+- [x] 5.5 Time scrubber: play, pause and scrub a typical day (24 hours) and the year (12 months), with speed control; colors, room states and numbers follow time
+- [x] 5.6 Simulated live meter: a ticking kW and cost readout driven by the time scrubber, always labeled "simulated"
+- [x] 5.7 Energy flow diagram: Sankey from grid and gas through the zones to end uses, with cost on each flow (Recharts)
+- [x] 5.8 Ghost upgrades: applying a package shows it on the twin (solar on the roof, LED glow, thermostat icons) with a before/after split view
+- [x] 5.9 Stress-test buttons (heat wave, cold snap, conference week, +20% price): trigger a scenario and show the twin reacting
+- [x] 5.10 Respect `reduceEffects`; keyboard and screen-reader support; component tests for layer switching, zone selection and the time scrubber through the store
 - [ ] 5.11 P2, only if time: lightweight 3D with React Three Fiber
+      (Built: layered diagram, time scrubber, meter, flow, ghost upgrades, stress tests. Not built: count-up animation of the header numbers; colors fade but numbers do not animate.)
 
 ## Phase 6 — AI advisor (P1) [CC]
 - [ ] 6.1 Design note (see [12_BACKEND_ARCHITECTURE.md](12_BACKEND_ARCHITECTURE.md)): the model receives a precomputed context (baseline by zone, current scenario, three packages, and a few precomputed

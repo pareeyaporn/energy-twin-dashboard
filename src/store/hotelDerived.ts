@@ -110,10 +110,12 @@ const displayedOf = memoLast(
 export const selectDisplayed = (s: TwinState): Displayed =>
   displayedOf(s.hotel, s.baseline, s.scenarioResult, selectActiveHotelPackage(s), s.hotelPlanBaseline);
 
+const compareOf = memoLast((before: EnergyResult, after: EnergyResult, kind: DisplayKind) => ({ before, after, kind }));
+
 /** Before (the baseline; for a package, the situation the plan was measured against) and after (what is displayed). */
 export const selectCompare = (s: TwinState): { before: EnergyResult; after: EnergyResult; kind: DisplayKind } => {
   const d = selectDisplayed(s);
-  return { before: d.kind === "package" ? (s.hotelPlanBaseline ?? s.baseline) : s.baseline, after: d.result, kind: d.kind };
+  return compareOf(d.kind === "package" ? (s.hotelPlanBaseline ?? s.baseline) : s.baseline, d.result, d.kind);
 };
 
 export interface ZoneRow {
@@ -158,10 +160,11 @@ export const selectEquipment = (s: TwinState) => equipmentOf(s.hotel);
 const meterOf = memoLast((result: EnergyResult, month: number, hour: number) => simulatedMeter(result, month, hour));
 export const selectMeter = (s: TwinState) => meterOf(selectDisplayed(s).result, s.timeMonth, s.timeHour);
 
-export const selectHotelLabel = (s: TwinState) => {
-  const p = s.hotel.profile;
-  return { title: p.name, city: `${p.city}, ${p.state}`, rooms: p.rooms, synthetic: s.hotelPresetId !== null };
-};
+const labelOf = memoLast((hotel: ResolvedProfile, presetId: string | null) => {
+  const p = hotel.profile;
+  return { title: p.name, city: `${p.city}, ${p.state}`, rooms: p.rooms, synthetic: presetId !== null };
+});
+export const selectHotelLabel = (s: TwinState) => labelOf(s.hotel, s.hotelPresetId);
 export const selectHotelCost = (s: TwinState) => selectDisplayed(s).result.annual.cost;
 export const selectHotelBaselineCost = (s: TwinState) => s.baseline.annual.cost;
 

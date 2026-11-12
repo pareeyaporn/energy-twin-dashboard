@@ -262,6 +262,10 @@ describe("twin controls and derived selectors", () => {
     expect(selectTypicalDay(s)).toBe(selectTypicalDay(s));
     expect(selectRooms(s)).toBe(selectRooms(s));
     expect(selectFlows(s)).toBe(selectFlows(s));
+    expect(selectCompare(s)).toBe(selectCompare(s));
+    expect(selectHotelLabel(s)).toBe(selectHotelLabel(s));
+    expect(selectEquipment(s)).toBe(selectEquipment(s));
+    expect(selectMeter(s)).toBe(selectMeter(s));
     get().setTime({ hour: 3 });
     expect(selectRooms(get())).not.toBe(selectRooms(s));
   });

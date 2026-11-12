@@ -28,6 +28,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 - `docs/13_HOTEL_ENGINE_SPEC.md` — equations, assumptions, the financial breakdown and the demo figures
 - `docs/08_DATA_TODO.md` — data status and research still to find; `docs/14_RESEARCH_LOG.md` — every sourced value; `docs/15_PRODUCT_DECISIONS.md` — team decisions (not facts)
 - `docs/16_ONBOARDING_TOUR.md` — the onboarding tour: every step, its wording and behavior
+- `docs/17_PORTFOLIO_MAP_DESIGN.md` — the portfolio city map's design: colors, basemap restyle, markers, overlap handling, card, list, toolbar, legend, mobile, fallback
 - `docs/04_3D_SPEC.md` — the 3D hotel twin (what drives each visual); `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md` — prompts and status
 - Removed (in git history): the home-era specs `docs/02`, `docs/03` and `docs/09`, the superseded offices-and-retail plan.
 

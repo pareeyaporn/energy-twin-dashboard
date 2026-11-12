@@ -271,7 +271,7 @@ build P0 and the portfolio optimizer first.
 - 13.1–13.4 five synthetic Chicago properties (`properties.json`), types, labels, documented assumptions
 - 13.5–13.7 portfolio aggregation in the engine (totals, savings potential, investment required, priority score) and its tests
 - 13.13–13.17 store: active property, `openProperty`, save and restore per property, custom plans per property, selectors, tests
-- 13.18–13.21 MapLibre city map with markers, hover cards, color-by metric, legend, offline fallback, accessibility
+- 13.18–13.21 MapLibre city map with markers, hover cards, color-by metric, legend, offline fallback, accessibility (redesigned in 13.39–13.48, docs/17)
 - 13.22–13.28 `/portfolio` page and top-bar link, KPI strip, comparison table, charts, breadcrumb, optimizer panel, tests
 
 P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress tests). P2: 13.33–13.36 (onboarding, venue types, organizations).
@@ -360,6 +360,35 @@ P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress t
       Chicago hotels); every hotel has a brand, region (Downtown, North Side, South Side, Airports) and ownership type (owned, managed,
       franchised, leased); an organization switcher and filters on the Portfolio page (map, table, totals, charts, optimizer and stress tests
       follow the filter); totals by brand, region or ownership; Add my hotel asks for brand and ownership and joins the selected organization
+
+### 13K — City map redesign: a hotel-chain command center (built November 2026; design in docs/17)
+Display only: no calculation, assumption or data changes. Each task is one point of the design brief.
+- [x] 13.39 **P1** [CC] Map styling: dark navy theme, muted roads, quiet labels, a clearly blue Lake Michigan, less noise — *done: Carto
+      dark-matter repainted after load by layer rules (`restyleBasemap`): navy land, blue lake, muted roads, POI, road-name and water labels
+      hidden, own "Lake Michigan" label; the drawn fallback uses the same palette*
+- [x] 13.40 **P1** [CC] Hotel markers: building tiles with a subtle glow, clean borders, hover and selection effects; metric colors and exact
+      coordinates kept — *done: `HotelMarker` (32 px tile, metric-colored border and icon, rank chip, glow, scale on hover and selection, ping
+      ring when selected, a dot marks the user's own hotels)*
+- [x] 13.41 **P1** [CC] Hotel card on click: name, rooms, annual energy cost, energy intensity, savings potential, Explore digital twin — *done:
+      four stat tiles (the selected metric's outlined), rank, occupancy, annual energy, priority, the data label; hover now shows a tooltip*
+- [x] 13.42 **P1** [CC] Property list: collapsible, ranked by the map's metric; hover highlights the marker, click focuses the map — *done:
+      `PropertyList` (rank, color dot, value bar, neighborhood, value); click selects and flies to the hotel*
+- [x] 13.43 **P1** [CC] Metric controls as one segmented toolbar (energy cost, energy intensity, savings potential, investment priority) —
+      *done: icons, short labels on phones*
+- [x] 13.44 **P1** [CC] Legend: metric, value range, units, color gradient — *done: unit in words, lowest / middle / highest values, what a
+      high value means; compact on phones*
+- [x] 13.45 **P1** [CC] Interactions: smooth selection, fly-to, hover tooltips, every overlapping downtown hotel selectable — *done: fly-to
+      padded clear of the card and list, Show all hotels, refit on filter changes, click the map or Escape to close; close markers fan out
+      (`spread.ts`, 34 px rule) with a leader line to the true location*
+- [x] 13.46 **P1** [CC] Visual hierarchy: the map as the focal point, consistent spacing, rounded corners, restrained shadows, subtle cyan —
+      *done: 540 px map with a soft shadow and faint cyan ring, navy glass panels, cyan only for the active and selected states*
+- [x] 13.47 **P1** [CC] Responsive desktop and mobile — *done: list over the map on desktop and below it on smaller screens; card over the map
+      from 640 px and below it on phones; checked at 1440 × 900 and 390 × 844, street map and drawn map*
+- [x] 13.48 **P1** [CC] Preserve functionality: organization switcher, brand / region / ownership filters, portfolio calculations, hotel
+      selection, map metrics, navigation — *done: unchanged store and engine; tests updated (hover → tooltip, click → card) and added (ranking,
+      list hover and selection, Escape, collapse, spreading)*
+- [ ] 13.49 **P2** [CC] Later: marker clustering with counts if a portfolio grows past about 30 hotels (the fan-out suits small groups);
+      a pan-and-zoom gesture on the drawn fallback map (today it fits and flies only); keyboard arrow navigation between markers
 
 ### 13I — Later (P2)
 - [x] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio

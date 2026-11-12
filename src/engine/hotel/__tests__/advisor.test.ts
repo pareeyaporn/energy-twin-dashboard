@@ -222,6 +222,11 @@ describe('fallbackAnswer', () => {
     expect(text).toContain(`$${smart.cost.toLocaleString('en-US')}`);
     expect(text).toMatch(/pays back faster/);
     expect(text).toMatch(/does not fit/); // solar is far over a $50,000 budget
+    // Labels inside a sentence start lower-case; "would cost" reads right for plural labels.
+    // (checked without assuming which one wins, since the placeholder numbers will be recalibrated)
+    expect(text).toMatch(/On these estimates, [a-z]/);
+    expect(text).toMatch(/budget, [a-z][^.]* (fits|does not fit) and [a-z]/);
+    expect(text).not.toMatch(/thermostats and occupancy sensing costs/);
   });
 
   it('uses the plan for the budget in the question', () => {

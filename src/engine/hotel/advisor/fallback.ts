@@ -25,8 +25,15 @@ function limitation(c: AdvisorContext): string[] {
   return out;
 }
 
+/** A label inside a sentence: "Rooftop solar" becomes "rooftop solar"; acronyms such as "LED" or "HVAC" stay as they are. */
+function inSentence(label: string): string {
+  const first = label.split(/[\s-]/)[0] ?? '';
+  return first.length > 1 && first === first.toUpperCase() ? label : label.charAt(0).toLowerCase() + label.slice(1);
+}
+
 function describeUpgrade(u: AdvisorUpgrade): string {
-  return `${u.label} costs about ${usd(u.cost)} and should save about ${usd(u.annualSavings.mid)} a year (${pct(u.annualSavingsPctOfBill)} of the bill), with ${years(u.paybackYears)}`;
+  // "would cost … and save" reads correctly for singular and plural labels ("Smart thermostats and sensors").
+  return `${u.label} would cost about ${usd(u.cost)} and save about ${usd(u.annualSavings.mid)} a year (${pct(u.annualSavingsPctOfBill)} of the bill), with ${years(u.paybackYears)}`;
 }
 
 function describePackage(p: AdvisorPackage): string {
@@ -82,10 +89,10 @@ function compare(c: AdvisorContext, q: ParsedQuestion): string[] | null {
   const pair: [AdvisorUpgrade, AdvisorUpgrade] = (a.paybackYears ?? Infinity) <= (b.paybackYears ?? Infinity) ? [a, b] : [b, a];
   const [first, second] = pair;
   if (first.paybackYears !== null) {
-    s.push(`On these estimates ${first.label} pays back faster (${first.paybackYears} years against ${second.paybackYears ?? 'no payback'}), and its five-year net benefit is ${usd(first.netBenefit)} against ${usd(second.netBenefit)}.`);
+    s.push(`On these estimates, ${inSentence(first.label)} pays back faster (${first.paybackYears} years against ${second.paybackYears ?? 'no payback'}), and its five-year net benefit is ${usd(first.netBenefit)} against ${usd(second.netBenefit)}.`);
   }
   const fit = (u: AdvisorUpgrade) => (u.cost <= c.hotel.budget ? 'fits' : 'does not fit');
-  s.push(`With your ${usd(c.hotel.budget)} budget, ${a.label} ${fit(a)} and ${b.label} ${fit(b)}.`);
+  s.push(`With your ${usd(c.hotel.budget)} budget, ${inSentence(a.label)} ${fit(a)} and ${inSentence(b.label)} ${fit(b)}.`);
   return s;
 }
 
@@ -132,7 +139,7 @@ function zoneCost(c: AdvisorContext, q: ParsedQuestion): string[] | null {
   const rows = c.baseline.byZone.filter((z) => q.zones.some((id) => zoneLabelMatches(id, z.label)));
   const row = rows[0];
   if (!row) return null;
-  const s = [`${row.label} costs about ${usd(row.annualCost)} a year, ${pct(row.sharePct)} of the estimated bill.`];
+  const s = [`The ${inSentence(row.label)} zone costs about ${usd(row.annualCost)} a year, ${pct(row.sharePct)} of the estimated bill.`];
   const helpers = c.upgrades.filter((u) => u.zonesHelped.includes(row.label)).sort((a, b) => b.annualSavings.mid - a.annualSavings.mid).slice(0, 2);
   if (helpers.length) s.push(`Upgrades that lower its cost: ${helpers.map((u) => `${u.label} (${usd(u.annualSavings.mid)} a year for the whole hotel)`).join('; ')}.`);
   return s;

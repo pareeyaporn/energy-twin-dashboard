@@ -465,8 +465,19 @@ export interface UpgradeDef {
   verified: boolean;
 }
 
+export interface LightingInteraction {
+  coolingPerSavedKBtu: number;
+  heatingPerSavedKBtu: { gas: number; resistance: number; heatPump: number };
+}
+
 export interface UpgradesData {
-  interaction: { coolingOffsetPerSavedLightingKBtu: number; heatingPenaltyPerSavedLightingKBtu: number };
+  /** Lighting-HVAC interaction per kBtu of lighting saved, by space (guest rooms or common areas) and heating kind (IL-TRM). */
+  interaction: {
+    guest: LightingInteraction;
+    common: LightingInteraction;
+    heatingKindByHvac: Record<HvacType, 'gas' | 'resistance' | 'heatPump'>;
+    source: string;
+  };
   comfortScore: { minorPenalty: number; flagPenalty: number };
   upgrades: UpgradeDef[];
   source: string;

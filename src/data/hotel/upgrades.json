@@ -1,7 +1,28 @@
 {
   "interaction": {
-    "coolingOffsetPerSavedLightingKBtu": 0.1,
-    "heatingPenaltyPerSavedLightingKBtu": 0.2
+    "guest": {
+      "coolingPerSavedKBtu": 0.17,
+      "heatingPerSavedKBtu": {
+        "gas": 0.586,
+        "resistance": 0.468,
+        "heatPump": 0.204
+      }
+    },
+    "common": {
+      "coolingPerSavedKBtu": 0.09,
+      "heatingPerSavedKBtu": {
+        "gas": 0.498,
+        "resistance": 0.406,
+        "heatPump": 0.176
+      }
+    },
+    "heatingKindByHvac": {
+      "ptac": "resistance",
+      "vrf": "heatPump",
+      "central_plant": "gas",
+      "rtu": "gas"
+    },
+    "source": "Illinois Statewide Technical Reference Manual v14.0 (effective January 1, 2026), Vol. 2, Section 4.5 reference table, Hotel/Motel - Guest and Hotel/Motel - Common (OpenStudio models based on Chicago): cooling saved = WHFe - 1 (1.17 and 1.09) kWh per kWh of lighting saved; heating added = IFTherms 0.020 and 0.017 therms per kWh (0.586 and 0.498 kBtu per kBtu, gas), resistance IFkWh 0.468 and 0.406, heat pump IFkWh 0.204 and 0.176. Applied in site energy to the heating and cooling cells. PTAC is treated as resistance heated (a PTHP would be closer to the heat-pump value)."
   },
   "comfortScore": {
     "minorPenalty": 0.05,
@@ -34,7 +55,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Setback: 5 F mid, the minimum unoccupied setback required by the Illinois Statewide Technical Reference Manual (IL-TRM v5.0, Guest Room Energy Management) and used in the California 2013 CASE report; 3 F and 7 F are PLACEHOLDER bounds. Cost: $260 per room incremental cost (IL-TRM v5.0); range $100 to $500 per room (California 2013 CASE, Guest Room Occupancy Controls). Life: 15 years (IL-TRM). Cross-check: a DOE/PNNL field study (2012) measured 10.8% to 26.5% (average 18.4%) of guest-room HVAC energy saved. Values seen in search excerpts of these documents; to confirm in the primary texts.",
+      "source": "Cost $260 per room and life 15 years: Illinois Statewide TRM v14.0, Vol. 2, measure 4.4.8 Guest Room Energy Management (read in the primary text), which also requires an unoccupied setback of at least 5 F; $100 and $500 bounds from the California 2013 CASE report (search excerpt). Setback 5 F mid; 3 F and 7 F are PLACEHOLDER bounds. Calibration check: IL-TRM 4.4.8 deems 92 to 147 kWh and 3.0 to 6.5 therms saved per ton of guest-room cooling for a Chicago hotel with central hot-water fan coils and gas heat (with or without housekeeping setback); see docs/08 for how the model compares.",
       "verified": false
     },
     {
@@ -92,14 +113,14 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Lighting reduction: low 27% (linear LED replacing fluorescent, PNNL evaluation for GSA), high 60% (incandescent-heavy fixtures); mid 45% is a judgment between them for a mixed hotel stock. Life: 12 years (IL-TRM default for LED fixtures when rated hours are unknown). Cost: PLACEHOLDER $0.40/$0.60/$0.90 per ft2 (no credible source found yet). Values seen in search excerpts; to confirm.",
+      "source": "Lighting reduction: low 27% (linear LED replacing fluorescent, PNNL evaluation for GSA, search excerpt), high 60% (incandescent-heavy fixtures); mid 45% is a judgment between them for a mixed hotel stock. Life: 12 years, from the IL-TRM v14.0 4.5.4 rule (rated life divided by operating hours, capped at 15 years): about 8 to 11 years at common-area hours (4,542 to 6,138 h a year, IL-TRM 4.5 reference table) and the 15-year cap in guest rooms (777 h). Cost: PLACEHOLDER $0.40/$0.60/$0.90 per ft2.",
       "verified": false
     },
     {
       "id": "occupancy_sensors",
       "label": "Occupancy sensors in common areas and hallways",
       "description": "Dims or turns off lighting and trims ventilation in unoccupied public areas.",
-      "lifetimeYears": 12,
+      "lifetimeYears": 10,
       "cost": {
         "perSqftCommon": {
           "low": 0.25,
@@ -111,7 +132,7 @@
         "commonLightingReduction": {
           "low": 0.12,
           "mid": 0.24,
-          "high": 0.45
+          "high": 0.37
         },
         "commonVentilationReduction": {
           "low": 0.02,
@@ -126,7 +147,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Lighting reduction in common areas and hallways: mid 24%, the average occupancy-sensor saving in the LBNL meta-analysis (Williams et al., LBNL-5095E, 2011); high 45% from PNNL stairwell assumptions (10% occupancy, 50% light reduction when vacant); low 12% is a PLACEHOLDER. Ventilation reduction, cost and life: PLACEHOLDER. Values seen in search excerpts; to confirm.",
+      "source": "Lighting reduction in common areas and hallways: mid 24%, the energy savings factor for an interior occupancy sensor in the Illinois Statewide TRM v14.0 (effective January 1, 2026), Vol. 2, measure 4.5.10 (based on Williams et al., LBNL 2012); high 37%, the same with high-end trim; low 12% is a PLACEHOLDER (poorly set or partly bypassed controls). Life: 10 years (IL-TRM 4.5.10, lighting controls other than networked or luminaire-level). Cost: PLACEHOLDER $0.25/$0.40/$0.65 per ft2 of common area; the IL-TRM gives $55 to $125 incremental cost per sensor, but no coverage area to convert it. Ventilation reduction: PLACEHOLDER. Read in the primary TRM text.",
       "verified": false
     },
     {

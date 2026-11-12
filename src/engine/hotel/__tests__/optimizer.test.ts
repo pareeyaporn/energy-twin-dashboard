@@ -63,16 +63,29 @@ describe('optimizeInvestmentPortfolio', () => {
     }
   });
 
-  it('gives each role its true winner when they do not collide', () => {
-    const r = run(100000);
-    const [maxS, fast, bal] = r.packages;
-    const best = (f: (c: (typeof r.candidates)[number]) => number, dir: 1 | -1) => dir * Math.max(...r.candidates.map((c) => dir * f(c)));
-    close(maxS!.evaluation.annualSavings.mid, best((c) => c.annualSavings, 1));
-    close(fast!.evaluation.metrics.paybackYears!, best((c) => c.paybackYears ?? Infinity, -1));
-    close(bal!.balancedScore, best((c) => c.balancedScore, 1));
-    expect(maxS!.note).toBeUndefined();
-    expect(fast!.note).toBeUndefined();
-    expect(bal!.note).toBeUndefined();
+  it('gives each role its true winner, or the runner-up with a note when the winner already took another role', () => {
+    for (const budget of [30000, 50000, 100000, 250000]) {
+      const r = run(budget);
+      const [maxS, fast, bal] = r.packages;
+      const best = (f: (c: (typeof r.candidates)[number]) => number, dir: 1 | -1) => dir * Math.max(...r.candidates.map((c) => dir * f(c)));
+      // Maximum savings is decided first, so it is always the true winner.
+      close(maxS!.evaluation.annualSavings.mid, best((c) => c.annualSavings, 1));
+      expect(maxS!.note).toBeUndefined();
+      const taken = new Set([maxS!.evaluation.id]);
+      for (const [p, f, dir] of [
+        [fast!, (c: (typeof r.candidates)[number]) => c.paybackYears ?? Infinity, -1],
+        [bal!, (c: (typeof r.candidates)[number]) => c.balancedScore, 1],
+      ] as const) {
+        const value = p === fast ? (p.evaluation.metrics.paybackYears ?? Infinity) : p.balancedScore;
+        if (p.note === undefined) close(value, best(f, dir));
+        else {
+          expect(p.note).toMatch(/runner-up/);
+          const rest = r.candidates.filter((c) => !taken.has(c.id));
+          close(value, dir * Math.max(...rest.map((c) => dir * f(c))));
+        }
+        taken.add(p.evaluation.id);
+      }
+    }
   });
 
   it('shows the runner-up, with a note, when one package would win two roles', () => {

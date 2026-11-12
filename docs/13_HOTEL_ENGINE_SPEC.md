@@ -179,28 +179,27 @@ so the cards, the optimizer and the advisor cannot disagree. Tests in `__tests__
 
 **`evaluatePackage`** returns the cost range, annual savings (low, mid, high), new annual cost, carbon avoided, metrics, comfort, sizing and per-item marginal savings (which sum to the package savings and depend on the fixed order).
 
-### Demo hotel, single upgrades (mid; research pass 1, no incentives applied)
+### Demo hotel, single upgrades (mid; research pass 2, no incentives applied)
 
-Baseline after research pass 1 (CBECS 2018 lodging end-use split and fuel mix): about $131,700 a year (electricity $109,900, gas $21,700),
-782,000 kWh, 23,400 therms, 305 t CO2. Price growth: EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar savings are net of $17.63/kW-yr O&M.
+Baseline: about $131,700 a year, 782,000 kWh, 23,400 therms, 449 t CO2 (eGRID RFCW), 91.1 kBtu/ft² site (CBECS 2018 lodging: 85.7).
+Price growth EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar: PVWatts Chicago, net of $17.63/kW-yr O&M. Lighting interaction: IL-TRM hotel factors.
 
 | Upgrade | Net cost | kWh / yr | therms / yr | $ / yr | Payback | 5-year net | 10-year net | t CO2 / yr |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Occupancy sensors | $6,600 | 17,544 | −101 | $2,371 | 2.8 y | $5,750 | $19,409 | 3.5 |
-| LED lighting | $33,000 | 60,967 | −378 | $8,214 | 4.0 y | $9,778 | $57,074 | 12.1 |
-| Water heating and low-flow | $22,000 | 8,897 | 1,720 | $2,848 | 7.7 y | −$6,808 | $11,030 | 11.2 |
-| Energy management | $26,000 | 18,680 | 539 | $3,126 | 8.3 y | −$9,591 | $8,936 | 7.2 |
-| Rooftop solar (55 kW, 66,000 kWh, all used on site) | $154,000 | 66,000 | 0 | $8,303 | 18.5 y | −$111,125 | −$64,687 | 15.3 |
-| Insulation | $38,500 | 8,186 | 733 | $1,831 | 21.0 y | −$28,807 | −$17,630 | 5.8 |
-| Smart room controls | $26,000 | 4,903 | 209 | $883 | 29.4 y | −$21,353 | −$16,075 | 2.2 |
-| HVAC equipment | $110,000 | 15,275 | 1,187 | $3,249 | 33.9 y | −$92,822 | −$73,079 | 9.8 |
+| Occupancy sensors | $6,600 | 17,396 | −251 | $2,211 | 3.0 y | $4,884 | $17,497 | 5.9 |
+| LED lighting | $33,000 | 62,186 | −1,008 | $7,800 | 4.2 y | $7,495 | $51,903 | 20.5 |
+| Water heating and low-flow | $22,000 | 8,897 | 1,720 | $2,848 | 7.7 y | −$6,808 | $11,030 | 12.8 |
+| Energy management | $26,000 | 18,680 | 539 | $3,126 | 8.3 y | −$9,591 | $8,936 | 10.6 |
+| Rooftop solar (55 kW, 68,211 kWh, all used on site) | $154,000 | 68,211 | 0 | $8,614 | 17.9 y | −$109,521 | −$61,346 | 28.3 |
+| Insulation | $38,500 | 8,186 | 733 | $1,831 | 21.0 y | −$28,807 | −$17,630 | 7.3 |
+| Smart room controls | $26,000 | 4,903 | 209 | $883 | 29.4 y | −$21,353 | −$16,075 | 3.1 |
+| HVAC equipment | $110,000 | 15,275 | 1,187 | $3,249 | 33.9 y | −$92,822 | −$73,079 | 12.6 |
 
-**Calibration flag (smart room controls).** The model saves about 3% (1.8 to 4.3%) of the HVAC energy attributable to guest rooms; a DOE/PNNL field
-study measured 10.8 to 26.5% (average 18.4%), in warmer climates with room units. The setback model (presence, sensitivity, recovery) under-predicts
-against that evidence and is the next calibration item; confirm with the IL-TRM per-room deemed savings.
+At $50,000 the optimizer picks LED lighting plus occupancy sensors ($39,600, $9,098 a year, 4.4 years).
 
-LED lighting plus occupancy sensors costs $39,600, saves $12,159 a year (payback 3.3 years, five-year net benefit about $23,700). The full package costs $396,000 and saves $33,700.
-All 256 combinations evaluate in about 0.25 seconds.
+**Calibration flag (smart room controls).** IL-TRM v14.0 4.4.8 (Chicago hotel, central hot-water fan coils, gas heat) implies about 6,900–14,700 kWh and
+225–650 therms a year for 100 rooms at 0.75–1.0 ton per room, about $1,200–2,700; the model gives 4,903 kWh and 209 therms ($883). The model does not
+include guest-room fan savings when rooms are empty. See `docs/08`, item A1.
 
 ### Limits of this version
 - **Smart room controls pay back slowly (21 years)** because their modeled savings are small (see section 7) and setback recovery is counted. That is a calibration question, not a product conclusion.

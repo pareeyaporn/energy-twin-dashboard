@@ -156,8 +156,8 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [ ] 7.4 Hot water per occupied room, lighting power and hours, kitchen share (ASHRAE or ENERGY STAR guidance)
 - [ ] 7.5 HVAC efficiency by type (PTAC, VRF, central plant, RTU)
 - [ ] 7.6 Upgrade savings and costs for all eight upgrades (NREL ComStock, ENERGY STAR hotel guidance, DOE Better Buildings case studies). **Pass 1 done** from search excerpts (see `docs/08`); most costs still placeholders; confirm in the IL-TRM once `icc.illinois.gov` is allowed
-- [ ] 7.7 Rooftop solar cost per kW and production (PVWatts, now at `developer.nlr.gov`). **Partly:** O&M and degradation sourced; $/W, output and export credit still to do
-- [ ] 7.8 Grid emission factor for the demo region (EPA eGRID). **Partly:** EIA Illinois generation rate (510 lbs CO2/MWh) in use; eGRID subregion still to check
+- [ ] 7.7 Rooftop solar cost per kW and production. **Partly:** output from PVWatts (Chicago TMY), O&M and degradation sourced; $/W (LBNL file, manual download) and export credit $ still to do
+- [x] 7.8 Grid emission factor for the demo region: EPA eGRID2023 RFCW (0.4155 kg CO2e/kWh); gas from the EPA Emission Factors Hub 2025
 - [ ] 7.9 Seasonal occupancy pattern (a synthetic curve is acceptable, but cite the basis)
 - [ ] 7.10 Comfort guidance for setpoints (ASHRAE 55)
 - [ ] 7.11 Compare the demo hotel against an ENERGY STAR Portfolio Manager benchmark and note the result for Q&A
@@ -174,7 +174,7 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [x] 7b.3 Incentives listed per upgrade with sources; none applied until confirmed; user-entered amounts supported
 - [x] 7b.4 [LV] LV11 and LV12: the breakdown on every upgrade card, the package cards and the comparison tables; packages first, comparison collapsed below
 - [ ] 7b.5 Calibrate smart room controls: the model saves about 3% of guest-room HVAC vs 10.8–26.5% measured (DOE/PNNL); check against the IL-TRM per-room figures
-- [ ] 7b.6 Research pass 2 once the hosts are allowed (`docs/08`): PVWatts for Chicago, solar $/W (LBNL file), IL-TRM measures, ENERGY STAR benchmark, eGRID
+- [x] 7b.6 Research pass 2: PVWatts, IL-TRM v14 (GREM, lighting controls, lighting-HVAC interaction, showerheads), eGRID, EPA gas factor, CBECS benchmark. Remaining items are in `docs/08` (A1–A5, B1–B7)
 - [ ] 7b.7 Small UI fixes: one "some inputs are defaults" note instead of a tag on every number; compact number row on mobile; twin split-view labels (CC)
 
 ## Phase 8 — Demo hardening (all)

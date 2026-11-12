@@ -1,85 +1,88 @@
-# 08 — Hotel data research to-do
+# 08 — Hotel data: status and research to-do
 
-What must be looked up to replace the placeholders in `src/data/hotel/`. For every value you replace, set `"verified": true` and rewrite the `source`
-field to name the exact table, page or study. If a value is a modeling choice and not a fact, say so in `source`. The calibration pass that uses this
-research is task 7.13 in [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md); the model is described in [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md).
+What is sourced, what is still a placeholder, and what to look up next, for the data in `src/data/hotel/`. Rules:
+- Every value carries a `source` that names the exact table, page or study. Set `"verified": true` only when the value was read in the primary
+  source (not a summary). Say "PLACEHOLDER" for estimates and say when a value is a modeling choice.
+- **Never invent a number** (incentives especially). A missing value stays a labeled placeholder.
+- **Change the demo story, not the numbers.** Calibration follows evidence, never the script.
 
-> The home-era data list that used to be here is obsolete (the home data files in `src/data/` remain only for the legacy home engine).
+The model is described in [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md); tasks are in [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md) (7.x, 7b.x).
+The home-era data files in `src/data/` belong to the legacy home engine and are not used by the hotel app.
 
-## Where things stand
+## Status at a glance (November 2026)
 
-| File | Status |
-| --- | --- |
-| `rates.json` | **Researched** (EIA commercial prices for Illinois and the U.S.). Still to confirm the demand-charge caveat below. Solar $/W still a placeholder; export credit basis found (220 ILCS 5/16-107.5(n), avoided cost of supply), no $ value |
-| `defaults.json` | **End-use split and fuel mix researched** (EIA CBECS 2018 Tables E1 and E5, lodging, checked in the primary file). **Price growth researched** (EIA AEO2026, 2.12% electricity, 4.09% gas). Other values placeholders |
-| `emissions.json` | **Electricity researched** (EIA State Electricity Profiles 2024: Illinois 510 lbs CO2/MWh, U.S. 785); generation-based, so the eGRID subregion is still to check. Gas factor recalled from the EPA hub, not re-checked |
-| `incentives.json` | Programs listed, **no amounts**: nothing is applied until confirmed |
-| `weather.json` | Chicago monthly temperatures **from memory**, unverified |
-| `defaults.json`, `shapes.json`, `equipment.json` | **Placeholders**, not researched |
-| `upgrades.json` | **Partly researched (pass 1, from search excerpts of named sources, to confirm in the primary texts):** smart controls setback, cost and life (IL-TRM, CA CASE); LED and occupancy-sensor savings ranges (PNNL, LBNL); EMS savings check (Crowe 2020); condensing boiler heating saving; solar O&M (NLR ATB 2025) and degradation (Jordan 2022). Costs for LED, sensors, EMS, HVAC, water heating and insulation are still placeholders |
-| `presets.json` | Synthetic demo hotel; sanity-check only |
+| Data | State | Source |
+| --- | --- | --- |
+| Electricity and gas prices (`rates.json`) | **Sourced, primary** | EIA Electric Power Monthly Table 5.6.B (IL, YTD Aug 2026); EIA natural gas prices (IL 2025) |
+| Price growth (`defaults.json` → `finance`) | **Sourced, primary** | EIA AEO2026 Tables 8 and 3: electricity 2.12%, gas 4.09% a year (nominal, 2025–2035) |
+| End-use split and fuel mix (`defaults.json`) | **Sourced, primary** (national lodging) | EIA CBECS 2018 Tables E1 and E5 |
+| Grid and gas emission factors (`emissions.json`) | **Sourced, primary** | EPA eGRID2023 (RFCW 0.4155, U.S. 0.3497 kg CO2e/kWh); EPA GHG Emission Factors Hub 2025 (5.311 kg/therm) |
+| Solar output (`weather.json` → `solar`) | **Sourced, primary** | NLR PVWatts v8.5, Chicago TMY: 1,194 / 1,240 / 1,307 kWh per kW (5°/10°/20° tilt) and the monthly split |
+| Lighting–HVAC interaction (`upgrades.json` → `interaction`) | **Sourced, primary** | IL-TRM v14.0 Vol. 2, section 4.5 table, Hotel/Motel guest and common |
+| Smart room controls cost and life | **Sourced, primary** | IL-TRM v14.0 4.4.8: $260 per room, 15 years |
+| Occupancy-sensor savings and life | **Sourced, primary** | IL-TRM v14.0 4.5.10: 24% (37% with high-end trim), 10 years |
+| Solar O&M and degradation | Sourced, from search excerpts | NLR ATB 2025 ($17.63/kW-yr); Jordan et al. 2022 (0.5%/yr) |
+| LED savings range and life; EMS, insulation, condensing-boiler savings | Partly sourced (excerpts, plus TRM rules) | PNNL/GSA, Crowe 2020, NREL ComStock, IL-TRM 4.5.4 |
+| Export credit for solar | Basis known, **no $ value** (so $0) | 220 ILCS 5/16-107.5(n): avoided cost of supply |
+| Incentives (`incentives.json`) | Programs listed, **no amounts applied** | — |
+| **Installed costs** for LED, sensors, EMS, HVAC, water heating, insulation; **solar $/W** | **Placeholders** | — |
+| Weather (`weather.json` temperatures) | **Placeholder** (from memory) | NOAA normals not reachable yet |
+| Baseline model internals (age factor, zone allocation, driver weights, shapes, equipment, occupancy curve) | **Placeholders** | — |
 
-Priority **A** = changes the demo story or the optimizer's ranking. Do these first.
+**Benchmark check (done):** the demo hotel models at 91.1 kBtu/ft² site energy, 53% electric; CBECS 2018 Table C1 lodging averages 85.7 kBtu/ft²,
+57% electric (national). Plausible for Chicago.
 
-## Network domains to allow (Environment, Network access)
-**Exact host names matter** (allowing `irs.gov` does not allow `www.irs.gov`). NREL is now the National Laboratory of the Rockies: PVWatts moved to
-**`developer.nlr.gov`** (the old `developer.nrel.gov` stopped resolving on May 29, 2026), with `pvwatts.nlr.gov`, `atb.nlr.gov` and `docs.nlr.gov`.
-The Illinois TRM needs **`icc.illinois.gov`** and **`ilsag.info`**. Use the `www.` form for `www.irs.gov`, `www.comed.com`, `www.dsireusa.org`,
-`www.energystar.gov`, `www.energy.gov`, `www.epa.gov`. LBNL (`emp.lbl.gov`) blocks automated downloads, so download the Tracking the Sun data by hand.
-Earlier list: `epa.gov`, `noaa.gov`, `nrel.gov` and `developer.nrel.gov` (PVWatts API), `energystar.gov`, `emp.lbl.gov` (Tracking the Sun solar prices), `dsireusa.org` and `irs.gov`
-(incentives), `comed.com`, `peoplesgasdelivery.com` and `illinoisshines.com` (utility rebates, export credit, REC payments). EIA is already allowed; `energy.gov` and `openei.org`
-help for case studies and tariffs.
+## To do — priority A (changes results or the recommendation)
 
-## 1. Upgrades (`upgrades.json`) — priority A
-For each upgrade find **low, mid and high** values. Sources: NREL ComStock, DOE Better Buildings hotel case studies, ENERGY STAR hotel guidance, utility program filings, vendor quotes.
+- [ ] **A1. Calibrate smart room controls (decision needed, task 7b.5).** IL-TRM v14.0 4.4.8, Chicago hotel with central hot-water fan coils and gas
+  heat, deems **92–147 kWh and 3.0–6.5 therms per ton** of guest-room cooling per year (with / without housekeeping setback). At 0.75–1.0 ton per room
+  (assumption; the TRM gives no default) that is 6,900–14,700 kWh and 225–650 therms for 100 rooms, about **$1,200–2,700 a year**. The model gives
+  **4,903 kWh and 209 therms ($883)**. The electric gap is the larger one: the TRM measure also controls the room's fan, which the model does not.
+  Options: (a) add guest-room fan savings when a room is empty, sized so the model lands inside the TRM range; (b) keep the model and show the TRM
+  range beside it. Either way the change goes into the shared simulation so the Scenario switch and the upgrade card agree.
+- [ ] **A2. Installed costs** (per ft², per room or per unit) for LED retrofit, occupancy sensors (the TRM gives $55–125 per sensor; needs a coverage
+  area per sensor), energy management controls, HVAC equipment, water heating plus low-flow fixtures (TRM: about $12 per showerhead) and roof
+  insulation. Sources: IL-TRM measure costs where they exist, ComEd and Peoples Gas program data, DOE/NREL cost studies, hotel case studies.
+- [ ] **A3. Solar installed $/W by size** for small commercial (≤100 kW) systems in Illinois: LBNL *Tracking the Sun* / *Distributed Solar and
+  Storage* data file. `emp.lbl.gov` blocks automated downloads, so **download it by hand and upload it** to the session.
+- [ ] **A4. Incentive amounts** (only with a source): ComEd business rebates for LED, controls and HVAC (`www.comed.com` is reachable); Peoples Gas
+  rebates; Illinois Shines REC payments; federal Section 48E status for new solar (needs `www.irs.gov`). Enter as `value`, `applied: true`,
+  `verified: true` in `incentives.json`.
+- [ ] **A5. Solar export credit $/kWh** for a ComEd non-residential customer (supply-only credit): ComEd tariff or Illinois Commerce Commission filing.
+  Low impact for the demo hotel, which exports nothing.
 
-- [ ] **A. Smart guest-room thermostats and occupancy sensing:** savings as a share of guest-room HVAC energy (setback degrees, ramp and recovery); installed cost per room and fixed cost; lifetime. *Currently: setback 3/5/7 °F, $250 per room + $1,500.*
-- [ ] **A. LED lighting retrofit:** lighting energy reduction by hotel type (many hotels are partly LED already); cost per ft² or per fixture; lifetime. *Currently: 35/45/55%, $0.60 per ft².*
-- [ ] **A. Occupancy sensors in common areas and hallways:** lighting and ventilation reduction; cost per ft² or per sensor. *Currently: 12/20/28% lighting, 2/5/8% ventilation, $0.40 per ft² of common area.*
-- [ ] **A. Rooftop solar output (`weather.json` → `climates.chicago.solar`):** NREL PVWatts for Chicago (fixed roof mount; record tilt, azimuth and losses): kWh per kW (DC) per year and the 12 monthly values. *Currently: 1,100/1,200/1,300 kWh per kW and an illustrative monthly split.*
-- [ ] **A. Rooftop solar cost (`rates.json` → `solar.installedCostPerW`):** commercial installed $ per W (DC) for Illinois by size (for example up to 100 kW, 100–500 kW, above 500 kW) from LBNL Tracking the Sun or NREL cost benchmarks. *Currently: one tier, $2.20/$2.80/$3.50 per W.*
-- [ ] **A. Solar export credit (`rates.json` → `solar.exportCreditPerKWh`):** what ComEd credits a commercial customer per exported kWh under current Illinois net metering. *Currently: not researched, so $0 (the demo hotel exports almost nothing).*
-- [ ] Solar sizing: usable roof share and ft² per kW for a flat commercial roof. *Currently: 50% and 100 ft² per kW (about 10 W per ft²).* Panel degradation: confirm 0.5% a year (Jordan and Kurtz 2013).
-- [ ] Solar operation and maintenance ($ per kW per year) and inverter replacement, if we decide to include them. *Currently: not included, and said so on screen.*
-- [ ] Energy management controls: HVAC savings and cost. *Currently: 4/7/10%, $15,000 + $0.20 per ft².*
-- [ ] High-efficiency HVAC equipment: heating and cooling reduction and cost per ft² or ton (and whether a heat-pump option should be added). *Currently: heating 8/12/16%, cooling 10/15/22%, $2.00 per ft².*
-- [ ] Water heating and low-flow fixtures: energy reduction and cost per room. *Currently: 15/22/30%, $220 per room.*
-- [ ] Insulation (roof and envelope): share of weather load removed and cost per ft² of roof. *Currently: 6/10/14%, $3.50 per ft².*
-- [ ] Equipment lifetimes for all eight (used in the residual value).
-- [ ] **A. Lighting-to-HVAC interaction:** cooling saved and heating added per unit of lighting energy saved. *Currently: 0.10 and 0.20 kBtu per kBtu.*
-- [ ] **A. Incentives (`incentives.json`):** for each listed program, the amount rule (percent of cost, $ per kW, $ per room or fixed), eligibility and source; then set `value`, `applied: true`, `verified: true`. Programs: federal Section 48E credit for solar (deadlines changed by Public Law 119-21; confirm current IRS guidance), Illinois Shines REC payments, ComEd business efficiency incentives, Peoples Gas business rebates. **Do not enter an amount without a source.**
-- [ ] Financial assumptions (`finance.ts`): energy price growth (EIA Annual Energy Outlook commercial price path) and the discount rate. *Currently: 2% and 3%, placeholders.*
+## To do — priority B (improves realism)
 
-## 2. Baseline energy model (`defaults.json`) — priority A
-- [ ] **A. Energy use intensity** (kBtu per ft² per year) for hotels in a cold climate; compare with ENERGY STAR Portfolio Manager's hotel median and EIA CBECS lodging. *Currently: 92.*
-- [ ] **A. End-use shares of site energy** for lodging (heating, cooling, ventilation, lighting, hot water, kitchen, equipment, other): CBECS lodging end uses. *Currently: 22 / 9 / 7 / 11 / 19 / 7 / 15 / 10%.*
-- [ ] Fuel mix: share of hot water and cooking on gas versus electricity; heating fuel by HVAC type (CBECS).
-- [ ] Age factor by year built (CBECS or ENERGY STAR). *Currently: 1.10 before 1980, 1.00 to 1999, 0.92 after.*
-- [ ] Zone allocation of each end use (guest rooms, lobby, kitchen, hallways, central plant, hot water) and the central-plant share by HVAC type: DOE or ComStock hotel prototype models. *Currently fixed guesses.*
-- [ ] Driver weights (base, occupancy, weather, schedule) for each end use: calibrate so a month-by-month profile looks like a real hotel's (ComStock hotel hourly profiles, utility interval data if available). *Currently rule-of-thumb weights.*
-- [ ] **A. Smart-room-control inputs:** per-degree heating and cooling sensitivity to setpoint, and the share of time a booked room has a guest present. *Currently 3% and 4% per °F; 14 hours per day.*
-- [ ] **A. Setback recovery:** thermal mass of a guest room per °F, number of times a booked room is set back and recovered per day, and whether published per-degree setback savings are already net of recovery. *Currently 0.15 kBtu per room per °F and 2 returns per day; at these values recovery takes about a quarter off the smart-controls saving ($407 of $1,645 a year).*
-- [ ] Setpoint references and comfort limits (ASHRAE 55): reference 68/74 °F, occupied limits 67 to 77 °F, vacant limits 55 and 85 °F, common-area hours floor. *Currently placeholders.*
-- [ ] Benchmark occupancy behind the EUI, default occupancy, seasonal occupancy curve for Chicago hotels (STR, Choose Chicago or similar). *Currently 62%, 65%, a synthetic curve.*
-- [ ] Hot water per occupied room per day (ASHRAE or ENERGY STAR). *Currently 20 gallons.*
-- [ ] Floor area per room and rooms per floor typical of a 100-room hotel. *Currently 550 ft² per room.*
+- [ ] **B1. Chicago weather normals** (NOAA 1991–2020, O'Hare or Midway) to replace the temperatures written from memory; needs `www.ncei.noaa.gov`.
+  Cross-check found: the PVWatts typical year for downtown is 4–8 °F cooler in May to July than the placeholder (lakefront and "typical year"
+  effects), so confirm with NOAA before changing.
+- [ ] B2. HVAC equipment: cooling reduction (chiller or RTU replacement) and lifetime; condensing boiler range (IL-TRM boiler measures, NREL ComStock).
+- [ ] B3. Water heating: share of a hotel's hot water used by showers and sinks (to turn the TRM showerhead and aerator flows into a % reduction),
+  heater efficiency gain, and gallons per occupied room per day (ASHRAE RP-1544 or the IL-TRM hot-water section).
+- [ ] B4. Lifetimes still placeholders: energy management controls, insulation, water heating.
+- [ ] B5. Climate-specific end-use split (CBECS has no lodging-by-climate table; NREL ComStock hotel results by climate zone).
+- [ ] B6. Baseline internals: age factor by year built, zone allocation, central-plant share by HVAC type, driver weights, hourly shapes
+  (ComStock hotel profiles), equipment sizing, Chicago seasonal occupancy (STR or Choose Chicago), floor area per room.
+- [ ] B7. Comfort limits and setpoint references (ASHRAE 55).
 
-## 3. Weather, rates, carbon
-- [ ] `weather.json`: Chicago monthly mean temperatures (NOAA 1991 to 2020 normals, O'Hare) and the heating and cooling balance point. Optional: more cities.
-- [ ] `rates.json`: **confirm what the EIA "commercial" average includes.** It is an all-in price that already spreads fixed and demand charges, which is how the engine uses it. For ComEd, check whether a separate demand charge or time-of-use rate matters for a hotel this size (the demo says demand charges are out of scope).
-- [ ] `emissions.json`: EPA eGRID emission rate for the Chicago grid subregion (RFCW) in kg CO2e per kWh; re-check the 5.31 kg CO2 per therm for natural gas on the EPA emission factors hub.
+## Decisions (not facts; record the reasoning)
 
-## 4. Twin and display data
-- [ ] `shapes.json`: hourly load shape for each end use and the guest-presence curve (ComStock or DOE hotel hourly profiles, or published occupancy studies). *Currently illustrative.*
-- [ ] `equipment.json`: rated loads and sizing rules (PTAC or fan-coil kW, boiler and chiller sizing per ft², elevator and laundry loads, water-heater size per room). *Currently rules of thumb, shown to users as estimates.*
+- [ ] Discount rate for NPV (3% placeholder; NPV is not shown on the cards).
+- [ ] Optimizer rules: minimum comfort score 0.70, minimum savings 1% of the bill, balanced weights 0.5 / 0.3 / 0.2.
+- [ ] PTAC heating treated as electric resistance (a PTHP hotel would use the heat-pump interaction factor).
+- [ ] Whether to add a smaller solar array, a heat-pump option and a heat-pump water heater as alternatives.
+- [ ] Illinois emission factor assumes a ComEd (northern Illinois, RFCW) building; Ameren territory would use SRMW.
 
-## 5. Decisions the team makes (not facts; record the reasoning)
-- [ ] Financial defaults: price growth (2%), discount rate (3%), horizon (5 years). EIA's Annual Energy Outlook can inform the price growth.
-- [ ] Optimizer rules: minimum comfort score (0.70), minimum savings share (1% of the bill), balanced-score weights (0.5 financial, 0.3 carbon, 0.2 comfort).
-- [ ] Whether to add a smaller solar array and a heat-pump option so there are real alternatives to compare.
+## Validation
 
-## 6. Validation
-- [ ] Compare the demo hotel's total energy and cost with an ENERGY STAR Portfolio Manager benchmark and note the result for Q&A.
-- [ ] Compare each package's savings, as a share of the bill, with published hotel case studies (DOE Better Buildings, utilities).
-- [ ] Re-run the optimizer after calibration and check that the demo story (task 8.1) is still honest. If the numbers say thermostats do not beat solar or LEDs, change the demo question, not the numbers.
-- [ ] Check the preset hotel's size, rooms and bills against a real 100-room property.
+- [x] Demo hotel energy intensity against CBECS 2018 lodging (see above).
+- [ ] Against the ENERGY STAR national median for hotels (needs `portfoliomanager.energystar.gov`).
+- [ ] Package savings as a share of the bill against published hotel case studies (DOE Better Buildings, utilities).
+- [ ] After A1–A3, re-run the optimizer and write the demo question from what the results say (task 8.1).
+
+## Network hosts
+
+Reachable now: `www.eia.gov`, `developer.nlr.gov` (PVWatts), `icc.illinois.gov` (IL-TRM), `www.comed.com`, `www.energystar.gov`, `www.epa.gov`.
+Still needed (exact names; `irs.gov` does not cover `www.irs.gov`): `www.ncei.noaa.gov`, `portfoliomanager.energystar.gov`, `www.irs.gov`,
+`www.dsireusa.org`, `atb.nlr.gov` and `docs.nlr.gov` (to confirm O&M and degradation in the primary texts). LBNL: manual download.
+NREL is now the National Laboratory of the Rockies (NLR); `developer.nrel.gov` stopped resolving on May 29, 2026.

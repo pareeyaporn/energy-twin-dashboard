@@ -1,0 +1,24 @@
+[
+  {
+    "id": "demo-chicago-100",
+    "label": "Lakeshore Inn (synthetic demo hotel)",
+    "synthetic": true,
+    "input": {
+      "name": "Lakeshore Inn",
+      "city": "Chicago",
+      "state": "IL",
+      "country": "US",
+      "rooms": 100,
+      "floorAreaSqft": 55000,
+      "floors": 5,
+      "yearBuilt": 1998,
+      "operatingHours": 24,
+      "hvacType": "central_plant",
+      "occupancy": 0.6,
+      "occupiedHoursPerRoom": 14,
+      "budget": 50000,
+      "horizonYears": 5,
+      "objective": "balanced"
+    }
+  }
+]

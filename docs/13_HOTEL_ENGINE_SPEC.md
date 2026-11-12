@@ -204,14 +204,19 @@ At $50,000 the optimizer picks LED lighting plus occupancy sensors ($38,940 gros
 
 **Smart room controls calibration.** IL-TRM v14.0 4.4.8 (Chicago hotel, central hot-water fan coils, gas heat) implies about 6,900–14,700 kWh and
 225–650 therms a year for 100 rooms at 0.75–1.0 ton per room. The setback alone gave 4,903 kWh; with smart controls the simulation now also cuts
-guest-room fan energy 17% while rooms are empty (`defaults.smartControlFan`), giving about 10,800 kWh and 209 therms. **Insulation** scales its
+guest-room fan energy 17% while rooms are empty (`defaults.smartControlFan`). Re-checked in November 2026 (after research pass 10): the mid
+case saves 10,179 kWh and 280 therms a year, **136 kWh and 3.7 therms per ton at 0.75 ton per room, inside the IL-TRM ranges (92–147 kWh,
+3.0–6.5 therms)**; low (95 kWh, 2.2 therms) and high (177 kWh, 5.2 therms) sit around them. Field studies report more (18–25% of guest-room
+HVAC, against about 6% of guest-room HVAC cost here) for reasons that do not apply to this hotel: see docs/14 pass 10. Known artifact: guest-room
+heating alone shows a small increase (about $39 a year) because the recovery charge exceeds that cell's setback saving; the total is still in
+the IL-TRM range. **Insulation** scales its
 weather-load reduction by 5 / floors above 5 floors. **Second preset:** `demo-chicago-300` (300 rooms, 20 floors, defaults for floor area and
 occupancy, then 69.2% occupancy from STR via Choose Chicago); at $150,000 the optimizer's maximum-savings package is roof insulation, LED lighting and occupancy sensors ($132,578 gross,
 $88,309 net after $44,269 of ComEd incentives, $30,323 a year, 2.9 years; baseline about $374,700 a year). Energy management dropped out when
 its cost was sourced (research pass 10: NREL, about $2.53 per ft² instead of a $0.47 per ft² placeholder). Log: `docs/14`.
 
 ### Limits of this version
-- **Smart room controls pay back slowly (21 years)** because their modeled savings are small (see section 7) and setback recovery is counted. That is a calibration question, not a product conclusion.
+- **Smart room controls pay back slowly (about 12 years: $20,375 net after ComEd's incentive, $1,690 a year)**. Their savings match the Illinois TRM's deemed savings for a Chicago hotel (section 7), so this reflects the local, regulator-reviewed figure; field studies elsewhere report more (docs/14 pass 10).
 - **Solar costs more than a $50,000 budget** at the modeled size, so it only appears with a larger budget. A smaller array option is not modeled.
 - **No HVAC alternatives** (for example a heat pump) and no heat-pump water heater, so there are no mutually exclusive options yet.
 - All savings, costs, lifetimes and interaction factors are placeholders until Phase 7.

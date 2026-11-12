@@ -94,7 +94,7 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
 - [x] Demo hotel energy intensity against CBECS 2018 lodging (see above).
 - [x] Against the ENERGY STAR national median for hotels (63.0 kBtu/ft² site): the demo hotel is 45% above it (see the benchmark note).
       Now computed by `benchmarkComparison` and shown in the app (LV15) as context; the model is not tuned toward it.
-- [x] Package savings as a share of the bill against published hotel case studies (DOE Better Buildings, utilities). — *Pass 10 (November 2026): six published hotel cases compared in docs/14 (pass 10): whole-building and lighting results agree; guest-room controls read low in the model (reported, not tuned).*
+- [x] Package savings as a share of the bill against published hotel case studies (DOE Better Buildings, utilities). — *Pass 10 (November 2026): six published hotel cases compared in docs/14 (pass 10): whole-building and lighting results agree; guest-room controls sit inside the IL-TRM range and below out-of-state field studies (reported, not tuned).*
 - [x] After A1–A3, re-run the optimizer and write the demo question from what the results say — *done (research pass 9): the $50,000 pick stays LED + occupancy sensors; the suggested question is in docs/07. Note for task 8.2: the offline template answer to it does not mention solar.*
 
 ## Network hosts

@@ -206,4 +206,4 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
   controls. The savings (4–10% of HVAC) are unchanged. The choice moves the 300-room recommendation from LED + energy management to insulation +
   LED + sensors; the demo script follows (docs/07).
 - **LED keeps an assumed mix** (about 14% of fixtures replaced, the rest relamped) between the two sourced EIA bounds, rather than either extreme.
-- **Validation findings are reported, not tuned**: the model's guest-room controls savings read lower than field studies (docs/14 pass 10).
+- **Validation findings are reported, not tuned**: the model's guest-room controls savings sit inside the Illinois TRM range and below field studies from other climates (docs/14 pass 10).

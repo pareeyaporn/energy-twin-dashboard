@@ -130,3 +130,10 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
 - **Watts and tons are estimated** from the hotel's modeled equipment (placeholders) and a 0.75 ton-per-room assumption, so incentive amounts are
   estimates, like the savings. Pre-approval and eligibility are the hotel's to confirm.
 - **The budget is still compared with the gross cost** (incentives arrive after installation); payback, net benefit and NPV use the net investment.
+
+## 14. ComStock climate data (November 2026)
+
+- **Chicago uses ComStock's zone-5A hotel stock** for its end-use split, energy intensity and hourly shapes; other climates keep CBECS national
+  values. ComStock is a calibrated simulation of the building stock, not a survey; CBECS is a survey but national.
+- **The age factor is a stock average by vintage** (it also reflects which HVAC systems hotels of each era have), not an effect of age alone.
+- **Guest presence by hour stays synthetic**, and the unsourced internals (zone allocation, plant share, driver weights) are calibration choices.

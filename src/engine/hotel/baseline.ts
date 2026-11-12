@@ -283,7 +283,8 @@ export function simulate(
     // Heating: the CBECS share describes a gas-heated hotel; other systems need reference efficiency / their efficiency as much site energy.
     const hs = d.heatingSystems;
     const heatFactor = u === 'heating' ? hs.reference.efficiency / hs[p.hvacType].efficiency : 1;
-    const e0u = siteAnnual * d.endUseShareOfSite[u] * heatFactor;
+    const share = (d.endUseShareOfSiteByClimate?.[p.climateId] ?? d.endUseShareOfSite)[u];
+    const e0u = siteAnnual * share * heatFactor;
     const fuel = fuelSplit(u, p, data);
     const w = d.driverWeights[u];
     for (const z of ZONE_IDS) {

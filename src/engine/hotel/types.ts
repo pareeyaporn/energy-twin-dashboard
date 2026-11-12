@@ -252,6 +252,8 @@ export interface HotelData {
     euiKBtuPerSqft: Record<string, number>;
     ageFactor: { before: number; factor: number }[];
     endUseShareOfSite: Record<EndUse, number>;
+    /** Climate-specific end-use split (ComStock), by climate id; falls back to endUseShareOfSite. */
+    endUseShareOfSiteByClimate?: Record<string, Record<EndUse, number>>;
     heatingFuelByHvac: Record<HvacType, FuelKind>;
     fuelMix: Record<Exclude<EndUse, 'heating'>, { electric: number; gas: number }>;
     driverWeights: Record<EndUse, DriverWeights>;

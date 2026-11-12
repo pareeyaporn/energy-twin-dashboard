@@ -115,6 +115,8 @@ export interface AdvisorContext {
   };
   scenario: null | {
     description: string[];
+    /** The numbers quoted in the description (so an answer may repeat them). */
+    settings: Record<string, number>;
     annualCostChange: number;
     annualCostChangePct: number;
     drivers: { label: string; annualCostChange: number }[];
@@ -196,6 +198,21 @@ function describeScenario(s: Scenario): string[] {
   if (s.electricityRateChangePct !== undefined) out.push(`Electricity price changed ${s.electricityRateChangePct}%`);
   if (s.gasRateChangePct !== undefined) out.push(`Gas price changed ${s.gasRateChangePct}%`);
   if (s.weatherOffsetF !== undefined) out.push('Weather changed from normal');
+  if (s.hvacEnergyChangePct !== undefined) out.push(`Heating and cooling equipment uses ${s.hvacEnergyChangePct}% more energy`);
+  if (s.solarOutputChangePct !== undefined) out.push(`Solar output changed ${s.solarOutputChangePct}%`);
+  return out;
+}
+
+/** The scenario's own numbers, as numbers, matching what describeScenario quotes. */
+function scenarioSettings(s: Scenario): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (s.occupancy !== undefined) out['occupancyPct'] = r0(s.occupancy * 100);
+  if (s.commonAreaHvacHours !== undefined) out['commonAreaHvacHours'] = s.commonAreaHvacHours;
+  if (s.lightingHoursPerDay !== undefined) out['lightingHoursPerDay'] = s.lightingHoursPerDay;
+  if (s.electricityRateChangePct !== undefined) out['electricityRateChangePct'] = s.electricityRateChangePct;
+  if (s.gasRateChangePct !== undefined) out['gasRateChangePct'] = s.gasRateChangePct;
+  if (s.hvacEnergyChangePct !== undefined) out['hvacEnergyChangePct'] = s.hvacEnergyChangePct;
+  if (s.solarOutputChangePct !== undefined) out['solarOutputChangePct'] = s.solarOutputChangePct;
   return out;
 }
 
@@ -293,6 +310,7 @@ export function buildAdvisorContext(input: AdvisorInput, question = ''): Advisor
     scenario: scenarioResult
       ? {
           description: describeScenario(input.scenario),
+          settings: scenarioSettings(input.scenario),
           annualCostChange: r0(scenarioResult.delta.cost),
           annualCostChangePct: bill > 0 ? r1((scenarioResult.delta.cost / bill) * 100) : 0,
           drivers: scenarioResult.drivers.map((d) => ({ label: d.label, annualCostChange: r0(d.deltaCost) })),

@@ -360,10 +360,11 @@ export function calculateUpgradeSavings(
   }
 
   exportCredit = solarExportKWh * exportCreditPerKWhIf(has('rooftop_solar'), ctx, d);
+  const solarOm = solarKw > 0 ? solarKw * constant(upgradeDef('rooftop_solar', d), 'omPerKwYear') : 0;
   const annual = sumCells(cells);
-  // The export credit lowers the electricity bill without changing the hotel's own use.
+  // The export credit lowers the electricity bill without changing the hotel's own use; solar upkeep adds an operating cost.
   annual.elecCost -= exportCredit;
-  annual.cost -= exportCredit;
+  annual.cost += solarOm - exportCredit;
   const b = ctx.baseline.annual;
   const savings = {
     elecKWh: b.elecKWh - annual.elecKWh,
@@ -382,6 +383,7 @@ export function calculateUpgradeSavings(
     solarExportKWhYear: solarExportKWh,
     // Solar is applied last, so its value is exactly the purchases it avoids at the rate, plus the export credit.
     solarValuePerYear: solarOffsetKWh * env.elecRate + exportCredit,
+    solarOmPerYear: solarOm,
   };
   return { upgradeIds: ids, scenario, annual, savings, cells, sizing, comfort: comfortFor(ids, smart?.flags ?? [], d) };
 }

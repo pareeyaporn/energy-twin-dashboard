@@ -31,9 +31,11 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 
 1. Introduce a hotel owner with rising energy costs and unclear upgrade choices (30 s)
 2. Open the synthetic 100-room Chicago hotel and show zone-level energy and cost
-3. Change occupancy from 60% to 85%, then enable smart HVAC controls; show the calculated differences and the "why it changed" panel
-4. Enter a $50,000 budget, generate the three packages, compare cost, savings, payback, five-year net and carbon
-5. Ask the advisor: "Why recommend smart thermostats over solar?" and point out that the answer uses the model's numbers
+3. Change occupancy from 60% to 85%, then enable smart room controls; show the cost strip and the "why it changed" panel
+   (more guests raise the bill; the controls claw part of it back)
+4. Enter a $50,000 budget (Invest tab, "Optimize for this scenario" turns on by itself), generate the three packages, compare cost, savings,
+   payback, five- and ten-year net benefit and carbon; apply one and show the split before/after twin
+5. Ask the advisor the question chosen after calibration (see `docs/10`, section 12) and point out that the answer uses the model's numbers
 6. Close with before/after energy, cost and estimated carbon. Core message: *Energy Twin helps hotel owners test energy decisions before spending real money.*
 
 ## Q&A prep
@@ -45,6 +47,8 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 | How is it different from ENERGY STAR Portfolio Manager? | Pitch lead | Portfolio Manager benchmarks past performance. We simulate what happens next and rank what to buy within a budget |
 | Does the AI make up numbers? | Engine lead | No. A deterministic engine computes everything; the AI only explains, and the app rejects any answer with a number that is not in the results |
 | How do you handle guest comfort? | Engine lead | Comfort is a constraint: setpoint and schedule changes that could hurt guests are flagged and the optimizer respects a comfort margin |
-| What about demand charges and complex tariffs? | Engine lead | Flat rates for now; tariffs are on the roadmap |
+| What about demand charges and complex tariffs? | Engine lead | Flat all-in average rates (EIA) for now; tariffs are on the roadmap |
+| Why not solar? / Are incentives included? | Engine lead | Solar is sized to the roof and priced per W; for this hotel it pays back slowly. Incentives are listed but only applied when confirmed (the federal credit's deadlines changed in 2025), so the figures are before incentives unless one is entered |
+| Where do the numbers come from? | Engine lead | EIA prices, the EIA hotel end-use survey (CBECS 2018), EIA price outlook (AEO2026) and EIA grid emissions; upgrade savings from DOE, PNNL, LBNL and the Illinois technical reference manual; the rest is labeled placeholder |
 | Why hotels? | Pitch lead | They run 24/7, occupancy swings energy use, and owners often have no energy team |
 | What's next? | Pitch lead | Utility-bill calibration, live building data, multi-property optimization, offices, retail, hospitals and factories |

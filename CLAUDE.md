@@ -12,19 +12,19 @@ packages** for a budget — with costs, savings ranges, payback, five-year net b
 An AI advisor explains the computed results in plain language. It never produces numbers.
 
 History: the project began as a home energy simulator (Maya's house). We pivoted because an earlier winner, Eden, covers
-net-zero **new-build** home design. We differentiate on **existing** buildings, operations plus investments. The home engine
-(P3–P5) is still in the repo and is being replaced by `src/engine/hotel/`.
+net-zero **new-build** home design. We differentiate on **existing** buildings, operations plus investments. The hotel product is
+built (`src/engine/hotel/`, `src/twin/`, the workspace UI, the advisor); the home engine files in `src/engine/` are legacy and unused.
 
 Hackathon: 48 hours. Built in **Lovable**, extended with **Claude Code**, synced through **GitHub**.
 Demo = one flawless 3-minute path: synthetic 100-room hotel (Chicago) → zone-level energy → occupancy 60% to 85% →
-smart HVAC controls on → $50,000 budget → three packages → ask the advisor why thermostats over solar →
-before/after energy, cost and carbon.
+smart room controls on → $50,000 budget → three packages → ask the advisor → before/after energy, cost and carbon.
+**The script follows the calibrated results**, whichever upgrades perform best; never adjust calculations to fit a story.
 
 Full specs live in `/docs`. Read the relevant doc before working on an area:
 - `docs/10_HOTEL_SPEC.md` — the product brief (what and why, MVP priorities, demo, success criteria)
 - `docs/11_HOTEL_TASKS.md` — the detailed task list by phase (P0, P1, P2). **Start here for what to build next.**
 - `docs/12_BACKEND_ARCHITECTURE.md` — runtime topology, the AI advisor function, guardrails
-- `docs/13_HOTEL_ENGINE_SPEC.md` — equations and assumptions (to be written, task 1.1)
+- `docs/13_HOTEL_ENGINE_SPEC.md` — equations, assumptions, the financial breakdown and the demo figures
 - `docs/08_DATA_TODO.md` — data and research still to find
 - Home-era docs, still useful as patterns until rewritten: `docs/02_ENGINE_SPEC.md`, `docs/03_DATA_SPEC.md`,
   `docs/04_3D_SPEC.md`, `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md`; `docs/09` is superseded.
@@ -37,7 +37,10 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 
 ## Golden rules
 
-1. **Lovable syncs only the `main` branch.** Always work on `main`. Never create, switch or push other branches.
+1. **Lovable syncs only the `main` branch.** Claude Code works on short-lived, meaningfully named feature branches (`engine/…`, `data/…`,
+   `docs/…`, `twin/…`), opens a pull request and merges it into `main` with a **regular merge** (never squash or rebase, which makes Lovable
+   report "replaced your work"). **Never merge while a Lovable prompt is running**; otherwise Lovable saves its work to `lovable-sync`,
+   which then has to be merged. Merge only when the user asks.
 2. **Never rename, move or delete the GitHub repo.** It breaks Lovable sync permanently.
 3. **Always `git pull` before starting work.** Lovable commits constantly.
 4. **Small commits, pushed often** (every 30–60 min). Clear messages: `engine: add optimizer`, `three: thermal material`.
@@ -94,15 +97,17 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 - Components never hard-code costs or savings. They read from the store.
 - The advisor receives precomputed results; the browser rejects any answer containing a number not in them. See `docs/12`.
 
-## Store contract (summary — see docs/11, task 1.10, for the hotel contract)
+## Store contract (summary — the full list for UI work is the cheat sheet at the top of `docs/06`)
 
-Today `useTwin` holds the home-era state: `selectedPresetId`, `home`, `budget`, `goal`, `assumptions`, `thermalMode`,
-`selectedPart`, `results`, `activePackageId`, `drawerOpen`, `reduceEffects`, and actions such as `selectPreset`, `runOptimize`.
-The hotel product adds `hotel` (profile), `scenario`, `baseline`, `scenarioResult`, three packages, `selectedZone`,
-saved scenarios and advisor messages.
+`useTwin` holds the hotel state: `hotelInput` / `hotel` (resolved profile with `defaulted` and `notes`), `baseline`, `scenario`,
+`activeStressTest`, `scenarioResult`, `optimizeOnScenario` (follows the scenario automatically), `hotelPlan`, `optimizing`,
+`optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, twin controls (`selectedZone`, `twinLayer`, time, `compareMode`)
+and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
+`applyHotelPackage` and `askAdvisor`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
+`selectUpgradeComparison`, `selectUpgradeBaseline`, …). Some home-era fields remain for compatibility.
 
-Before changing the store, read the existing `src/store/useTwin.ts` (Lovable created it) and **extend** it, backwards
-compatibly, rather than replacing it. Show the diff and get the user's OK first.
+Before changing the store, read `src/store/useTwin.ts` and **extend** it, backwards compatibly, rather than replacing it.
+Show the diff and get the user's OK first.
 
 ## Commands
 
@@ -126,4 +131,4 @@ npx vitest run       # engine tests
 
 - `npm run build` passes, `npx vitest run` passes
 - The demo path still works end to end with the synthetic 100-room hotel
-- Committed and pushed to `main`, and the change is visible in Lovable's preview
+- Merged into `main` (regular merge, when the user asks), and the change is visible in Lovable's preview

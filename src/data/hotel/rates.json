@@ -14,7 +14,7 @@
         }
       ],
       "exportCreditPerKWh": null,
-      "source": "PLACEHOLDER. Installed cost of commercial rooftop solar in $ per W (DC) by system size, to be replaced with LBNL Tracking the Sun or NREL cost benchmarks for the state. Export credit per kWh sent to the grid is not researched yet (Illinois net metering rules changed in 2025), so exported energy is credited at $0.",
+      "source": "PLACEHOLDER installed cost: $2.20/$2.80/$3.50 per W (DC), one tier; no primary 2024-2025 figure for small (100 kW or less) commercial systems could be opened yet (LBNL Distributed Solar and Storage 2025 and 2026 Data Updates split non-residential at 100 kW; NREL ATB 2024 models a 200 kW commercial rooftop at about $1.78 per W for 2023, which understates smaller systems). Export credit: Illinois law (220 ILCS 5/16-107.5(n)) credits exports from systems interconnected from 2025 at the avoided cost of electricity supply; ComEd's large commercial customers are credited against the supply section of the bill. No primary source gives a dollar value per kWh, so exported energy is credited at $0 (the demo hotel exports almost nothing).",
       "verified": false
     }
   },

@@ -6,6 +6,15 @@ Task numbers refer to [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md). The old home-era p
 
 Style for every prompt: polished B2B SaaS look, professional typography, clear financial metrics, intuitive charts (Recharts), responsive controls.
 
+**Order and status.** Run one at a time and tell Claude Code when each is done (nothing is merged into `main` while a prompt runs).
+
+| Prompt | Status |
+| --- | --- |
+| LV1 clean home copy, LV2 profile form, LV3 overview, LV4 scenario simulator, LV5 optimizer, LV6 twin, LV7 saved scenarios, LV8 advisor | Done and reviewed |
+| LV10 one workspace (ran before LV9) | Done and reviewed |
+| LV9 polish | Done |
+| **LV11 upgrade comparison and the financial breakdown** | **Next** |
+
 ## Store API cheat sheet (already built; read it, do not change it)
 
 Import state and actions from `@/store/useTwin` (`useTwin`) and derived values from `@/store/hotelDerived`. Types and the `STRESS_TESTS` list (labels and descriptions) come from `@/engine/hotel`, read only.

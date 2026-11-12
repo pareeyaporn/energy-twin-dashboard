@@ -10,18 +10,23 @@ research is task 7.13 in [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md); the model is de
 
 | File | Status |
 | --- | --- |
-| `rates.json` | **Researched** (EIA commercial prices for Illinois and the U.S.). Still to confirm the demand-charge caveat below |
+| `rates.json` | **Researched** (EIA commercial prices for Illinois and the U.S.). Still to confirm the demand-charge caveat below. Solar $/W still a placeholder; export credit basis found (220 ILCS 5/16-107.5(n), avoided cost of supply), no $ value |
+| `defaults.json` | **End-use split and fuel mix researched** (EIA CBECS 2018 Tables E1 and E5, lodging, checked in the primary file). **Price growth researched** (EIA AEO2026, 2.12% electricity, 4.09% gas). Other values placeholders |
 | `emissions.json` | **Electricity researched** (EIA State Electricity Profiles 2024: Illinois 510 lbs CO2/MWh, U.S. 785); generation-based, so the eGRID subregion is still to check. Gas factor recalled from the EPA hub, not re-checked |
 | `incentives.json` | Programs listed, **no amounts**: nothing is applied until confirmed |
 | `weather.json` | Chicago monthly temperatures **from memory**, unverified |
 | `defaults.json`, `shapes.json`, `equipment.json` | **Placeholders**, not researched |
-| `upgrades.json` | **Placeholders**: every cost, savings value, lifetime, interaction factor and solar parameter is my estimate |
+| `upgrades.json` | **Partly researched (pass 1, from search excerpts of named sources, to confirm in the primary texts):** smart controls setback, cost and life (IL-TRM, CA CASE); LED and occupancy-sensor savings ranges (PNNL, LBNL); EMS savings check (Crowe 2020); condensing boiler heating saving; solar O&M (NLR ATB 2025) and degradation (Jordan 2022). Costs for LED, sensors, EMS, HVAC, water heating and insulation are still placeholders |
 | `presets.json` | Synthetic demo hotel; sanity-check only |
 
 Priority **A** = changes the demo story or the optimizer's ranking. Do these first.
 
 ## Network domains to allow (Environment, Network access)
-`epa.gov`, `noaa.gov`, `nrel.gov` and **`developer.nrel.gov`** (PVWatts API), `energystar.gov`, `emp.lbl.gov` (Tracking the Sun solar prices), `dsireusa.org` and `irs.gov`
+**Exact host names matter** (allowing `irs.gov` does not allow `www.irs.gov`). NREL is now the National Laboratory of the Rockies: PVWatts moved to
+**`developer.nlr.gov`** (the old `developer.nrel.gov` stopped resolving on May 29, 2026), with `pvwatts.nlr.gov`, `atb.nlr.gov` and `docs.nlr.gov`.
+The Illinois TRM needs **`icc.illinois.gov`** and **`ilsag.info`**. Use the `www.` form for `www.irs.gov`, `www.comed.com`, `www.dsireusa.org`,
+`www.energystar.gov`, `www.energy.gov`, `www.epa.gov`. LBNL (`emp.lbl.gov`) blocks automated downloads, so download the Tracking the Sun data by hand.
+Earlier list: `epa.gov`, `noaa.gov`, `nrel.gov` and `developer.nrel.gov` (PVWatts API), `energystar.gov`, `emp.lbl.gov` (Tracking the Sun solar prices), `dsireusa.org` and `irs.gov`
 (incentives), `comed.com`, `peoplesgasdelivery.com` and `illinoisshines.com` (utility rebates, export credit, REC payments). EIA is already allowed; `energy.gov` and `openei.org`
 help for case studies and tariffs.
 

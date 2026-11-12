@@ -12,17 +12,12 @@
       "id": "smart_room_controls",
       "label": "Smart guest-room thermostats and occupancy sensing",
       "description": "Sets vacant and away rooms back and recovers when a guest returns.",
-      "lifetimeYears": 12,
+      "lifetimeYears": 15,
       "cost": {
-        "fixed": {
-          "low": 1000,
-          "mid": 1500,
-          "high": 2500
-        },
         "perRoom": {
-          "low": 150,
-          "mid": 250,
-          "high": 400
+          "low": 100,
+          "mid": 260,
+          "high": 500
         }
       },
       "params": {
@@ -39,7 +34,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "PLACEHOLDER. Cost and setback ranges are illustrative; replace with vendor quotes and DOE or utility case studies.",
+      "source": "Setback: 5 F mid, the minimum unoccupied setback required by the Illinois Statewide Technical Reference Manual (IL-TRM v5.0, Guest Room Energy Management) and used in the California 2013 CASE report; 3 F and 7 F are PLACEHOLDER bounds. Cost: $260 per room incremental cost (IL-TRM v5.0); range $100 to $500 per room (California 2013 CASE, Guest Room Occupancy Controls). Life: 15 years (IL-TRM). Cross-check: a DOE/PNNL field study (2012) measured 10.8% to 26.5% (average 18.4%) of guest-room HVAC energy saved. Values seen in search excerpts of these documents; to confirm in the primary texts.",
       "verified": false
     },
     {
@@ -68,14 +63,14 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "PLACEHOLDER. Replace with NREL ComStock or DOE hotel measure data and contractor quotes.",
+      "source": "Weather-load reduction mid 10%: consistent with NREL ComStock roof insulation to ASHRAE AEDG levels (about 11% of gas heating and 12% of electric heating, stock-wide). Low and high: PLACEHOLDER. Cost: PLACEHOLDER $3.50 per ft2 of roof (contractor ranges $2 to $7 per ft2 for insulation only). Life: PLACEHOLDER.",
       "verified": false
     },
     {
       "id": "led_lighting",
       "label": "LED lighting retrofit",
       "description": "Replaces remaining non-LED lamps and fixtures throughout the hotel.",
-      "lifetimeYears": 15,
+      "lifetimeYears": 12,
       "cost": {
         "perSqftFloor": {
           "low": 0.4,
@@ -85,9 +80,9 @@
       },
       "params": {
         "lightingReduction": {
-          "low": 0.35,
+          "low": 0.27,
           "mid": 0.45,
-          "high": 0.55
+          "high": 0.6
         }
       },
       "constants": {},
@@ -97,7 +92,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "PLACEHOLDER. Replace with ENERGY STAR or DOE hotel lighting guidance and a lighting audit.",
+      "source": "Lighting reduction: low 27% (linear LED replacing fluorescent, PNNL evaluation for GSA), high 60% (incandescent-heavy fixtures); mid 45% is a judgment between them for a mixed hotel stock. Life: 12 years (IL-TRM default for LED fixtures when rated hours are unknown). Cost: PLACEHOLDER $0.40/$0.60/$0.90 per ft2 (no credible source found yet). Values seen in search excerpts; to confirm.",
       "verified": false
     },
     {
@@ -115,8 +110,8 @@
       "params": {
         "commonLightingReduction": {
           "low": 0.12,
-          "mid": 0.2,
-          "high": 0.28
+          "mid": 0.24,
+          "high": 0.45
         },
         "commonVentilationReduction": {
           "low": 0.02,
@@ -131,7 +126,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "PLACEHOLDER. Replace with DOE or utility occupancy-sensor measure data.",
+      "source": "Lighting reduction in common areas and hallways: mid 24%, the average occupancy-sensor saving in the LBNL meta-analysis (Williams et al., LBNL-5095E, 2011); high 45% from PNNL stairwell assumptions (10% occupancy, 50% light reduction when vacant); low 12% is a PLACEHOLDER. Ventilation reduction, cost and life: PLACEHOLDER. Values seen in search excerpts; to confirm.",
       "verified": false
     },
     {
@@ -167,7 +162,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "PLACEHOLDER. Replace with DOE Better Buildings or vendor case studies.",
+      "source": "HVAC reduction 4/7/10%: consistent with a 3% whole-building median saving for lodging retro-commissioning (Crowe, Mills et al. 2020, Energy and Buildings, about 1,500 buildings), which is about 7.6% of HVAC energy if all of it is HVAC (39.5% HVAC share, CBECS 2018 lodging). Cost: PLACEHOLDER $15,000 + $0.20 per ft2; for comparison the retro-commissioning median is $0.26 per ft2 (Crowe 2020), without control hardware. Life: PLACEHOLDER. Values seen in search excerpts; to confirm.",
       "verified": false
     },
     {
@@ -186,7 +181,7 @@
       "params": {
         "heatingReduction": {
           "low": 0.08,
-          "mid": 0.12,
+          "mid": 0.13,
           "high": 0.16
         },
         "coolingReduction": {
@@ -202,7 +197,7 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "PLACEHOLDER. Replace with AHRI and DOE equipment efficiency data and contractor quotes.",
+      "source": "Heating reduction mid 13%: replacing an 80% efficient boiler (typical existing stock, GSA evaluation) with a condensing boiler at about 92% seasonal efficiency gives 1 - 0.80/0.92 = 13%; NREL ComStock (Condensing Gas Boilers, 2025) reports 9% site savings for an example building. Low and high, cooling reduction, cost and life: PLACEHOLDER. Values seen in search excerpts; to confirm.",
       "verified": false
     },
     {
@@ -237,7 +232,7 @@
     {
       "id": "rooftop_solar",
       "label": "Rooftop solar",
-      "description": "Sized to the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit.",
+      "description": "Sized to the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
       "lifetimeYears": 25,
       "cost": {},
       "params": {},
@@ -245,7 +240,8 @@
         "usableRoofShare": 0.5,
         "sqftPerKw": 100,
         "degradationPerYear": 0.005,
-        "maxShareOfElectricity": 1
+        "maxShareOfElectricity": 1,
+        "omPerKwYear": 17.63
       },
       "comfort": {
         "impact": "none",
@@ -253,10 +249,10 @@
       },
       "requires": [],
       "excludes": [],
-      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data. Cost: the region's installed cost per W. Degradation: 0.5% a year, the median reported by Jordan and Kurtz, 'Photovoltaic Degradation Rates: An Analytical Review', Progress in Photovoltaics (2013), to be verified. Operation and maintenance and inverter replacement are not included.",
+      "source": "Sizing: PLACEHOLDER usable roof share (0.5) and roof area per kW (100 ft2). Output: the climate's solar data. Cost: the region's installed cost per W. Operation and maintenance: $17.63 per kW (DC) a year for commercial PV in 2024 ($14.17 system plus $3.46 administration), NREL/NLR Annual Technology Baseline 2025, Commercial PV (seen in a search excerpt; to confirm in the ATB table). Degradation: 0.5% a year, consistent with Jordan et al. 2022, Progress in Photovoltaics (NREL/TP-5K00-81314): fleet median 0.75% a year, cooler climates 0.48% a year. Inverter replacement is not included.",
       "verified": false
     }
   ],
-  "source": "PLACEHOLDER, synthetic. All upgrade savings, costs, lifetimes and interaction factors are illustrative until replaced with sourced values (docs/11 Phase 7).",
+  "source": "Upgrade values are a mix of researched figures (named in each upgrade's source, from search excerpts still to confirm in the primary documents) and placeholders, labelled as such.",
   "verified": false
 }

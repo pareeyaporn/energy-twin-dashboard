@@ -41,18 +41,24 @@ describe('the common financial breakdown', () => {
   });
 
   it('computes each figure the same way for every upgrade', () => {
-    const g = DEFAULT_FINANCE.priceGrowth;
+    const ge = DEFAULT_FINANCE.priceGrowth;
+    const gg = DEFAULT_FINANCE.gasPriceGrowth!;
+    expect(ge).toBeCloseTo(0.0212, 4); // EIA AEO2026 commercial electricity, nominal
+    expect(gg).toBeCloseTo(0.0409, 4); // EIA AEO2026 commercial natural gas, nominal
     for (const { id, financials: f } of rows) {
+      const gas = evaluatePackage(ctx, [id], { lineItems: false }).outcome.savings.gasCost;
       // 3. net investment = gross cost - applied incentives
       close(f.netInvestment.mid, f.grossCost.mid - f.incentivesTotal);
       // 6. simple payback = net investment / first-year savings
       if (f.annualSavings.mid > 0) close(f.simplePaybackYears!, f.netInvestment.mid / f.annualSavings.mid);
       // 7. net benefit = yearly savings (with price growth and solar degradation) minus net investment
+      // electricity savings grow with electricity prices, gas savings with gas prices, solar also degrades
       const d = id === 'rooftop_solar' ? 0.005 : 0;
-      const solarPart = f.solar ? f.annualSavings.mid : 0;
+      const elec = f.annualSavings.mid - gas;
+      const solarPart = f.solar ? elec : 0;
       for (const [years, nb] of [[5, f.netBenefit5.mid], [10, f.netBenefit10.mid]] as const) {
         let total = 0;
-        for (let t = 1; t <= years; t++) total += ((f.annualSavings.mid - solarPart) + solarPart * (1 - d) ** (t - 1)) * (1 + g) ** (t - 1);
+        for (let t = 1; t <= years; t++) total += ((elec - solarPart) + solarPart * (1 - d) ** (t - 1)) * (1 + ge) ** (t - 1) + gas * (1 + gg) ** (t - 1);
         close(nb, total - f.netInvestment.mid, 1e-9);
       }
       // ranges are ordered
@@ -93,7 +99,9 @@ describe('solar', () => {
     expect(s.exportedKWh).toBeGreaterThanOrEqual(0);
     // With the export credit not researched, exports earn $0: savings = self-used kWh x electricity rate.
     expect(s.exportCreditPerKWh).toBe(0);
-    close(f.annualSavings.mid, s.selfConsumedKWh * ctx.baseline.rates.elecPerKWh, 1e-9);
+    // ... minus the array's yearly operation and maintenance ($17.63 per kW, NREL/NLR ATB 2025).
+    close(s.omPerYear, s.sizeKw * 17.63, 1e-9);
+    close(f.annualSavings.mid, s.selfConsumedKWh * ctx.baseline.rates.elecPerKWh - s.omPerYear, 1e-9);
     close(f.annualEnergySavings.elecKWh, s.selfConsumedKWh, 1e-9);
   });
 
@@ -107,7 +115,7 @@ describe('solar', () => {
     const e = evaluatePackage(sc, ['rooftop_solar'], { lineItems: false }, d);
     const sol = e.financials.solar!;
     expect(sol.exportedKWh).toBeGreaterThan(0);
-    close(e.financials.annualSavings.mid, sol.selfConsumedKWh * sc.baseline.rates.elecPerKWh + sol.exportedKWh * 0.05, 1e-9);
+    close(e.financials.annualSavings.mid, sol.selfConsumedKWh * sc.baseline.rates.elecPerKWh + sol.exportedKWh * 0.05 - sol.omPerYear, 1e-9);
   });
 
   it('loses value over time from panel degradation', () => {
@@ -118,7 +126,8 @@ describe('solar', () => {
   it('follows the electricity price', () => {
     const pricier = prepareUpgradeContext(resolveProfile({ ...demo.profile, electricityRate: ctx.baseline.rates.elecPerKWh * 1.5 } as never));
     const p = compareUpgrades(pricier).find((r) => r.id === 'rooftop_solar')!.financials;
-    close(p.annualSavings.mid / f.annualSavings.mid, 1.5, 1e-6);
+    // The energy value scales with the price; operation and maintenance does not.
+    close((p.annualSavings.mid + s.omPerYear) / (f.annualSavings.mid + s.omPerYear), 1.5, 1e-6);
   });
 
   it('uses a daylight shape that sums to 1, is dark at night and longer in summer', () => {

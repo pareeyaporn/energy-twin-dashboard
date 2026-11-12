@@ -8,39 +8,49 @@ investments that pay back best within a budget.
 
 Built for a 48-hour hackathon in [Lovable](https://lovable.dev), extended with Claude Code, and synced through GitHub.
 
-> **We are mid-pivot.** The project began as a home energy simulator and is moving to hotels. The home engine is still in the repo;
-> the hotel product is specified and planned but not built yet. See the status table below.
+All P0 and P1 features are built and run on a synthetic 100-room Chicago hotel. Numbers are **estimates**: part of the data is researched
+(EIA prices, end-use split, price growth and grid emissions), the rest is labeled placeholder until the calibration pass. See the status below.
 
-## What it does (target)
-- **Hotel profile:** rooms, floor area, HVAC, bills, occupancy, schedules, budget. Most inputs are optional, with labeled defaults.
-- **Interactive twin:** a clickable diagram of six zones (guest rooms, lobby and common areas, kitchen, hallways, central HVAC,
-  hot water) showing energy and cost.
-- **Scenario simulator:** change occupancy, setpoints, schedules or electricity prices and see before/after energy, cost and carbon.
-- **Budget optimizer:** for a budget such as $50,000, three ranked packages (maximum savings, fastest payback, balanced) with cost,
-  savings, payback, five-year net benefit, carbon and comfort notes.
-- **AI advisor:** plain-language answers grounded in the computed results. The AI never invents numbers.
+## What it does
+- **One workspace:** four numbered tabs (1 Hotel, 2 Scenario, 3 Invest, 4 Ask) beside the digital twin, with a cost / energy / carbon
+  strip that shows before → after for whatever is being tested. Overview ("Report"), full scenario and full optimizer pages are one click away.
+- **Hotel profile:** rooms, floor area, HVAC, bills, occupancy, schedules, budget. Every input is optional; defaults are labeled "default (estimate)".
+- **Digital twin (2D):** six clickable zones (guest rooms, lobby and common areas, kitchen and restaurant, hallways, central HVAC, hot water)
+  colored by cost, plus room, equipment and energy-flow layers, a typical-day clock, stress tests and a before/after split view with upgrade markers.
+- **Scenario simulator:** occupancy, setpoints, smart room controls, schedules, electricity price, four stress tests, "why this changed" and comfort notes.
+  Saved scenarios (per browser session).
+- **Upgrade comparison:** eight upgrades, solar included, each with the same breakdown: gross cost, incentives (listed, applied only when confirmed),
+  net investment, kWh and therms saved, $ saved, simple payback, 5- and 10-year net benefit and CO2 avoided. Solar is sized to the roof,
+  uses location-based output with hour-by-hour self-use and export, regional $/W, degradation and O&M.
+- **Budget optimizer:** tests every combination (256) and returns three packages (maximum savings, fastest payback, balanced) within the budget
+  and a comfort limit, measured against the current scenario when one is running. It uses exactly the numbers on the cards.
+- **AI advisor:** plain-language answers from Claude, grounded in the computed results. The browser rejects any answer with a number that is
+  not in the results and falls back to a template answer; nothing is invented.
 
 ## Demo path (3 minutes)
-Synthetic 100-room hotel → zone-level energy → occupancy 60% to 85% → smart HVAC controls on → $50,000 budget → three packages →
-ask the advisor "Why recommend smart thermostats over solar?" → before/after energy, cost and carbon.
+Synthetic 100-room hotel → zone-level energy → occupancy 60% to 85% → smart room controls on → $50,000 budget → three packages →
+ask the advisor → before/after energy, cost and carbon. **The script follows the calibrated results:** the advisor question and the
+featured upgrades will be chosen after the calibration pass, whichever upgrades perform best (today: LED lighting plus occupancy sensors at $50,000).
 
 ## Status
 
 | Area | State |
 | --- | --- |
-| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, costs, finance, budget optimizer, twin data | Built and tested (all data are placeholders until the research pass) |
-| Store (`src/store`): hotel profile, scenarios, optimizer, twin controls, memoized selectors | Built |
-| 2D digital twin (`src/twin`): zones, rooms, equipment, energy flow, time scrubber, stress tests, before/after | Built |
-| Dashboard screens (profile form, overview, scenario simulator, optimizer): Lovable | Prompts ready in `docs/06`; not built yet |
-| AI advisor (`supabase/functions/advisor` and `src/engine/hotel/advisor`): context, number check, template answers, store actions | Built; needs the `ANTHROPIC_API_KEY` secret in Lovable Cloud to use the model, and the chat panel from Lovable (prompt LV8) |
-| Home-era UI shell, home engine and home data | Legacy; to be removed after the hotel dashboard replaces them |
+| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown, solar, incentives, optimizer, twin data | Built and tested (300+ tests) |
+| Data (`src/data/hotel`) | Researched: EIA prices, CBECS lodging end-use split and fuel mix, AEO2026 price growth, EIA grid CO2. Partly researched: upgrade savings ranges, solar O&M. Placeholder: most upgrade costs, solar $/W and output, export credit (see `docs/08`) |
+| Store (`src/store`): profile, scenarios, optimizer (scenario-aware), upgrade comparison, twin controls, advisor | Built |
+| 2D digital twin (`src/twin`) | Built |
+| Workspace UI (Lovable, prompts LV1–LV10) | Built. **LV11** (show the full financial breakdown on every card) is next |
+| AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
+| Demo hardening (cached answers, reset, rehearsals) | Not started; after calibration |
+| Home-era engine and data | Legacy, unused by the app; home UI components removed |
 
 ## Tech stack
 - TanStack Start (React, TypeScript, Vite), Tailwind, shadcn/ui, built to a Cloudflare Worker target
 - State: `zustand`
 - Charts: `recharts`
 - Tests: `vitest`
-- Backend: Lovable Cloud edge function for the AI advisor only (not set up yet)
+- Backend: Lovable Cloud (Supabase) edge function for the AI advisor only; key in Lovable Cloud secrets
 
 ## Architecture
 
@@ -64,10 +74,10 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | --- | --- |
 | `src/components/`, `src/routes/` | UI (Lovable) |
 | `src/store/` | Shared state contract |
-| `src/engine/` | Pure TypeScript calculations (`hotel/` is the new engine) |
+| `src/engine/` | Pure TypeScript calculations (`hotel/` is the active engine; the rest is legacy) |
 | `src/data/` | Sourced JSON data |
 | `src/twin/` | Clickable hotel twin |
-| `supabase/functions/` | Backend functions (planned: advisor) |
+| `supabase/functions/` | Backend function: the AI advisor |
 | `docs/` | Specs and plans |
 
 ## Development
@@ -78,12 +88,12 @@ You need Node.js and npm.
 npm install
 npm run dev     # local dev server
 npm run build   # must pass before every commit
-npm test        # vitest
+npx vitest run  # tests
 ```
 
 ## Docs
 - [Idea overview](docs/00_IDEA.md), [hotel pivot brief](docs/10_HOTEL_SPEC.md) and [detailed task list](docs/11_HOTEL_TASKS.md)
-- [Backend architecture](docs/12_BACKEND_ARCHITECTURE.md)
+- [Backend architecture](docs/12_BACKEND_ARCHITECTURE.md) and [hotel engine spec](docs/13_HOTEL_ENGINE_SPEC.md) (equations, assumptions, demo figures)
 - [Claude Code prompts](docs/05_CLAUDE_CODE_PROMPTS.md), [Lovable prompts](docs/06_LOVABLE_PROMPTS.md), [demo checklist](docs/07_DEMO_CHECKLIST.md)
 - [Data and research to-do](docs/08_DATA_TODO.md) and [setup](docs/01_SETUP.md)
 - Home-era specs, kept as patterns until the hotel versions exist: [engine](docs/02_ENGINE_SPEC.md), [data](docs/03_DATA_SPEC.md),
@@ -91,5 +101,7 @@ npm test        # vitest
 
 ## Working with Lovable
 
-Continue development in the [Lovable editor](https://lovable.dev/projects/8b8ae6ff-81b9-40af-a0ce-6e5e7b40ba7e). Lovable syncs only the `main` branch,
-so changes pushed to `main` sync back. Never rename, move or delete this repository, because that breaks Lovable sync.
+Continue development in the [Lovable editor](https://lovable.dev/projects/8b8ae6ff-81b9-40af-a0ce-6e5e7b40ba7e). Lovable syncs only the `main` branch.
+Claude Code works on short feature branches and merges them into `main` with a **regular merge** (never squash or rebase), and never while a
+Lovable prompt is running; otherwise Lovable saves its work to a `lovable-sync` branch that then has to be merged. If Lovable shows
+"A push to your repository replaced your Lovable work", choose "Keep repository version". Never rename, move or delete this repository.

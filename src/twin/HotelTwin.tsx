@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useTwin } from "@/store/useTwin";
 import type { CompareMode, TwinLayer } from "@/store/useTwin";
 import { selectCompare, selectDisplayed, selectHotelLabel } from "@/store/hotelDerived";
@@ -10,6 +11,7 @@ import { RoomGrid } from "./parts/RoomGrid";
 import { StressTests } from "./parts/StressTests";
 import { TimeControls } from "./parts/TimeControls";
 import { ZonePanel } from "./parts/ZonePanel";
+import { View3D, hasWebGL } from "./parts/View3D";
 import { useTwinClock } from "./useTwinClock";
 
 const LAYERS: { id: TwinLayer; label: string }[] = [
@@ -40,6 +42,14 @@ export function HotelTwin() {
   const displayed = useTwin(selectDisplayed);
   const compare = useTwin(selectCompare);
   const delta = compare.after.annual.cost - compare.before.annual.cost;
+  // 3D is the default on desktop when WebGL works and effects are not reduced; decided after mount (the server renders 2D).
+  const [view, setView] = useState<"2d" | "3d">("2d");
+  const [canUse3D, setCanUse3D] = useState(false);
+  useEffect(() => {
+    const ok = hasWebGL();
+    setCanUse3D(ok);
+    if (ok && !reduce && window.matchMedia?.("(min-width: 1024px)").matches) setView("3d");
+  }, [reduce]);
 
   return (
     <section aria-label="Hotel digital twin" data-reduce-effects={reduce ? "true" : "false"} className="space-y-4">
@@ -84,6 +94,21 @@ export function HotelTwin() {
             </button>
           ))}
         </div>
+        {layer === "zones" && canUse3D && (
+          <div role="group" aria-label="View" className="flex overflow-hidden rounded-lg border border-glass-border text-sm">
+            {(["3d", "2d"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                aria-pressed={view === v}
+                onClick={() => setView(v)}
+                className={`px-3 py-1.5 ${view === v ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent"}`}
+              >
+                {v === "3d" ? "3D" : "2D"}
+              </button>
+            ))}
+          </div>
+        )}
         <div role="group" aria-label="Compare" className="flex overflow-hidden rounded-lg border border-glass-border text-sm">
           {COMPARE.map((c) => (
             <button
@@ -101,7 +126,7 @@ export function HotelTwin() {
 
       <div id="twin-panel" role="tabpanel" aria-labelledby={`twin-tab-${layer}`} className={layer === "zones" ? "grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]" : ""}>
         <div className="rounded-xl border border-glass-border bg-stage-gradient p-3">
-          {layer === "zones" && <BuildingDiagram />}
+          {layer === "zones" && (view === "3d" && canUse3D ? <View3D fallback={<BuildingDiagram />} /> : <BuildingDiagram />)}
           {layer === "rooms" && <RoomGrid />}
           {layer === "equipment" && <EquipmentLayer />}
           {layer === "flow" && <FlowLayer />}

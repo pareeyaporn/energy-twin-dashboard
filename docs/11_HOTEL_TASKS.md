@@ -204,27 +204,27 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
       to the hour's total, the clock advancing hour then month)
 
 ### 9B. The 3D hotel (one pull request)
-- [ ] 9.9 `src/three/` scene, lazy-loaded (its code downloads only when 3D is shown), client-only (no server rendering), WebGL detection with
+- [x] 9.9 `src/three/` scene, lazy-loaded (its code downloads only when 3D is shown), client-only (no server rendering), WebGL detection with
       a fallback to the 2D view and a note
-- [ ] 9.10 Procedural building from the profile (`layout.ts`): podium with lobby and restaurant, guest floors with one window per room, a
+- [x] 9.10 Procedural building from the profile (`layout.ts`): podium with lobby and restaurant, guest floors with one window per room, a
       hallway core, rooftop HVAC unit with a turning fan, hot-water room, ground; windows drawn as one batch
-- [ ] 9.11 Energy colors from the store: zones colored by cost on the same blue → amber → red scale as 2D; the HVAC unit tinted red when
+- [x] 9.11 Energy colors from the store: zones colored by cost on the same blue → amber → red scale as 2D; the HVAC unit tinted red when
       heating and blue when cooling, in proportion to that hour's demand
-- [ ] 9.12 Windows from `selectRooms`: lit when a guest is in, dim when booked and out, dark when vacant; set-back rooms marked
-- [ ] 9.13 Interaction: orbit (rotate), zoom, click to select guest rooms, lobby, restaurant, hallways, HVAC, hot water or rooftop solar; the
+- [~] 9.12 Windows from `selectRooms`: lit when a guest is in, dim when booked and out, dark when vacant; set-back rooms marked (lit/away/dark done; set-back marker still to do)
+- [x] 9.13 Interaction: orbit (rotate), zoom, click to select guest rooms, lobby, restaurant, hallways, HVAC, hot water or rooftop solar; the
       selection highlights and the existing zone panel shows energy, cost, drivers and opportunities; keyboard alternative via the zone list
-- [ ] 9.14 Exploded-floors (cutaway) toggle that separates the floors to show the interior
-- [ ] 9.15 Solar: solid panels at the applied package's size (quarter, half or full roof); otherwise the translucent "Not installed —
+- [x] 9.14 Exploded-floors (cutaway) toggle that separates the floors to show the interior
+- [x] 9.15 Solar: solid panels at the applied package's size (quarter, half or full roof); otherwise the translucent "Not installed —
       potential" preview when the solar zone is selected
-- [ ] 9.16 2D / 3D switch in the twin; 3D default on desktop
+- [x] 9.16 2D / 3D switch in the twin; 3D default on desktop
 
 ### 9C. Seasons, day–night and controls (one pull request)
-- [ ] 9.17 Sky and light from 9.3: daytime sun with soft shadows, warm sunrise and sunset light, dark sky with moonlight at night
-- [ ] 9.18 Seasons from the month: winter snow on the ground and roof, bare trees and light snowfall; spring and summer green trees; fall orange
+- [x] 9.17 Sky and light from 9.3: daytime sun with soft shadows, warm sunrise and sunset light, dark sky with moonlight at night
+- [x] 9.18 Seasons from the month: winter snow on the ground and roof, bare trees and light snowfall; spring and summer green trees; fall orange
       foliage (procedural trees drawn as one batch; snowfall as one particle system)
-- [ ] 9.19 Live readout beside the scene from `selectHourState`: date and time, outdoor temperature (modeled), occupancy, heating, cooling and
+- [x] 9.19 Live readout beside the scene from `selectHourState`: date and time, outdoor temperature (modeled), occupancy, heating, cooling and
       lighting demand, solar output, cost per hour
-- [ ] 9.20 Controls: play/pause, month picker, time-of-day slider, speed, camera reset, and season presets ("January night", "April morning",
+- [x] 9.20 Controls: play/pause, month picker, time-of-day slider, speed, camera reset, and season presets ("January night", "April morning",
       "July afternoon", "October evening")
 - [ ] 9.21 Count-up animation for the twin's header numbers
 - [ ] 9.22 Performance and accessibility: no auto-rotate, particles or count-up with "reduce effects"; one shadow-casting light; smooth on a

@@ -14,6 +14,8 @@ import {
   selectRooms,
   selectTypicalDay,
   selectZoneRows,
+  selectUpgradeComparison,
+  selectUpgradeBaseline,
 } from "@/store/hotelDerived";
 
 const get = () => useTwin.getState();
@@ -432,5 +434,30 @@ describe("opportunities by zone in the store", () => {
     const before = led("hallways_shared");
     get().applyStressTest("price_up_20");
     expect(led("hallways_shared")).toBeGreaterThan(before);
+  });
+});
+
+describe("upgrade comparison in the store", () => {
+  beforeEach(() => get().resetHotel());
+
+  it("lists every eligible upgrade with the common breakdown, measured like the optimizer", () => {
+    const rows = selectUpgradeComparison(get());
+    expect(rows.map((r) => r.id)).toContain("rooftop_solar");
+    expect(selectUpgradeComparison(get())).toBe(rows); // memoized
+    for (const r of rows) {
+      expect(r.financials.netInvestment.mid).toBeCloseTo(r.financials.grossCost.mid - r.financials.incentivesTotal, 6);
+      expect(Number.isFinite(r.financials.netBenefit10.mid)).toBe(true);
+    }
+  });
+
+  it("follows the scenario while optimize-for-scenario is on, and the baseline when it is off", () => {
+    const base = selectUpgradeComparison(get()).find((r) => r.id === "led_lighting")!.financials.annualSavings.mid;
+    get().applyStressTest("price_up_20"); // turns optimize-for-scenario on
+    const onScenario = selectUpgradeComparison(get()).find((r) => r.id === "led_lighting")!.financials.annualSavings.mid;
+    expect(onScenario).toBeGreaterThan(base);
+    expect(selectUpgradeBaseline(get())).toBe(get().scenarioResult!.after);
+    get().setOptimizeOnScenario(false);
+    expect(selectUpgradeComparison(get()).find((r) => r.id === "led_lighting")!.financials.annualSavings.mid).toBeCloseTo(base, 6);
+    expect(selectUpgradeBaseline(get())).toBe(get().baseline);
   });
 });

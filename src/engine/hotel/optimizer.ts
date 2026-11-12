@@ -1,8 +1,8 @@
 import { OPTIMIZER_DEFAULTS } from './constants';
 import { packageCost } from './costs';
 import { hotelData } from './data';
-import { DEFAULT_FINANCE, calculateFinancialMetrics } from './finance';
-import { evaluatePackage } from './package';
+import { DEFAULT_FINANCE } from './finance';
+import { evaluatePackage, packageMetrics } from './package';
 import {
   calculateUpgradeSavings,
   eligibleUpgrades,
@@ -140,15 +140,8 @@ export function optimizeInvestmentPortfolio(
       rejected.belowSavingsThreshold++;
       continue;
     }
-    const m = calculateFinancialMetrics(
-      {
-        annualSavings: savings,
-        carbonAvoidedKgPerYear: mid.savings.carbonKg,
-        items: costs.items.map((i) => ({ cost: i.cost.mid, lifetimeYears: upgradeDef(i.id, d).lifetimeYears })),
-        budget,
-      },
-      assumptions,
-    );
+    // The same function evaluatePackage uses, so the ranking matches the numbers on the cards.
+    const m = packageMetrics(ctx, ids, mid, costs, assumptions, budget, options.incentives);
     scored.push({
       id: ids.join('+'),
       upgradeIds: ids,
@@ -182,7 +175,7 @@ export function optimizeInvestmentPortfolio(
   };
 
   const rank = (cand: Candidate, role: PackageRole, note?: string): RankedPackage => {
-    const evaluation = evaluatePackage(ctx, cand.upgradeIds, { assumptions, budget, lineItems: true }, d);
+    const evaluation = evaluatePackage(ctx, cand.upgradeIds, { assumptions, budget, lineItems: true, ...(options.incentives ? { incentives: options.incentives } : {}) }, d);
     const out: RankedPackage = {
       role,
       roleLabel: ROLE_LABEL[role],

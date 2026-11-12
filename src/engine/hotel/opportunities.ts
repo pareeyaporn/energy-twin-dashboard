@@ -1,7 +1,7 @@
 import { ZONE_IDS } from './constants';
-import { upgradeCost } from './costs';
 import { hotelData } from './data';
-import { calculateUpgradeSavings, eligibleUpgrades, upgradeDef } from './upgrades';
+import { evaluatePackage } from './package';
+import { eligibleUpgrades, upgradeDef } from './upgrades';
 import type { UpgradeContext } from './upgrades';
 import type { HotelData, UpgradeId, ZoneId } from './types';
 
@@ -13,7 +13,7 @@ export interface ZoneOpportunity {
   zoneAnnualSavings: number;
   /** The upgrade's total yearly saving across the whole hotel (mid). */
   totalAnnualSavings: number;
-  /** Installed cost (mid) of the upgrade for the whole hotel. */
+  /** Net investment (mid): installed cost minus applied incentives, for the whole hotel. */
   cost: number;
   /** Payback of the whole upgrade; null if it does not save money overall. */
   paybackYears: number | null;
@@ -30,9 +30,11 @@ export function opportunitiesByZone(ctx: UpgradeContext, data: HotelData = hotel
   const out = Object.fromEntries(ZONE_IDS.map((z) => [z, [] as ZoneOpportunity[]])) as Record<ZoneId, ZoneOpportunity[]>;
   const base = ctx.baseline;
   for (const id of eligibleUpgrades(ctx.profile, base.annual.elecKWh, data)) {
-    const o = calculateUpgradeSavings(ctx, [id], 'mid', data, { skipValidation: true });
+    // Same evaluation as the comparison cards and the optimizer, so cost and payback match everywhere.
+    const e = evaluatePackage(ctx, [id], { lineItems: false }, data);
+    const o = e.outcome;
     const def = upgradeDef(id, data);
-    const cost = upgradeCost(ctx.profile, id, o.sizing, data).mid;
+    const cost = e.financials.netInvestment.mid;
     const total = o.savings.cost;
     for (const z of ZONE_IDS) {
       const after = o.cells.filter((c) => c.zone === z).reduce((s, c) => s + c.cost, 0);
@@ -45,7 +47,7 @@ export function opportunitiesByZone(ctx: UpgradeContext, data: HotelData = hotel
         zoneAnnualSavings: saved,
         totalAnnualSavings: total,
         cost,
-        paybackYears: total > 0 ? cost / total : null,
+        paybackYears: e.financials.simplePaybackYears,
         comfortImpact: def.comfort.impact,
         comfortNote: def.comfort.note,
       });

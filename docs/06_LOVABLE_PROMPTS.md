@@ -23,12 +23,14 @@ Call selectors like `useTwin(selectDisplayed)`; they are memoized and safe to us
 | Zones, equipment, flows, time | `selectZoneRows`, `selectEquipment`, `selectFlows`, `selectTypicalDay`, `selectRooms`, `selectMeter`; `selectedZone`/`selectZone`, `twinLayer`/`setTwinLayer`, `timeMode`/`timeMonth`/`timeHour`/`setTime`, `playing`/`setPlaying`, `playbackSpeed`/`setPlaybackSpeed`, `compareMode`/`setCompareMode` |
 | Budget optimizer | `runHotelOptimizer()`, `optimizing`, `optimizerCombinations` (set when a run starts), `hotelPlan` (`packages`, `objectiveWinner`, `combinationsTested`, `feasibleCount`, `emptyReason`, `cheapestUseful`), `applyHotelPackage(id \| null)`, `activeHotelPackageId` |
 | Package fields | `evaluation.cost` and `evaluation.annualSavings` (`low`/`mid`/`high`), `evaluation.metrics` (`paybackYears`, `netBenefit`, `roi`, `remainingBudget`, `carbonAvoidedKgPerYear`), `evaluation.comfort`, `evaluation.lineItems`, plus `role`, `roleLabel`, `reason`, `note`, `budgetRisk` |
+| Financial breakdown (same for every upgrade and package) | `evaluation.financials`: `grossCost`, `incentives` (lines with `label`, `amount`, `applied`, `note`, `source`), `incentivesTotal`, `netInvestment`, `annualEnergySavings` (`elecKWh`, `gasTherms`), `annualSavings`, `simplePaybackYears`, `netBenefit5`, `netBenefit10`, `carbonAvoidedKgPerYear` (ranges are `low`/`mid`/`high`), `solar` (`sizeKw`, `generationKWh`, `selfConsumedKWh`, `exportedKWh`, `installedCostPerW`, `exportCreditPerKWh`, `degradationPerYear`) or null, `assumptions` (strings) |
+| Upgrade comparison (every upgrade on its own) | `selectUpgradeComparison(s)` → rows `{ id, label, description, financials, metrics, comfort, lifetimeYears, source }`, measured the same way as the optimizer |
 | Optimize against the current what-if (for example electricity +20%) | `optimizeOnScenario` (turns on by itself when a scenario or stress test starts and off when it is cleared), `setOptimizeOnScenario(b)`; the plan records `hotelPlan.scenario`, and `hotelPlanBaseline` is what it was measured against |
 | AI advisor | `advisorMessages` (`{ id, role: 'user' \| 'advisor', text, source?: 'ai' \| 'fallback', reason? }`), `advisorBusy`, `askAdvisor(question)`, `clearAdvisor()`; suggested questions: `advisor.ADVISOR_SUGGESTED_QUESTIONS` from `@/engine/hotel` |
 | Saved scenarios | `savedScenarios`, `saveScenario(name?)`, `loadScenario(id)`, `renameScenario(id, name)`, `deleteScenario(id)` |
 | Reset | `resetHotel()` |
 
-Money fields are US dollars (round only for display); energy is kWh and therms; carbon is kg CO2e.
+Money fields are US dollars (round only for display); energy is kWh and therms; carbon is kg CO2 (the grid factor is CO2 only).
 
 ---
 
@@ -151,4 +153,22 @@ different role label (for example the objective is Balanced and the winner is "M
 mermaid imports so their bundles are not shipped. In the top bar, remove the Scenario and Investments links (the workspace tabs cover
 them; the full pages stay reachable from "Compare in detail" and the Scenario tab). Don't modify src/engine, src/data, src/twin, src/store
 or supabase.
+```
+
+## LV11 — Upgrade comparison and the financial breakdown (run after LV9)
+
+```
+Add an upgrade comparison to the Invest tab (above the budget) and to the /optimizer page: one card per row of
+selectUpgradeComparison(s), solar included, every card showing the same eight lines from row.financials in this order:
+1 Gross installation cost (grossCost.mid, with low to high), 2 Incentives (incentivesTotal; if none is applied say "None applied" and
+list the not-applied incentives[].label with their note in a tooltip), 3 Net upfront investment (netInvestment.mid), 4 Annual energy
+savings (annualEnergySavings.elecKWh in kWh, and gasTherms in therms when not zero; a negative value means it adds that energy),
+5 Annual savings ($, annualSavings.mid with low to high), 6 Simple payback (simplePaybackYears, "No payback" when null),
+7 Net benefit over 5 years and over 10 years (netBenefit5.mid and netBenefit10.mid, with low to high; negative in amber),
+8 CO2 reduction per year (carbonAvoidedKgPerYear.mid in tonnes, label it "CO2, estimate"). For solar also show size (kW), yearly
+generation, used on site and exported (kWh), and $/W. Under each card show financials.assumptions as small muted text and a Source
+chip with row.source. Add a compact table view toggle with the same columns, sortable. Use the same eight lines in the package cards
+and the comparison table of the budget optimizer (evaluation.financials), replacing the older metrics there so every view shows the
+same numbers. Never compute or round money in the component beyond display formatting. Label everything "Estimate".
+Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```

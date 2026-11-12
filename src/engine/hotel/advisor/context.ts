@@ -1,9 +1,9 @@
 import { CATEGORIES, ZONE_IDS, ZONE_LABELS } from '../constants';
 import { opportunitiesByZone } from '../opportunities';
 import { optimizeInvestmentPortfolio } from '../optimizer';
-import { evaluatePackage } from '../package';
+import { compareUpgrades } from '../comparison';
 import { simulateOccupancyChange } from '../scenarios';
-import { contextFromBaseline, eligibleUpgrades, upgradeDef } from '../upgrades';
+import { contextFromBaseline } from '../upgrades';
 import type {
   Category,
   EnergyResult,
@@ -32,7 +32,14 @@ export interface AdvisorPackage {
   role: string;
   name: string;
   upgradeIds: UpgradeId[];
+  /** Gross installed cost (mid). */
   cost: number;
+  incentivesApplied: number;
+  netInvestment: number;
+  annualElecKWhSaved: number;
+  annualGasThermsSaved: number;
+  netBenefit5Years: number;
+  netBenefit10Years: number;
   annualSavings: { low: number; mid: number; high: number };
   annualSavingsPctOfBill: number;
   paybackYears: number | null;
@@ -56,7 +63,18 @@ export interface AdvisorPlan {
 export interface AdvisorUpgrade {
   id: UpgradeId;
   label: string;
+  /** Gross installed cost (mid). */
   cost: number;
+  /** Applied incentives (0 when none is confirmed) and the net investment after them. */
+  incentivesApplied: number;
+  netInvestment: number;
+  /** Incentive programs listed as possible but not applied. */
+  incentivesNotApplied: string[];
+  annualElecKWhSaved: number;
+  annualGasThermsSaved: number;
+  netBenefit5Years: number;
+  netBenefit10Years: number;
+  solar: null | { sizeKw: number; generationKWh: number; selfConsumedKWh: number; exportedKWh: number };
   annualSavings: { low: number; mid: number; high: number };
   annualSavingsPctOfBill: number;
   paybackYears: number | null;
@@ -126,6 +144,8 @@ export interface AdvisorInput {
   scenarioResult: ScenarioResult | null;
   plan: PortfolioResult | null;
   syntheticDemo: boolean;
+  /** Measure upgrades against the what-if (as the optimizer does when "optimize for this scenario" is on). Defaults to true. */
+  measureUpgradesOnScenario?: boolean;
 }
 
 const roleName = (p: RankedPackage) => p.roleLabel;
@@ -137,6 +157,12 @@ function summarizePackage(p: RankedPackage, bill: number): AdvisorPackage {
     name: e.name,
     upgradeIds: e.upgradeIds,
     cost: r0(e.cost.mid),
+    incentivesApplied: r0(e.financials.incentivesTotal),
+    netInvestment: r0(e.financials.netInvestment.mid),
+    annualElecKWhSaved: r0(e.financials.annualEnergySavings.elecKWh),
+    annualGasThermsSaved: r0(e.financials.annualEnergySavings.gasTherms),
+    netBenefit5Years: r0(e.financials.netBenefit5.mid),
+    netBenefit10Years: r0(e.financials.netBenefit10.mid),
     annualSavings: { low: r0(e.annualSavings.low), mid: r0(e.annualSavings.mid), high: r0(e.annualSavings.high) },
     annualSavingsPctOfBill: bill > 0 ? r1((e.annualSavings.mid / bill) * 100) : 0,
     paybackYears: e.metrics.paybackYears === null ? null : r1(e.metrics.paybackYears),
@@ -181,16 +207,30 @@ export function buildAdvisorContext(input: AdvisorInput, question = ''): Advisor
   const { hotel, baseline, scenarioResult, plan } = input;
   const p = hotel.profile;
   const bill = baseline.annual.cost;
-  const measured = scenarioResult?.after ?? baseline;
+  const onScenario = scenarioResult !== null && input.measureUpgradesOnScenario !== false;
+  const measured = onScenario ? scenarioResult.after : baseline;
   const ctx = contextFromBaseline(hotel, measured);
 
   const opp = opportunitiesByZone(ctx);
-  const upgrades: AdvisorUpgrade[] = eligibleUpgrades(ctx.profile, measured.annual.elecKWh).map((id) => {
-    const e = evaluatePackage(ctx, [id], { lineItems: false });
+  // The same rows as the upgrade comparison cards.
+  const upgrades: AdvisorUpgrade[] = compareUpgrades(ctx).map((row) => {
+    const id = row.id;
+    const f = row.financials;
+    const e = { cost: f.grossCost, annualSavings: f.annualSavings, metrics: row.metrics, carbonAvoidedKg: { mid: f.carbonAvoidedKgPerYear.mid }, comfort: row.comfort };
     return {
       id,
-      label: upgradeDef(id).label,
+      label: row.label,
       cost: r0(e.cost.mid),
+      incentivesApplied: r0(f.incentivesTotal),
+      netInvestment: r0(f.netInvestment.mid),
+      incentivesNotApplied: [...new Set(f.incentives.filter((l) => !l.applied).map((l) => l.label))],
+      annualElecKWhSaved: r0(f.annualEnergySavings.elecKWh),
+      annualGasThermsSaved: r0(f.annualEnergySavings.gasTherms),
+      netBenefit5Years: r0(f.netBenefit5.mid),
+      netBenefit10Years: r0(f.netBenefit10.mid),
+      solar: f.solar
+        ? { sizeKw: r1(f.solar.sizeKw), generationKWh: r0(f.solar.generationKWh), selfConsumedKWh: r0(f.solar.selfConsumedKWh), exportedKWh: r0(f.solar.exportedKWh) }
+        : null,
       annualSavings: { low: r0(e.annualSavings.low), mid: r0(e.annualSavings.mid), high: r0(e.annualSavings.high) },
       annualSavingsPctOfBill: measured.annual.cost > 0 ? r1((e.annualSavings.mid / measured.annual.cost) * 100) : 0,
       paybackYears: e.metrics.paybackYears === null ? null : r1(e.metrics.paybackYears),
@@ -259,7 +299,7 @@ export function buildAdvisorContext(input: AdvisorInput, question = ''): Advisor
           comfortWarnings: scenarioResult.flags.filter((f) => f.severity === 'warn').map((f) => f.message),
         }
       : null,
-    upgradesMeasuredAgainst: scenarioResult ? 'scenario' : 'baseline',
+    upgradesMeasuredAgainst: onScenario ? 'scenario' : 'baseline',
     upgrades,
     occupancyExample: {
       fromPct: r0(from * 100),

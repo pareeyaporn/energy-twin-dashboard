@@ -2,11 +2,50 @@
   "climates": {
     "chicago": {
       "label": "Chicago, IL",
-      "meanTempF": [26, 29.5, 39, 49.5, 60, 70, 75, 73.5, 66, 53.5, 41.5, 31],
-      "balancePointF": 65
+      "meanTempF": [
+        26,
+        29.5,
+        39,
+        49.5,
+        60,
+        70,
+        75,
+        73.5,
+        66,
+        53.5,
+        41.5,
+        31
+      ],
+      "balancePointF": 65,
+      "latitude": 41.88,
+      "solar": {
+        "kWhPerKwYear": {
+          "low": 1100,
+          "mid": 1200,
+          "high": 1300
+        },
+        "monthlyShare": [
+          0.045,
+          0.058,
+          0.085,
+          0.1,
+          0.115,
+          0.12,
+          0.122,
+          0.112,
+          0.092,
+          0.068,
+          0.043,
+          0.04
+        ],
+        "source": "PLACEHOLDER. Annual output per kW (DC) of a fixed rooftop array and its monthly split for Chicago; replace with NREL PVWatts for the site (developer.nrel.gov is not reachable from the build environment yet).",
+        "verified": false
+      }
     }
   },
-  "cityToClimate": { "chicago,il": "chicago" },
+  "cityToClimate": {
+    "chicago,il": "chicago"
+  },
   "defaultClimate": "chicago",
   "source": "PLACEHOLDER. Approximate Chicago monthly mean temperatures (NOAA 1991 to 2020 normals, to be verified). Degree days are computed from monthly means with a 65 F balance point.",
   "verified": false

@@ -6,6 +6,7 @@ import shapesJson from '@/data/hotel/shapes.json';
 import equipmentJson from '@/data/hotel/equipment.json';
 import presetsJson from '@/data/hotel/presets.json';
 import upgradesJson from '@/data/hotel/upgrades.json';
+import incentivesJson from '@/data/hotel/incentives.json';
 import type { HotelData } from './types';
 
 /** The sourced data the hotel engine reads. Pass a different bundle to tests to isolate behavior. */
@@ -18,4 +19,5 @@ export const hotelData: HotelData = {
   equipment: equipmentJson as unknown as HotelData['equipment'],
   presets: presetsJson as unknown as HotelData['presets'],
   upgrades: upgradesJson as unknown as HotelData['upgrades'],
+  incentives: incentivesJson as unknown as HotelData['incentives'],
 };

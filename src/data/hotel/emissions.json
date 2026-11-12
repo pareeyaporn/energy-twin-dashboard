@@ -1,6 +1,9 @@
 {
-  "elecKgCO2ePerKWh": { "IL": 0.4, "default": 0.37 },
+  "elecKgCO2ePerKWh": {
+    "IL": 0.2313,
+    "default": 0.3561
+  },
   "gasKgCO2ePerTherm": 5.31,
-  "source": "PLACEHOLDER. Gas: EPA GHG Emission Factors Hub, natural gas about 53.06 kg CO2 per MMBtu (about 5.31 kg per therm). Electricity: illustrative regional grid factors, to be replaced with EPA eGRID subregion values. Estimates only; not verified carbon accounting.",
+  "source": "Electricity: EIA State Electricity Profiles, data year 2024 (released November 10, 2025), carbon dioxide emission rate of power generated in the state: Illinois 510 lbs/MWh (0.2313 kg/kWh), United States 785 lbs/MWh (0.3561 kg/kWh). These are CO2 only (not CO2e) and describe in-state generation; Illinois is nuclear-heavy and the grid serving a Chicago building (EPA eGRID subregion) may be higher, so treat carbon results as estimates. Gas: about 53.06 kg CO2 per MMBtu (about 5.31 kg per therm) from the EPA GHG Emission Factors Hub, to be verified. Not verified carbon accounting.",
   "verified": false
 }

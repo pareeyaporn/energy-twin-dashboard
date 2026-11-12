@@ -114,6 +114,27 @@ automatically if the AI is slow, unavailable or states a number it was not given
 clearAdvisor(). Keep the answer text exactly as given. Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```
 
+## LV10 — One workspace (run before LV9)
+
+```
+Make the dashboard (/) one workspace and keep the current visual style. Desktop: a 380px left panel with four numbered tabs
+"1 Hotel", "2 Scenario", "3 Invest", "4 Ask"; the center keeps Stage (the digital twin) always visible, with a KPI strip above it
+showing annual cost, energy and carbon from selectCompare (before → after and the change, each with an "Estimate" badge; show only
+the current value when before and after are equal). Remove the right panel and PlanDrawer; remove the top-bar Advisor button (it is
+now a tab) and rename the Overview link "Report".
+Tab 1 Hotel: the preset picker and a summary of hotel.profile (name, city, rooms, floor area, HVAC type, monthly bill or "estimated")
+with an "Edit details" button that expands HotelProfileForm.
+Tab 2 Scenario: the ScenarioSimulator controls with occupancy, the two setpoints and smart room controls first and the rest under
+"More controls"; then stress tests, "Why this changed", comfort notes and saved scenarios. Leave out its tiles and monthly chart here
+(the KPI strip and twin show the change); keep the full /scenario page.
+Tab 3 Invest: budget input with quick chips $25,000 / $50,000 / $100,000 (setHotelBudget), objective, "Optimize for this scenario",
+the Find button with the live counter, and the three packages as compact cards (role, name, investment, annual savings, payback,
+Apply). Applying a package calls applyHotelPackage and setCompareMode("split"). A "Compare in detail" link opens /optimizer.
+Tab 4 Ask: AdvisorPanel, filling the panel height.
+Mobile: twin and KPI strip on top, the same four tabs below. Reuse the existing components; do not duplicate their logic.
+Don't modify src/engine, src/data, src/twin, src/store or supabase.
+```
+
 ## LV9 — Polish and disclaimers (task 4.7)
 
 ```

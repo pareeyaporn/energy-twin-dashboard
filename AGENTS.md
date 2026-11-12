@@ -34,7 +34,6 @@ use the editor.
 - Mock data lives in `src/data/*.json`; `src/engine` (calculations) and `src/three` (3D) are reserved for code the owner adds later — don't add logic there.
 - Zustand selectors that return new objects must be wrapped in `useShallow` to avoid render loops.
 - The index page renders one CSS-responsive workspace tree, so stage popovers are not duplicated and hydration never swaps desktop/mobile trees.
-- Translate legacy sample terminology only at the presentation boundary with `src/lib/presentation.ts`; keep underlying data and calculations unchanged during UI-only wording updates.
 - Hotel profile controls display resolved `hotel.profile` values and commit optional input patches through `setHotelInput`; nested temperature resets preserve other explicit setpoints because the store clears only top-level keys.
 - The Overview is a separate content route reading `selectDisplayed`, `selectZoneRows`, and `selectOpportunities`; rank unique standalone upgrades by their supplied whole-hotel savings to avoid double-counting zone entries.
 - Place the owner-managed `HotelTwin` unchanged inside Stage; use stage container queries for zone details beside or below the diagram, and keep legacy stage overlays unmounted to avoid duplicate controls and costs.

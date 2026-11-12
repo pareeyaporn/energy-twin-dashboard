@@ -20,7 +20,7 @@ is built today, and what we will add. Product context is in [10_HOTEL_SPEC.md](1
   `src/integrations/supabase/` the client Lovable generated. The advisor function (`supabase/functions/advisor`) is deployed and the
   `ANTHROPIC_API_KEY` secret is set; answers arrive in about 3 seconds.
 - **Engine** (`src/engine/hotel`, pure TypeScript, no network): baseline, scenarios, twin data, upgrades, the common financial breakdown, solar,
-  incentives, optimizer and the advisor's browser side. The home engine files in `src/engine/` are legacy and unused by the app.
+  incentives, optimizer and the advisor's browser side. (The home-era engine was removed.)
 - **No other backend.** No database tables are used; saved scenarios live in the browser session.
 
 ## 3. Runtime topology

@@ -3,7 +3,7 @@
 Paste these into Claude Code one at a time, from the repo root. Wait for each to finish, check the result, then move on.
 Every prompt ends with build + tests + commit + push so Lovable stays in sync. Task numbers refer to [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md).
 
-Before each prompt: `git pull`. Read `CLAUDE.md` first. The old home-era prompts (P0–P15) are replaced by this file; their code is still in `src/engine` as legacy.
+Before each prompt: `git pull`. Read `CLAUDE.md` first. The old home-era prompts (P0–P15) are replaced by this file; their code has been removed.
 
 **Status:** H0–H11 are done (engine, data, store, twin, advisor). Since then, also done outside these prompts: the common financial
 breakdown and solar model (docs/13 section 8), research passes 1–3 and the first calibration round (docs/14), and the product decisions (docs/15).
@@ -26,7 +26,7 @@ and the peer benchmark. **Next: the Flow, Rooms and Equipment tab redesign, then
 ## H0 — Orientation (5 min)
 
 ```
-Read CLAUDE.md and docs/10_HOTEL_SPEC.md, docs/11_HOTEL_TASKS.md and docs/12_BACKEND_ARCHITECTURE.md. Inspect src/engine (home-era),
+Read CLAUDE.md and docs/10_HOTEL_SPEC.md, docs/11_HOTEL_TASKS.md and docs/12_BACKEND_ARCHITECTURE.md. Inspect src/engine/hotel,
 src/data, src/store/useTwin.ts and src/components. Summarize: what is reusable, what is residential-specific, and anything in the
 repo that conflicts with the docs. Don't change anything yet.
 ```

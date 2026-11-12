@@ -13,7 +13,7 @@ An AI advisor explains the computed results in plain language. It never produces
 
 History: the project began as a home energy simulator (Maya's house). We pivoted because an earlier winner, Eden, covers
 net-zero **new-build** home design. We differentiate on **existing** buildings, operations plus investments. The hotel product is
-built (`src/engine/hotel/`, `src/twin/`, the 3D twin in `src/three/`, the workspace UI, the advisor); the home engine files in `src/engine/` are legacy and unused.
+built (`src/engine/hotel/`, `src/twin/`, the 3D twin in `src/three/`, the workspace UI, the advisor); the home-era engine, data and specs were removed (git history keeps them).
 
 Hackathon: 48 hours. Built in **Lovable**, extended with **Claude Code**, synced through **GitHub**.
 Demo = one flawless 6–7 minute path (script in `docs/07`): synthetic 100-room hotel (Chicago) in 3D → zone-level energy → a living
@@ -28,7 +28,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 - `docs/13_HOTEL_ENGINE_SPEC.md` — equations, assumptions, the financial breakdown and the demo figures
 - `docs/08_DATA_TODO.md` — data status and research still to find; `docs/14_RESEARCH_LOG.md` — every sourced value; `docs/15_PRODUCT_DECISIONS.md` — team decisions (not facts)
 - `docs/04_3D_SPEC.md` — the 3D hotel twin (what drives each visual); `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md` — prompts and status
-- Home-era docs, still useful as patterns: `docs/02_ENGINE_SPEC.md`, `docs/03_DATA_SPEC.md`. (`docs/09`, the superseded offices-and-retail plan, was removed; it is in git history.)
+- Removed (in git history): the home-era specs `docs/02`, `docs/03` and `docs/09`, the superseded offices-and-retail plan.
 
 ## Honesty rules
 
@@ -56,8 +56,8 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 | --- | --- | --- |
 | `src/pages/`, `src/components/` | Lovable | Do NOT edit unless the user explicitly asks |
 | `src/store/` | Shared | Agreed contract. Change only with the user's OK; keep backwards compatible |
-| `src/engine/` | Claude Code | Pure TypeScript. No React, no network, no AI. `hotel/` is the active engine; the home files are legacy |
-| `src/data/` | Claude Code | JSON only. Every value carries a source; `hotel/` is the active set |
+| `src/engine/` | Claude Code | Pure TypeScript. No React, no network, no AI. The engine lives in `hotel/` |
+| `src/data/` | Claude Code | JSON only. Every value carries a source; `hotel/` is the data set (three home-era files remain only because the store imports them) |
 | `src/twin/` | Claude Code | The clickable 2D hotel diagram (`<HotelTwin />`). Lovable only places it |
 | `src/three/` | Claude Code | The 3D hotel twin (built, Phase 9). Loaded by `src/twin/parts/View3D.tsx`; Lovable places only `<HotelTwin />` |
 | `supabase/functions/` | Claude Code | Backend functions (AI advisor). Keys are read only here |
@@ -106,7 +106,7 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 `seasons` / `day` / `year`, `compareMode`)
 and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
 `applyHotelPackage` and `askAdvisor`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
-`selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, …). Some home-era fields remain for compatibility.
+`selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).
 
 Before changing the store, read `src/store/useTwin.ts` and **extend** it, backwards compatibly, rather than replacing it.
 Show the diff and get the user's OK first.
@@ -122,7 +122,7 @@ npx vitest run       # engine tests
 
 ## Coding conventions
 
-- TypeScript strict. Export types from `src/engine/types.ts`.
+- TypeScript strict. Export types from `src/engine/hotel/types.ts`.
 - Engine functions are pure and deterministic: same input → same output. No `Date.now()`, no randomness.
 - Money in US dollars, rounded only for display. Energy in kWh (electric) and therms (gas).
 - Every number shown to users comes with a `source` and, where relevant, a `[low, high]` range.

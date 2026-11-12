@@ -8,7 +8,7 @@ What is sourced, what is still a placeholder, and what to look up next, for the 
 
 The model is described in [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md); tasks are in [11_HOTEL_TASKS.md](11_HOTEL_TASKS.md) (7.x, 7b.x).
 **Every change with before, after and source is logged in [14_RESEARCH_LOG.md](14_RESEARCH_LOG.md).**
-The home-era data files in `src/data/` belong to the legacy home engine and are not used by the hotel app.
+The home-era data files were removed, except `presetHomes.json`, `mockPackages.json` and `mockParts.json`, which the store still imports for backwards compatibility.
 
 ## Status at a glance (November 2026)
 

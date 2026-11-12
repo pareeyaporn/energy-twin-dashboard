@@ -255,7 +255,7 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
 - [ ] 8.5 Claims check: nothing says engineering-grade accuracy, verified carbon savings, guaranteed returns or real-time monitoring
 - [ ] 8.7 "Reset demo" control: restores the 100-room preset, baseline, July 3 PM, 3D home view and clears the advisor
 - [ ] 8.8 Re-run the demo figures from the engine before each rehearsal and update the script in `docs/07`
-- [ ] 8.6 Remove or hide leftover home-only code paths from the demo (home UI removed in LV9); decide whether to delete the home engine and data after the demo
+- [x] 8.6 Remove or hide leftover home-only code paths from the demo (home UI removed in LV9; home engine, data, unused home components and specs removed November 2026, verified with an import graph); decide whether to delete the home engine and data after the demo
 
 ## Definition of done (per task)
 `npm run build` and `npx vitest run` pass; the demo path still works; committed and pushed; numbers come only from the engine.

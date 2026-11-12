@@ -46,7 +46,7 @@ LED lighting plus occupancy sensors, $39,600, about $10,400 a year, payback 3.8 
 
 | Area | State |
 | --- | --- |
-| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (338 tests) |
+| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (300 tests) |
 | Data (`src/data/hotel`) | **Sourced from primary documents:** EIA prices, price growth (AEO2026) and hotel end uses (CBECS 2018); EPA eGRID2023 grid factors by location and the EPA gas factor; PVWatts solar output; NOAA weather; IL-TRM hotel measures (smart controls, sensors, lighting interaction, hot water); NLR solar O&M and degradation; Chicago hotel sizes and occupancy (Choose Chicago, STR). **Still placeholders:** most installed costs, solar $/W, the solar export credit, and the monthly occupancy shape. Phase 7 is closed except costs (7.6) and solar $/W (7.7). See `docs/08`, `docs/14`, `docs/15` |
 | Store (`src/store`): profile, scenarios, optimizer (scenario-aware), upgrade comparison, twin controls, advisor | Built |
 | Digital twin: 2D (`src/twin`) and 3D (`src/three`, Phase 9) | Built |
@@ -54,7 +54,6 @@ LED lighting plus occupancy sensors, $39,600, about $10,400 a year, payback 3.8 
 | Flow, Rooms and Equipment tab redesign (animated Sankey, room facade, equipment cards) | Planned next |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
 | Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |
-| Home-era engine and data | Legacy, unused by the app; home UI components removed |
 
 ## Tech stack
 - TanStack Start (React, TypeScript, Vite), Tailwind, shadcn/ui, built to a Cloudflare Worker target
@@ -86,7 +85,7 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | --- | --- |
 | `src/components/`, `src/routes/` | UI (Lovable) |
 | `src/store/` | Shared state contract |
-| `src/engine/` | Pure TypeScript calculations (`hotel/` is the active engine; the rest is legacy) |
+| `src/engine/hotel/` | Pure TypeScript calculations (the engine) |
 | `src/data/` | Sourced JSON data |
 | `src/twin/` | Clickable hotel twin (2D layers, controls, the 3D wrapper) |
 | `src/three/` | 3D hotel scene (building, scenery, street, people, camera) |
@@ -112,7 +111,6 @@ npx vitest run  # tests
 - [Claude Code prompts](docs/05_CLAUDE_CODE_PROMPTS.md), [Lovable prompts](docs/06_LOVABLE_PROMPTS.md), [demo checklist](docs/07_DEMO_CHECKLIST.md)
 - [Data and research to-do](docs/08_DATA_TODO.md) and [setup](docs/01_SETUP.md)
 - [3D twin spec](docs/04_3D_SPEC.md) (what drives each visual)
-- Home-era specs, kept as patterns: [engine](docs/02_ENGINE_SPEC.md), [data](docs/03_DATA_SPEC.md)
 
 ## Working with Lovable
 

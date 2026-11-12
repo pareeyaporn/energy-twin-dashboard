@@ -50,8 +50,6 @@ Copy these files into the repo root, keeping the folders:
 ```
 CLAUDE.md
 docs/01_SETUP.md
-docs/02_ENGINE_SPEC.md
-docs/03_DATA_SPEC.md
 docs/04_3D_SPEC.md
 docs/05_CLAUDE_CODE_PROMPTS.md
 docs/06_LOVABLE_PROMPTS.md

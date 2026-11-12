@@ -104,3 +104,10 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
 - **Upgrades not modeled** (heat-pump HVAC, heat-pump water heaters, battery storage, window film) are listed as "Not modeled yet",
   with no figures, and cannot be selected.
 - **Plans are kept in the browser's local storage**; only choices are stored, every figure is recomputed by the engine.
+
+## 11. Solar prices and export credit (November 2026)
+
+- **Solar price per W follows the LBNL 2024 national medians by system size**, before incentives, labeled as national benchmarks, not
+  Chicago quotes. The ±15% range around each median is a team placeholder. Users can override the price per W for their hotel.
+- **Export credit stays $0** until the hotel's tariff is confirmed (docs/14, pass 5); users can enter a value. It does not affect the
+  presets, which export nothing.

@@ -51,6 +51,10 @@ export interface HotelInput {
   electricityRate?: number; // $/kWh
   /** EPA eGRID subregion acronym (for example RFCW); defaults from the city, then the state, then the U.S. rate. */
   gridSubregion?: string;
+  /** Override for the solar installed price, $ per W (DC) before incentives, all sizes (the low–high spread of the size tier is kept). */
+  solarCostPerW?: number;
+  /** Credit per exported solar kWh, $ (default: the region's researched value, else $0 as a conservative fallback). */
+  solarExportCreditPerKWh?: number;
   gasRate?: number; // $/therm
   occupancy?: number; // annual average, 0..1
   seasonalOccupancy?: number[]; // 12 relative factors
@@ -94,6 +98,9 @@ export interface HotelProfile {
   budget: number;
   horizonYears: number;
   objective: Objective;
+  /** User overrides (absent = the data's values). */
+  solarCostPerW?: number;
+  solarExportCreditPerKWh?: number;
 }
 
 export interface ResolvedProfile {

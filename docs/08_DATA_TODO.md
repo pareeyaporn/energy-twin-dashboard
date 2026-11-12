@@ -53,15 +53,19 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
 - [ ] **A2. Installed costs** (per ft², per room or per unit) for LED retrofit, occupancy sensors (the TRM gives $55–125 per sensor; needs a coverage
   area per sensor), energy management controls, HVAC equipment, water heating plus low-flow fixtures (TRM: about $12 per showerhead) and roof
   insulation. Sources: IL-TRM measure costs where they exist, ComEd and Peoples Gas program data, DOE/NREL cost studies, hotel case studies.
-- [ ] **A3. Solar installed $/W by size** for small commercial (≤100 kW) systems in Illinois: LBNL *Tracking the Sun* / *Distributed Solar and
-  Storage* data file. `emp.lbl.gov` blocks automated downloads, so **download it by hand and upload it** to the session.
+- [x] **A3. Solar installed $/W by size — done (November 2026).** LBNL *Distributed Solar & Storage, 2025 Data Update*, p. 8: 2024 national
+  median gross installed prices for non-residential PV by size ($3.70 up to 10 kW … $1.70 over 1,000 kW), transcribed by the team (the PDF host
+  is not reachable from the build session). The ±15% low/high band is a placeholder. Editable per hotel (`solarCostPerW`). Still to do:
+  Illinois- or Chicago-specific prices and the percentiles, if wanted.
 - [ ] **A4. Incentive amounts** (only with a source; until then shown as unverified and $0). ComEd: the 2026 Standard Incentives Application
   rules are recorded; the measure amounts are in worksheets on `azure-na-assets.contentstack.com` (allow it, or download the worksheets by hand).
   Also: ComEd business rebates for LED, controls and HVAC (`www.comed.com` is reachable); Peoples Gas
   rebates; Illinois Shines REC payments; federal Section 48E status for new solar (needs `www.irs.gov`). Enter as `value`, `applied: true`,
   `verified: true` in `incentives.json`.
 - [ ] **A5. Solar export credit $/kWh** for a ComEd non-residential customer (supply-only credit): ComEd tariff or Illinois Commerce Commission filing.
-  Low impact for the demo hotel, which exports nothing.
+  **$0 kept as a labeled conservative fallback, now editable per hotel** (`solarExportCreditPerKWh`). No effect on either preset: both use all
+  their solar on site (0 kWh exported). Which rules apply to this hotel is listed in docs/14, pass 5 (to confirm; `www.ilga.gov` and
+  `illinoisshines.com` are not reachable from the build session).
 
 ## To do — priority B (improves realism)
 

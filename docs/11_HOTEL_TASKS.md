@@ -159,7 +159,7 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [x] 7.4 Hot water: IL-TRM 4.3.2 / ASHRAE, 14 gal per hotel room per day (the default 20 per occupied room is consistent); kitchen share from CBECS; IL-TRM hotel lighting hours (guest 777, common 4,542 h a year) recorded
 - [x] 7.5 HVAC efficiency by type: gas 0.80, resistance 1.0, heat pump COP 2.3 (IL-TRM conversion), PTHP added (docs/15); condensing boiler ≥90% (IL-TRM 4.4.10)
 - [ ] 7.6 Upgrade savings and costs. **Savings sourced or calibrated for all; costs sourced** for smart controls ($260/room) and noted for boilers ($22.95/kBtu-h), sensors ($55–125 each), showerheads ($12). **Still placeholders:** LED, sensor, EMS, HVAC (chiller part), water heating and insulation costs per ft² or per room (docs/08 A2)
-- [ ] 7.7 Rooftop solar: output (PVWatts), O&M, degradation sourced; three sizes. **Blocked:** $/W needs the LBNL file (manual download); export credit $ not published
+- [x] 7.7 Rooftop solar: output (PVWatts), O&M, degradation sourced; three sizes; **$/W by size from LBNL 2025 Data Update (2024 national medians), editable**; export credit $0 (labeled fallback, editable) until the tariff is confirmed
 - [x] 7.8 Grid emission factor for the demo region: EPA eGRID2023 RFCW (0.4155 kg CO2e/kWh); gas from the EPA Emission Factors Hub 2025
 - [x] 7.9 Seasonal occupancy: annual anchor sourced (Chicago CBD 69.2% in 2025, STR via Choose Chicago; used for the 300-room preset); the monthly shape stays synthetic because only annual figures are published, as the task allows
 - [x] 7.10 Comfort limits documented as a product decision (docs/15); ASHRAE 55 is a paid standard and was not consulted, so the limits are not presented as ASHRAE values

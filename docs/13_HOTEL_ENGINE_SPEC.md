@@ -194,7 +194,7 @@ Price growth EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar: PVWatts C
 | LED lighting | $33,000 | 62,186 | −1,008 | $7,800 | 4.2 y | $7,495 | $51,903 | 20.5 |
 | Water heating and low-flow | $22,000 | 8,897 | 1,720 | $2,848 | 7.7 y | −$6,808 | $11,030 | 12.8 |
 | Energy management | $26,000 | 18,680 | 539 | $3,126 | 8.3 y | −$9,591 | $8,936 | 10.6 |
-| Rooftop solar (55 kW, 68,211 kWh, all used on site) | $154,000 | 68,211 | 0 | $8,614 | 17.9 y | −$109,521 | −$61,346 | 28.3 |
+| Rooftop solar (55 kW at $2.90/W, LBNL 2024 median; 68,211 kWh, all used on site) | $159,500 | 68,211 | 0 | $8,614 | 18.5 y | −$115,021 | −$66,846 | 28.3 |
 | Insulation | $38,500 | 8,186 | 733 | $1,831 | 21.0 y | −$28,807 | −$17,630 | 7.3 |
 | Smart room controls (fan saving calibrated to IL-TRM) | $26,000 | 10,820 | 209 | $1,715 | 15.2 y | −$17,015 | −$6,918 | 5.6 |
 | HVAC equipment | $110,000 | 15,275 | 1,187 | $3,249 | 33.9 y | −$92,822 | −$73,079 | 12.6 |

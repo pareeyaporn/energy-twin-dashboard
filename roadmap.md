@@ -1,18 +1,5 @@
 # Task roadmap
 
-## Existing advisor deployment
-
-- [x] Confirm Lovable Cloud is enabled.
-- [ ] Collect ANTHROPIC_API_KEY with the Add secret form.
-- [ ] Deploy the existing advisor edge function unchanged.
-
-## Agent integrations
-
-- [x] Enable Lovable Cloud for secure external access.
-- [x] Activate managed OAuth and implement the MCP server and consent flow.
-- [ ] Add browser-local dashboard tools without moving session state to the server.
-- [ ] Verify the integration catalog and dashboard flows.
-
 ## AI advisor
 
 - [x] Add the advisor panel, suggested questions, busy state, source labels, and clear action.

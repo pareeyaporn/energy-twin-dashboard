@@ -41,6 +41,3 @@ use the editor.
 - Budget optimizer views share hotel actions and package presentation; never recalculate financial values in UI, label net benefit with the result's actual horizon, and delay winner application by 600ms without overriding manual selection.
 - The advisor panel uses AI Elements and the existing store actions; preserve returned text and source labels without adding inference, error messages, or fallback logic in the UI.
 - Prebundle lazy panel dependencies and React together in Vite's optimizeDeps include list to prevent late discovery replacing React chunks beneath mounted components.
-- Remote MCP uses managed OAuth and exposes only static demo catalogs; never import the browser store into server tools because session state is tab-local.
-- Browser agent tools register in the component owning the controls through useWebMCP, use the same validated actions as the UI, and emit only static-name telemetry.
-- Integration sign-in uses a public callback and canonical same-origin return paths so consent survives password, signup, and social sign-in without exposing tokens.

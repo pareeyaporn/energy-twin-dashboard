@@ -12,10 +12,13 @@ const sources = [
 
 export function SourcesSheet() {
   const { sourcesOpen, setSourcesOpen } = useTwin();
+  const plan = useTwin((s) => s.hotelPlan);
+  const lineSources = [...new Set([...(plan?.packages ?? []), ...(plan?.objectiveWinner ? [plan.objectiveWinner] : [])].flatMap((p) => p.evaluation.lineItems.map((line) => line.source)))];
   return (
     <Sheet open={sourcesOpen} onOpenChange={setSourcesOpen}>
-      <SheetContent className="border-border bg-panel">
-        <SheetHeader><SheetTitle>Sources</SheetTitle><SheetDescription>Public data behind every estimate.</SheetDescription></SheetHeader>
+      <SheetContent className="overflow-y-auto border-border bg-panel">
+        <SheetHeader><SheetTitle>Sources</SheetTitle><SheetDescription>References and assumptions behind the estimates; synthetic values are not verified.</SheetDescription></SheetHeader>
+        {lineSources.length > 0 && <section className="mt-5 space-y-3"><h2 className="text-sm font-semibold">Investment sources</h2><ul className="space-y-3 text-xs text-muted-foreground">{lineSources.map((source) => <li key={source} className="break-words border-b border-border pb-3">{source}</li>)}</ul></section>}
         <ul className="mt-6 space-y-3">
           {sources.map((s) => (
             <li key={s.name}>

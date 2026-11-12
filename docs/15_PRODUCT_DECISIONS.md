@@ -164,3 +164,9 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
   Custom plans are tagged with the property they were made for; plans made before the portfolio existed show for every hotel.
 - **Map colors:** energy cost and intensity use the twin's heat-map scale (blue → amber → red); savings potential and priority use one green hue
   (dim → bright). The cost view carries a note that larger hotels naturally spend more.
+- **My portfolio** uses one custom plan per hotel: the one chosen, else the hotel's latest plan; plans are measured on the hotel's baseline (like the
+  AI portfolio), so a plan can show different figures here than in a twin where "optimize for this scenario" is on. Both portfolios use one totals
+  function, so they compare like for like; comfort is shown as the lowest score among the chosen plans.
+- **Portfolio stress tests** apply the single-hotel test to the chosen hotels only; the others keep their normal-year cost. Plans are the AI
+  portfolio (none until the optimizer has run), my portfolio, or none. The check whether a hotel's recommendation changes under a persistent
+  change stays in each hotel's twin, because it needs two optimizer runs per hotel.

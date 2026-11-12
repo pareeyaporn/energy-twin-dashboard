@@ -99,5 +99,8 @@ export {
   portfolioSummary,
   optimizePortfolioBudget,
   chooseOnePerGroup,
+  portfolioTotals,
 } from './portfolio';
-export type { PreparedProperty, PropertySummary, PortfolioSummary, PortfolioAllocation, PortfolioPlan } from './portfolio';
+export type { PreparedProperty, PropertySummary, PortfolioSummary, PortfolioAllocation, PortfolioPlan, PortfolioTotals } from './portfolio';
+export { evaluatePortfolioCustomPlan, portfolioStressReport } from './portfolioPlans';
+export type { PortfolioCustomRow, PortfolioCustomEvaluation, PortfolioStressRow, PortfolioStressReport } from './portfolioPlans';

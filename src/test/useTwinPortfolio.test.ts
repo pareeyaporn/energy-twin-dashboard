@@ -100,3 +100,46 @@ describe("portfolio store", () => {
     expect(get().hotel.profile.name).toBe("Riverwalk Grand");
   });
 });
+
+import { selectPortfolioCustomEvaluation, selectPortfolioPlanChoice, selectPortfolioStressReport } from "@/store/hotelDerived";
+
+describe("portfolio P1: my portfolio and stress tests", () => {
+  it("uses each property's latest plan by default, and a chosen one or none when set", () => {
+    get().openProperty("wells-street");
+    const a = get().createCustomPlan("Wells A", [{ id: "led_lighting" }]);
+    const b = get().createCustomPlan("Wells B", [{ id: "occupancy_sensors" }]);
+    expect(selectPortfolioPlanChoice(get())["wells-street"]?.id).toBe(b);
+    get().setPortfolioCustomPlan("wells-street", a);
+    expect(selectPortfolioPlanChoice(get())["wells-street"]?.id).toBe(a);
+    const ev = selectPortfolioCustomEvaluation(get());
+    expect(ev.rows.find((r) => r.propertyId === "wells-street")!.planName).toBe("Wells A");
+    get().setPortfolioCustomPlan("wells-street", null);
+    expect(selectPortfolioPlanChoice(get())["wells-street"]).toBeNull();
+    // A plan made for another property cannot be chosen.
+    get().setPortfolioCustomPlan("ohare-gateway", a);
+    expect(selectPortfolioPlanChoice(get())["ohare-gateway"]?.id).not.toBe(a);
+  });
+
+  it("Customize AI plan copies the AI portfolio into one custom plan per property with the same totals", async () => {
+    await runPortfolio();
+    const ai = get().portfolioPlan!;
+    const ids = get().customizeAiPortfolio();
+    expect(ids.length).toBe(ai.allocations.filter((x) => x.candidate).length);
+    const mine = selectPortfolioCustomEvaluation(get());
+    expect(mine.totals.annualSavings).toBeCloseTo(ai.totals.annualSavings, 4);
+    for (const id of ids) expect(get().customPlans.find((p) => p.id === id)!.propertyId).toBeTruthy();
+  });
+
+  it("runs a portfolio stress test on a selection with the AI plans", async () => {
+    await runPortfolio();
+    expect(selectPortfolioStressReport(get())).toBeNull();
+    get().setPortfolioStressTest("price_up_20");
+    get().setPortfolioStressScope(["riverwalk-grand", "lakefront-convention"]);
+    const r = selectPortfolioStressReport(get())!;
+    expect(r.rows.filter((x) => x.inScope).map((x) => x.propertyId)).toEqual(["riverwalk-grand", "lakefront-convention"]);
+    expect(r.totals.increase).toBeGreaterThan(0);
+    expect(r.rows.every((x) => x.planLabel === "AI portfolio")).toBe(true);
+    get().setPortfolioStressPlan("none");
+    expect(selectPortfolioStressReport(get())!.rows.every((x) => x.planLabel === null)).toBe(true);
+  });
+});

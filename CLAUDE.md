@@ -108,10 +108,10 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 `optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, `hotelDiscountRate`, `customPlans` / `activeCustomPlanId` (local storage),
 `planBeforeStress`, twin controls (`selectedZone`, `twinLayer`, time with modes
 `seasons` / `day` / `year`, `compareMode`)
-the portfolio (`portfolio`, `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
+the portfolio (`portfolio`, `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioCustomPlanIds`, the portfolio stress test) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
 `applyHotelPackage`, `askAdvisor`, `openProperty` and `runPortfolioOptimizer`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
 `selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, `selectCatalog`, `selectCustomPlanEvaluation`,
-`selectPlanExplanation`, `selectStressReport`, `selectPortfolioSummary`, `selectVisibleCustomPlans`, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).
+`selectPlanExplanation`, `selectStressReport`, `selectPortfolioSummary`, `selectPortfolioCustomEvaluation`, `selectPortfolioStressReport`, `selectVisibleCustomPlans`, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).
 
 Before changing the store, read `src/store/useTwin.ts` and **extend** it, backwards compatibly, rather than replacing it.
 Show the diff and get the user's OK first.

@@ -358,6 +358,14 @@ Portfolio optimizer at **$500,000, balanced**: $495,389 gross, $169,973 incentiv
 cost), payback **2.8 years**, 10-year NPV $504,341, 316 t CO2 a year. LED + sensors at Lakeshore Inn, Riverwalk Grand and the convention hotel;
 insulation + LED + sensors at O'Hare Gateway; LED + water heating at Wells Street. 2,560 combinations tested (512 per hotel).
 
+### My portfolio and stress tests (`portfolioPlans.ts`, Phase 13 P1)
+
+- `evaluatePortfolioCustomPlan(items, { budget })`: each hotel's chosen custom plan through `evaluatePlan` (the plan builder's function), totals with
+  `portfolioTotals` (shared with the AI portfolio), and warnings (over budget, conflicts, empty). Copying the AI portfolio gives identical totals.
+- `portfolioStressReport(items, test, scope)`: `stressTestReport` for each hotel in the scope, with its plan; totals of normal and stressed cost,
+  with and without plans, and the extra cost the plans avoid. Example, electricity +20% on four hotels (all but Wells Street) with the $500,000
+  AI portfolio: the chain's cost rises $244,071 a year; the plans avoid $23,070 of it (9%); payback at Riverwalk Grand falls from 2.5 to 2.1 years.
+
 ### Limits
 
 All five hotels share Chicago weather. Hotel types differ only through size, age, HVAC, occupancy and guest hours: the model has no ballroom,

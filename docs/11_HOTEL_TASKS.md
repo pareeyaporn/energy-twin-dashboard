@@ -8,7 +8,7 @@ backwards compatibly; clickable **2D** twin with the **Tier A** feature set (bel
 `docs/09` superseded; merge the P5 optimizer branch as is.
 
 **Status (November 2026):** Phases 0–6, 7b and 9 are done; Phase 7 is open only for installed costs (7.6). Phases 10–12 (Flow, Rooms and
-Equipment; custom plans; stress tests) are done. Phase 13 P0 and the portfolio optimizer (13.1–13.28) are done; next: Phase 13 P1 (13.29–13.32) or Phase 8 (demo hardening).
+Equipment; custom plans; stress tests) are done. Phase 13 P0 and P1 (13.1–13.32) are done; next: Phase 8 (demo hardening, including the portfolio in the demo script) or Phase 13 P2.
 
 Order: Phase 0 → 1 → 2 → 3 are engine and can start now. Phase 7 (data research, TEAM) runs in parallel with all of them.
 Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Phase 6 needs 3.
@@ -342,13 +342,13 @@ P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress t
 - [x] 13.28 **P0** [CC] Tests: page renders, sort works, "Explore digital twin" opens the property
 
 ### 13G — Custom portfolio plan and comparison (P1)
-- [ ] 13.29 **P1** [CC] Build a portfolio plan from each property's custom plan; totals across properties; budget used and remaining
-- [ ] 13.30 **P1** [CC] "Customize AI plan" copies each property's recommended package into that property's custom plan
-- [ ] 13.31 **P1** [CC] AI portfolio vs my portfolio: investment, savings, payback, NPV, carbon, comfort
+- [x] 13.29 **P1** [CC] Build a portfolio plan from each property's custom plan; totals across properties; budget used and remaining — *done: "My portfolio" tab: one custom plan (or none) per hotel, default the hotel's latest plan; totals, budget used and left, over-budget warning; "Edit in twin"*
+- [x] 13.30 **P1** [CC] "Customize AI plan" copies each property's recommended package into that property's custom plan — *done: one new custom plan per hotel, tagged with the hotel; totals equal the AI portfolio (tested)*
+- [x] 13.31 **P1** [CC] AI portfolio vs my portfolio: investment, savings, payback, NPV, carbon, comfort — *done: "Compare" tab, from the same totals function, better values highlighted, plus lowest comfort score and hotels with a package*
 
 ### 13H — Portfolio stress tests (P1)
-- [ ] 13.32 **P1** [CC] Apply a stress test to one property, a selection or all; per property and total: normal vs stressed cost, with the
-      recommended plan, cost avoided; temporary vs persistent rules as in Phase 12
+- [x] 13.32 **P1** [CC] Apply a stress test to one property, a selection or all; per property and total: normal vs stressed cost, with the
+      recommended plan, cost avoided; temporary vs persistent rules as in Phase 12 — *done: any of the 8 tests on one, some or all hotels, with the AI portfolio, my portfolio or no plans; persistent tests show payback under the change per hotel; the per-hotel recommendation check stays in each twin (two optimizer runs per hotel)*
 
 ### 13I — Later (P2)
 - [ ] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio

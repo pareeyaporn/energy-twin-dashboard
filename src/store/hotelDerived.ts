@@ -30,6 +30,8 @@ import {
   stressTestReport,
   upgradeCatalog,
   portfolioSummary,
+  evaluatePortfolioCustomPlan,
+  portfolioStressReport,
 } from "@/engine/hotel";
 import type {
   UpgradeComparisonRow,
@@ -40,6 +42,9 @@ import type {
   PortfolioResult,
   PortfolioProperty,
   PortfolioSummary,
+  PortfolioCustomEvaluation,
+  PortfolioPlan,
+  PortfolioStressReport,
   StressPlanInput,
   StressReport,
   RankedPackage,
@@ -422,3 +427,74 @@ export function computeStressRecommendation(s: TwinState): StressReport["recomme
   recCache.result = result;
   return result;
 }
+
+/** The custom plan used for each property in "my portfolio": the chosen one, else the latest plan made for that property. */
+const choiceOf = memoLast((properties: PortfolioProperty[], plans: TwinState["customPlans"], ids: Record<string, string | null>) => {
+  const out: Record<string, TwinState["customPlans"][number] | null> = {};
+  for (const p of properties) {
+    const own = plans.filter((x) => x.propertyId === p.id);
+    if (p.id in ids) {
+      const id = ids[p.id];
+      const chosen = id === null ? null : plans.find((x) => x.id === id && (!x.propertyId || x.propertyId === p.id));
+      out[p.id] = chosen === undefined ? (own[own.length - 1] ?? null) : chosen;
+    } else out[p.id] = own[own.length - 1] ?? null;
+  }
+  return out;
+});
+export const selectPortfolioPlanChoice = (s: TwinState) => choiceOf(s.portfolio.properties, s.customPlans, s.portfolioCustomPlanIds);
+
+/** Plans a property can use in "my portfolio": its own plus plans made before the portfolio existed. */
+export const plansForProperty = (s: TwinState, propertyId: string) => s.customPlans.filter((p) => !p.propertyId || p.propertyId === propertyId);
+
+const customEvalOf = memoLast(
+  (items: { property: PortfolioProperty; input: HotelInput }[], choice: ReturnType<typeof selectPortfolioPlanChoice>, budget: number, discountRate: number): PortfolioCustomEvaluation =>
+    evaluatePortfolioCustomPlan(
+      items.map((x) => ({ ...x, plan: choice[x.property.id] ?? null })),
+      { budget, discountRate },
+    ),
+);
+export const selectPortfolioCustomEvaluation = (s: TwinState): PortfolioCustomEvaluation =>
+  customEvalOf(selectPortfolioItems(s), selectPortfolioPlanChoice(s), s.portfolioBudget, s.hotelDiscountRate);
+
+function stressPlans(
+  choice: TwinState["portfolioStressPlan"],
+  ai: PortfolioPlan | null,
+  mine: PortfolioCustomEvaluation,
+): Record<string, StressPlanInput | null> {
+  const out: Record<string, StressPlanInput | null> = {};
+  if (choice === "ai" && ai)
+    for (const a of ai.allocations) out[a.propertyId] = a.candidate ? { label: "AI portfolio", source: "ai", ids: a.candidate.upgradeIds } : null;
+  if (choice === "mine")
+    for (const r of mine.rows) {
+      const e = r.plan;
+      out[r.propertyId] = e?.evaluation ? { label: r.planName ?? "My plan", source: "custom", ids: e.ids, amounts: e.amounts } : null;
+    }
+  return out;
+}
+const portfolioStressOf = memoLast(
+  (
+    items: { property: PortfolioProperty; input: HotelInput }[],
+    testId: StressTest["id"] | null,
+    scope: string[],
+    choice: TwinState["portfolioStressPlan"],
+    ai: PortfolioPlan | null,
+    mine: PortfolioCustomEvaluation,
+    discountRate: number,
+  ): PortfolioStressReport | null => {
+    const test = STRESS_TESTS.find((t) => t.id === testId);
+    if (!test) return null;
+    const plans = stressPlans(choice, ai, mine);
+    return portfolioStressReport(items.map((x) => ({ ...x, plan: plans[x.property.id] ?? null })), test, scope, { discountRate });
+  },
+);
+/** Null when no portfolio stress test is chosen. With "AI portfolio" and no optimizer run yet, the hotels are tested without plans. */
+export const selectPortfolioStressReport = (s: TwinState): PortfolioStressReport | null =>
+  portfolioStressOf(
+    selectPortfolioItems(s),
+    s.portfolioStressTestId,
+    s.portfolioStressScope,
+    s.portfolioStressPlan,
+    s.portfolioPlan,
+    selectPortfolioCustomEvaluation(s),
+    s.hotelDiscountRate,
+  );

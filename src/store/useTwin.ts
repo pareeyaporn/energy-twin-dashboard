@@ -5,6 +5,7 @@ import {
   STRESS_TESTS,
   hotelPortfolio,
   optimizePortfolioBudget,
+  prepareProperty,
   advisor,
   calculateBaselineEnergy,
   hotelData,
@@ -102,6 +103,8 @@ export interface PropertySnapshot {
   advisorMessages: AdvisorMessage[];
   selectedZone: ZoneId | null;
 }
+
+export type PortfolioStressPlanChoice = "ai" | "mine" | "none";
 
 export interface TwinState {
   presets: PresetHome[];
@@ -203,6 +206,18 @@ export interface TwinState {
   setPortfolioBudget: (n: number) => void;
   setPortfolioObjective: (o: PortfolioObjective) => void;
   runPortfolioOptimizer: () => Promise<void>;
+  /** "My portfolio": the custom plan chosen for each property (null = none). A property with no entry uses its latest plan. */
+  portfolioCustomPlanIds: Record<string, string | null>;
+  setPortfolioCustomPlan: (propertyId: string, planId: string | null) => void;
+  /** "Customize AI plan" for the portfolio: copies each property's recommended package into a new custom plan for that property. */
+  customizeAiPortfolio: () => string[];
+  /** Portfolio stress test: which test, on which properties, and with which plans (the AI portfolio, mine, or none). */
+  portfolioStressTestId: StressTest["id"] | null;
+  portfolioStressScope: string[];
+  portfolioStressPlan: PortfolioStressPlanChoice;
+  setPortfolioStressTest: (id: StressTest["id"] | null) => void;
+  setPortfolioStressScope: (ids: string[]) => void;
+  setPortfolioStressPlan: (c: PortfolioStressPlanChoice) => void;
 
   /** Custom investment plans (kept in the browser's local storage; numbers are always recomputed by the engine). */
   customPlans: CustomPlan[];
@@ -307,6 +322,10 @@ function initialHotelState() {
     portfolioObjective: PORTFOLIO_DEFAULTS.objective,
     portfolioPlan: null as PortfolioPlan | null,
     portfolioOptimizing: false,
+    portfolioCustomPlanIds: {} as Record<string, string | null>,
+    portfolioStressTestId: null as StressTest["id"] | null,
+    portfolioStressScope: hotelPortfolio.properties.map((p) => p.id),
+    portfolioStressPlan: "ai" as PortfolioStressPlanChoice,
   };
 }
 
@@ -565,6 +584,39 @@ export const useTwin = create<TwinState>((set, get) => ({
     const same = selectPortfolioItems(get()) === items && get().portfolioBudget === plan.budget && get().portfolioObjective === plan.objective;
     set(same ? { portfolioOptimizing: false, portfolioPlan: plan } : { portfolioOptimizing: false });
   },
+
+  setPortfolioCustomPlan: (propertyId, planId) =>
+    set((s) => {
+      if (!s.portfolio.properties.some((p) => p.id === propertyId)) return {};
+      const ok = planId === null || s.customPlans.some((p) => p.id === planId && (!p.propertyId || p.propertyId === propertyId));
+      return ok ? { portfolioCustomPlanIds: { ...s.portfolioCustomPlanIds, [propertyId]: planId } } : {};
+    }),
+  customizeAiPortfolio: () => {
+    const s = get();
+    if (!s.portfolioPlan) return [];
+    const items = selectPortfolioItems(s);
+    let n = s.nextPlanNumber;
+    const created: CustomPlan[] = [];
+    const ids: Record<string, string | null> = { ...s.portfolioCustomPlanIds };
+    for (const a of s.portfolioPlan.allocations) {
+      if (!a.candidate) continue;
+      const item = items.find((x) => x.property.id === a.propertyId);
+      if (!item) continue;
+      const ctx = prepareProperty(item.property, item.input).ctx;
+      const id = `plan-${n}-${s.customPlans.length + created.length + 1}`;
+      n++;
+      created.push({ id, name: "AI portfolio (customized)", items: dedupeItems(planFromPackage(ctx, a.candidate.upgradeIds)), propertyId: a.propertyId, copiedFrom: "AI portfolio" });
+      ids[a.propertyId] = id;
+    }
+    if (!created.length) return [];
+    const forOpen = created.find((p) => p.propertyId === s.activePropertyId)?.id;
+    setPlans(set, get, [...s.customPlans, ...created], n, forOpen ?? s.activeCustomPlanId);
+    set({ portfolioCustomPlanIds: ids });
+    return created.map((p) => p.id);
+  },
+  setPortfolioStressTest: (portfolioStressTestId) => set({ portfolioStressTestId }),
+  setPortfolioStressScope: (ids) => set((s) => ({ portfolioStressScope: s.portfolio.properties.map((p) => p.id).filter((id) => ids.includes(id)) })),
+  setPortfolioStressPlan: (portfolioStressPlan) => set({ portfolioStressPlan }),
 
   customPlans: [] as CustomPlan[],
   activeCustomPlanId: null as string | null,

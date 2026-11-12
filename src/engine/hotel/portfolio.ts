@@ -243,26 +243,58 @@ export interface PortfolioAllocation {
   combinationsTested: number;
 }
 
+/** Totals of one package (or plan) per property; the same shape for the AI portfolio and the user's portfolio, so they compare directly. */
+export interface PortfolioTotals {
+  grossCost: number;
+  incentives: number;
+  netInvestment: number;
+  remainingBudget: number;
+  annualSavings: number;
+  npv5: number;
+  npv10: number;
+  netBenefit10: number;
+  paybackYears: number | null;
+  carbonAvoidedKg: number;
+  /** Annual savings as a share of the portfolio's annual energy cost. */
+  shareOfPortfolioCost: number;
+  baselineCost: number;
+  /** Lowest comfort score among the chosen packages (null when nothing is chosen). Optional for backwards compatibility. */
+  comfortScore?: number | null;
+  /** How many properties get a package. Optional for backwards compatibility. */
+  propertiesWithPackage?: number;
+}
+
+/** Adds up the full evaluations (null = nothing at that property); payback is total net investment / total annual savings. */
+export function portfolioTotals(evaluations: (PackageEvaluation | null)[], baselineCost: number, budget: number): PortfolioTotals {
+  const chosen = evaluations.filter((e): e is PackageEvaluation => e !== null);
+  const sum = (f: (e: PackageEvaluation) => number) => chosen.reduce((t, e) => t + f(e), 0);
+  const grossCost = sum((e) => e.financials.grossCost.mid);
+  const netInvestment = sum((e) => e.financials.netInvestment.mid);
+  const annualSavings = sum((e) => e.financials.annualSavings.mid);
+  return {
+    grossCost,
+    incentives: sum((e) => e.financials.incentivesTotal),
+    netInvestment,
+    remainingBudget: budget - grossCost,
+    annualSavings,
+    npv5: sum((e) => e.financials.npv5?.mid ?? 0),
+    npv10: sum((e) => e.financials.npv10?.mid ?? 0),
+    netBenefit10: sum((e) => e.financials.netBenefit10.mid),
+    paybackYears: annualSavings > 0 ? netInvestment / annualSavings : null,
+    carbonAvoidedKg: sum((e) => e.financials.carbonAvoidedKgPerYear.mid),
+    shareOfPortfolioCost: baselineCost > 0 ? annualSavings / baselineCost : 0,
+    baselineCost,
+    comfortScore: chosen.length ? Math.min(...chosen.map((e) => e.comfort.score)) : null,
+    propertiesWithPackage: chosen.length,
+  };
+}
+
 export interface PortfolioPlan {
   budget: number;
   objective: PortfolioObjective;
   discountRate: number;
   allocations: PortfolioAllocation[];
-  totals: {
-    grossCost: number;
-    incentives: number;
-    netInvestment: number;
-    remainingBudget: number;
-    annualSavings: number;
-    npv5: number;
-    npv10: number;
-    netBenefit10: number;
-    paybackYears: number | null;
-    carbonAvoidedKg: number;
-    /** Annual savings as a share of the portfolio's annual energy cost. */
-    shareOfPortfolioCost: number;
-    baselineCost: number;
-  };
+  totals: PortfolioTotals;
   combinationsTested: number;
   method: string;
   notes: string[];
@@ -391,30 +423,13 @@ export function optimizePortfolioBudget(
       combinationsTested: sets[i]!.tested,
     };
   });
-  const sum = (f: (e: PackageEvaluation) => number) => allocations.reduce((s, a) => s + (a.evaluation ? f(a.evaluation) : 0), 0);
-  const grossCost = sum((e) => e.financials.grossCost.mid);
-  const netInvestment = sum((e) => e.financials.netInvestment.mid);
-  const annualSavings = sum((e) => e.financials.annualSavings.mid);
-  const baselineCost = allocations.reduce((s, a) => s + a.baselineCost, 0);
+  const baselineCost = allocations.reduce((t, x) => t + x.baselineCost, 0);
   return {
     budget,
     objective,
     discountRate,
     allocations,
-    totals: {
-      grossCost,
-      incentives: sum((e) => e.financials.incentivesTotal),
-      netInvestment,
-      remainingBudget: budget - grossCost,
-      annualSavings,
-      npv5: sum((e) => e.financials.npv5?.mid ?? 0),
-      npv10: sum((e) => e.financials.npv10?.mid ?? 0),
-      netBenefit10: sum((e) => e.financials.netBenefit10.mid),
-      paybackYears: annualSavings > 0 ? netInvestment / annualSavings : null,
-      carbonAvoidedKg: sum((e) => e.financials.carbonAvoidedKgPerYear.mid),
-      shareOfPortfolioCost: baselineCost > 0 ? annualSavings / baselineCost : 0,
-      baselineCost,
-    },
+    totals: portfolioTotals(allocations.map((x) => x.evaluation), baselineCost, budget),
     combinationsTested: sets.reduce((s, x) => s + x.tested, 0),
     method,
     notes: [

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Building2 } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
@@ -6,6 +7,7 @@ import { usd } from "@/twin/format";
 import { CityMap } from "./CityMap";
 import { PortfolioCharts } from "./PortfolioCharts";
 import { PortfolioOptimizer } from "./PortfolioOptimizer";
+import { PortfolioStress } from "./PortfolioStress";
 import { PortfolioTable } from "./PortfolioTable";
 
 const compact = (n: number, unit: string) =>
@@ -18,9 +20,18 @@ export function PortfolioPage() {
   const budget = useTwin((s) => s.portfolioBudget);
   const reduce = useTwin((s) => s.reduceEffects);
   const openProperty = useTwin((s) => s.openProperty);
+  const setActivePlan = useTwin((s) => s.setActiveCustomPlan);
+  const hydrate = useTwin((s) => s.hydrateCustomPlans);
+  // Custom plans live in the browser's storage; read them after mount (the server renders without them).
+  useEffect(() => hydrate(), [hydrate]);
   const navigate = useNavigate();
   const explore = (id: string) => {
     openProperty(id);
+    void navigate({ to: "/" });
+  };
+  const editPlan = (id: string, planId: string | null) => {
+    openProperty(id);
+    if (planId) setActivePlan(planId);
     void navigate({ to: "/" });
   };
   const t = summary.totals;
@@ -66,7 +77,9 @@ export function PortfolioPage() {
 
       <PortfolioCharts rows={summary.properties} />
 
-      <PortfolioOptimizer onExplore={explore} />
+      <PortfolioOptimizer onExplore={explore} onEdit={editPlan} />
+
+      <PortfolioStress />
 
       <section aria-label="Coming later" className="space-y-2">
         <h2 className="text-base font-semibold">More building types (coming later)</h2>

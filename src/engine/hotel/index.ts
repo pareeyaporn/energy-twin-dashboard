@@ -73,3 +73,14 @@ export { opportunitiesByZone } from './opportunities';
 export type { ZoneOpportunity } from './opportunities';
 export * as advisor from './advisor';
 export { benchmarkComparison } from './benchmark';
+export {
+  CATALOG_CATEGORIES,
+  CATALOG_IDS,
+  upgradeCatalog,
+  planAmounts,
+  evaluatePlan,
+  evaluatePlanItem,
+  planFromPackage,
+  explainPlan,
+} from './plans';
+export type { CatalogItem, CatalogQuantity, QuantityKind, PlanItem, PlanWarning, PlanWarningKind, PlanEvaluation } from './plans';

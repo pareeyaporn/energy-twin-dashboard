@@ -224,6 +224,15 @@ peers in `defaults.peerBenchmarks` (ENERGY STAR hotel median 63.0 and CBECS 2018
 climates). Comparison only: nothing in the model is adjusted toward them. The demo hotel (91.1) sits 45% above the ENERGY STAR
 median, partly explained by Chicago's climate and the restaurant; this is shown, not tuned away. Shown by prompt LV15.
 
+**Custom plans (Phase 11).** `evaluatePackage(ctx, ids, { amounts })` takes optional `coverage` (0–1 per upgrade) and `solarKw`. Coverage
+scales the upgrade's scope: smart room controls blend the baseline and the set-back simulation by the share of rooms (rooms are modeled
+alike); LED lighting, occupancy sensors and insulation multiply their reduction by the share (LED interaction with heating and cooling
+follows the lighting saved); costs scale every part except the fixed cost. Solar can be any size up to the full usable roof (and the
+hotel's own use), priced per W for that size. Energy management, HVAC equipment and water heating are whole-system only. With no
+amounts the result is exactly what the optimizer computes. `evaluatePlan` converts catalog quantities (rooms, % of lighting, ft² of
+common area or roof, kW) into amounts and adds plan notes; `explainPlan` lists each upgrade's marginal contribution, budget use and
+the best upgrades left out with the reason.
+
 ## 9. Budget optimizer (Phase 3)
 `optimizeInvestmentPortfolio(profile, options)` tests every subset of the eligible upgrades (2^n, so 256 for the demo hotel, the empty set counted but never returned).
 It keeps a package only if it is valid (requirements and exclusions), costs no more than the budget at the **mid** estimate, has a comfort score of at least 0.70, and saves at least 1% of the current bill.

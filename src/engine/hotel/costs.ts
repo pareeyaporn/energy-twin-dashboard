@@ -16,8 +16,11 @@ export function upgradeCost(
   id: UpgradeId,
   sizing: Pick<UpgradeSizing, 'hvacSizeFactor' | 'solarKw'>,
   data: HotelData = hotelData,
+  /** Share of the upgrade's scope installed (custom plans); scales every part except the fixed cost. Solar uses its kW instead. */
+  coverage = 1,
 ): Range3 {
   const def = upgradeDef(id, data);
+  const k = isSolar(id) ? 1 : Math.min(1, Math.max(0, coverage));
   const { roofSqft, commonSqft } = areasOf(p, data);
   const m = def.cost;
   const out: Range3 = { low: 0, mid: 0, high: 0 };
@@ -25,10 +28,11 @@ export function upgradeCost(
   for (const s of SCENARIOS) {
     out[s] =
       (m.fixed?.[s] ?? 0) +
-      (m.perRoom?.[s] ?? 0) * p.rooms +
-      (m.perSqftFloor?.[s] ?? 0) * p.floorAreaSqft * (def.sizeScaled ? sizing.hvacSizeFactor : 1) +
-      (m.perSqftRoof?.[s] ?? 0) * roofSqft +
-      (m.perSqftCommon?.[s] ?? 0) * commonSqft +
+      k *
+        ((m.perRoom?.[s] ?? 0) * p.rooms +
+          (m.perSqftFloor?.[s] ?? 0) * p.floorAreaSqft * (def.sizeScaled ? sizing.hvacSizeFactor : 1) +
+          (m.perSqftRoof?.[s] ?? 0) * roofSqft +
+          (m.perSqftCommon?.[s] ?? 0) * commonSqft) +
       (m.perKw?.[s] ?? 0) * sizing.solarKw +
       (perW ? perW[s] * 1000 * sizing.solarKw : 0);
   }
@@ -41,8 +45,9 @@ export function packageCost(
   ids: readonly UpgradeId[],
   sizing: Pick<UpgradeSizing, 'hvacSizeFactor' | 'solarKw'>,
   data: HotelData = hotelData,
+  coverage: Partial<Record<UpgradeId, number>> = {},
 ): { items: { id: UpgradeId; cost: Range3 }[]; total: Range3 } {
-  const items = orderUpgrades(ids).map((id) => ({ id, cost: upgradeCost(p, id, sizing, data) }));
+  const items = orderUpgrades(ids).map((id) => ({ id, cost: upgradeCost(p, id, sizing, data, coverage[id] ?? 1) }));
   const total = items.reduce(
     (t, i) => ({ low: t.low + i.cost.low, mid: t.mid + i.cost.mid, high: t.high + i.cost.high }),
     { low: 0, mid: 0, high: 0 },

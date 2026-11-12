@@ -23,12 +23,17 @@ import {
   typicalDayProfile,
   ZONE_IDS,
   ZONE_LABELS,
+  evaluatePlan,
+  explainPlan,
+  upgradeCatalog,
 } from "@/engine/hotel";
 import type {
   UpgradeComparisonRow,
   Conditions,
   EnergyResult,
   HotelInput,
+  PlanEvaluation,
+  PortfolioResult,
   RankedPackage,
   ResolvedProfile,
   Scenario,
@@ -283,3 +288,42 @@ export const selectHourState = (s: TwinState): HourState => {
   const solarKw = d.package?.evaluation.sizing.solarKw ?? 0;
   return hourStateOf(s.hotel, s.baseline.annual.elecKWh, d.result, d.conditions, s.timeMonth, s.timeHour, solarId, solarKw);
 };
+
+// ---- Custom investment plans ----
+
+/** The upgrade context custom plans are measured against: the same as the optimizer and the upgrade comparison (scenario-aware). */
+const planContextOf = memoLast((hotel: ResolvedProfile, measuredAgainst: EnergyResult) => contextFromBaseline(hotel, measuredAgainst));
+export const selectPlanContext = (s: TwinState) => planContextOf(s.hotel, selectUpgradeBaseline(s));
+
+const catalogOf = memoLast((ctx: ReturnType<typeof contextFromBaseline>) => upgradeCatalog(ctx));
+export const selectCatalog = (s: TwinState) => catalogOf(selectPlanContext(s));
+
+export const selectActiveCustomPlan = (s: TwinState) => s.customPlans.find((p) => p.id === s.activeCustomPlanId) ?? null;
+
+/** Per-plan memo: re-evaluates a plan only when its items, the context, the budget or the discount rate change. */
+const planEvalCache = new Map<string, { items: unknown; ctx: unknown; budget: number; rate: number; result: PlanEvaluation }>();
+export function selectCustomPlanEvaluation(s: TwinState, planId?: string): PlanEvaluation | null {
+  const plan = planId ? s.customPlans.find((p) => p.id === planId) : selectActiveCustomPlan(s);
+  if (!plan) return null;
+  const ctx = selectPlanContext(s);
+  const budget = s.hotel.profile.budget;
+  const rate = s.hotelDiscountRate;
+  const hit = planEvalCache.get(plan.id);
+  if (hit && hit.items === plan.items && hit.ctx === ctx && hit.budget === budget && hit.rate === rate) return hit.result;
+  const result = evaluatePlan(ctx, plan.items, { budget, assumptions: { discountRate: rate } });
+  planEvalCache.set(plan.id, { items: plan.items, ctx, budget, rate, result });
+  return result;
+}
+
+const explainOf = memoLast((ctx: ReturnType<typeof contextFromBaseline>, plan: PortfolioResult, pkg: RankedPackage) => explainPlan(ctx, plan, pkg));
+/** Why the optimizer chose a package (deterministic lines from the numbers). */
+export function selectPlanExplanation(s: TwinState, packageId?: string): string[] {
+  const plan = s.hotelPlan;
+  if (!plan) return [];
+  const all = [...plan.packages, ...(plan.objectiveWinner ? [plan.objectiveWinner] : [])];
+  const pkg = (packageId ? all.find((p) => p.evaluation.id === packageId) : null) ?? plan.objectiveWinner ?? plan.packages[0];
+  if (!pkg) return [];
+  // Explain against the context the plan was measured against (scenario or baseline).
+  const ctx = planContextOf(s.hotel, s.hotelPlanBaseline ?? s.baseline);
+  return explainOf(ctx, plan, pkg);
+}

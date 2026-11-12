@@ -27,7 +27,7 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 - [x] 0.6 [CC] Rewrite `docs/05` (Claude Code prompts) and `docs/06` (Lovable prompts) for the new phases; update `docs/07` demo
       checklist and Q&A (vs Eden, vs ENERGY STAR Portfolio Manager, accuracy, why hotels)
 - [ ] 0.7 [TEAM] Delete finished branches on GitHub (I cannot delete remote branches); turn on "Automatically delete head branches"
-- [ ] 0.8 [TEAM] Allow the network domains needed for research: `epa.gov`, `noaa.gov` (and `nrel.gov`, `energystar.gov` if used)
+- [x] 0.8 [TEAM] Allow the network domains needed for research: `epa.gov`, `noaa.gov` (and `nrel.gov`, `energystar.gov` if used) — done (EPA, NOAA, NLR, ENERGY STAR, EIA, IRS, ComEd, Choose Chicago reachable)
 
 ## Phase 1 — Hotel data model and baseline simulation (P0) [CC]
 - [x] 1.1 Engine spec `docs/13_HOTEL_ENGINE_SPEC.md`: units, equations, load categories, zones, assumptions, what is *not* modeled
@@ -137,8 +137,8 @@ a bill-calibration view, a 12-month forecast band, 3D, and live IoT.
 - [x] 5.8 Ghost upgrades: applying a package shows it on the twin (solar on the roof, LED glow, thermostat icons) with a before/after split view
 - [x] 5.9 Stress-test buttons (heat wave, cold snap, conference week, +20% price): trigger a scenario and show the twin reacting
 - [x] 5.10 Respect `reduceEffects`; keyboard and screen-reader support; component tests for layer switching, zone selection and the time scrubber through the store
-- [ ] 5.11 Lightweight 3D with React Three Fiber — now planned in detail as **Phase 9** below
-      (Built: layered diagram, time scrubber, meter, flow, ghost upgrades, stress tests. Not built: count-up animation of the header numbers; colors fade but numbers do not animate.)
+- [x] 5.11 Lightweight 3D with React Three Fiber — built as **Phase 9** below (3D twin, 9.1–9.27), including the header count-up (9.21).
+      The 2D layers were later redesigned in Phase 10 (animated Flow Sankey, Equipment cards, Rooms façade).
 
 ## Phase 6 — AI advisor (P1) [CC]
 - [x] 6.1 Design note (see [12_BACKEND_ARCHITECTURE.md](12_BACKEND_ARCHITECTURE.md)): the model receives a precomputed context (baseline by zone, current scenario, three packages, and a few precomputed
@@ -178,7 +178,7 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [x] 7b.4 [LV] LV11 and LV12: the breakdown on every upgrade card, the package cards and the comparison tables; packages first, comparison collapsed below
 - [x] 7b.5 Calibrate smart room controls to the IL-TRM 4.4.8 Chicago-hotel range (guest-room fan saving while empty); now $1,715 a year for 100 rooms
 - [x] 7b.6 Research pass 2: PVWatts, IL-TRM v14 (GREM, lighting controls, lighting-HVAC interaction, showerheads), eGRID, EPA gas factor, CBECS benchmark. Remaining items are in `docs/08` (A1–A5, B1–B7)
-- [ ] 7b.7 Small UI fixes: one "some inputs are defaults" note instead of a tag on every number; compact number row on mobile; twin split-view labels (CC)
+- [x] 7b.7 Small UI fixes: one "some inputs are defaults" note instead of a tag on every number; compact number row on mobile; twin split-view labels (CC) — defaults note and mobile row by LV15; split labels in the 2D twin
 
 ## Phase 9 — 3D digital twin with seasons and day–night (CC; decided November 2026)
 
@@ -245,6 +245,14 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
 - [x] 10.3 Equipment: cards grouped by HVAC, water heating, lighting and other: icon, quantity, capacity, efficiency, schedule, modeled status at the hour, system energy and cost, related opportunities; "modeled, not monitored"
 - [x] 10.4 Rooms: floor-by-floor facade with windows lit by state and daylight, set-back sills, transitions; click a room for state, HVAC mode, setpoints and the guest-room average kW (per zone, labeled); same numbering as the 3D windows
 - [x] 10.5 Tests (hourly flows sum to the meter, Sankey layout, room and equipment mapping), screenshots, docs
+
+## Phase 11 — Investment catalog and custom plans (CC; built November 2026)
+- [x] 11.1 Engine: optional coverage per upgrade and a solar size in kW on the optimizer's own path (`evaluatePackage(..., { amounts })`); omitted = the whole hotel, as before (tested equal)
+- [x] 11.2 Data: catalog category and `costStatus` per upgrade (only smart room controls' cost is sourced); not-yet-modeled upgrades listed as experimental, with no figures
+- [x] 11.3 `upgradeCatalog`, `evaluatePlan` (plan checks: budget, conflicts, unavailable, clamped quantities, overlaps), `planFromPackage`, `explainPlan`
+- [x] 11.4 Store: `customPlans` with create, duplicate, rename, delete, add, remove, quantity and "Customize AI plan"; kept in local storage; selectors for the catalog, plan evaluation and why-this-plan
+- [x] 11.5 UI (`src/plans`): AI recommended (with "Why this plan" and "Customize AI plan"), Build your own (catalog by HVAC & Controls, Lighting, Renewable Energy, Building & Water; quantity controls; live totals with gross, verified incentives and net separately; budget bar; notes), Compare (AI plan vs up to three custom plans)
+- [x] 11.6 Tests: a plan copied from any package equals the package; quantities scale cost and savings; combinations recomputed, not summed; store and UI tests
 
 ## Phase 8 — Demo hardening (all)
 - [ ] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

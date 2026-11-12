@@ -14,6 +14,7 @@ import type {
   HotelProfile,
   LoadType,
   PackageComfort,
+  PlanAmounts,
   ResolvedProfile,
   SavingsScenario,
   Scenario,
@@ -184,6 +185,20 @@ function smartControlCells(ctx: UpgradeContext, sc: SavingsScenario): { cells: C
   return { cells, flags: comfortFlags(cond, ctx.data) };
 }
 
+/** Cells between two simulations: `a` + share × (`b` − `a`), energy and load kinds alike (both runs have the same cell order). */
+function blendCells(a: Cell[], b: Cell[], share: number, env: Env): Cell[] {
+  if (share >= 1) return b.map(cloneCell);
+  if (share <= 0) return a.map(cloneCell);
+  return a.map((x, i) => {
+    const y = b[i];
+    const c = cloneCell(x);
+    if (!y || y.zone !== x.zone || y.endUse !== x.endUse || y.month !== x.month) return c;
+    for (const lt of LOAD_TYPES) c.loadKBtu[lt] = x.loadKBtu[lt] + share * (y.loadKBtu[lt] - x.loadKBtu[lt]);
+    setEnergy(c, x.elecKWh + share * (y.elecKWh - x.elecKWh), x.gasTherms + share * (y.gasTherms - x.gasTherms), env);
+    return c;
+  });
+}
+
 interface Env {
   elecRate: number;
   gasRate: number;
@@ -264,7 +279,7 @@ export function calculateUpgradeSavings(
   upgradeIds: readonly UpgradeId[],
   scenario: SavingsScenario = 'mid',
   data: HotelData = hotelData,
-  options: { skipValidation?: boolean } = {},
+  options: { skipValidation?: boolean; amounts?: PlanAmounts } = {},
 ): UpgradeOutcome {
   const ctx = isContext(input) ? input : prepareUpgradeContext(input, data);
   const d = ctx.data;
@@ -274,6 +289,8 @@ export function calculateUpgradeSavings(
     if (errors.length) throw new Error(errors.join(' '));
   }
   const has = (id: UpgradeId) => ids.includes(id);
+  // Share of each upgrade's scope that is installed (1 = the whole hotel, as the optimizer uses).
+  const cov = (id: UpgradeId) => clamp(options.amounts?.coverage?.[id] ?? 1, 0, 1);
   const env: Env = {
     elecRate: ctx.baseline.rates.elecPerKWh,
     gasRate: ctx.baseline.rates.gasPerTherm,
@@ -282,7 +299,8 @@ export function calculateUpgradeSavings(
   };
 
   const smart = has('smart_room_controls') ? smartControlCells(ctx, scenario) : null;
-  const cells = (smart ? smart.cells : ctx.baseline.cells).map(cloneCell);
+  // Smart controls in only some rooms: rooms are modeled alike, so blend the baseline and the set-back simulation by the share of rooms.
+  const cells = smart ? blendCells(ctx.baseline.cells, smart.cells, cov('smart_room_controls'), env) : ctx.baseline.cells.map(cloneCell);
   let hvacSizeFactor = 1;
   let solarKw = 0;
   let solarId: UpgradeId | null = null;
@@ -297,21 +315,21 @@ export function calculateUpgradeSavings(
       case 'insulation': {
         // The reduction is for a low-rise building; on a taller one the roof is a smaller part of the envelope, so it scales down.
         const refFloors = constant(def, 'referenceFloors');
-        const r = param(def, 'weatherLoadReduction', scenario) * Math.min(1, refFloors / Math.max(1, ctx.profile.floors));
+        const r = param(def, 'weatherLoadReduction', scenario) * Math.min(1, refFloors / Math.max(1, ctx.profile.floors)) * cov(id);
         rescale(cells, (c) => c.endUse === 'heating' || c.endUse === 'cooling', { weather: 1 - r }, env);
         break;
       }
       case 'led_lighting': {
         const before = lightingBySpace(cells);
-        rescale(cells, (c) => c.endUse === 'lighting', 1 - param(def, 'lightingReduction', scenario), env);
+        rescale(cells, (c) => c.endUse === 'lighting', 1 - param(def, 'lightingReduction', scenario) * cov(id), env);
         lightingInteraction(cells, savedBetween(before, lightingBySpace(cells)), ctx, env);
         break;
       }
       case 'occupancy_sensors': {
         const common = (c: Cell) => c.zone === 'lobby_common' || c.zone === 'hallways_shared';
         const before = lightingBySpace(cells);
-        rescale(cells, (c) => common(c) && c.endUse === 'lighting', 1 - param(def, 'commonLightingReduction', scenario), env);
-        rescale(cells, (c) => common(c) && c.endUse === 'ventilation', 1 - param(def, 'commonVentilationReduction', scenario), env);
+        rescale(cells, (c) => common(c) && c.endUse === 'lighting', 1 - param(def, 'commonLightingReduction', scenario) * cov(id), env);
+        rescale(cells, (c) => common(c) && c.endUse === 'ventilation', 1 - param(def, 'commonVentilationReduction', scenario) * cov(id), env);
         lightingInteraction(cells, savedBetween(before, lightingBySpace(cells)), ctx, env);
         break;
       }
@@ -340,7 +358,12 @@ export function calculateUpgradeSavings(
       case 'rooftop_solar': {
         // Generation from the location's solar data; each hour of a typical day the hotel uses what it can (its load after the
         // other upgrades) and the rest is exported at the region's export credit.
-        solarKw = solarSizeKw(ctx.profile, ctx.baseline.annual.elecKWh, d, id);
+        // A custom plan may choose any size up to what the full usable roof holds (and never more than the hotel uses).
+        const maxKw = solarSizeKw(ctx.profile, ctx.baseline.annual.elecKWh, d, 'rooftop_solar');
+        solarKw =
+          options.amounts?.solarKw !== undefined
+            ? Math.round(clamp(options.amounts.solarKw, 0, maxKw) * 10) / 10
+            : solarSizeKw(ctx.profile, ctx.baseline.annual.elecKWh, d, id);
         solarId = id;
         const sol = climateSolar(ctx.profile, d);
         const yieldKwh = solarYield(ctx.profile, scenario, d);

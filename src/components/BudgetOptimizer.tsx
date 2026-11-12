@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { DiscountRateControl, NpvEstimate } from "@/components/DiscountRateControl";
 import { ProjectionSparkline, ProjectionToggle } from "@/components/Projection";
 import { FinancialLines, UpgradeComparison, fmtEnergy } from "@/components/FinancialLines";
+import { CustomizeButton, InvestModes, WhyThisPlan } from "@/plans/InvestModes";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const number = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -71,6 +72,7 @@ function InvestmentCard({ pkg, winner, objective }: { pkg: RankedPackage; winner
       <div className="space-y-3 border-t border-border pt-3"><h3 className="text-xs font-medium text-muted-foreground">Investment line items</h3>{e.lineItems.map((line) => <div key={line.id} className="space-y-1 text-xs"><div className="flex justify-between gap-2"><span>{line.label}</span><span className="num shrink-0">{money(line.cost.mid)}</span></div><p className="text-muted-foreground">Annual savings: {money(line.annualSavingsMid)}</p><Button variant="outline" size="sm" className="h-6 text-[10px]" aria-label={`Source for ${line.label}`} onClick={() => sources(true)}><BookOpen />Source</Button></div>)}</div>
     </div>}</div>
     <Button variant={active ? "secondary" : "accentOutline"} className="w-full" onClick={() => apply(e.id)} aria-label={`Apply ${pkg.roleLabel}`} aria-pressed={active}>{active ? <><Check />Applied to twin</> : "Apply to twin"}</Button>
+    <CustomizeButton packageId={e.id} label={pkg.roleLabel} />
   </article>;
 }
 
@@ -89,6 +91,7 @@ function CompactInvestmentCard({ pkg, winner, objective }: { pkg: RankedPackage;
     <PackageSummary pkg={pkg} />
     <div className="border-t border-border pt-2"><FiguresToggle open={showAll} onClick={() => setShowAll((open) => !open)} />{showAll && <PackageExtraFigures pkg={pkg} dense />}</div>
     <Button size="sm" variant={active ? "secondary" : "accentOutline"} className="w-full" aria-label={`Apply ${pkg.roleLabel}`} aria-pressed={active} onClick={() => { apply(e.id); setCompareMode("split"); }}>{active ? <><Check />Applied</> : "Apply"}</Button>
+    <CustomizeButton packageId={e.id} label={pkg.roleLabel} />
   </article>;
 }
 
@@ -129,7 +132,7 @@ export function BudgetOptimizer({ compact = false, workspace = false }: { compac
   const winner = plan?.objectiveWinner;
   const cards = plan?.packages ?? [];
   const objectiveLabel = objectives.find((item) => item.value === (plan?.objective ?? hotel.profile.objective))?.label ?? "Balanced";
-  return <div className={cn("space-y-6", compact ? "p-5" : "mx-auto max-w-7xl p-4 md:p-8")}>
+  return <InvestModes compact={compact} ai={<div className={cn("space-y-6", compact ? "p-5" : "mx-auto max-w-7xl p-4 md:p-8")}>
     <div className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-xl font-semibold">Budget optimizer</h1><p className="mt-1 text-sm text-muted-foreground">{hotel.profile.name}</p></div>{preset !== null && <Badge variant="outline" className="border-heat/30 text-heat">Synthetic demo data</Badge>}</div>
     <section className={cn("grid items-end gap-4 border-y border-border py-5", !compact && "md:grid-cols-[1fr_1fr_auto]")}>
       <div className={cn(!compact && "md:col-span-3")}><DefaultEstimateNotice fields={["budget", "objective"]} /></div>
@@ -150,6 +153,7 @@ export function BudgetOptimizer({ compact = false, workspace = false }: { compac
         <p role="status" className="num text-xs text-muted-foreground">{number(plan.combinationsTested)} combinations tested · {number(plan.feasibleCount)} feasible packages · Estimates</p>
         {plan.scenario && <Badge variant="secondary" className="text-primary">Measured against the current scenario</Badge>}
       </div>
+      <WhyThisPlan />
       {workspace && cards.length > 0 ? <><section aria-label="Investment packages" className="space-y-3">{cards.map((pkg) => <CompactInvestmentCard key={`${pkg.role}-${pkg.evaluation.id}`} pkg={pkg} winner={pkg.evaluation.id === winner?.evaluation.id} objective={objectiveLabel} />)}</section><Button asChild variant="link" className="h-auto px-0"><Link to="/optimizer">Compare in detail<ArrowRight /></Link></Button></> : cards.length === 0 ? <section aria-label="No investments found" className="space-y-3 border-l-2 border-heat pl-4"><h2 className="font-semibold">No suitable package</h2><p className="text-sm text-muted-foreground">{plan.emptyReason}</p>{plan.cheapestUseful && <p className="text-sm">Lowest-cost useful investment: {plan.cheapestUseful.label} · <span className="num">{money(plan.cheapestUseful.cost)}</span></p>}</section> : <>
         <section aria-label="Investment packages" className={cn("grid items-start gap-4", !compact && "lg:grid-cols-3")}>{cards.map((pkg) => <InvestmentCard key={`${pkg.role}-${pkg.evaluation.id}`} pkg={pkg} winner={pkg.evaluation.id === winner?.evaluation.id} objective={objectiveLabel} />)}</section>
         {winner && !cards.some((pkg) => pkg.evaluation.id === winner.evaluation.id) && <section aria-label="Objective winner" className="space-y-3 border-t border-primary/30 pt-4"><h2 className="font-semibold">Objective winner · {winner.roleLabel}</h2><InvestmentCard pkg={winner} winner objective={objectiveLabel} /></section>}
@@ -172,5 +176,5 @@ export function BudgetOptimizer({ compact = false, workspace = false }: { compac
       </>}
     </>}
     <UpgradeComparison compact={compact} />
-  </div>;
+  </div>} />;
 }

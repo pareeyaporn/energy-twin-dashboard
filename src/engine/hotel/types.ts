@@ -487,8 +487,24 @@ export interface CostModel {
   perKw?: Range3;
 }
 
+/**
+ * Partial quantities for a custom plan: the share (0–1) of each upgrade's scope that is installed (rooms with smart controls, share of
+ * lighting retrofitted, share of common areas with sensors, share of the roof insulated) and a solar array size in kW. Leaving them
+ * out means the whole hotel and the upgrade's own solar size, exactly as before.
+ */
+export interface PlanAmounts {
+  coverage?: Partial<Record<UpgradeId, number>>;
+  solarKw?: number;
+}
+
+export type CatalogCategory = 'hvac_controls' | 'lighting' | 'renewable' | 'building_water';
+
 export interface UpgradeDef {
   id: UpgradeId;
+  /** Catalog group (custom plans). */
+  category?: CatalogCategory;
+  /** Whether the installed cost is from a source or a placeholder. */
+  costStatus?: 'sourced' | 'placeholder';
   label: string;
   description: string;
   lifetimeYears: number;
@@ -509,7 +525,18 @@ export interface LightingInteraction {
   heatingPerSavedKBtu: { gas: number; resistance: number; heatPump: number };
 }
 
+/** An upgrade shown in the catalog that the model does not cover yet: listed, never priced or selectable. */
+export interface ExperimentalUpgrade {
+  id: string;
+  label: string;
+  description: string;
+  category: CatalogCategory;
+  reason: string;
+}
+
 export interface UpgradesData {
+  /** Upgrades listed in the catalog as not yet modeled. */
+  experimental?: ExperimentalUpgrade[];
   /** Lighting-HVAC interaction per kBtu of lighting saved, by space (guest rooms or common areas) and heating kind (IL-TRM). */
   interaction: {
     guest: LightingInteraction;

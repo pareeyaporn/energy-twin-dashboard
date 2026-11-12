@@ -33,6 +33,8 @@
     {
       "id": "smart_room_controls",
       "label": "Smart guest-room thermostats and occupancy sensing",
+      "category": "hvac_controls",
+      "costStatus": "sourced",
       "description": "Sets vacant and away rooms back and recovers when a guest returns.",
       "lifetimeYears": 15,
       "cost": {
@@ -62,6 +64,8 @@
     {
       "id": "insulation",
       "label": "Roof and envelope insulation",
+      "category": "building_water",
+      "costStatus": "placeholder",
       "description": "Cuts the weather-driven heating and cooling load.",
       "lifetimeYears": 30,
       "cost": {
@@ -93,6 +97,8 @@
     {
       "id": "led_lighting",
       "label": "LED lighting retrofit",
+      "category": "lighting",
+      "costStatus": "placeholder",
       "description": "Replaces remaining non-LED lamps and fixtures throughout the hotel.",
       "lifetimeYears": 12,
       "cost": {
@@ -122,6 +128,8 @@
     {
       "id": "occupancy_sensors",
       "label": "Occupancy sensors in common areas and hallways",
+      "category": "lighting",
+      "costStatus": "placeholder",
       "description": "Dims or turns off lighting and trims ventilation in unoccupied public areas.",
       "lifetimeYears": 10,
       "cost": {
@@ -156,6 +164,8 @@
     {
       "id": "energy_management",
       "label": "Energy management controls (scheduling and optimization)",
+      "category": "hvac_controls",
+      "costStatus": "placeholder",
       "description": "Schedules and tunes the central plant, public-area HVAC and fans.",
       "lifetimeYears": 12,
       "cost": {
@@ -192,6 +202,8 @@
     {
       "id": "hvac_upgrade",
       "label": "High-efficiency HVAC equipment",
+      "category": "hvac_controls",
+      "costStatus": "placeholder",
       "description": "Replaces the heating and cooling equipment with higher-efficiency units, sized from the reduced load.",
       "lifetimeYears": 20,
       "cost": {
@@ -227,6 +239,8 @@
     {
       "id": "water_heating",
       "label": "High-efficiency water heating and low-flow fixtures",
+      "category": "building_water",
+      "costStatus": "placeholder",
       "description": "Condensing water heaters and low-flow fixtures.",
       "lifetimeYears": 15,
       "cost": {
@@ -256,6 +270,8 @@
     {
       "id": "rooftop_solar_quarter",
       "label": "Rooftop solar (a quarter of the usable roof)",
+      "category": "renewable",
+      "costStatus": "placeholder",
       "description": "Sized to 25% of the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
       "lifetimeYears": 25,
       "cost": {},
@@ -283,6 +299,8 @@
     {
       "id": "rooftop_solar_half",
       "label": "Rooftop solar (half the usable roof)",
+      "category": "renewable",
+      "costStatus": "placeholder",
       "description": "Sized to 50% of the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
       "lifetimeYears": 25,
       "cost": {},
@@ -310,6 +328,8 @@
     {
       "id": "rooftop_solar",
       "label": "Rooftop solar (full usable roof)",
+      "category": "renewable",
+      "costStatus": "placeholder",
       "description": "Sized to the usable roof (never above the hotel's yearly electricity use). Output comes from the location's solar data; the hotel uses what it can hour by hour and any surplus is exported at the region's export credit. Yearly operation and maintenance is subtracted.",
       "lifetimeYears": 25,
       "cost": {},
@@ -336,5 +356,35 @@
     }
   ],
   "source": "Upgrade values are a mix of researched figures (named in each upgrade's source, from search excerpts still to confirm in the primary documents) and placeholders, labelled as such.",
-  "verified": false
+  "verified": false,
+  "experimental": [
+    {
+      "id": "heat_pump_hvac",
+      "label": "Heat-pump HVAC (electrification)",
+      "description": "Replace gas heating with heat pumps.",
+      "category": "hvac_controls",
+      "reason": "Not modeled yet: needs sourced cost and cold-climate performance (product decision, docs/15 section 4)."
+    },
+    {
+      "id": "heat_pump_water_heater",
+      "label": "Heat-pump water heaters",
+      "description": "Replace gas water heaters with heat-pump units.",
+      "category": "building_water",
+      "reason": "Not modeled yet: needs sourced cost and performance (docs/15 section 4)."
+    },
+    {
+      "id": "battery_storage",
+      "label": "Battery storage",
+      "description": "Store solar or off-peak electricity.",
+      "category": "renewable",
+      "reason": "Not modeled: the model uses flat average rates, so it cannot value demand-charge or time-of-use savings."
+    },
+    {
+      "id": "window_film",
+      "label": "Window film and glazing upgrades",
+      "description": "Reduce solar heat gain and heat loss through windows.",
+      "category": "building_water",
+      "reason": "Not modeled yet: no sourced savings or cost data."
+    }
+  ]
 }

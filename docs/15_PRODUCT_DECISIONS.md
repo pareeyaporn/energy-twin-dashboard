@@ -94,3 +94,13 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
 - **Solar without an array**: no panels; selecting the roof shows a translucent full-roof preview labeled "Not installed — potential".
 - **Projection horizon: 10 years**, the same savings stream as the 5- and 10-year net benefit and NPV (so they always agree).
 - **Peer benchmark is context, not calibration**: the model is not adjusted toward ENERGY STAR or CBECS values.
+
+## 10. Custom investment plans (November 2026)
+
+- **Partial quantities are linear in scope**: half the rooms with smart controls save half and cost half (rooms are modeled alike);
+  the same for the share of lighting, common area and roof. A simplification, not a measured result.
+- **LEDs are entered as a share of the hotel's lighting**, not fixtures: the model has no fixture inventory.
+- **Energy management, HVAC equipment and water heating are on or off** for the whole hotel; partial versions are not modeled.
+- **Upgrades not modeled** (heat-pump HVAC, heat-pump water heaters, battery storage, window film) are listed as "Not modeled yet",
+  with no figures, and cannot be selected.
+- **Plans are kept in the browser's local storage**; only choices are stored, every figure is recomputed by the engine.

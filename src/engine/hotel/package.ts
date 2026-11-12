@@ -16,6 +16,7 @@ import type {
   HotelInput,
   PackageEvaluation,
   PackageLineItem,
+  PlanAmounts,
   ResolvedProfile,
   UpgradeId,
 } from './types';
@@ -28,6 +29,8 @@ export interface EvaluateOptions {
   lineItems?: boolean;
   /** Confirmed incentive amounts entered by the user, per upgrade. */
   incentives?: IncentiveOverrides;
+  /** Partial quantities and a solar size (custom plans). Omitted: the whole hotel, as the optimizer uses. */
+  amounts?: PlanAmounts;
 }
 
 /** Yearly degradation of the solar part of the savings (0 if the package has no solar). */
@@ -81,10 +84,11 @@ export function evaluatePackage(
   const p = ctx.profile;
   const ids = orderUpgrades(upgradeIds);
 
-  const mid = calculateUpgradeSavings(ctx, ids, 'mid', d);
-  const low = calculateUpgradeSavings(ctx, ids, 'low', d, { skipValidation: true });
-  const high = calculateUpgradeSavings(ctx, ids, 'high', d, { skipValidation: true });
-  const costs = packageCost(p, ids, mid.sizing, d);
+  const amounts = options.amounts;
+  const mid = calculateUpgradeSavings(ctx, ids, 'mid', d, amounts ? { amounts } : {});
+  const low = calculateUpgradeSavings(ctx, ids, 'low', d, { skipValidation: true, ...(amounts ? { amounts } : {}) });
+  const high = calculateUpgradeSavings(ctx, ids, 'high', d, { skipValidation: true, ...(amounts ? { amounts } : {}) });
+  const costs = packageCost(p, ids, mid.sizing, d, amounts?.coverage);
 
   const annualSavings = { low: low.savings.cost, mid: mid.savings.cost, high: high.savings.cost };
   const carbonAvoidedKg = { low: low.savings.carbonKg, mid: mid.savings.carbonKg, high: high.savings.carbonKg };
@@ -122,7 +126,7 @@ export function evaluatePackage(
   if (options.lineItems !== false) {
     let prev = ctx.baseline.annual.cost;
     lineItems = costs.items.map((item, i) => {
-      const upTo = calculateUpgradeSavings(ctx, ids.slice(0, i + 1), 'mid', d, { skipValidation: true });
+      const upTo = calculateUpgradeSavings(ctx, ids.slice(0, i + 1), 'mid', d, { skipValidation: true, ...(amounts ? { amounts } : {}) });
       const marginal = prev - upTo.annual.cost;
       prev = upTo.annual.cost;
       const def = upgradeDef(item.id, d);

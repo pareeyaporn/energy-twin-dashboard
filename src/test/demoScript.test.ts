@@ -109,7 +109,7 @@ export async function demoFigures(): Promise<{ figures: Record<string, string>; 
 describe("demo script figures (docs/07)", () => {
   it("every figure the script quotes matches the engine", async () => {
     const { figures: f, names } = await demoFigures();
-    if (process.env.DEMO_FIGURES) console.log(Object.entries({ ...f, ...names }).map(([k, v]) => `${k.padEnd(30)} ${v}`).join("\n"));
+    if (process.env["DEMO_FIGURES"]) console.log(Object.entries({ ...f, ...names }).map(([k, v]) => `${k.padEnd(30)} ${v}`).join("\n"));
     const script = readFileSync("docs/07_DEMO_CHECKLIST.md", "utf8");
     const section = script.slice(script.indexOf("## Demo path"), script.indexOf("## Q&A prep"));
     // Each figure must appear in bold, exactly as the app formats it (package names are said in short, so they are printed only).

@@ -16,6 +16,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { SavedScenarios } from "@/components/SavedScenarios";
+import { ScenarioImpact } from "@/scenario/ScenarioImpact";
 import { cn } from "@/lib/utils";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -189,6 +190,7 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
       <div className="@container space-y-5 p-5" aria-label="Scenario controls">
         <Button asChild variant="link" className="h-auto px-0"><Link to="/scenario">Scenario in detail</Link></Button>
         {headerEl}
+        <ScenarioImpact />
         {occupancyEl}
         {setpointsEl}
         {smartEl}
@@ -243,6 +245,7 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
         </aside>
 
         <div className="min-w-0 space-y-6">
+          <ScenarioImpact />
           {stressEl}
 
           <div className="grid gap-4 md:grid-cols-3">

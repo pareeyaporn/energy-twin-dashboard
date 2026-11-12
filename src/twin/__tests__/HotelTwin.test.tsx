@@ -215,7 +215,7 @@ describe("HotelTwin stress tests and comparison", () => {
     fireEvent.click(screen.getByRole("button", { name: "Heat wave" }));
     expect(get().activeStressTest).toBe("heat_wave");
     expect(screen.getByTestId("stress-description")).toHaveTextContent(/July runs 10 F hotter/);
-    expect(screen.getByTestId("stress-description")).toHaveTextContent(/Estimated change: \+\$[\d,]+ per year/);
+    expect(screen.getByTestId("stress-description")).toHaveTextContent(/Estimated change: \+\$[\d,]+ in the year it happens \(one-off, not annualized\)/);
     expect(screen.getByTestId("twin-kind")).toHaveTextContent("What-if");
     expect(screen.getByTestId("twin-delta")).toHaveTextContent(/per year vs before/);
     fireEvent.click(screen.getByRole("button", { name: "Heat wave" }));

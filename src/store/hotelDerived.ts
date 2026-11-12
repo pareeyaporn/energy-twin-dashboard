@@ -32,6 +32,11 @@ import {
   portfolioSummary,
   evaluatePortfolioCustomPlan,
   portfolioStressReport,
+  energyInsights,
+  impactSummary,
+  calculateBaselineEnergy,
+  prepareUpgradeContext,
+  resolveProfile,
 } from "@/engine/hotel";
 import type {
   UpgradeComparisonRow,
@@ -54,6 +59,8 @@ import type {
   StressTest,
   Totals,
   ZoneId,
+  EnergyInsight,
+  ImpactLine,
 } from "@/engine/hotel";
 import type { TwinState } from "./useTwin";
 
@@ -514,3 +521,43 @@ export const selectPortfolioStressReport = (s: TwinState): PortfolioStressReport
     selectPortfolioCustomEvaluation(s),
     s.hotelDiscountRate,
   );
+
+// ---- Energy insights and scenario impact (Phase 14A) ----
+
+const peerEui = new WeakMap<HotelInput, number>();
+/** Modeled site energy intensity of a portfolio hotel (baseline only, cached per input; no optimizer run). */
+function euiOf(input: HotelInput): number {
+  const hit = peerEui.get(input);
+  if (hit !== undefined) return hit;
+  const r = resolveProfile(input);
+  const b = calculateBaselineEnergy(r);
+  const v = r.profile.floorAreaSqft > 0 ? b.annual.siteKBtu / r.profile.floorAreaSqft : 0;
+  peerEui.set(input, v);
+  return v;
+}
+
+const insightsOf = memoLast(
+  (hotel: ResolvedProfile, baseline: EnergyResult, discountRate: number, peers: { name: string; siteEui: number }[], portfolioName: string): EnergyInsight[] => {
+    const comparison = compareUpgrades(prepareUpgradeContext(hotel, undefined, baseline), { assumptions: { discountRate } });
+    return energyInsights({ hotel, baseline, comparison, peers, portfolioName });
+  },
+);
+let lastPeers: { name: string; siteEui: number }[] = [];
+/** The other hotels in the open portfolio (all of them, whatever the filter), with their modeled intensity. */
+function selectInsightPeers(s: TwinState): { name: string; siteEui: number }[] {
+  const own = s.activePropertyId ?? s.portfolio.properties.find((p) => p.presetId && p.presetId === s.hotelPresetId)?.id ?? null;
+  const next = s.portfolio.properties
+    .filter((p) => p.id !== own)
+    .map((p) => ({ name: p.input.name ?? p.id, siteEui: euiOf(s.propertyStates[p.id]?.hotelInput ?? p.input) }));
+  const same = next.length === lastPeers.length && next.every((x, i) => x.name === lastPeers[i]!.name && x.siteEui === lastPeers[i]!.siteEui);
+  if (!same) lastPeers = next;
+  return lastPeers;
+}
+/** 3 to 5 prioritized findings for the open hotel, from its baseline (not the what-if), the upgrade comparison and scenario runs. */
+export const selectEnergyInsights = (s: TwinState): EnergyInsight[] =>
+  insightsOf(s.hotel, s.baseline, s.hotelDiscountRate, selectInsightPeers(s), s.portfolio.name);
+
+const impactOf = memoLast((before: Totals, after: Totals) => impactSummary(before, after));
+/** Reference (baseline) vs the active what-if or stress test; null when none is active. */
+export const selectScenarioImpact = (s: TwinState): ImpactLine[] | null =>
+  s.scenarioResult ? impactOf(s.scenarioResult.before.annual, s.scenarioResult.after.annual) : null;

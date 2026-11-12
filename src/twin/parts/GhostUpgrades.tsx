@@ -74,7 +74,7 @@ export function GhostUpgradeOverlay() {
           {[130, 170, 210, 250, 380, 420, 460, 500].map((x) => (
             <circle key={x} cx={x} cy="270" r="4" fill="var(--heat)" opacity="0.95" />
           ))}
-          {[108, 160, 212, 264, 316].map((y) => (
+          {[108, 160, 204, 264, 316].map((y) => (
             <circle key={y} cx="320" cy={y} r="3.5" fill="var(--heat)" />
           ))}
           {[120, 170, 240, 280].map((x) => (

@@ -15,6 +15,11 @@ export function hourLabel(h: number): string {
 }
 
 /** Heat-map color for a value between 0 (efficient, blue) and 1 (costly, red), through amber. */
+/** Position of a value between the lowest and highest shown, 0 to 1 (0.5 when they are all equal), so the scale uses its full range. */
+export function relativeIntensity(value: number, min: number, max: number): number {
+  return max - min > 0 ? (value - min) / (max - min) : 0.5;
+}
+
 export function intensityColor(t: number): string {
   const x = Math.min(1, Math.max(0, Number.isFinite(t) ? t : 0));
   return x < 0.5

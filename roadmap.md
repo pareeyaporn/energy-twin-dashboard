@@ -1,5 +1,11 @@
 # Task roadmap
 
+## Detailed financial comparisons
+
+- [x] Add store-backed discount-rate switches and five/ten-year NPV ranges to both detailed tables, preserving separate solar sizes and simple-payback cards.
+- [x] Add the optional eGRID region control with default provenance and reset.
+- [x] Test controls and verify desktop/mobile comparison flows.
+
 ## Dashboard cleanup
 
 - [x] Remove obsolete controls, drawer, unused components, and advisor plugins.

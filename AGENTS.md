@@ -44,3 +44,4 @@ use the editor.
 - The dashboard is one workspace: a four-tab left panel reusing existing components through variant props (ScenarioSimulator panel, BudgetOptimizer workspace, HomePanel presetOnly) beside an always-visible Stage with a selectCompare KPI strip; full pages stay on their own routes.
 - Budget editors retain transient text locally and commit valid amounts only on blur/Enter; an empty draft preserves the stored budget, so typing never triggers intermediate optimizations.
 - Render default provenance from resolved profile metadata and use plugin-free advisor text rendering to avoid shipping unused document-rendering bundles.
+- Detailed comparisons share store-backed discount-rate controls and NPV formatting; keep NPV out of main cards and preserve each supplied solar-size row to avoid recomputing or merging engine results.

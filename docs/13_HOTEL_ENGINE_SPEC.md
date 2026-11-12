@@ -366,6 +366,12 @@ insulation + LED + sensors at O'Hare Gateway; LED + water heating at Wells Stree
   with and without plans, and the extra cost the plans avoid. Example, electricity +20% on four hotels (all but Wells Street) with the $500,000
   AI portfolio: the chain's cost rises $244,071 a year; the plans avoid $23,070 of it (9%); payback at Riverwalk Grand falls from 2.5 to 2.1 years.
 
+### A second organization (synthetic)
+
+Northshore Hospitality: Lincoln Park Suites (120 rooms, PTHP, 2005, 74%, North Side, owned), Hyde Park Inn (90, rooftop units, 1968, 58%,
+South Side, franchised), Midway Express Hotel (160, PTAC, 1988, 72%, Airports, managed), Gold Coast Residence (210, central plant, 1972, 68%,
+Downtown, owned). Inputs are assumptions; floor areas are defaulted. Brands, regions and ownership types for both organizations are labels.
+
 ### Limits
 
 All five hotels share Chicago weather. Hotel types differ only through size, age, HVAC, occupancy and guest hours: the model has no ballroom,

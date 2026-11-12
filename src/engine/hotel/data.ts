@@ -8,6 +8,7 @@ import presetsJson from '@/data/hotel/presets.json';
 import upgradesJson from '@/data/hotel/upgrades.json';
 import incentivesJson from '@/data/hotel/incentives.json';
 import propertiesJson from '@/data/hotel/properties.json';
+import organizationsJson from '@/data/hotel/organizations.json';
 import type { HotelData, PortfolioOrganization } from './types';
 
 /** The sourced data the hotel engine reads. Pass a different bundle to tests to isolate behavior. */
@@ -25,3 +26,6 @@ export const hotelData: HotelData = {
 
 /** The synthetic demonstration hotel chain (five Chicago properties) for the portfolio view. */
 export const hotelPortfolio: PortfolioOrganization = propertiesJson as unknown as PortfolioOrganization;
+
+/** Every demonstration organization: the hotel chain above first, then the others (synthetic). */
+export const hotelOrganizations: PortfolioOrganization[] = [hotelPortfolio, ...(organizationsJson as unknown as PortfolioOrganization[])];

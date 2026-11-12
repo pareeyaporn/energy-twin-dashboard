@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import type { PropertySummary } from "@/engine/hotel";
 import { percent, usd } from "@/twin/format";
 import { HVAC_LABEL } from "./metrics";
+import { OWNERSHIP_LABEL } from "@/store/userHotels";
 
 type Col = {
   id: string;
@@ -15,6 +16,7 @@ type Col = {
 const COLS: Col[] = [
   { id: "name", label: "Property", value: (r) => r.name, show: (r) => r.name },
   { id: "location", label: "Location", value: (r) => r.neighborhood, show: (r) => r.neighborhood },
+  { id: "brand", label: "Brand · ownership", value: (r) => r.brand ?? "", show: (r) => [r.brand, r.ownership ? OWNERSHIP_LABEL[r.ownership] : undefined].filter(Boolean).join(" · ") || "—" },
   { id: "rooms", label: "Rooms", value: (r) => r.rooms, show: (r) => String(r.rooms), numeric: true },
   { id: "area", label: "Floor area", value: (r) => r.floorAreaSqft, show: (r) => `${Math.round(r.floorAreaSqft).toLocaleString("en-US")} ft²`, numeric: true },
   { id: "hvac", label: "HVAC", value: (r) => r.hvacType, show: (r) => HVAC_LABEL[r.hvacType] ?? r.hvacType },
@@ -39,7 +41,7 @@ export function PortfolioTable({ rows, onExplore, onRemove }: { rows: PropertySu
   });
   return (
     <div className="table-scroll overflow-x-auto rounded-xl border border-glass-border">
-      <table className="sticky-first-column w-full min-w-[980px] text-xs" data-testid="portfolio-table">
+      <table className="sticky-first-column w-full min-w-[1080px] text-xs" data-testid="portfolio-table">
         <caption className="sr-only">Portfolio comparison (synthetic demonstration properties, modeled estimates)</caption>
         <thead>
           <tr className="border-b border-border text-muted-foreground">

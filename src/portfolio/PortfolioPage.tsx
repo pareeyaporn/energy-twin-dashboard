@@ -9,6 +9,8 @@ import { PortfolioCharts } from "./PortfolioCharts";
 import { PortfolioOptimizer } from "./PortfolioOptimizer";
 import { PortfolioStress } from "./PortfolioStress";
 import { AddHotelDialog } from "./AddHotelDialog";
+import { PortfolioFilters } from "./PortfolioFilters";
+import { PortfolioGroups } from "./PortfolioGroups";
 import { PortfolioTable } from "./PortfolioTable";
 
 const compact = (n: number, unit: string) =>
@@ -59,7 +61,7 @@ export function PortfolioPage() {
           <nav aria-label="Breadcrumb" className="text-xs text-muted-foreground">Portfolio · {org.city}</nav>
           <h1 className="flex items-center gap-2 text-xl font-semibold"><Building2 className="size-5 text-primary" />{org.name}</h1>
           <p className="text-xs text-muted-foreground">
-            {t.properties} hotels in {org.city} ·{" "}
+            {org.properties.length} hotels in {org.city} ·{" "}
             <span className="rounded-full border border-glass-border px-1.5 py-0.5" data-testid="portfolio-synthetic">
               {summary.properties.some((p) => !p.synthetic) ? "Sample hotels are synthetic · yours use your inputs · modeled estimates" : "Synthetic demonstration chain · modeled estimates"}
             </span>
@@ -67,6 +69,8 @@ export function PortfolioPage() {
         </div>
         <AddHotelDialog />
       </header>
+
+      <PortfolioFilters shown={t.properties} />
 
       <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8" aria-label="Portfolio totals">
         {kpis.map(([k, v]) => (
@@ -83,6 +87,8 @@ export function PortfolioPage() {
         <h2 className="text-base font-semibold">Compare the hotels</h2>
         <PortfolioTable rows={summary.properties} onExplore={explore} onRemove={removeHotel} />
       </section>
+
+      <PortfolioGroups rows={summary.properties} />
 
       <PortfolioCharts rows={summary.properties} />
 

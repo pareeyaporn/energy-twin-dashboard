@@ -4,7 +4,8 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { HotelInput, HvacType } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
-import { CHICAGO_AREAS } from "@/store/userHotels";
+import { CHICAGO_AREAS, OWNERSHIP_LABEL } from "@/store/userHotels";
+import type { Ownership } from "@/engine/hotel";
 import type { ChicagoAreaId } from "@/store/userHotels";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -17,8 +18,8 @@ const HVAC_OPTIONS: { value: HvacType; label: string }[] = [
   { value: "rtu", label: "Rooftop units (gas heat)" },
 ];
 
-type Draft = { name: string; area: ChicagoAreaId; rooms: string; floors: string; floorArea: string; yearBuilt: string; hvac: HvacType; occupancy: string; bill: string; budget: string };
-const EMPTY: Draft = { name: "", area: "loop", rooms: "", floors: "", floorArea: "", yearBuilt: "", hvac: "central_plant", occupancy: "", bill: "", budget: "" };
+type Draft = { name: string; area: ChicagoAreaId; rooms: string; floors: string; floorArea: string; yearBuilt: string; hvac: HvacType; occupancy: string; bill: string; budget: string; brand?: string; ownership?: Ownership };
+const EMPTY: Draft = { name: "", area: "loop", rooms: "", floors: "", floorArea: "", yearBuilt: "", hvac: "central_plant", occupancy: "", bill: "", budget: "", brand: "", ownership: "owned" };
 
 const num = (s: string) => (s.trim() === "" ? undefined : Number(s.replace(/[$,\s%]/g, "")));
 
@@ -78,7 +79,7 @@ export function AddHotelDialog({ trigger }: { trigger?: React.ReactNode }) {
     setErrors(r.errors);
     if (!r.input) return;
     hydrate();
-    const id = add(r.input, d.area);
+    const id = add(r.input, d.area, { ...(d.brand?.trim() ? { brand: d.brand.trim() } : {}), ownership: d.ownership ?? "owned" });
     openProperty(id);
     setOpen(false);
     setD(EMPTY);
@@ -115,6 +116,12 @@ export function AddHotelDialog({ trigger }: { trigger?: React.ReactNode }) {
             <Field id="mh-hvac" label="Heating and cooling">
               <select id="mh-hvac" className={inputCls} value={d.hvac} onChange={set("hvac")}>
                 {HVAC_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </Field>
+            <Field id="mh-brand" label="Brand" hint="Optional; for grouping and filters"><input id="mh-brand" className={inputCls} value={d.brand ?? ""} onChange={set("brand")} placeholder="Independent" maxLength={60} /></Field>
+            <Field id="mh-ownership" label="Ownership">
+              <select id="mh-ownership" className={inputCls} value={d.ownership ?? "owned"} onChange={set("ownership")}>
+                {(Object.keys(OWNERSHIP_LABEL) as Ownership[]).map((o) => <option key={o} value={o}>{OWNERSHIP_LABEL[o]}</option>)}
               </select>
             </Field>
             <Field id="mh-floors" label="Floors" hint="Optional"><input id="mh-floors" className={inputCls} inputMode="numeric" value={d.floors} onChange={set("floors")} /></Field>

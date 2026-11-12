@@ -193,8 +193,15 @@ const labelOf = memoLast((hotel: ResolvedProfile, presetId: string | null) => {
   return { title: p.name, city: `${p.city}, ${p.state}`, rooms: p.rooms, synthetic: presetId !== null };
 });
 /** True when the open hotel's data is synthetic: a preset, or a sample portfolio hotel (not one the user added). */
+const allPropertiesOf = memoLast((orgs: TwinState["organizations"], userHotels: TwinState["userHotels"]): PortfolioProperty[] => [
+  ...orgs.flatMap((o) => o.properties),
+  ...userHotels,
+]);
+/** Every hotel in every organization, plus the user's own (for looking a hotel up by id). */
+export const selectAllProperties = (s: TwinState): PortfolioProperty[] => allPropertiesOf(s.organizations, s.userHotels);
+
 export const selectIsSynthetic = (s: TwinState): boolean => {
-  if (s.activePropertyId) return s.portfolio.properties.find((p) => p.id === s.activePropertyId)?.synthetic ?? true;
+  if (s.activePropertyId) return selectAllProperties(s).find((p) => p.id === s.activePropertyId)?.synthetic ?? true;
   return s.hotelPresetId !== null;
 };
 export const selectHotelLabel = (s: TwinState) => labelOf(s.hotel, selectIsSynthetic(s) ? "synthetic" : null);
@@ -329,7 +336,11 @@ export const selectVisibleCustomPlans = (s: TwinState) => visiblePlansOf(s.custo
 let lastItems: { property: PortfolioProperty; input: HotelInput }[] = [];
 /** Each property with its current input: the open one's live input, the others' saved or original input. Stable while unchanged. */
 export function selectPortfolioItems(s: TwinState): { property: PortfolioProperty; input: HotelInput }[] {
-  const next = s.portfolio.properties.map((property) => ({
+  const f = s.portfolioFilter;
+  const shown = s.portfolio.properties.filter(
+    (p) => (!f.brand || p.brand === f.brand) && (!f.region || p.region === f.region) && (!f.ownership || p.ownership === f.ownership),
+  );
+  const next = shown.map((property) => ({
     property,
     input: property.id === s.activePropertyId ? s.hotelInput : (s.propertyStates[property.id]?.hotelInput ?? property.input),
   }));
@@ -342,7 +353,7 @@ const summaryOf = memoLast((items: { property: PortfolioProperty; input: HotelIn
 );
 export const selectPortfolioSummary = (s: TwinState): PortfolioSummary => summaryOf(selectPortfolioItems(s), s.hotelDiscountRate);
 export const selectActiveProperty = (s: TwinState): PortfolioProperty | null =>
-  s.portfolio.properties.find((p) => p.id === s.activePropertyId) ?? null;
+  selectAllProperties(s).find((p) => p.id === s.activePropertyId) ?? null;
 
 /** Per-plan memo: re-evaluates a plan only when its items, the context, the budget or the discount rate change. */
 const planEvalCache = new Map<string, { items: unknown; ctx: unknown; budget: number; rate: number; result: PlanEvaluation }>();

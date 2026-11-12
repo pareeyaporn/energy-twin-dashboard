@@ -3,6 +3,7 @@ import {
   DEFAULT_FINANCE,
   PORTFOLIO_DEFAULTS,
   STRESS_TESTS,
+  hotelOrganizations,
   hotelPortfolio,
   optimizePortfolioBudget,
   prepareProperty,
@@ -26,13 +27,14 @@ import type {
   PortfolioOrganization,
   PortfolioPlan,
   PortfolioProperty,
+  Ownership,
   ResolvedProfile,
   Scenario,
   ScenarioResult,
   StressTest,
   ZoneId,
 } from "@/engine/hotel";
-import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, selectIsSynthetic, selectPortfolioItems, selectPortfolioSummary, withoutKeys } from "./hotelDerived";
+import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, selectAllProperties, selectIsSynthetic, selectPortfolioItems, selectPortfolioSummary, withoutKeys } from "./hotelDerived";
 import { readStoredPlans, writeStoredPlans } from "./customPlans";
 import { readUserHotels, userProperty, writeUserHotels } from "./userHotels";
 import type { ChicagoAreaId } from "./userHotels";
@@ -111,9 +113,20 @@ export type PortfolioStressPlanChoice = "ai" | "mine" | "none";
 export type UserHotel = PortfolioProperty & { areaId: ChicagoAreaId };
 
 /** The sample chain plus the user's hotels (a stable object per list of user hotels). */
-function portfolioWith(userHotels: UserHotel[]): PortfolioOrganization {
-  return userHotels.length ? { ...hotelPortfolio, properties: [...hotelPortfolio.properties, ...userHotels] } : hotelPortfolio;
+/** The selected organization with the user's hotels that belong to it (hotels saved before organizations existed go to the first). */
+function portfolioWith(userHotels: UserHotel[], organizationId: string = hotelPortfolio.id): PortfolioOrganization {
+  const org = hotelOrganizations.find((o) => o.id === organizationId) ?? hotelPortfolio;
+  const mine = userHotels.filter((h) => (h.organizationId ?? hotelPortfolio.id) === org.id);
+  return mine.length ? { ...org, properties: [...org.properties, ...mine] } : org;
 }
+
+/** Narrows the portfolio views (map, table, totals, charts, optimizer, stress tests) to a brand, a region or an ownership type. */
+export interface PortfolioFilter {
+  brand: string | null;
+  region: string | null;
+  ownership: Ownership | null;
+}
+const NO_FILTER: PortfolioFilter = { brand: null, region: null, ownership: null };
 
 export interface TwinState {
   presets: PresetHome[];
@@ -234,6 +247,13 @@ export interface TwinState {
   setPortfolioStressTest: (id: StressTest["id"] | null) => void;
   setPortfolioStressScope: (ids: string[]) => void;
   setPortfolioStressPlan: (c: PortfolioStressPlanChoice) => void;
+  /** The demonstration organizations and the selected one (`portfolio` is the selected organization). */
+  organizations: PortfolioOrganization[];
+  organizationId: string;
+  portfolioFilter: PortfolioFilter;
+  /** Switches the portfolio to another organization (clears the filter and the portfolio plan; the open hotel stays open). */
+  setOrganization: (id: string) => void;
+  setPortfolioFilter: (patch: Partial<PortfolioFilter>) => void;
   /** Hotels the user added ("Add my hotel"), kept in this browser; they join the portfolio after the sample chain. */
   userHotels: UserHotel[];
   nextUserHotelNumber: number;
@@ -241,7 +261,7 @@ export interface TwinState {
   /** Reads the user's hotels from local storage (call after mount, in the browser). */
   hydrateUserHotels: () => void;
   /** Adds a hotel from the user's inputs (blank fields use defaults); returns its id. It does not open it. */
-  addUserHotel: (input: HotelInput, areaId: ChicagoAreaId) => string;
+  addUserHotel: (input: HotelInput, areaId: ChicagoAreaId, meta?: { brand?: string; ownership?: Ownership }) => string;
   removeUserHotel: (id: string) => void;
 
   /** Custom investment plans (kept in the browser's local storage; numbers are always recomputed by the engine). */
@@ -341,6 +361,9 @@ function initialHotelState() {
     playbackSpeed: 1,
     compareMode: "after" as CompareMode,
     portfolio: hotelPortfolio,
+    organizations: hotelOrganizations,
+    organizationId: hotelPortfolio.id,
+    portfolioFilter: NO_FILTER,
     activePropertyId: null as string | null,
     propertyStates: {} as Record<string, PropertySnapshot>,
     portfolioBudget: PORTFOLIO_DEFAULTS.budget,
@@ -380,7 +403,7 @@ function savedUserEdit(s: TwinState, hotelInput: HotelInput): Partial<TwinState>
   if (!s.activePropertyId || !s.userHotels.some((h) => h.id === s.activePropertyId)) return {};
   const userHotels = s.userHotels.map((h) => (h.id === s.activePropertyId ? { ...h, input: hotelInput } : h));
   writeUserHotels(userHotels, s.nextUserHotelNumber);
-  return { userHotels, portfolio: portfolioWith(userHotels) };
+  return { userHotels, portfolio: portfolioWith(userHotels, s.organizationId) };
 }
 
 /** Saves the open property (if any) into `propertyStates`. */
@@ -583,6 +606,7 @@ export const useTwin = create<TwinState>((set, get) => ({
       optimizing: false,
       portfolio: portfolioWith(s.userHotels),
       portfolioStressScope: portfolioWith(s.userHotels).properties.map((p) => p.id),
+      organizationId: hotelPortfolio.id,
     })),
   demoResets: 0,
   resetDemo: () => {
@@ -595,7 +619,7 @@ export const useTwin = create<TwinState>((set, get) => ({
   openProperty: (id) =>
     set((s) => {
       if (id === s.activePropertyId) return {};
-      const property = s.portfolio.properties.find((p) => p.id === id);
+      const property = selectAllProperties(s).find((p) => p.id === id);
       if (!property) return {};
       const propertyStates = savedStates(s);
       const saved = propertyStates[id];
@@ -680,19 +704,19 @@ export const useTwin = create<TwinState>((set, get) => ({
       userHotels,
       nextUserHotelNumber: Math.max(s.nextUserHotelNumber, stored.next),
       userHotelsHydrated: true,
-      portfolio: portfolioWith(userHotels),
-      portfolioStressScope: [...s.portfolioStressScope, ...hotels.map((h) => h.id)],
+      portfolio: portfolioWith(userHotels, s.organizationId),
+      portfolioStressScope: [...s.portfolioStressScope, ...hotels.filter((h) => (h.organizationId ?? hotelPortfolio.id) === s.organizationId).map((h) => h.id)],
     }));
   },
-  addUserHotel: (input, areaId) => {
+  addUserHotel: (input, areaId, meta = {}) => {
     const s = get();
     const n = s.nextUserHotelNumber;
     const id = `my-hotel-${n}`;
     const clean: HotelInput = { ...input, name: input.name?.trim() || `My hotel ${n}` };
-    const hotel: UserHotel = { ...userProperty(id, clean, areaId, s.userHotels.length), areaId };
+    const hotel: UserHotel = { ...userProperty(id, clean, areaId, s.userHotels.length, { ...meta, organizationId: s.organizationId }), areaId };
     const userHotels = [...s.userHotels, hotel];
     writeUserHotels(userHotels, n + 1);
-    set({ userHotels, nextUserHotelNumber: n + 1, portfolio: portfolioWith(userHotels), portfolioPlan: null, portfolioStressScope: [...s.portfolioStressScope, id] });
+    set({ userHotels, nextUserHotelNumber: n + 1, portfolio: portfolioWith(userHotels, s.organizationId), portfolioPlan: null, portfolioStressScope: [...s.portfolioStressScope, id] });
     return id;
   },
   removeUserHotel: (id) => {
@@ -705,13 +729,20 @@ export const useTwin = create<TwinState>((set, get) => ({
     const { [id]: _plan, ...portfolioCustomPlanIds } = get().portfolioCustomPlanIds;
     set({
       userHotels,
-      portfolio: portfolioWith(userHotels),
+      portfolio: portfolioWith(userHotels, get().organizationId),
       propertyStates,
       portfolioCustomPlanIds,
       portfolioPlan: null,
       portfolioStressScope: get().portfolioStressScope.filter((x) => x !== id),
     });
   },
+  setOrganization: (id) =>
+    set((s) => {
+      if (id === s.organizationId || !s.organizations.some((o) => o.id === id)) return {};
+      const portfolio = portfolioWith(s.userHotels, id);
+      return { organizationId: id, portfolio, portfolioFilter: NO_FILTER, portfolioPlan: null, portfolioStressScope: portfolio.properties.map((p) => p.id) };
+    }),
+  setPortfolioFilter: (patch) => set((s) => ({ portfolioFilter: { ...s.portfolioFilter, ...patch }, portfolioPlan: null })),
   setPortfolioStressTest: (portfolioStressTestId) => set({ portfolioStressTestId }),
   setPortfolioStressScope: (ids) => set((s) => ({ portfolioStressScope: s.portfolio.properties.map((p) => p.id).filter((id) => ids.includes(id)) })),
   setPortfolioStressPlan: (portfolioStressPlan) => set({ portfolioStressPlan }),

@@ -189,3 +189,12 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
 - **The tour shows live figures** computed by the engine for the open hotel (read-only calls, nothing stored). Its time-lapse and energy-flow
   views are view settings that the tour restores at the end. "Find my best investments" on the last card runs the optimizer because the user
   pressed it.
+
+## 19. Organizations and filters (November 2026)
+
+- **Two synthetic organizations**, both in Chicago (the model has Chicago weather only): Lakefront Hotel Group (the five-hotel chain, unchanged
+  figures) and Northshore Hospitality (four hotels). Brands, regions and ownership types are invented labels; the model treats ownership types
+  alike (no split of who pays for energy or upgrades).
+- **Regions are areas of Chicago** (Downtown, North Side, South Side, Airports), not other cities.
+- **Filters narrow every portfolio view**, including the optimizer and the priority score, which is then relative to the hotels shown.
+- **A hotel stays open when the organization changes**; the breadcrumb names its own organization.

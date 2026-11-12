@@ -21,6 +21,7 @@ export function PropertyCard({ row, onExplore, onClose }: { row: PropertySummary
         <div>
           <div className="font-semibold leading-tight">{row.name}</div>
           <div className="text-xs text-muted-foreground">{row.neighborhood} · {row.segment}</div>
+          {row.brand && <div className="text-[11px] text-primary">{row.brand}{row.region ? ` · ${row.region}` : ""}</div>}
         </div>
         {onClose && (
           <button type="button" onClick={onClose} className="rounded p-1 text-muted-foreground hover:bg-accent" aria-label="Close card">

@@ -26,7 +26,7 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 - [x] 0.8b [CC] Backend architecture doc `docs/12_BACKEND_ARCHITECTURE.md` and README updated for the hotel pivot
 - [x] 0.6 [CC] Rewrite `docs/05` (Claude Code prompts) and `docs/06` (Lovable prompts) for the new phases; update `docs/07` demo
       checklist and Q&A (vs Eden, vs ENERGY STAR Portfolio Manager, accuracy, why hotels)
-- [ ] 0.7 [TEAM] Delete finished branches on GitHub (I cannot delete remote branches); turn on "Automatically delete head branches"
+- [x] 0.7 [TEAM] Delete finished branches on GitHub (I cannot delete remote branches); turn on "Automatically delete head branches" — *done (November 2026): 35 merged branches deleted; the Lovable branches and the early, superseded branches are kept*
 - [x] 0.8 [TEAM] Allow the network domains needed for research: `epa.gov`, `noaa.gov` (and `nrel.gov`, `energystar.gov` if used) — done (EPA, NOAA, NLR, ENERGY STAR, EIA, IRS, ComEd, Choose Chicago reachable)
 
 ## Phase 1 — Hotel data model and baseline simulation (P0) [CC]
@@ -356,12 +356,17 @@ P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress t
       the map and in the comparison (tagged "Your hotel", not synthetic), opens in its own twin, and edits under Edit details are saved; it can
       be removed. Reset demo removes added hotels. Chicago weather only (the model has no other climate).
 
+- [x] 13.38 **P1** [CC] Organizations, brands, regions and ownership types: a second synthetic organization (Northshore Hospitality, four
+      Chicago hotels); every hotel has a brand, region (Downtown, North Side, South Side, Airports) and ownership type (owned, managed,
+      franchised, leased); an organization switcher and filters on the Portfolio page (map, table, totals, charts, optimizer and stress tests
+      follow the filter); totals by brand, region or ownership; Add my hotel asks for brand and ownership and joins the selected organization
+
 ### 13I — Later (P2)
 - [x] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
       optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 14 steps with live figures, a time-lapse and the energy flow) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
 - [x] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
       their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model — *done: "More building types (coming later)" cards on the portfolio page, from `properties.json`*
-- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data
+- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Still later: multi-city portfolios (needs sourced weather, prices and grid data per city), real utility data (bill upload and calibration), role-based access (accounts and a database)*
 - [x] 13.36 **P2** [CC] Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07) — *transitions done (marker colors fade between metrics; the twin's figures count up when a hotel opens); the demo script is the storyline owner's (docs/07)*
 
 Known limits: all five hotels share Chicago weather (O'Hare normals); property types differ through size, age, HVAC and occupancy only (the

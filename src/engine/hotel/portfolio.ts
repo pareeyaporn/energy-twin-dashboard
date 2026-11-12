@@ -125,6 +125,10 @@ export function propertyCandidates(
 export interface PropertySummary {
   id: string;
   name: string;
+  /** Labels from the property (optional for older data). */
+  brand?: string;
+  region?: string;
+  ownership?: PortfolioProperty['ownership'];
   neighborhood: string;
   segment: string;
   lat: number;
@@ -191,9 +195,13 @@ export function portfolioSummary(
   const maxRatio = Math.max(0, ...rows.map((r) => ratio(r.best)));
   const properties: PropertySummary[] = rows.map(({ prep, best }) => {
     const p = prep.hotel.profile;
+    const { brand, region, ownership } = prep.property;
     return {
       id: prep.property.id,
       name: p.name,
+      ...(brand ? { brand } : {}),
+      ...(region ? { region } : {}),
+      ...(ownership ? { ownership } : {}),
       neighborhood: prep.property.neighborhood,
       segment: prep.property.segment,
       lat: prep.property.lat,

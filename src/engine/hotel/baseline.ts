@@ -13,6 +13,7 @@ import {
   ZONE_IDS,
 } from './constants';
 import { hotelData } from './data';
+import { billFit, billTotals } from './bills';
 import { isResolved, resolveProfile } from './profile';
 import type {
   Calibration,
@@ -321,9 +322,15 @@ export function simulate(
         // Equipment condition (stress test): heating and cooling use more (or less) energy for the same load.
         const hvacMult = u === 'heating' || u === 'cooling' ? (c.hvacEnergyMult ?? 1) : 1;
         if (hvacMult !== 1) for (const lt of Object.keys(loadKBtu) as LoadType[]) loadKBtu[lt] *= hvacMult;
-        const siteKBtu = loadKBtu.base + loadKBtu.occupancy + loadKBtu.weather + loadKBtu.schedule;
-        const elecKWh = (siteKBtu * fuel.electric) / KBTU_PER_KWH;
-        const gasTherms = (siteKBtu * fuel.gas) / KBTU_PER_THERM;
+        const siteKBtuRaw = loadKBtu.base + loadKBtu.occupancy + loadKBtu.weather + loadKBtu.schedule;
+        // Monthly bills calibrate each fuel on its own: the cell's electric and gas parts scale by their factors (1 otherwise).
+        const kE = calibration.elecFactor ?? 1;
+        const kG = calibration.gasFactor ?? 1;
+        const kCell = fuel.electric * kE + fuel.gas * kG;
+        if (kCell !== 1) for (const lt of Object.keys(loadKBtu) as LoadType[]) loadKBtu[lt] *= kCell;
+        const siteKBtu = siteKBtuRaw * kCell;
+        const elecKWh = (siteKBtuRaw * fuel.electric * kE) / KBTU_PER_KWH;
+        const gasTherms = (siteKBtuRaw * fuel.gas * kG) / KBTU_PER_THERM;
         const elecCost = elecKWh * elecRate;
         const gasCost = gasTherms * gasRate;
         cells.push({
@@ -375,8 +382,35 @@ export function calculateBaselineEnergy(
   const p = resolved.profile;
   const cond = baselineConditions(p, data);
   const raw = simulate(p, cond, data);
+  if (p.utilityBills.length > 0) {
+    const calibrated = calibrateToBills(p, cond, raw, data);
+    if (calibrated) return calibrated;
+  }
   if (p.monthlyEnergyBill == null || raw.annual.cost <= 0) return raw;
   const wanted = (p.monthlyEnergyBill * 12) / raw.annual.cost;
   const factor = clamp(wanted, CALIBRATION_RANGE[0], CALIBRATION_RANGE[1]);
   return simulate(p, cond, data, { factor, source: 'bill', clamped: factor !== wanted });
+}
+
+/**
+ * Calibrate to monthly utility bills, fuel by fuel: factor = billed use / modeled use over the months the bills report (each within
+ * the calibration range), so the year keeps its modeled shape while matching the bills' level. A fuel without bills keeps the
+ * benchmark (factor 1). The fit against the bills is measured with ASHRAE Guideline 14's monthly criteria and kept on the result.
+ */
+function calibrateToBills(p: HotelProfile, cond: Conditions, raw: EnergyResult, data: HotelData): EnergyResult | null {
+  const t = billTotals(p.utilityBills);
+  const modeled = (months: number[], pick: (x: { elecKWh: number; gasTherms: number }) => number) =>
+    raw.months.filter((m) => months.includes(m.month)).reduce((s, m) => s + pick(m.totals), 0);
+  const mE = modeled(t.elecMonths, (x) => x.elecKWh);
+  const mG = modeled(t.gasMonths, (x) => x.gasTherms);
+  const wantE = t.elecMonths.length && mE > 0 ? t.elecKWh / mE : null;
+  const wantG = t.gasMonths.length && mG > 0 ? t.gasTherms / mG : null;
+  if (wantE === null && wantG === null) return null;
+  const elecFactor = wantE === null ? 1 : clamp(wantE, CALIBRATION_RANGE[0], CALIBRATION_RANGE[1]);
+  const gasFactor = wantG === null ? 1 : clamp(wantG, CALIBRATION_RANGE[0], CALIBRATION_RANGE[1]);
+  const clamped = (wantE !== null && elecFactor !== wantE) || (wantG !== null && gasFactor !== wantG);
+  const cal: Calibration = { factor: 1, source: 'bill', clamped, method: 'monthly_bills', elecFactor, gasFactor };
+  const result = simulate(p, cond, data, cal);
+  result.calibration = { ...cal, fit: billFit(result, p.utilityBills) };
+  return result;
 }

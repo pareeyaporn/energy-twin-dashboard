@@ -24,6 +24,7 @@ export {
 export type { StressTest, HvacSettings } from './scenarios';
 export { typicalDayProfile, simulatedMeter, roomOccupancyPattern, equipmentInventory, energyFlows, energyFlowsAt, typicalDayByZoneEndUse } from './twin';
 export type { HourPoint, MeterReading, RoomPoint, RoomState, EquipmentItem, FlowGraph, FlowNode, FlowLink, ZoneEndUseDay } from './twin';
+export { parseUtilityBillsCsv, normalizeBills, billRates, billFit, parseMonth, GUIDELINE_14_MONTHLY } from './bills';
 export {
   upgradeDef,
   upgradeLifetime,

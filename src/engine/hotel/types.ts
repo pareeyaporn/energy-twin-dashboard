@@ -48,6 +48,11 @@ export interface HotelInput {
   operatingHours?: number;
   hvacType?: HvacType;
   monthlyEnergyBill?: number;
+  /**
+   * Up to 12 months of utility bills (use, optionally cost). When given, the model is calibrated to them fuel by fuel and, unless a
+   * rate is entered, the bills' average rates replace the state averages. Takes precedence over `monthlyEnergyBill`.
+   */
+  utilityBills?: UtilityBillMonth[];
   electricityRate?: number; // $/kWh
   /** EPA eGRID subregion acronym (for example RFCW); defaults from the city, then the state, then the U.S. rate. */
   gridSubregion?: string;
@@ -85,6 +90,8 @@ export interface HotelProfile {
   operatingHours: number;
   hvacType: HvacType;
   monthlyEnergyBill: number | null;
+  /** Valid bill months (empty when none were given). */
+  utilityBills: UtilityBillMonth[];
   electricityRate: number;
   gasRate: number;
   occupancy: number;
@@ -186,6 +193,37 @@ export interface Calibration {
   factor: number;
   source: 'bill' | 'benchmark';
   clamped: boolean;
+  /** Monthly utility bills: separate factors for electricity and gas (each within the calibration range), and the fit. */
+  method?: 'monthly_bills';
+  elecFactor?: number;
+  gasFactor?: number;
+  fit?: BillFit;
+}
+
+/** One month of a utility bill. `month` is 0 (January) to 11. */
+export interface UtilityBillMonth {
+  month: number;
+  elecKWh?: number;
+  gasTherms?: number;
+  /** Total charges for the month, $ (all-in). */
+  elecCost?: number;
+  gasCost?: number;
+}
+
+export interface FuelFit {
+  months: number;
+  /** ASHRAE Guideline 14 normalized mean bias error, % (positive: the bills are higher than the model). */
+  nmbePct: number;
+  /** Coefficient of variation of the root-mean-square error, %. */
+  cvrmsePct: number;
+  /** 12 months, |NMBE| <= 5% and CV(RMSE) <= 15%. */
+  meetsGuideline14: boolean;
+  pairs: { month: number; bill: number; model: number }[];
+}
+
+export interface BillFit {
+  elec: FuelFit | null;
+  gas: FuelFit | null;
 }
 
 export interface EnergyResult {

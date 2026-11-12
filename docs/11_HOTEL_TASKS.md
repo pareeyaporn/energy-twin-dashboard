@@ -156,6 +156,11 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [ ] 7.10 Comfort guidance for setpoints (ASHRAE 55)
 - [ ] 7.11 Compare the demo hotel against an ENERGY STAR Portfolio Manager benchmark and note the result for Q&A
 - [ ] 7.12 Update `docs/08_DATA_TODO.md` to this list
+- [ ] 7.13 **Calibration pass, after everything is built (decided: do not tune numbers before then).** Replace the placeholder savings, costs and interaction factors with
+      reasonable, sourced values, then check the whole result for realism. Start with the items the demo depends on:
+      smart room control savings (setback degrees, per-degree sensitivities, guest-presence curve), the HVAC share of energy, LED and occupancy-sensor savings, the lighting-to-heating/cooling
+      interaction, solar cost and size, and the balanced-score weights. Check: demo hotel total against an ENERGY STAR Portfolio Manager benchmark, package savings as a share of the bill
+      against published hotel case studies, and that the demo question still has an honest answer. Do not pick numbers to fit the story; change the demo question if the numbers say so.
 
 ## Phase 8 — Demo hardening (all)
 - [ ] 8.1 Make the three-minute path deterministic (brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart HVAC on,

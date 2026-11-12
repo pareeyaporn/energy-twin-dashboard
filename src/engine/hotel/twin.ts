@@ -196,10 +196,19 @@ export interface FlowLink {
   target: string;
   costUsd: number;
   siteKBtu: number;
+  /** The electricity and gas parts of the link (they sum to `costUsd` and `siteKBtu`). */
+  elecCostUsd: number;
+  gasCostUsd: number;
+  elecKBtu: number;
+  gasKBtu: number;
+  elecKWh: number;
+  gasTherms: number;
 }
 export interface FlowGraph {
   nodes: FlowNode[];
   links: FlowLink[];
+  /** "year": annual totals ($ and kBtu per year). "hour": one hour of a typical day ($ and kBtu in that hour). */
+  period?: 'year' | 'hour';
 }
 
 const CATEGORY_LABELS: Record<Category, string> = {
@@ -211,28 +220,110 @@ const CATEGORY_LABELS: Record<Category, string> = {
   other: 'Other',
 };
 
-/** Grid and gas → zones → categories, with cost and site energy on every link. Flows are conserved. */
-export function energyFlows(result: EnergyResult): FlowGraph {
+interface FlowPart {
+  zone: ZoneId;
+  endUse: EndUse;
+  elecKWh: number;
+  gasTherms: number;
+  elecCost: number;
+  gasCost: number;
+}
+
+const KBTU_PER_KWH = 3.412;
+const KBTU_PER_THERM = 100;
+
+function flowGraph(parts: FlowPart[], period: 'year' | 'hour'): FlowGraph {
   const nodes: FlowNode[] = [
     { id: 'grid', label: 'Grid electricity', kind: 'source' },
     { id: 'gas', label: 'Natural gas', kind: 'source' },
     ...ZONE_IDS.map((z) => ({ id: `zone:${z}`, label: ZONE_LABELS[z], kind: 'zone' as const })),
     ...CATEGORIES.map((c) => ({ id: `category:${c}`, label: CATEGORY_LABELS[c], kind: 'category' as const })),
   ];
+  const link = (source: string, target: string, ps: FlowPart[], fuel: 'both' | 'elec' | 'gas'): FlowLink => {
+    const e = fuel !== 'gas';
+    const g = fuel !== 'elec';
+    const elecKWh = e ? ps.reduce((s, x) => s + x.elecKWh, 0) : 0;
+    const gasTherms = g ? ps.reduce((s, x) => s + x.gasTherms, 0) : 0;
+    const elecCostUsd = e ? ps.reduce((s, x) => s + x.elecCost, 0) : 0;
+    const gasCostUsd = g ? ps.reduce((s, x) => s + x.gasCost, 0) : 0;
+    const elecKBtu = elecKWh * KBTU_PER_KWH;
+    const gasKBtu = gasTherms * KBTU_PER_THERM;
+    return { source, target, costUsd: elecCostUsd + gasCostUsd, siteKBtu: elecKBtu + gasKBtu, elecCostUsd, gasCostUsd, elecKBtu, gasKBtu, elecKWh, gasTherms };
+  };
   const links: FlowLink[] = [];
   for (const z of ZONE_IDS) {
-    const cells = result.cells.filter((c) => c.zone === z);
-    const elecCost = cells.reduce((s, c) => s + c.elecCost, 0);
-    const gasCost = cells.reduce((s, c) => s + c.gasCost, 0);
-    const elecKBtu = cells.reduce((s, c) => s + c.elecKWh * 3.412, 0);
-    const gasKBtu = cells.reduce((s, c) => s + c.gasTherms * 100, 0);
-    if (elecCost > 0) links.push({ source: 'grid', target: `zone:${z}`, costUsd: elecCost, siteKBtu: elecKBtu });
-    if (gasCost > 0) links.push({ source: 'gas', target: `zone:${z}`, costUsd: gasCost, siteKBtu: gasKBtu });
+    const zp = parts.filter((x) => x.zone === z);
+    const el = link('grid', `zone:${z}`, zp, 'elec');
+    const gl = link('gas', `zone:${z}`, zp, 'gas');
+    if (el.costUsd > 0) links.push(el);
+    if (gl.costUsd > 0) links.push(gl);
     for (const cat of CATEGORIES) {
-      const cc = cells.filter((c) => CATEGORY_OF[c.endUse] === cat);
-      const cost = cc.reduce((s, c) => s + c.cost, 0);
-      if (cost > 0) links.push({ source: `zone:${z}`, target: `category:${cat}`, costUsd: cost, siteKBtu: cc.reduce((s, c) => s + c.siteKBtu, 0) });
+      const cl = link(`zone:${z}`, `category:${cat}`, zp.filter((x) => CATEGORY_OF[x.endUse] === cat), 'both');
+      if (cl.costUsd > 0) links.push(cl);
     }
   }
-  return { nodes, links };
+  return { nodes, links, period };
+}
+
+/** Grid and gas → zones → categories, with cost and site energy (split by fuel) on every link, for the year. Flows are conserved. */
+export function energyFlows(result: EnergyResult): FlowGraph {
+  return flowGraph(
+    result.cells.map((c) => ({ zone: c.zone, endUse: c.endUse, elecKWh: c.elecKWh, gasTherms: c.gasTherms, elecCost: c.elecCost, gasCost: c.gasCost })),
+    'year',
+  );
+}
+
+/**
+ * The same flows for one hour of a typical day of `month`, computed exactly like the meter (`typicalDayProfile`): each cell's monthly
+ * energy divided by the days and spread by its end use's hourly shape, priced at the flat rates. So the hour's flows add up to the meter.
+ */
+export function energyFlowsAt(result: EnergyResult, month: number, hour: number, data: HotelData = hotelData): FlowGraph {
+  const days = DAYS_IN_MONTH[month] ?? 30;
+  const h = clamp(Math.round(hour), 0, 23);
+  const parts: FlowPart[] = [];
+  const shapes = new Map<EndUse, number[]>();
+  for (const c of result.cells) {
+    if (c.month !== month) continue;
+    let shape = shapes.get(c.endUse);
+    if (!shape) {
+      shape = normalizedShape(c.endUse, data);
+      shapes.set(c.endUse, shape);
+    }
+    const sh = shape[h] ?? 0;
+    const kWh = (c.elecKWh / days) * sh;
+    const th = (c.gasTherms / days) * sh;
+    parts.push({ zone: c.zone, endUse: c.endUse, elecKWh: kWh, gasTherms: th, elecCost: kWh * result.rates.elecPerKWh, gasCost: th * result.rates.gasPerTherm });
+  }
+  return flowGraph(parts, 'hour');
+}
+
+/** One zone and end use over a typical day: electricity (kW), gas (therms per hour) and cost per hour, 24 values each. */
+export interface ZoneEndUseDay {
+  elecKW: number[];
+  gasThermsPerHour: number[];
+  costPerHour: number[];
+}
+
+/**
+ * A typical day of `month` for every zone and end use, computed exactly like the meter (`typicalDayProfile`), keyed `${zone}|${endUse}`.
+ * Used to show which systems are running at an hour; the model has no per-appliance energy.
+ */
+export function typicalDayByZoneEndUse(result: EnergyResult, month: number, data: HotelData = hotelData): Record<string, ZoneEndUseDay> {
+  const days = DAYS_IN_MONTH[month] ?? 30;
+  const out: Record<string, ZoneEndUseDay> = {};
+  for (const c of result.cells) {
+    if (c.month !== month) continue;
+    const key = `${c.zone}|${c.endUse}`;
+    const d = (out[key] ??= { elecKW: Array(24).fill(0), gasThermsPerHour: Array(24).fill(0), costPerHour: Array(24).fill(0) });
+    const shape = normalizedShape(c.endUse, data);
+    for (let h = 0; h < 24; h++) {
+      const s = shape[h] ?? 0;
+      const kW = (c.elecKWh / days) * s;
+      const th = (c.gasTherms / days) * s;
+      d.elecKW[h] = (d.elecKW[h] ?? 0) + kW;
+      d.gasThermsPerHour[h] = (d.gasThermsPerHour[h] ?? 0) + th;
+      d.costPerHour[h] = (d.costPerHour[h] ?? 0) + kW * result.rates.elecPerKWh + th * result.rates.gasPerTherm;
+    }
+  }
+  return out;
 }

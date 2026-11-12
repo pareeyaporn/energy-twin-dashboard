@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 /** True when the user's system allows motion (and the browser can tell). Without that signal, numbers change instantly. */
-function motionAllowed(): boolean {
+export function motionAllowed(): boolean {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
   return window.matchMedia("(prefers-reduced-motion: no-preference)").matches === true;
 }

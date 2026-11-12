@@ -7,8 +7,8 @@ Approved decisions: new engine in `src/engine/hotel/` alongside the home engine;
 backwards compatibly; clickable **2D** twin with the **Tier A** feature set (below; 3D is P2); demo hotel = 100 rooms in Chicago; save the brief and mark
 `docs/09` superseded; merge the P5 optimizer branch as is.
 
-**Status (November 2026):** Phases 0–6, 7b and 9 are done; Phase 7 is open only for installed costs (7.6) and solar $/W (7.7). Next: the Flow,
-Rooms and Equipment redesign (Phase 10, below), then Phase 8 (demo hardening).
+**Status (November 2026):** Phases 0–6, 7b and 9 are done; Phase 7 is open only for installed costs (7.6) and solar $/W (7.7). Phase 10 (Flow, Rooms and
+Equipment redesign) is done. Next: Phase 8 (demo hardening).
 
 Order: Phase 0 → 1 → 2 → 3 are engine and can start now. Phase 7 (data research, TEAM) runs in parallel with all of them.
 Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Phase 6 needs 3.
@@ -239,12 +239,12 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
 - [x] 9.27 Peer benchmark in the engine (`benchmarkComparison`, ENERGY STAR and CBECS, sourced); card by LV15
       (scenery) as such
 
-## Phase 10 — Flow, Rooms and Equipment tabs redesign (CC; planned, after LV15)
-- [ ] 10.1 Engine (additive): electricity/gas split on every flow link; `energyFlowsAt(result, month, hour)` with the meter's formula, so hourly flows add up to the meter
-- [ ] 10.2 Flow: own SVG Sankey (same columns): width by Cost or Energy, Annual or This hour; particles along each link (cyan electricity, amber gas); hover highlights the path; click shows energy, cost and share; widths ease on before/after; speed follows playback; "illustrative" label in annual mode; static with reduced motion
-- [ ] 10.3 Equipment: cards grouped by HVAC, water heating, lighting and other: icon, quantity, capacity, efficiency, schedule, modeled status at the hour, system energy and cost, related opportunities; "modeled, not monitored"
-- [ ] 10.4 Rooms: floor-by-floor facade with windows lit by state and daylight, set-back sills, transitions; click a room for state, HVAC mode, setpoints and the guest-room average kW (per zone, labeled); same numbering as the 3D windows
-- [ ] 10.5 Tests (hourly flows sum to the meter, Sankey layout, room and equipment mapping), screenshots, docs
+## Phase 10 — Flow, Rooms and Equipment tabs redesign (CC; built November 2026)
+- [x] 10.1 Engine (additive): electricity/gas split on every flow link; `energyFlowsAt(result, month, hour)` with the meter's formula, so hourly flows add up to the meter
+- [x] 10.2 Flow: own SVG Sankey (same columns): width by Cost or Energy, Annual or This hour; particles along each link (cyan electricity, amber gas); hover highlights the path; click shows energy, cost and share; widths ease on before/after; speed follows playback; "illustrative" label in annual mode; static with reduced motion
+- [x] 10.3 Equipment: cards grouped by HVAC, water heating, lighting and other: icon, quantity, capacity, efficiency, schedule, modeled status at the hour, system energy and cost, related opportunities; "modeled, not monitored"
+- [x] 10.4 Rooms: floor-by-floor facade with windows lit by state and daylight, set-back sills, transitions; click a room for state, HVAC mode, setpoints and the guest-room average kW (per zone, labeled); same numbering as the 3D windows
+- [x] 10.5 Tests (hourly flows sum to the meter, Sankey layout, room and equipment mapping), screenshots, docs
 
 ## Phase 8 — Demo hardening (all)
 - [ ] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

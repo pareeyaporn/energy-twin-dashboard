@@ -385,6 +385,69 @@ exhibit-hall, pool or round-the-clock restaurant drivers. Heat-pump water heater
 
 ---
 
+## 14. Energy insights, simulation impact and stress-test kinds (Phase 14A, November 2026)
+
+Three small pure modules turn results the engine already computes into answers an operator can act on. **No calculation was added or
+changed**: every figure below is the baseline, `compareUpgrades`, `simulateEnergyScenario` / `simulateOccupancyChange` or `benchmarkComparison`.
+
+### Energy insights (`src/engine/hotel/insights.ts`, `energyInsights`)
+
+Input: the open hotel's resolved profile and **baseline** (the insights describe the hotel as it runs today, not the active what-if), the
+single-upgrade comparison measured against that baseline, and the modeled site energy intensity of the other hotels in the open portfolio
+(baseline only, no optimizer run; all hotels of the organization, whatever the filter). Output: at most **5** cards, each with an id, a title,
+one or two sentences, a figure (`usd`, `pct` or `kbtu`), a category, a priority ("High priority" or "Worth a look"), an action and a "How was this
+calculated?" line. A card whose data is missing is left out (no upgrades → no investment card; no peers → intensity only against ENERGY STAR;
+a zero bill → no cards). Store: `selectEnergyInsights` (memoized on the hotel, baseline, discount rate, peers and portfolio name).
+
+| Card | Rule (shown when…) | Figure | Data | Category | High priority when | Action |
+| --- | --- | --- | --- | --- | --- | --- |
+| Investment opportunity | at least one eligible single upgrade has an installed cost within the budget, a simple payback within its expected life and a positive 10-year net benefit | yearly savings of the one with the largest 10-year net benefit | `compareUpgrades` against the baseline (the same rows as Compare all upgrades) | Investment opportunity | its savings are ≥ 5% of the bill | **Find the best investments**: opens Invest and runs the optimizer (only on click) |
+| Biggest cost driver | the largest end-use category is ≥ **25%** of the modeled bill | its share of the bill (and $ a year in the text) | `baseline.byCategory` (CBECS 2018 shares scaled to the hotel) | Cost reduction | share ≥ 1/3 | HVAC → **See the HVAC equipment** (twin Equipment view); otherwise **Explore upgrades** (Invest) |
+| Energy intensity | site EUI ≥ **10%** above the median of the other hotels in the portfolio, or ≥ 10% above the ENERGY STAR hotel median | site EUI (kBtu/ft² a year) | baseline site energy ÷ floor area; peers' baselines; `benchmarkComparison` | Operational efficiency | gap ≥ 25% | against peers → **Compare properties** (portfolio page, comparison table); against ENERGY STAR only → **Explore upgrades** |
+| Occupancy sensitivity | +10 occupancy points moves the bill ≥ **2%** | $ a year added | `simulateOccupancyChange(profile → profile + 10 points)` | Operational efficiency | ≥ 5% of the bill | **Run an occupancy simulation**: opens the Scenario tab with that same what-if (Reset undoes it) |
+| Price exposure | a sustained 20% electricity or gas rise (the larger) adds ≥ **3%** | $ a year added | `simulateEnergyScenario` with the `price_up_20` / `gas_up_20` stress tests | Energy resilience | ≥ 5% of the bill | **Run the price stress test** (applies it; Reset to baseline undoes it) |
+| Weather exposure | the costlier of the heat wave and cold snap adds ≥ **1%** of the year's bill | $ added once, in the year it happens (not annualized) | `simulateEnergyScenario` with `heat_wave` / `cold_snap` | Energy resilience | ≥ 5% of the bill | **Run the … test** (applies it) |
+| Equipment condition | 10% worn heating and cooling equipment adds ≥ **1%** | $ a year added | `simulateEnergyScenario` with `hvac_decline` | Equipment performance | ≥ 5% of the bill | **Run the equipment stress test** (applies it) |
+
+**Selection and order.** Energy resilience shows **one** card: the larger dollar figure of the price and weather exposures. The rest keep a
+fixed order, most actionable first: investment, cost driver, intensity, occupancy, resilience, equipment; the first five are shown.
+Thresholds and the order are product decisions (docs/15 §21), not sourced values; they live in `INSIGHT_THRESHOLDS`.
+
+**Demo hotel (100 rooms, today's data):** 4 upgrades fit and pay back (best: LED lighting, $7,826 a year); HVAC 36% of the bill; 86.5
+kBtu/ft², 37% above the ENERGY STAR median (it is not above the median of the other Lakefront hotels, so the card compares with ENERGY STAR
+and points to upgrades rather than to the portfolio); +10 occupancy points add $5,147 a year (Worth
+a look); electricity +20% adds $19,618 a year. The equipment card ($3,059 a year) is the sixth and is not shown.
+
+### Simulation impact (`src/engine/hotel/impact.ts`, `impactSummary`)
+
+For electricity (kWh), natural gas (therms), energy cost ($) and carbon (kg CO₂e): `before` = the reference simulation (`scenarioResult.before`,
+the hotel today), `after` = the what-if or stress test (`scenarioResult.after`), `delta = after − before` and `pct = delta ÷ before` (none when
+the reference is zero). Both are whole-year totals over the same 12 months, so they are comparable; a temporary event's delta is the total for the
+one event. Store: `selectScenarioImpact` (null when no what-if or stress test is active). UI: "Simulation impact" at the top of the Scenario tab
+and the scenario page, with Reset (clears the what-if and the stress test).
+
+### Stress tests: exact definitions and how to read them (`STRESS_TESTS`, `stressKind`)
+
+| Test | Exactly what the simulation changes | Period | Kind (`stressKind`) | Duration | Changes payback / NPV / recommendation? | 100-room demo: cost change |
+| --- | --- | --- | --- | --- | --- | --- |
+| Heat wave | July's mean temperature +10 °F vs the NOAA normal (monthly resolution, so the whole of July) | July only | Temporary event | temporary | No | +$6,589 (5.5%) in that year |
+| Cold snap | January's mean temperature −12 °F (the whole of January) | January only | Temporary event | temporary | No | +$649 (0.5%) in that year |
+| Low solar production | solar output −15% vs the PVWatts typical year (plans with solar only) | one year | Temporary event | temporary | No | $0 (the hotel has no solar) |
+| Conference surge | occupancy +25 points in September | September only | Operational scenario | temporary | No | +$1,058 (0.9%) in that year |
+| Low occupancy (off-season) | occupancy −20 points January–March | one season | Operational scenario | temporary | No | −$2,538 (−2.1%) in that year |
+| HVAC efficiency decline | heating and cooling energy +10% for the same load (illustrative) | every year until fixed | Operational scenario | persistent | Yes | +$3,059 a year (2.5%) |
+| Electricity +20% | electricity price +20% | every year from now | Persistent financial assumption | persistent | Yes | +$19,618 a year (16.3%) |
+| Natural gas +20% | gas price +20% | every year from now | Persistent financial assumption | persistent | Yes | +$4,418 a year (3.7%) |
+
+The weather tests are temporary events and the price tests persistent financial assumptions; occupancy and equipment tests are operational
+scenarios, temporary or persistent as defined. Only persistent tests change payback, NPV and the recommended package (`stressTestReport`,
+and the store switches the optimizer only for them); temporary events are never annualized, because how often they recur is not modeled. The
+stress panel now states the period of the cost change ("in the year it happens (one-off, not annualized)" or "per year, every year until it
+changes"; it used to say "per year" for every test), adds carbon and percentage changes, and draws normal / stress / stress-with-plan bars from
+`StressReport` (cost avoided = the plan's savings under the stress minus its normal savings). The cold snap costs much less than the heat wave
+because the extra heating is gas ($0.929 a therm, about $9.3 per MMBtu) while the extra cooling is electric ($0.1405 a kWh, about $41.2 per
+MMBtu), and only one month changes in each.
+
 ## Appendix A — Store contract (task 1.10): approved and built
 
 Approved and implemented in `src/store/useTwin.ts` (hotel fields added next to the home-era ones, nothing removed) with helpers and selectors in `src/store/hotelDerived.ts`.

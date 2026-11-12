@@ -62,6 +62,8 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 | `src/twin/` | Claude Code | The clickable 2D hotel diagram (`<HotelTwin />`). Lovable only places it |
 | `src/plans/` | Claude Code | Investment modes: AI plan, Build your own (catalog), Compare. Placed by `BudgetOptimizer` (minimal hook) |
 | `src/portfolio/` | Claude Code | Hotel portfolio page: city map (MapLibre, drawn fallback), totals, comparison, charts, portfolio optimizer. Route `src/routes/portfolio.tsx` |
+| `src/insights/` | Claude Code | Opportunities & alerts cards. Rules in `src/engine/hotel/insights.ts` (docs/13 §14) |
+| `src/scenario/` | Claude Code | Simulation impact summary (today vs the what-if), placed by `ScenarioSimulator` (minimal hook) |
 | `src/tour/` | Claude Code | First-visit onboarding tour (spotlight steps, replay from the top bar). Steps and behavior in `docs/16` |
 | `src/three/` | Claude Code | The 3D hotel twin (built, Phase 9). Loaded by `src/twin/parts/View3D.tsx`; Lovable places only `<HotelTwin />` |
 | `supabase/functions/` | Claude Code | Backend functions (AI advisor). Keys are read only here |

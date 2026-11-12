@@ -207,3 +207,27 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
   LED + sensors; the demo script follows (docs/07).
 - **LED keeps an assumed mix** (about 14% of fixtures replaced, the rest relamped) between the two sourced EIA bounds, rather than either extreme.
 - **Validation findings are reported, not tuned**: the model's guest-room controls savings sit inside the Illinois TRM range and below field studies from other climates (docs/14 pass 10).
+
+## 21. Energy insight thresholds and order (November 2026)
+
+The insights (docs/13 §14) only show findings the engine's own results support. The thresholds are team choices meant to keep the list short
+and meaningful, not sourced values; they are in `INSIGHT_THRESHOLDS` (`src/engine/hotel/insights.ts`) and can be tuned there.
+
+| Threshold | Value | Why |
+| --- | --- | --- |
+| Biggest cost driver | ≥ 25% of the bill | A use that is a quarter of the bill is worth an operator's attention; below that the "biggest" is not a driver |
+| Energy intensity | ≥ 10% above the portfolio median or the ENERGY STAR hotel median | Smaller gaps are within what climate and amenities explain; the ENERGY STAR median is national and not climate-adjusted, so the text says so |
+| Occupancy sensitivity | +10 points moves the bill ≥ 2% | A realistic busy-season step; 2% is the smallest change worth planning for |
+| Price exposure | a sustained +20% (the existing stress test) adds ≥ 3% | The stress test's size; 3% of the bill separates real exposure from noise |
+| Weather and equipment | ≥ 1% of the year's bill | Both are one-off or illustrative magnitudes, so a lower bar; the weather figure is a one-off total, never annualized |
+| Investment opportunity | fits the budget (installed cost), payback within the upgrade's life, positive 10-year net benefit | An upgrade that does not pay back within its life is not an opportunity; the optimizer then combines them |
+| High priority | dollar findings ≥ 5% of the bill; cost driver ≥ 1/3; intensity ≥ 25% above | One common scale ("a twentieth of the bill") so priorities compare across cards |
+| Count and order | at most 5; one energy-resilience card (the larger of price and weather); fixed order investment, cost driver, intensity, occupancy, resilience, equipment | Fewer, actionable cards; the order follows the operator's journey from what to do to what to watch |
+
+- **Insights read the baseline**, not the active what-if, so they describe the hotel as it runs today and do not change while the user
+  experiments; the Simulation impact panel covers the what-if.
+- **Actions only do what their label says**: the investment button runs the optimizer only when clicked; stress and occupancy buttons apply
+  that what-if (undone with Reset); the HVAC button switches the twin to the Equipment view; the intensity button opens the portfolio comparison.
+- **Stress-test kinds**: weather = temporary event; occupancy and equipment = operational scenario (temporary or persistent as defined);
+  prices = persistent financial assumption. Only persistent tests change long-term returns (unchanged from Phase 12).
+

@@ -27,8 +27,8 @@ The home-era data files were removed, except `presetHomes.json`, `mockPackages.j
 | Hotel sizes (presets) | **Checked, primary** | Choose Chicago hotel supply list (median 232 rooms) |
 | LED savings range and life; EMS, insulation, condensing-boiler savings | Partly sourced (excerpts, plus TRM rules) | PNNL/GSA, Crowe 2020, NREL ComStock, IL-TRM 4.5.4 |
 | Export credit for solar | Basis known, **no $ value** (so $0) | 220 ILCS 5/16-107.5(n): avoided cost of supply |
-| Incentives (`incentives.json`) | Programs listed, **no amounts applied** | — |
-| **Installed costs** for LED, sensors, EMS, HVAC, water heating, insulation; **solar $/W** | **Placeholders** | — |
+| Incentives (`incentives.json`) | **ComEd amounts applied** (LED, sensors, guest room energy management; 90% cap); HVAC equipment, EMS, gas, Illinois Shines, 48E listed only | ComEd worksheets 2025 lighting, 2026 HVAC (team-provided) |
+| Installed costs | **Sourced:** smart controls, insulation, water heating (IL-TRM), solar $/W (LBNL). **Placeholders:** LED, sensors, EMS, HVAC equipment | IL-TRM v14.0; LBNL 2025 Data Update |
 | Weather (`weather.json` temperatures) | **Sourced, primary** | NOAA 1991–2020 normals, Chicago O'Hare |
 | Hot water per room | **Checked, primary** | IL-TRM 4.3.2 / ASHRAE: 14 gal per hotel room per day (default consistent) |
 | Chicago occupancy (annual) | **Sourced, primary** | STR via Choose Chicago: CBD 69.2% in 2025 (300-room preset) |

@@ -5,6 +5,96 @@ read in the publisher's own document or data file (downloaded and parsed, or rea
 summary of that document and still needs a primary check. Status by file and what is left: [08_DATA_TODO.md](08_DATA_TODO.md).
 Method: [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md), section 8.
 
+**Status words used below.** *Primary*: read in the publisher's own document or data file. *Team-provided*: a document or figure the team
+supplied (uploaded or transcribed) that the build session could not fetch itself. *Derived*: computed from sourced values (the calculation is
+stated). *Calibrated*: tuned so the model lands in a sourced range. *Assumption* / *placeholder*: not sourced; labeled in the app.
+*Product decision*: a team choice (docs/15), not a fact.
+
+## Current values (as of pass 7, November 2026)
+
+The model's inputs today, with their status. Details and before/after values are in the passes below.
+
+### Energy prices, weather, emissions
+
+| Input | Value in the model | Source | Status | Pass |
+| --- | --- | --- | --- | --- |
+| Electricity price, Illinois commercial | $0.1405 per kWh | EIA Electric Power Monthly, Table 5.6.B, YTD Aug 2026 | Primary | 1 |
+| Natural gas price, Illinois commercial | $0.929 per therm | EIA Natural Gas Prices, 2025 annual ($9.63/Mcf) | Primary | 1 |
+| Price growth | electricity 2.12%, gas 4.09% a year (nominal) | EIA AEO2026, Tables 8 and 3 | Primary | 1 |
+| Discount rate | 8% (3% alternative) | — | Product decision | 3 |
+| Weather | NOAA 1991–2020 normals, O'Hare: monthly means, highs and lows | NOAA NCEI | Primary | 2, 4 |
+| Grid emissions | 27 eGRID2023 subregions; Chicago RFC West 0.4155 kg CO2e/kWh | EPA eGRID2023 | Primary | 2, 3 |
+| Gas emissions | 5.311 kg CO2e per therm | EPA GHG Emission Factors Hub 2025 | Primary | 2 |
+
+### The hotel
+
+| Input | Value in the model | Source | Status | Pass |
+| --- | --- | --- | --- | --- |
+| End-use split and fuel mix | CBECS 2018 lodging | EIA CBECS Tables E1, E5 | Primary (national, not by climate) | 1 |
+| Site energy intensity default | 92 kBtu/ft² | — | Placeholder (demo hotel models 91.1; CBECS lodging 85.7; ENERGY STAR hotel median 63.0) | 2 |
+| Peer benchmarks | ENERGY STAR 63.0, CBECS 85.7 kBtu/ft² | ENERGY STAR (Aug 2024); CBECS Table C1 | Primary (context only) | 2, 4 |
+| Hot water | 20 gal per occupied room-day; faucets 25% of it | IL-TRM v14.0 4.3.2 (14 gal per room-day) | Primary (cross-check) | 3, 6 |
+| Heating efficiency by HVAC type | gas 0.80; resistance 1.0; heat pump COP 2.3 | IL-TRM conversion | Primary / assumption | 3 |
+| Hotel sizes, occupancy | 100-room boutique (synthetic); 300-room at 69.2% | Choose Chicago; STR via Choose Chicago | Primary (annual); monthly shape synthetic | 2, 3 |
+| Equipment sizes (lighting W, tons, kW) | rules of thumb; 0.75 ton of cooling per guest room | — | Placeholder / assumption | 7 |
+| Comfort limits | team values | — | Product decision (ASHRAE 55 not consulted) | 3 |
+
+### Upgrades: savings, cost, life
+
+| Upgrade | Savings | Installed cost | Life | Cost status |
+| --- | --- | --- | --- | --- |
+| Smart room controls | setback 3/5/7 °F + fan 17% when empty (calibrated to IL-TRM 4.4.8) | $260 per room (IL-TRM 4.4.8) | 15 (IL-TRM 4.4.8) | Sourced |
+| LED lighting | 27 / 45 / 60% (PNNL; judgment) | $0.60 per ft² | 12 (IL-TRM 4.5.4 rule) | Placeholder |
+| Occupancy sensors | 12 / 24 / 37% (IL-TRM 4.5.10) | $0.40 per ft² of common area | 10 (IL-TRM 4.5.10) | Placeholder |
+| Energy management | 4 / 7 / 10% of HVAC (Crowe 2020, excerpt) | $15,000 + $0.20 per ft² | 10 (judgment from IL-TRM 4.4.41) | Placeholder |
+| HVAC equipment | heating 8 / 13 / 16% (condensing boiler math); cooling 10 / 15 / 26% (high from IL-TRM 4.4.6) | $2.00 per ft² | central plant 23, RTU 15, PTAC/PTHP 8, VRF 16 (IL-TRM) | Placeholder |
+| Water heating and low-flow | 15 / 22 / 30% (placeholder, cross-checked) | $200 per room (built from IL-TRM 4.3.1–4.3.3) | 15 (IL-TRM 4.3.1) | Sourced (derived) |
+| Roof insulation | 6 / 10 / 14% of weather load (ComStock, excerpt), scaled by floors | $1.91 per ft² of roof (IL-TRM 4.8.1, 2024 $) | 20 (IL-TRM 4.8.1) | Sourced (derived) |
+| Rooftop solar | PVWatts output, self-use hour by hour; O&M $17.63/kW-yr; 0.5%/yr degradation | LBNL 2024 national medians by size ($3.30 / $3.10 / $2.90 per W for the demo's three sizes) | 25 | Sourced (team-provided) |
+
+### Incentives
+
+| Program | Rate | Applied | Source | Status |
+| --- | --- | --- | --- | --- |
+| ComEd LED fixtures and retrofits | $0.75 per watt reduced | Yes | ComEd Indoor Lighting worksheet 2025 | Team-provided (2025 rate) |
+| ComEd occupancy sensors | $0.25 per watt controlled | Yes | same | Team-provided (2025 rate) |
+| ComEd guest room energy management | $75 per ton (gas heat) / $100 (electric or heat-pump heat) | Yes | ComEd HVAC & VSD worksheet 2026 | Team-provided |
+| ComEd HVAC equipment | by rated efficiency (IPLV, IEER, SEER2) | No (listed) | same | Not modelable yet |
+| ComEd energy management systems | separate EMS worksheet | No (listed) | — | Worksheet not provided |
+| Peoples Gas, Illinois Shines, federal 48E | — | No (listed) | — | Unverified |
+| Program cap | 90% of cost; pre-approval at $10,000 or more | Yes | ComEd 2026 Standard Incentives Application | Team-provided |
+| Solar export credit | $0 per kWh (editable) | — | 220 ILCS 5/16-107.5 (to confirm) | Conservative fallback; no effect today (0 kWh exported) |
+
+## Sources
+
+| Source | Used for | How it was read |
+| --- | --- | --- |
+| EIA Electric Power Monthly; Natural Gas Prices; AEO2026; CBECS 2018 | prices, growth, end uses, benchmarks | Primary, downloaded (xlsx) |
+| EPA eGRID2023; GHG Emission Factors Hub 2025 | emissions | Primary, downloaded (xlsx) |
+| NOAA NCEI 1991–2020 normals (O'Hare) | weather | Primary, downloaded (CSV) |
+| NLR (formerly NREL) PVWatts v8.5; ATB 2025; Jordan et al. 2022 | solar output, O&M, degradation | Primary (API, page, PDF) |
+| Illinois Statewide TRM v14.0, Vol. 2 (effective Jan 1, 2026) | savings, costs, lives, interaction factors | Primary (PDF downloaded in pass 3; `icc.illinois.gov` no longer reachable, the saved copy was used in pass 6) |
+| ENERGY STAR "U.S. EUI by Property Type" (Aug 2024) | benchmark | Primary |
+| Choose Chicago hotel supply; STR via Choose Chicago 2025 | hotel sizes, occupancy | Primary (page, PDF) |
+| IRS Notice 2025-42; IRS 48E page | federal solar credit | Primary |
+| LBNL Distributed Solar & Storage, 2025 Data Update, p. 8 | solar price per W | Team-provided (transcribed; `emp.lbl.gov` not reachable) |
+| ComEd 2026 Standard Incentives Application V15; Indoor Lighting worksheet 2025; HVAC & VSD worksheets 2025 and 2026 | incentives | Team-provided (uploaded PDFs) |
+| 220 ILCS 5/16-107.5; Illinois Shines program documents | export credit, RECs | Not read (`www.ilga.gov` refused; `illinoisshines.com` reachable but RECs are an incentive, not applied) |
+| Itron WO017 measure cost study (via IL-TRM 4.8.1); CPI-U 2012→2024 (×1.37) | insulation cost in 2024 dollars | Via TRM; CPI ratio from memory, not fetched |
+
+## Open questions (current)
+
+- **Installed costs still placeholders**: LED, occupancy sensors, energy management, HVAC equipment (docs/08 A2). The TRM gives per-unit costs
+  (e.g., $55–125 per sensor) that need a per-ft² coverage assumption to use.
+- **2026 lighting incentive rates**: the applied LED and sensor rates are from the 2025 worksheet.
+- **Export credit tariff** for a non-residential ComEd hotel (pass 5 checklist); needs `www.ilga.gov` or a ComEd tariff document.
+- **Energy intensity**: the demo hotel's 91.1 kBtu/ft² is 45% above the ENERGY STAR hotel median; climate and the restaurant explain part.
+  A climate-specific end-use split (NREL ComStock) would improve it (docs/08 B5).
+- **Showers' share of hotel hot water** (docs/08 B3); **ASHRAE 55** comfort references (B7); **case-study validation** of package
+  savings (needs `betterbuildingssolutioncenter.energy.gov`).
+
+# History: research passes
+
 ## Pass 1 (November 2026)
 
 | Item | Before | Now | Source | Read |
@@ -12,10 +102,10 @@ Method: [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md), section 8.
 | Electricity and gas price growth | 2% a year, one rate | **2.12%** electricity, **4.09%** gas a year (nominal, 2025–2035), applied separately | EIA Annual Energy Outlook 2026 (April 2026), Counterfactual Baseline, Tables 8 and 3, commercial | Primary (xlsx) |
 | Hotel end-use split | heating 22, cooling 9, ventilation 7, lighting 11, hot water 19, kitchen 7, equipment 15, other 10% | 18.1 / 6.9 / 14.5 / 8.4 / 18.6 / 17.2 / 1.8 / 14.5% | EIA CBECS 2018 Table E1, Lodging (598 trillion Btu) | Primary (xlsx) |
 | Fuel mix (electric share) | hot water 20%, kitchen 45%, other 100% | 15% / 40% / 82% | EIA CBECS 2018 Table E5, Lodging | Primary (xlsx) |
-| Smart room controls cost and life | $1,500 + $250 per room, 12 years | $100 / **$260** / $500 per room, **15 years** | IL-TRM 4.4.8 ($260, 15 y); California 2013 CASE (range) | Excerpt, then primary in pass 2 |
+| Smart room controls cost and life | $1,500 + $250 per room, 12 years | $100 / **$260** / $500 per room, **15 years** | IL-TRM 4.4.8 ($260, 15 y); California 2013 CASE (range) | Excerpt, then primary in pass 2 (incentive added in pass 7) |
 | LED lighting reduction and life | 35 / 45 / 55%, 15 years | 27 / 45 / 60%, 12 years | PNNL evaluation for GSA (27%); IL-TRM 4.5.4 life rule | Excerpt / judgment |
 | Condensing boiler heating saving | 12% mid | 13% mid | 1 − 0.80/0.92 (GSA existing-boiler efficiency, condensing seasonal efficiency); NREL ComStock | Excerpt |
-| Energy management and insulation | 4/7/10%; 6/10/14% | kept, now supported | Crowe, Mills et al. 2020 (3% lodging RCx ≈ 7.6% of HVAC); NREL ComStock roof insulation (≈11% of gas heating) | Excerpt |
+| Energy management and insulation | 4/7/10%; 6/10/14% | kept, now supported (lives updated in pass 6) | Crowe, Mills et al. 2020 (3% lodging RCx ≈ 7.6% of HVAC); NREL ComStock roof insulation (≈11% of gas heating) | Excerpt |
 
 ## Pass 2 (November 2026)
 
@@ -30,7 +120,7 @@ Method: [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md), section 8.
 | Solar O&M | not included, then $17.63 (excerpt) | **$17.63** per kW-yr ($14.17 system + $3.46 administration), subtracted from savings | NLR Annual Technology Baseline 2025, Commercial PV | Primary (page) |
 | Solar degradation | 0.5% (Jordan and Kurtz 2013, from memory) | **0.5%** a year, kept | Jordan et al. 2022, Progress in Photovoltaics (NREL/TP 81314): fleet median 0.75%, cooler climates 0.48% a year | Primary (PDF) |
 | Federal solar credit (Section 48E) | "deadlines changed" | not applied; facts recorded: ends for solar placed in service after Dec 31, 2027 unless construction began by July 4, 2026; 6% base, up to 30% with wage and apprenticeship rules, +10 points each for domestic content and energy communities | IRS Notice 2025-42 (Aug 2025); IRS Clean Electricity Investment Credit page (reviewed Jan 5, 2026) | Primary |
-| Solar export credit | not researched | basis: avoided cost of supply for systems interconnected from 2025; **no $ value**, so $0 | 220 ILCS 5/16-107.5(n) | Excerpt |
+| Solar export credit | not researched | basis: avoided cost of supply for systems interconnected from 2025; **no $ value**, so $0 *(still $0; now editable, pass 5)* | 220 ILCS 5/16-107.5(n) | Excerpt |
 | Chicago temperatures | written from memory | **25.2, 28.8, 39.0, 49.7, 60.6, 70.6, 75.4, 73.8, 66.3, 54.0, 41.3, 30.5 °F** | NOAA NCEI U.S. Climate Normals 1991–2020, Chicago O'Hare (USW00094846); 5,974 HDD, 1,003 CDD | Primary (CSV) |
 | Benchmarks | none | demo hotel **91.1** kBtu/ft² site; CBECS 2018 lodging mean **85.7** (Table C1); ENERGY STAR hotel median **63.0** site / 146.7 source | EIA CBECS 2018 Table C1; ENERGY STAR "U.S. Energy Use Intensity by Property Type" (August 2024) | Primary |
 | Hotel size, Chicago | not checked | Choose Chicago list: **147 hotels, 49,526 rooms**, median **232**, mean 337, middle half 173–378; 18% under 150 rooms | Choose Chicago, Chicago hotel supply | Primary (page) |
@@ -40,11 +130,10 @@ Method: [13_HOTEL_ENGINE_SPEC.md](13_HOTEL_ENGINE_SPEC.md), section 8.
 | Item | Before | Now | Source | Read |
 | --- | --- | --- | --- | --- |
 | Grid factors by location | one value per state | all **27 eGRID2023 subregions** (CO2e), chosen from the city, then the state, then the U.S. | EPA eGRID2023 Summary Tables, Table 1 | Primary (xlsx) |
-| ComEd business incentives | program listed | rules recorded (pre-approval at $10,000 or more, otherwise a possible $10,000 cap; up to $2 million per customer); **amounts not available** (in worksheets on another host) | ComEd 2026 Standard Incentives Application (www.comed.com) | Primary (PDF) |
-| Heat-pump water heaters, heat-pump HVAC | not modeled | **still not modeled**: no commercial hotel-scale cost and performance found (IL-TRM's water-heater measure covers tanks up to 120 gallons) | IL-TRM v14.0 Vol. 2 | Primary (PDF) |
-
+| ComEd business incentives | program listed | rules recorded (pre-approval at $10,000 or more, otherwise a possible $10,000 cap; up to $2 million per customer); **amounts not available** (in worksheets on another host) *(superseded in pass 7: amounts applied from the worksheets)* | ComEd 2026 Standard Incentives Application (www.comed.com) | Primary (PDF) |
+| Heat-pump water heaters, heat-pump HVAC | not modeled | **still not modeled** (listed as "Not modeled yet" in the catalog): no commercial hotel-scale cost and performance found (IL-TRM's water-heater measure covers tanks up to 120 gallons) | IL-TRM v14.0 Vol. 2 | Primary (PDF) |
 | Hot water per room | 20 gal per occupied room (unsourced) | kept; consistent with **14 gal per hotel room per day** | IL-TRM v14.0 4.3.2 table (from the 2007 ASHRAE Handbook, HVAC Applications, ch. 49) | Primary (PDF) |
-| Condensing boiler cost and life | none | **$22.95 per kBtu/h** full installed (>90% EC), 25 years (recorded; chiller part still unsourced) | IL-TRM v14.0 4.4.10 | Primary (PDF) |
+| Condensing boiler cost and life | none | **$22.95 per kBtu/h** full installed (>90% EC), 25 years (recorded; chiller part still unsourced; *central-plant life now 23 years, pass 6*) | IL-TRM v14.0 4.4.10 | Primary (PDF) |
 | Chicago hotel occupancy | defaults only | **69.2%** CBD average in 2025 (68.1% in 2024), ADR $243.10; used for the 300-room preset | STR via Choose Chicago, 2025 Hotel Performance (January 2026) | Primary (PDF) |
 | Monthly occupancy shape | synthetic | **still synthetic** (only annual figures are published) | Choose Chicago | Primary (PDF) |
 | Comfort limits | unlabeled defaults | documented as a **product decision**; ASHRAE 55 not consulted (paid standard) | — | — |
@@ -61,11 +150,11 @@ Product decisions taken at the same time (discount rate, optimizer rules, HVAC t
   sized from the Choose Chicago list. Both are synthetic.
 - **Emissions** assume a ComEd (northern Illinois) building.
 
-## Open questions from this research
+## Open questions at pass 3 (historical; current list at the top)
 
 - The demo hotel's 91.1 kBtu/ft² is 45% above the ENERGY STAR national hotel median (63.0) and 6% above the CBECS lodging mean (85.7, which
   includes nursing homes). A cold climate and a restaurant explain part of it; the default EUI input (92) is still a placeholder (docs/08, B5/B6).
-- Installed costs for most upgrades and solar $/W are still placeholders (docs/08, A2, A3).
+- Installed costs for most upgrades and solar $/W are still placeholders (docs/08, A2, A3). *(Solar $/W done in pass 5; insulation and water heating costs in pass 6.)*
 
 ## Pass 4 (November 2026, with the 3D twin)
 
@@ -114,7 +203,7 @@ Read from the saved copy of the IL-TRM v14.0 Vol. 2 PDF (downloaded in pass 3; `
 (was $22,000, 7.7). The $50,000 recommendation is unchanged (LED + occupancy sensors). At $150,000 the maximum-savings package now adds
 insulation and smart controls instead of a quarter-roof solar array.
 
-**Still blocked:** ComEd incentive worksheets (A2/A4: the worksheets page is a JavaScript app with no file links), 220 ILCS 5/16-107.5
+**Still blocked** *(at pass 6; the ComEd worksheets were provided in pass 7)*: ComEd incentive worksheets (A2/A4: the worksheets page is a JavaScript app with no file links), 220 ILCS 5/16-107.5
 (`www.ilga.gov` refused by the session's network policy) and DOE Better Buildings case studies (`betterbuildingssolutioncenter.energy.gov`
 refused). `illinoisshines.com` is reachable; its REC payments are incentives, not export credit, and are not applied.
 

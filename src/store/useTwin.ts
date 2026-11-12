@@ -104,6 +104,8 @@ export interface TwinState {
   hotelPlan: PortfolioResult | null;
   /** The situation the plan was measured against: the baseline, or the scenario's result if the optimizer ran on a scenario. */
   hotelPlanBaseline: EnergyResult | null;
+  /** How many combinations the running (or last) optimizer run tests; set as soon as a run starts so the UI can count up to it. */
+  optimizerCombinations: number | null;
   /** When true the optimizer measures upgrades against the current scenario (for example electricity +20%). */
   optimizeOnScenario: boolean;
   activeHotelPackageId: string | null;
@@ -190,6 +192,7 @@ function initialHotelState() {
     scenarioResult: null as ScenarioResult | null,
     hotelPlan: null as PortfolioResult | null,
     hotelPlanBaseline: null as EnergyResult | null,
+    optimizerCombinations: null as number | null,
     optimizeOnScenario: false,
     activeHotelPackageId: null as string | null,
     savedScenarios: [] as SavedScenario[],
@@ -302,6 +305,7 @@ export const useTwin = create<TwinState>((set, get) => ({
     const onScenario = Object.keys(scenario).length > 0;
     const ctx = onScenario ? prepareScenarioContext(started, scenario) : prepareUpgradeContext(started, undefined, get().baseline);
     const plan = optimizeInvestmentPortfolio(ctx, onScenario ? { scenario } : {});
+    set({ optimizerCombinations: plan.combinationsTested });
     await new Promise((r) => setTimeout(r, 2000));
     // If the hotel or the scenario changed while waiting, the result is stale: drop it.
     const same = get().hotel === started && get().scenarioResult === startedScenario;

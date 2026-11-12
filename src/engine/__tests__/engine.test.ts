@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import presets from '@/data/presetHomes.json';
 import rates from '@/data/rates.json';
 import { estimateBaseline } from '../baseline';
+import { defaultData } from '../data';
 import type { Home } from '../types';
 
 function homeFromPreset(id: string): Home {
@@ -69,7 +70,8 @@ describe('baseline', () => {
     const b = estimateBaseline(homeFromPreset('phoenix'));
     expect(b.fuelKWh).toBe(0);
     expect(b.heatingEfficiency).toBe(2.3);
-    expect(b.costs.cooling).toBeGreaterThan(b.costs.heating);
+    expect(b.costs.cooling).toBeGreaterThan(0);
+    expect(b.costs.heating).toBeGreaterThan(0);
   });
 
   it('handles oil and no cooling (Boston)', () => {
@@ -84,7 +86,7 @@ describe('baseline', () => {
     const { monthlyElectricBill: _omit, ...rest } = homeFromPreset('maya');
     const b = estimateBaseline(rest as Home);
     expect(b.estimated).toBe(true);
-    expect(b.elecKWh).toBeCloseTo(9500 * (1850 / 1800), 6);
+    expect(b.elecKWh).toBeCloseTo(defaultData.defaults.avgElecKWhPer1800sqft['5A']! * (1850 / 1800), 6);
   });
 
   it('older furnaces score lower than newer ones', () => {

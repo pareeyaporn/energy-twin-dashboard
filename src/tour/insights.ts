@@ -110,6 +110,17 @@ export function insightFor(stepId: string, s: TwinState): Insight | null {
         note: `${w.evaluation.name}${pay !== null ? `, paying back in ${pay.toFixed(1)} years` : ""}. ${r.combinationsTested.toLocaleString("en-US")} combinations tested.`,
       };
     }
+    case "projections": {
+      const series = projectionSeries(s);
+      const best = [...series].sort((x, y) => y.net10 - x.net10)[0];
+      if (!best) return null;
+      return {
+        value: best.net10,
+        format: "usd",
+        label: `net over 10 years from the ${best.role.toLowerCase()} package`,
+        note: `${best.name}: ${usd(best.netInvestment)} upfront after incentives${best.paybackYears !== null ? `, paid back in ${best.paybackYears.toFixed(1)} years` : ""}.`,
+      };
+    }
     case "portfolio": {
       const sum = selectPortfolioSummary(s);
       const top = [...sum.properties].sort((x, y) => y.priorityScore - x.priorityScore)[0];
@@ -123,6 +134,36 @@ export function insightFor(stepId: string, s: TwinState): Insight | null {
     default:
       return null;
   }
+}
+
+/** One recommended package's 10-year projection for the tour's chart (all figures from the engine, mid case). */
+export interface ProjectionSeries {
+  role: string;
+  name: string;
+  netInvestment: number;
+  /** Year 0 (minus the net investment) to year 10: savings to date minus the net investment. */
+  cumulative: number[];
+  net10: number;
+  paybackYears: number | null;
+}
+
+/** The 10-year projections of the packages the optimizer recommends for the open hotel at its own budget (read-only, cached). */
+export function projectionSeries(s: TwinState): ProjectionSeries[] {
+  const r = bestPackage(s.hotel, s.baseline, s.hotelDiscountRate);
+  return r.packages
+    .filter((p) => (p.evaluation.financials.projection ?? []).length > 0)
+    .slice(0, 3)
+    .map((p) => {
+      const f = p.evaluation.financials;
+      return {
+        role: p.roleLabel,
+        name: p.evaluation.name,
+        netInvestment: f.netInvestment.mid,
+        cumulative: [-f.netInvestment.mid, ...(f.projection ?? []).map((y) => y.cumulativeNet.mid)],
+        net10: f.netBenefit10.mid,
+        paybackYears: f.simplePaybackYears,
+      };
+    });
 }
 
 /** The finish card's summary: what the hotel spends, what the best package saves and how fast it pays back. */

@@ -62,7 +62,7 @@ baseline $9,000 a year and 2.7 years).
 | Investment catalog and custom plans; stress tests | Built (Phases 11 and 12) |
 | Hotel portfolio (`/portfolio`): synthetic five-hotel Chicago chain on a MapLibre map, totals, comparison table, charts, one budget split across hotels, open any hotel in the twin; my portfolio (custom plan per hotel) vs the AI portfolio; portfolio stress tests | Built (Phase 13 P0 and P1) |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
-| Onboarding tour (14 steps with live figures, a time-lapse and the energy flow; first visit and replay; `docs/16`) | Built |
+| Onboarding tour (15 steps with live figures, a time-lapse and the energy flow; first visit and replay; `docs/16`) | Built |
 | Add my hotel (saved in the browser, on the map, its own twin) | Built |
 | Organizations, brands, regions, ownership; switcher, filters, totals by group | Built (two synthetic organizations, Chicago only) |
 | Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |

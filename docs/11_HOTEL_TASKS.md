@@ -363,7 +363,7 @@ P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress t
 
 ### 13I — Later (P2)
 - [x] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
-      optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 14 steps with live figures, a time-lapse and the energy flow) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
+      optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 15 steps with live figures, a time-lapse, the energy flow and a 10-year projection chart) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
 - [x] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
       their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model — *done: "More building types (coming later)" cards on the portfolio page, from `properties.json`*
 - [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Still later: multi-city portfolios (needs sourced weather, prices and grid data per city), real utility data (bill upload and calibration), role-based access (accounts and a database)*

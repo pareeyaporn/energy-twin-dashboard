@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useTwin } from "@/store/useTwin";
 import { TOUR_STEPS, bodyOf } from "@/tour/steps";
-import { finishSummary, insightFor } from "@/tour/insights";
+import { finishSummary, insightFor, projectionSeries } from "@/tour/insights";
 import { overlaps, placeCard } from "@/tour/layout";
 import { TOUR_STORAGE_KEY, readTourOutcome, useTour } from "@/tour/useTour";
 import { TourButton, resetTourAutoStart } from "@/tour/TourButton";
@@ -49,8 +49,8 @@ describe("tour card placement", () => {
 });
 
 describe("tour steps", () => {
-  it("are 14 short steps for hotel operators, ending with a clear action", () => {
-    expect(TOUR_STEPS).toHaveLength(14);
+  it("are 15 short steps for hotel operators, ending with a clear action", () => {
+    expect(TOUR_STEPS).toHaveLength(15);
     expect(TOUR_STEPS[0]!.id).toBe("welcome");
     expect(TOUR_STEPS.at(-1)!.title).toBe("You're ready to explore!");
     for (const s of TOUR_STEPS) {
@@ -66,6 +66,15 @@ describe("tour steps", () => {
     const opt = insightFor("optimizer", s)!;
     expect(opt.value).toBeGreaterThan(0);
     expect(insightFor("stress", s)!.value).toBeGreaterThan(0);
+    // The 10-year chart: each recommended package, year 0 = minus the net investment, year 10 = the engine's 10-year net benefit.
+    const series = projectionSeries(s);
+    expect(series.length).toBeGreaterThan(0);
+    for (const x of series) {
+      expect(x.cumulative).toHaveLength(11);
+      expect(x.cumulative[0]).toBeCloseTo(-x.netInvestment, 6);
+      expect(x.cumulative[10]).toBeCloseTo(x.net10, 0);
+    }
+    expect(insightFor("projections", s)!.value).toBeCloseTo(Math.max(...series.map((x) => x.net10)), 6);
     expect(insightFor("portfolio", s)!.note).toMatch(/Top priority/);
     expect(finishSummary(s)[0]!.value).toBeCloseTo(s.baseline.annual.cost, 6);
     useTwin.getState().selectHotelPreset("demo-chicago-300");
@@ -151,7 +160,7 @@ describe("tour flow", () => {
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
     expect(await screen.findByText("Meet your hotel's digital twin")).toBeTruthy();
-    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 14");
+    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 15");
     expect((await screen.findByTestId("tour-insight")).textContent).toMatch(/a year on energy/);
     fireEvent.click(screen.getByTestId("tour-next"));
     expect(useTour.getState().index).toBe(1);

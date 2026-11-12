@@ -46,6 +46,10 @@ the numbers (task 8.1) and update this script, never the other way round.** Item
 | 6:00–6:40 | **7. Scale and honesty** | Switch to the **300-room** preset, $150,000; then close on the before/after strip (energy, cost, carbon) | "A 300-room downtown hotel: **LED + energy management**, **$147,000**, **$34,163** a year, **4.3 years**. Estimates, with sources and ranges; not an audit and not live monitoring. *Simulate smarter. Spend better. Save energy.*" |
 | 6:40–7:00 | Buffer | — | Hand over to Q&A |
 
+**3-minute cut** (if the slot has a hard limit): drop act 3 (a living building) and act 7 (scale and honesty), and tighten the rest:
+act 1 (0:00–0:25), act 2 (0:25–1:00, keep Energy view and one zone click), act 4 (1:00–1:40), act 5 (1:40–2:30, packages and the solar line;
+skip the projection), act 6 (2:30–2:55), then the one-line close "Estimates, not an audit. Simulate smarter. Spend better. Save energy." (2:55–3:00).
+
 **Fallbacks:** no WebGL or a slow laptop → 2D button (the script works in 2D; skip act 3's 3D moments). Advisor slow or offline → the cached
 answer (task 8.2) or the template answer appears within 8 s. Wrong state → the **Reset demo** button (task 8.7).
 

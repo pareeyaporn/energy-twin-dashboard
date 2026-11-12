@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { Assumptions, FinancialLines, UpgradeComparison, fmtEnergy } from "@/components/FinancialLines";
+import { FinancialLines, UpgradeComparison, fmtEnergy } from "@/components/FinancialLines";
 
 const money = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 const number = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -32,7 +32,7 @@ function InvestmentCard({ pkg, winner, objective }: { pkg: RankedPackage; winner
     <Button variant="ghost" className="h-auto w-full justify-start whitespace-normal p-0 text-left text-base font-semibold hover:bg-transparent hover:text-primary" aria-pressed={active} onClick={() => apply(e.id)}><span>{e.name}</span>{active && <Check className="ml-auto shrink-0 text-primary" />}</Button>
     <Badge variant="outline" className="text-muted-foreground">Estimate</Badge><DefaultEstimate />
     <FinancialLines f={e.financials} />
-    <Assumptions f={e.financials} />
+    <dl className="space-y-2 border-t border-border pt-2 text-sm"><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Remaining budget</dt><dd className="num">{money(e.metrics.remainingBudget)}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Comfort score</dt><dd className="num">{number(e.comfort.score * 100)}%</dd></div></dl>
     <p className="text-sm text-muted-foreground">{pkg.reason}</p>
     {pkg.note && <p className="text-xs text-heat">{pkg.note}</p>}
     {pkg.budgetRisk && <p role="note" className="flex items-start gap-2 rounded-md border border-heat/25 bg-heat/10 p-2 text-xs text-heat"><TriangleAlert className="h-4 w-4 shrink-0" /><span>High-end investment estimate ({money(e.cost.high)}) exceeds your budget.</span></p>}
@@ -54,6 +54,7 @@ function CompactInvestmentCard({ pkg, winner, objective }: { pkg: RankedPackage;
     <h3 className="text-sm font-semibold">{e.name}</h3><DefaultEstimate />
     <Badge variant="outline" className="text-muted-foreground">Estimate</Badge>
     <FinancialLines f={e.financials} dense />
+    <dl className="space-y-2 border-t border-border pt-2 text-xs"><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Remaining budget</dt><dd className="num">{money(e.metrics.remainingBudget)}</dd></div><div className="flex justify-between gap-3"><dt className="text-muted-foreground">Comfort score</dt><dd className="num">{number(e.comfort.score * 100)}%</dd></div></dl>
     <Button size="sm" variant={active ? "secondary" : "accentOutline"} className="w-full" aria-label={`Apply ${pkg.roleLabel}`} aria-pressed={active} onClick={() => { apply(e.id); setCompareMode("split"); }}>{active ? <><Check />Applied</> : "Apply"}</Button>
   </article>;
 }
@@ -96,7 +97,6 @@ export function BudgetOptimizer({ compact = false, workspace = false }: { compac
   const objectiveLabel = objectives.find((item) => item.value === (plan?.objective ?? hotel.profile.objective))?.label ?? "Balanced";
   return <div className={cn("space-y-6", compact ? "p-5" : "mx-auto max-w-7xl p-4 md:p-8")}>
     <div className="flex flex-wrap items-start justify-between gap-3"><div><h1 className="text-xl font-semibold">Budget optimizer</h1><p className="mt-1 text-sm text-muted-foreground">{hotel.profile.name}</p></div>{preset !== null && <Badge variant="outline" className="border-heat/30 text-heat">Synthetic demo data</Badge>}</div>
-    <UpgradeComparison compact={compact} />
     <section className={cn("grid items-end gap-4 border-y border-border py-5", !compact && "md:grid-cols-[1fr_1fr_auto]")}>
       <div className="space-y-2"><Label htmlFor={compact ? "panel-hotel-budget" : "hotel-budget"}>Investment budget ($)</Label><BudgetInput id={compact ? "panel-hotel-budget" : "hotel-budget"} value={hotel.profile.budget} disabled={optimizing} onCommit={setBudget} /><DefaultEstimate field="budget" />{workspace && <div className="flex flex-wrap gap-2">{BUDGET_CHIPS.map((amount) => <Button key={amount} type="button" size="sm" variant={hotel.profile.budget === amount ? "secondary" : "outline"} className="h-7 text-xs" disabled={optimizing} onClick={() => setBudget(amount)}>{money(amount)}</Button>)}</div>}</div>
       <div className="space-y-2"><Label htmlFor={compact ? "panel-hotel-objective" : "hotel-objective"}>Objective</Label><Select value={hotel.profile.objective} disabled={optimizing} onValueChange={(value) => { const option = objectives.find((item) => item.value === value); if (option) setObjective(option.value); }}><SelectTrigger id={compact ? "panel-hotel-objective" : "hotel-objective"}><SelectValue /></SelectTrigger><SelectContent>{objectives.map((item) => <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>)}</SelectContent></Select><DefaultEstimate field="objective" /></div>
@@ -128,8 +128,11 @@ export function BudgetOptimizer({ compact = false, workspace = false }: { compac
           ["7 Net benefit, 5 years", (p: RankedPackage) => `${money(p.evaluation.financials.netBenefit5.mid)} (${money(p.evaluation.financials.netBenefit5.low)} to ${money(p.evaluation.financials.netBenefit5.high)})`],
           ["   Net benefit, 10 years", (p: RankedPackage) => `${money(p.evaluation.financials.netBenefit10.mid)} (${money(p.evaluation.financials.netBenefit10.low)} to ${money(p.evaluation.financials.netBenefit10.high)})`],
           ["8 CO2, estimate / yr", (p: RankedPackage) => `${(p.evaluation.financials.carbonAvoidedKgPerYear.mid / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 })} t`],
+          ["Remaining budget", (p: RankedPackage) => money(p.evaluation.metrics.remainingBudget)],
+          ["Comfort score", (p: RankedPackage) => `${number(p.evaluation.comfort.score * 100)}%`],
         ].map(([label, format]) => <tr key={String(label)} className="border-b border-border/50"><th className="p-3 text-left font-normal text-muted-foreground">{String(label)}</th>{cards.map((pkg) => <td key={pkg.role} className="num whitespace-nowrap p-3 text-right">{typeof format === "function" ? format(pkg) : ""}</td>)}</tr>)}</tbody></table></div></section>
       </>}
     </>}
+    <UpgradeComparison compact={compact} />
   </div>;
 }

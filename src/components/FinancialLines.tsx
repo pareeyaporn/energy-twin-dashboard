@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { ArrowUpDown, BookOpen, LayoutGrid, Table2 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ArrowUpDown, ChevronDown, BookOpen, LayoutGrid, Table2 } from "lucide-react";
 import { useShallow } from "zustand/react/shallow";
 import { useTwin } from "@/store/useTwin";
 import { selectUpgradeComparison } from "@/store/hotelDerived";
@@ -57,7 +58,7 @@ export function Assumptions({ f }: { f: FinancialBreakdown }) {
 
 function SourceChip({ label, source }: { label: string; source: string }) {
   const open = useTwin((s) => s.setSourcesOpen);
-  return <Button variant="outline" size="sm" className="h-auto min-h-6 max-w-full whitespace-normal py-0.5 text-left text-[10px]" aria-label={`Source for ${label}`} onClick={() => open(true)}><BookOpen className="shrink-0" />{source}</Button>;
+  return <TooltipProvider delayDuration={200}><Tooltip><TooltipTrigger asChild><Button variant="outline" size="sm" className="h-6 text-[10px]" aria-label={`Source for ${label}`} onClick={() => open(true)}><BookOpen />Source</Button></TooltipTrigger><TooltipContent className="max-w-80">{source}</TooltipContent></Tooltip></TooltipProvider>;
 }
 
 type SortKey = "label" | "gross" | "incentives" | "net" | "kwh" | "savings" | "payback" | "nb5" | "nb10" | "co2";
@@ -76,17 +77,20 @@ const columns: { key: SortKey; label: string; value: (r: UpgradeComparisonRow) =
 
 export function UpgradeComparison({ compact = false }: { compact?: boolean }) {
   const rows = useTwin(useShallow(selectUpgradeComparison));
-  const [view, setView] = useState<"cards" | "table">("cards");
+  const [view, setView] = useState<"cards" | "table">("table");
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 } | null>(null);
   const sorted = useMemo(() => {
     if (!sort) return rows;
     const col = columns.find((c) => c.key === sort.key)!;
     return [...rows].sort((a, b) => { const x = col.value(a), y = col.value(b); return (typeof x === "string" ? x.localeCompare(String(y)) : x - (y as number)) * sort.dir; });
   }, [rows, sort]);
-  return <section aria-label="Upgrade comparison" className="space-y-3">
-    <div className="flex flex-wrap items-center justify-between gap-2"><div className="flex items-center gap-2"><h2 className="font-semibold">Compare upgrades</h2><Badge variant="outline" className="text-muted-foreground">Estimate</Badge></div>
-      <div className="flex gap-1" role="group" aria-label="Comparison view"><Button size="sm" variant={view === "cards" ? "secondary" : "ghost"} className="h-7" aria-pressed={view === "cards"} onClick={() => setView("cards")}><LayoutGrid />Cards</Button><Button size="sm" variant={view === "table" ? "secondary" : "ghost"} className="h-7" aria-pressed={view === "table"} onClick={() => setView("table")}><Table2 />Table</Button></div></div>
-    {rows.length === 0 ? <p className="text-sm text-muted-foreground">No eligible upgrades for this hotel.</p> : view === "cards" ? <div className={cn("grid items-start gap-3", !compact && "md:grid-cols-2 xl:grid-cols-3")}>{rows.map((r) => <article key={r.id} className="min-w-0 space-y-3 rounded-lg border border-border bg-card p-3"><div className="flex items-start justify-between gap-2"><h3 className="text-sm font-semibold">{r.label}</h3><Badge variant="outline" className="shrink-0 text-muted-foreground">Estimate</Badge></div><FinancialLines f={r.financials} dense /><Assumptions f={r.financials} /><SourceChip label={r.label} source={r.source} /></article>)}</div>
+  const [open, setOpen] = useState(false);
+  return <Collapsible open={open} onOpenChange={setOpen} asChild><section aria-label="Upgrade comparison" className="space-y-3 border-t border-border pt-5">
+    <div className="flex flex-wrap items-center justify-between gap-2"><div className="flex items-center gap-2"><CollapsibleTrigger asChild><Button variant="ghost" className="h-auto px-0 text-base font-semibold hover:bg-transparent hover:text-primary" aria-expanded={open}>Compare all upgrades<ChevronDown className={cn("transition-transform", open && "rotate-180")} /></Button></CollapsibleTrigger><Badge variant="outline" className="text-muted-foreground">Estimate</Badge></div>
+      {open && 
+      <div className="flex gap-1" role="group" aria-label="Comparison view"><Button size="sm" variant={view === "cards" ? "secondary" : "ghost"} className="h-7" aria-pressed={view === "cards"} onClick={() => setView("cards")}><LayoutGrid />Cards</Button><Button size="sm" variant={view === "table" ? "secondary" : "ghost"} className="h-7" aria-pressed={view === "table"} onClick={() => setView("table")}><Table2 />Table</Button></div>}</div>
+    <CollapsibleContent className="space-y-3">{rows.length === 0 ? <p className="text-sm text-muted-foreground">No eligible upgrades for this hotel.</p> : view === "cards" ? <div className={cn("grid items-start gap-3", !compact && "md:grid-cols-2 xl:grid-cols-3")}>{rows.map((r) => <article key={r.id} className="min-w-0 space-y-3 rounded-lg border border-border bg-card p-3"><div className="flex items-start justify-between gap-2"><h3 className="text-sm font-semibold">{r.label}</h3><Badge variant="outline" className="shrink-0 text-muted-foreground">Estimate</Badge></div><FinancialLines f={r.financials} dense />{r.financials.solar && <Assumptions f={{ ...r.financials, assumptions: r.financials.assumptions.filter((a) => /solar/i.test(a)) }} />}<SourceChip label={r.label} source={r.source} /></article>)}</div>
       : <div className="overflow-x-auto"><table className="w-full min-w-[960px] text-xs"><caption className="sr-only">Estimated upgrade comparison</caption><thead><tr className="border-b border-border">{columns.map((c) => <th key={c.key} className={cn("p-2", c.key === "label" ? "text-left" : "text-right")} aria-sort={sort?.key === c.key ? (sort.dir === 1 ? "ascending" : "descending") : "none"}><button type="button" className="inline-flex items-center gap-1 hover:text-primary" onClick={() => setSort((s) => ({ key: c.key, dir: s?.key === c.key && s.dir === 1 ? -1 : 1 }))}>{c.label}<ArrowUpDown className="h-3 w-3" /></button></th>)}</tr></thead><tbody>{sorted.map((r) => <tr key={r.id} className="border-b border-border/50">{columns.map((c) => <td key={c.key} className={cn("p-2", c.key === "label" ? "text-left font-medium" : "num whitespace-nowrap text-right")}>{c.show(r)}</td>)}</tr>)}</tbody></table><p className="mt-2 text-[11px] text-muted-foreground">All values are estimates.</p></div>}
-  </section>;
+    {rows[0] && <div className="space-y-1 border-t border-border pt-3"><h3 className="text-xs font-medium text-muted-foreground">Assumptions</h3><Assumptions f={rows[0].financials} /></div>}</CollapsibleContent>
+  </section></Collapsible>;
 }

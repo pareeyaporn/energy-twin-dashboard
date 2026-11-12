@@ -219,6 +219,38 @@ function scheduleFactor(z: ZoneId, u: EndUse, c: Conditions, data: HotelData): n
 }
 
 /**
+ * Energy to bring a set-back guest room back to the occupied setpoint when a guest returns, in site kBtu.
+ * events = booked rooms × returns per day × days (scaled by how much time guests are away); each event needs
+ * setback depth × thermal mass per °F, spread over heating or cooling months by degree days, divided by equipment efficiency.
+ * Zero when there is no setback, and zero when guests are always in their rooms.
+ */
+function recoverySiteKBtu(
+  u: 'heating' | 'cooling',
+  p: HotelProfile,
+  c: Conditions,
+  occ: number,
+  days: number,
+  hdd: number,
+  cdd: number,
+  data: HotelData,
+): number {
+  const k = data.defaults.recovery;
+  const depth =
+    u === 'heating'
+      ? Math.max(0, c.setpoints.occupiedHeatF - c.setpoints.vacantHeatF)
+      : Math.max(0, c.setpoints.vacantCoolF - c.setpoints.occupiedCoolF);
+  if (depth <= 0 || k.kBtuPerRoomPerF <= 0) return 0;
+  const away = 1 - c.occupiedHoursPerRoom / 24;
+  const refAway = 1 - k.referenceOccupiedHoursPerRoom / 24;
+  const events = occ * p.rooms * days * k.returnsPerBookedRoomPerDay * (refAway > 0 ? away / refAway : 0);
+  const total = hdd + cdd;
+  const share = total > 0 ? (u === 'heating' ? hdd : cdd) / total : 0;
+  const thermal = events * depth * k.kBtuPerRoomPerF * share;
+  const eff = u === 'heating' ? k.heatingEfficiency[data.defaults.heatingFuelByHvac[p.hvacType]] : k.coolingCOP;
+  return eff > 0 ? thermal / eff : 0;
+}
+
+/**
  * The simulation core. Annual benchmark energy for each zone and end use is spread over the months by four drivers:
  *   monthly = E0 × ( wBase×days/365 + wOcc×occupancy + wWeather×weather×setpoint + wSched×hours )
  * Every driver equals 1 at the benchmark conditions, so the annual total equals E0 there. See docs/13.
@@ -269,9 +301,11 @@ export function simulate(
         const weatherTerm = wx * weatherMult(z, u, occ, c, data);
         const schedTerm = scheduleFactor(z, u, c, data) * base;
 
+        const recovery =
+          z === 'guest_rooms' && (u === 'heating' || u === 'cooling') ? recoverySiteKBtu(u, p, c, occ, days, hdd, cdd, data) : 0;
         const loadKBtu: Record<LoadType, number> = {
           base: e0 * w.base * base,
-          occupancy: e0 * w.occupancy * occTerm,
+          occupancy: e0 * w.occupancy * occTerm + recovery,
           weather: e0 * w.weather * weatherTerm,
           schedule: e0 * w.schedule * schedTerm,
         };

@@ -3,6 +3,7 @@ import {
   calculateBaselineEnergy,
   hotelData,
   optimizeInvestmentPortfolio,
+  prepareScenarioContext,
   prepareUpgradeContext,
   resolveProfile,
 } from "@/engine/hotel";
@@ -91,6 +92,10 @@ export interface TwinState {
   scenarioResult: ScenarioResult | null;
   /** Result of the budget optimizer (three packages and the objective winner). */
   hotelPlan: PortfolioResult | null;
+  /** The situation the plan was measured against: the baseline, or the scenario's result if the optimizer ran on a scenario. */
+  hotelPlanBaseline: EnergyResult | null;
+  /** When true the optimizer measures upgrades against the current scenario (for example electricity +20%). */
+  optimizeOnScenario: boolean;
   activeHotelPackageId: string | null;
   savedScenarios: SavedScenario[];
   nextScenarioNumber: number;
@@ -106,6 +111,7 @@ export interface TwinState {
   selectHotelPreset: (id: string) => void;
   setHotelBudget: (n: number) => void;
   setHotelObjective: (o: Objective) => void;
+  setOptimizeOnScenario: (b: boolean) => void;
   setScenario: (patch: Scenario, clear?: (keyof Scenario)[]) => void;
   resetScenario: () => void;
   applyStressTest: (id: StressTest["id"] | null) => void;
@@ -143,6 +149,10 @@ const homeFromPreset = (p: PresetHome): HomeForm => ({
   electricMonthly: p.electricMonthly, fuelMonthly: p.fuelMonthly, notes: "",
 });
 
+/** A plan measured against a scenario goes stale when the scenario changes. */
+const stalePlan = (s: TwinState) =>
+  s.hotelPlan?.scenario ? { hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null } : {};
+
 const clampInt = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, Math.round(n)));
 
 /** Resolve the profile and compute its baseline. Deterministic, so the server and the browser agree. */
@@ -164,6 +174,8 @@ function initialHotelState() {
     activeStressTest: null as StressTest["id"] | null,
     scenarioResult: null as ScenarioResult | null,
     hotelPlan: null as PortfolioResult | null,
+    hotelPlanBaseline: null as EnergyResult | null,
+    optimizeOnScenario: false,
     activeHotelPackageId: null as string | null,
     savedScenarios: [] as SavedScenario[],
     nextScenarioNumber: 1,
@@ -231,6 +243,7 @@ export const useTwin = create<TwinState>((set, get) => ({
         hotelPresetId: null,
         scenarioResult: computeScenarioResult(hotel, effectiveScenario(s.scenario, s.activeStressTest)),
         hotelPlan: null,
+        hotelPlanBaseline: null,
         activeHotelPackageId: null,
       };
     }),
@@ -246,28 +259,35 @@ export const useTwin = create<TwinState>((set, get) => ({
       activeStressTest: null,
       scenarioResult: null,
       hotelPlan: null,
+      hotelPlanBaseline: null,
       activeHotelPackageId: null,
     });
   },
   setHotelBudget: (n) => get().setHotelInput({ budget: Math.max(0, n) }),
   setHotelObjective: (objective) => get().setHotelInput({ objective }),
+  setOptimizeOnScenario: (optimizeOnScenario) => set({ optimizeOnScenario, hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null }),
   setScenario: (patch, clear) =>
     set((s) => {
       const scenario = { ...withoutKeys(s.scenario, clear), ...patch };
-      return { scenario, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(scenario, s.activeStressTest)) };
+      return { scenario, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(scenario, s.activeStressTest)), ...stalePlan(s) };
     }),
-  resetScenario: () => set({ scenario: {}, activeStressTest: null, scenarioResult: null }),
+  resetScenario: () => set((s) => ({ scenario: {}, activeStressTest: null, scenarioResult: null, ...stalePlan(s) })),
   applyStressTest: (activeStressTest) =>
-    set((s) => ({ activeStressTest, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(s.scenario, activeStressTest)) })),
+    set((s) => ({ activeStressTest, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(s.scenario, activeStressTest)), ...stalePlan(s) })),
   runHotelOptimizer: async () => {
     if (get().optimizing) return;
     const started = get().hotel;
-    set({ optimizing: true, hotelPlan: null, activeHotelPackageId: null });
+    const startedScenario = get().scenarioResult;
+    set({ optimizing: true, hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null });
     // Computed at once; the short wait lets the UI play its "testing combinations" animation.
-    const plan = optimizeInvestmentPortfolio(prepareUpgradeContext(started, undefined, get().baseline));
+    const scenario = get().optimizeOnScenario ? effectiveScenario(get().scenario, get().activeStressTest) : {};
+    const onScenario = Object.keys(scenario).length > 0;
+    const ctx = onScenario ? prepareScenarioContext(started, scenario) : prepareUpgradeContext(started, undefined, get().baseline);
+    const plan = optimizeInvestmentPortfolio(ctx, onScenario ? { scenario } : {});
     await new Promise((r) => setTimeout(r, 2000));
-    // If the hotel changed while waiting, the result is stale: drop it.
-    set(get().hotel === started ? { optimizing: false, hotelPlan: plan } : { optimizing: false });
+    // If the hotel or the scenario changed while waiting, the result is stale: drop it.
+    const same = get().hotel === started && get().scenarioResult === startedScenario;
+    set(same ? { optimizing: false, hotelPlan: plan, hotelPlanBaseline: ctx.baseline } : { optimizing: false });
   },
   applyHotelPackage: (id) =>
     set((s) => {
@@ -286,7 +306,7 @@ export const useTwin = create<TwinState>((set, get) => ({
       const saved = s.savedScenarios.find((x) => x.id === id);
       if (!saved) return {};
       const scenario = { ...saved.scenario };
-      return { scenario, activeStressTest: saved.stressTest, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(scenario, saved.stressTest)) };
+      return { scenario, activeStressTest: saved.stressTest, scenarioResult: computeScenarioResult(s.hotel, effectiveScenario(scenario, saved.stressTest)), ...stalePlan(s) };
     }),
   renameScenario: (id, name) =>
     set((s) => ({ savedScenarios: s.savedScenarios.map((x) => (x.id === id ? { ...x, name: name.trim() || x.name } : x)) })),

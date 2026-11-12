@@ -28,14 +28,12 @@ ask the advisor "Why recommend smart thermostats over solar?" → before/after e
 
 | Area | State |
 | --- | --- |
-| UI shell (Lovable): panels, package cards, plan drawer, sources sheet | Built, still home-themed |
-| Home engine (`src/engine`): baseline, upgrades, costs, finance | Built and merged (will be replaced by the hotel engine) |
-| Home optimizer and explanation (P5) | Built on the branch `engine/optimizer`, not merged |
-| Home data (`src/data`): EIA rates, RECS 2020 end-use splits | Partly sourced; the rest are placeholders |
-| Hotel engine (`src/engine/hotel`) | Planned |
-| Dashboard and scenario simulator | Planned |
-| 2D digital twin (`src/twin`) | Planned |
+| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, costs, finance, budget optimizer, twin data | Built and tested (all data are placeholders until the research pass) |
+| Store (`src/store`): hotel profile, scenarios, optimizer, twin controls, memoized selectors | Built |
+| 2D digital twin (`src/twin`): zones, rooms, equipment, energy flow, time scrubber, stress tests, before/after | Built |
+| Dashboard screens (profile form, overview, scenario simulator, optimizer): Lovable | Prompts ready in `docs/06`; not built yet |
 | AI advisor (`supabase/functions/advisor`) | Planned |
+| Home-era UI shell, home engine and home data | Legacy; to be removed after the hotel dashboard replaces them |
 
 ## Tech stack
 - TanStack Start (React, TypeScript, Vite), Tailwind, shadcn/ui, built to a Cloudflare Worker target
@@ -68,7 +66,7 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | `src/store/` | Shared state contract |
 | `src/engine/` | Pure TypeScript calculations (`hotel/` is the new engine) |
 | `src/data/` | Sourced JSON data |
-| `src/twin/` | Clickable hotel diagram (planned) |
+| `src/twin/` | Clickable hotel twin |
 | `supabase/functions/` | Backend functions (planned: advisor) |
 | `docs/` | Specs and plans |
 

@@ -241,6 +241,13 @@ export interface HotelData {
     setpointSensitivity: { heatingPerF: number; coolingPerF: number; min: number; max: number };
     commonHvacRecoveryFactor: number;
     smartControlSetbackF: number;
+    recovery: {
+      kBtuPerRoomPerF: number;
+      returnsPerBookedRoomPerDay: number;
+      referenceOccupiedHoursPerRoom: number;
+      heatingEfficiency: { gas: number; electric: number };
+      coolingCOP: number;
+    };
     vacantLimits: { minHeatF: number; maxCoolF: number };
     comfort: {
       occupiedHeatMinF: number;
@@ -463,6 +470,11 @@ export interface OptimizerOptions {
   /** Packages must save at least this share of the current bill to be recommended (so a trivial package is not "fastest"). */
   minSavingsShare?: number;
   assumptions?: Partial<FinancialAssumptions>;
+  /**
+   * Optimize against the hotel under this what-if (savings, payback and ranking are all relative to it). With a plain profile the
+   * context is built for you; with a prepared context (`prepareScenarioContext`) it is only recorded in the result.
+   */
+  scenario?: Scenario;
 }
 
 /** The key numbers of every package that was considered, for tables and charts. */
@@ -495,6 +507,8 @@ export interface RankedPackage {
 }
 
 export interface PortfolioResult {
+  /** The what-if the packages were measured against; null for the plain baseline. */
+  scenario: Scenario | null;
   budget: number;
   objective: Objective;
   baselineAnnualCost: number;

@@ -10,6 +10,7 @@ import {
   selectHotelCost,
   selectHotelLabel,
   selectMeter,
+  selectOpportunities,
   selectRooms,
   selectTypicalDay,
   selectZoneRows,
@@ -261,6 +262,10 @@ describe("twin controls and derived selectors", () => {
     expect(selectTypicalDay(s)).toBe(selectTypicalDay(s));
     expect(selectRooms(s)).toBe(selectRooms(s));
     expect(selectFlows(s)).toBe(selectFlows(s));
+    expect(selectCompare(s)).toBe(selectCompare(s));
+    expect(selectHotelLabel(s)).toBe(selectHotelLabel(s));
+    expect(selectEquipment(s)).toBe(selectEquipment(s));
+    expect(selectMeter(s)).toBe(selectMeter(s));
     get().setTime({ hour: 3 });
     expect(selectRooms(get())).not.toBe(selectRooms(s));
   });
@@ -298,5 +303,99 @@ describe("saved scenarios", () => {
     get().saveScenario();
     get().setScenario({ occupancy: 0.5 });
     expect(get().savedScenarios[0]!.scenario).toEqual({ occupancy: 0.8 });
+  });
+});
+
+describe("optimizing under a scenario", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    get().resetHotel();
+    get().setHotelBudget(100000);
+  });
+  afterEach(() => vi.useRealTimers());
+
+  async function run() {
+    const p = get().runHotelOptimizer();
+    await vi.advanceTimersByTimeAsync(2000);
+    await p;
+  }
+
+  it("is off by default and measures against the plain baseline", async () => {
+    get().applyStressTest("price_up_20");
+    await run();
+    expect(get().hotelPlan!.scenario).toBeNull();
+    expect(get().hotelPlanBaseline).toBe(get().baseline);
+  });
+
+  it("when on, measures against the scenario and says so", async () => {
+    get().applyStressTest("price_up_20");
+    await run();
+    const plain = get().hotelPlan!;
+    get().setOptimizeOnScenario(true);
+    expect(get().hotelPlan).toBeNull();
+    await run();
+    const scn = get().hotelPlan!;
+    expect(scn.scenario).not.toBeNull();
+    expect(scn.baselineAnnualCost).toBeCloseTo(get().scenarioResult!.after.annual.cost, 6);
+    expect(scn.baselineAnnualCost).toBeGreaterThan(plain.baselineAnnualCost);
+    expect(get().hotelPlanBaseline).not.toBe(get().baseline);
+  });
+
+  it("applying a package then shows it against the situation it was measured against", async () => {
+    get().applyStressTest("price_up_20");
+    get().setOptimizeOnScenario(true);
+    await run();
+    const pkg = get().hotelPlan!.packages[0]!;
+    get().applyHotelPackage(pkg.evaluation.id);
+    const { before, after, kind } = selectCompare(get());
+    expect(kind).toBe("package");
+    expect(before).toBe(get().hotelPlanBaseline);
+    expect(before.annual.cost - after.annual.cost).toBeCloseTo(pkg.evaluation.annualSavings.mid, 6);
+  });
+
+  it("a plan made on a scenario goes stale when the scenario changes; a plain plan does not", async () => {
+    get().applyStressTest("price_up_20");
+    get().setOptimizeOnScenario(true);
+    await run();
+    get().applyHotelPackage(get().hotelPlan!.packages[0]!.evaluation.id);
+    get().setScenario({ occupancy: 0.9 });
+    expect(get().hotelPlan).toBeNull();
+    expect(get().activeHotelPackageId).toBeNull();
+    expect(get().hotelPlanBaseline).toBeNull();
+
+    get().setOptimizeOnScenario(false);
+    await run();
+    get().setScenario({ occupancy: 0.5 });
+    expect(get().hotelPlan).not.toBeNull();
+  });
+
+  it("drops a result if the scenario changed while it was running", async () => {
+    get().setOptimizeOnScenario(true);
+    get().applyStressTest("heat_wave");
+    const p = get().runHotelOptimizer();
+    get().applyStressTest("cold_snap");
+    await vi.advanceTimersByTimeAsync(2000);
+    await p;
+    expect(get().hotelPlan).toBeNull();
+    expect(get().optimizing).toBe(false);
+  });
+});
+
+describe("opportunities by zone in the store", () => {
+  beforeEach(() => get().resetHotel());
+
+  it("lists the upgrades that help each zone", () => {
+    const opp = selectOpportunities(get());
+    expect(opp.hot_water[0]!.id).toBe("water_heating");
+    expect(opp.guest_rooms.map((o) => o.id)).toContain("smart_room_controls");
+  });
+
+  it("is the same object for the same state and follows the scenario", () => {
+    const s = get();
+    expect(selectOpportunities(s)).toBe(selectOpportunities(s));
+    const led = (z: "hallways_shared") => selectOpportunities(get())[z].find((o) => o.id === "led_lighting")!.zoneAnnualSavings;
+    const before = led("hallways_shared");
+    get().applyStressTest("price_up_20");
+    expect(led("hallways_shared")).toBeGreaterThan(before);
   });
 });

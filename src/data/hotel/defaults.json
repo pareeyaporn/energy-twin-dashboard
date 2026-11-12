@@ -1,11 +1,22 @@
 {
   "benchmarkOccupancy": 0.62,
   "benchmarkHotWaterGalPerOccupiedRoomDay": 20,
-  "euiKBtuPerSqft": { "default": 92 },
+  "euiKBtuPerSqft": {
+    "default": 92
+  },
   "ageFactor": [
-    { "before": 1980, "factor": 1.1 },
-    { "before": 2000, "factor": 1.0 },
-    { "before": 10000, "factor": 0.92 }
+    {
+      "before": 1980,
+      "factor": 1.1
+    },
+    {
+      "before": 2000,
+      "factor": 1.0
+    },
+    {
+      "before": 10000,
+      "factor": 0.92
+    }
   ],
   "endUseShareOfSite": {
     "heating": 0.22,
@@ -17,41 +28,169 @@
     "equipment": 0.15,
     "other": 0.1
   },
-  "heatingFuelByHvac": { "ptac": "electric", "vrf": "electric", "central_plant": "gas", "rtu": "gas" },
+  "heatingFuelByHvac": {
+    "ptac": "electric",
+    "vrf": "electric",
+    "central_plant": "gas",
+    "rtu": "gas"
+  },
   "fuelMix": {
-    "cooling": { "electric": 1, "gas": 0 },
-    "ventilation": { "electric": 1, "gas": 0 },
-    "lighting": { "electric": 1, "gas": 0 },
-    "hotWater": { "electric": 0.2, "gas": 0.8 },
-    "kitchen": { "electric": 0.45, "gas": 0.55 },
-    "equipment": { "electric": 1, "gas": 0 },
-    "other": { "electric": 1, "gas": 0 }
+    "cooling": {
+      "electric": 1,
+      "gas": 0
+    },
+    "ventilation": {
+      "electric": 1,
+      "gas": 0
+    },
+    "lighting": {
+      "electric": 1,
+      "gas": 0
+    },
+    "hotWater": {
+      "electric": 0.2,
+      "gas": 0.8
+    },
+    "kitchen": {
+      "electric": 0.45,
+      "gas": 0.55
+    },
+    "equipment": {
+      "electric": 1,
+      "gas": 0
+    },
+    "other": {
+      "electric": 1,
+      "gas": 0
+    }
   },
   "driverWeights": {
-    "heating": { "base": 0.1, "occupancy": 0.1, "weather": 0.8, "schedule": 0 },
-    "cooling": { "base": 0.05, "occupancy": 0.15, "weather": 0.8, "schedule": 0 },
-    "ventilation": { "base": 0.4, "occupancy": 0.1, "weather": 0.2, "schedule": 0.3 },
-    "lighting": { "base": 0.35, "occupancy": 0.35, "weather": 0, "schedule": 0.3 },
-    "hotWater": { "base": 0.3, "occupancy": 0.7, "weather": 0, "schedule": 0 },
-    "kitchen": { "base": 0.4, "occupancy": 0.6, "weather": 0, "schedule": 0 },
-    "equipment": { "base": 0.55, "occupancy": 0.45, "weather": 0, "schedule": 0 },
-    "other": { "base": 1, "occupancy": 0, "weather": 0, "schedule": 0 }
+    "heating": {
+      "base": 0.1,
+      "occupancy": 0.1,
+      "weather": 0.8,
+      "schedule": 0
+    },
+    "cooling": {
+      "base": 0.05,
+      "occupancy": 0.15,
+      "weather": 0.8,
+      "schedule": 0
+    },
+    "ventilation": {
+      "base": 0.4,
+      "occupancy": 0.1,
+      "weather": 0.2,
+      "schedule": 0.3
+    },
+    "lighting": {
+      "base": 0.35,
+      "occupancy": 0.35,
+      "weather": 0,
+      "schedule": 0.3
+    },
+    "hotWater": {
+      "base": 0.3,
+      "occupancy": 0.7,
+      "weather": 0,
+      "schedule": 0
+    },
+    "kitchen": {
+      "base": 0.4,
+      "occupancy": 0.6,
+      "weather": 0,
+      "schedule": 0
+    },
+    "equipment": {
+      "base": 0.55,
+      "occupancy": 0.45,
+      "weather": 0,
+      "schedule": 0
+    },
+    "other": {
+      "base": 1,
+      "occupancy": 0,
+      "weather": 0,
+      "schedule": 0
+    }
   },
-  "hvacZoneShares": { "guest_rooms": 0.62, "lobby_common": 0.16, "kitchen_restaurant": 0.08, "hallways_shared": 0.14 },
-  "hvacPlantShare": { "ptac": 0.15, "vrf": 0.3, "central_plant": 0.6, "rtu": 0.35 },
+  "hvacZoneShares": {
+    "guest_rooms": 0.62,
+    "lobby_common": 0.16,
+    "kitchen_restaurant": 0.08,
+    "hallways_shared": 0.14
+  },
+  "hvacPlantShare": {
+    "ptac": 0.15,
+    "vrf": 0.3,
+    "central_plant": 0.6,
+    "rtu": 0.35
+  },
   "zoneAllocation": {
-    "lighting": { "guest_rooms": 0.4, "lobby_common": 0.2, "kitchen_restaurant": 0.05, "hallways_shared": 0.3, "central_hvac": 0.05, "hot_water": 0 },
-    "equipment": { "guest_rooms": 0.3, "lobby_common": 0.08, "kitchen_restaurant": 0.2, "hallways_shared": 0.3, "central_hvac": 0.12, "hot_water": 0 },
-    "other": { "guest_rooms": 0.1, "lobby_common": 0.15, "kitchen_restaurant": 0.05, "hallways_shared": 0.45, "central_hvac": 0.25, "hot_water": 0 },
-    "kitchen": { "guest_rooms": 0, "lobby_common": 0, "kitchen_restaurant": 1, "hallways_shared": 0, "central_hvac": 0, "hot_water": 0 },
-    "hotWater": { "guest_rooms": 0, "lobby_common": 0, "kitchen_restaurant": 0, "hallways_shared": 0, "central_hvac": 0, "hot_water": 1 }
+    "lighting": {
+      "guest_rooms": 0.4,
+      "lobby_common": 0.2,
+      "kitchen_restaurant": 0.05,
+      "hallways_shared": 0.3,
+      "central_hvac": 0.05,
+      "hot_water": 0
+    },
+    "equipment": {
+      "guest_rooms": 0.3,
+      "lobby_common": 0.08,
+      "kitchen_restaurant": 0.2,
+      "hallways_shared": 0.3,
+      "central_hvac": 0.12,
+      "hot_water": 0
+    },
+    "other": {
+      "guest_rooms": 0.1,
+      "lobby_common": 0.15,
+      "kitchen_restaurant": 0.05,
+      "hallways_shared": 0.45,
+      "central_hvac": 0.25,
+      "hot_water": 0
+    },
+    "kitchen": {
+      "guest_rooms": 0,
+      "lobby_common": 0,
+      "kitchen_restaurant": 1,
+      "hallways_shared": 0,
+      "central_hvac": 0,
+      "hot_water": 0
+    },
+    "hotWater": {
+      "guest_rooms": 0,
+      "lobby_common": 0,
+      "kitchen_restaurant": 0,
+      "hallways_shared": 0,
+      "central_hvac": 0,
+      "hot_water": 1
+    }
   },
-  "referenceSetpoints": { "heatF": 68, "coolF": 74 },
-  "setpointSensitivity": { "heatingPerF": 0.03, "coolingPerF": 0.04, "min": 0.3, "max": 2 },
+  "referenceSetpoints": {
+    "heatF": 68,
+    "coolF": 74
+  },
+  "setpointSensitivity": {
+    "heatingPerF": 0.03,
+    "coolingPerF": 0.04,
+    "min": 0.3,
+    "max": 2
+  },
   "commonHvacRecoveryFactor": 0.6,
   "smartControlSetbackF": 5,
-  "vacantLimits": { "minHeatF": 55, "maxCoolF": 85 },
-  "comfort": { "occupiedHeatMinF": 67, "occupiedCoolMaxF": 77, "commonHvacMinHours": 20, "vacantHeatWarnF": 58, "vacantCoolWarnF": 82 },
+  "vacantLimits": {
+    "minHeatF": 55,
+    "maxCoolF": 85
+  },
+  "comfort": {
+    "occupiedHeatMinF": 67,
+    "occupiedCoolMaxF": 77,
+    "commonHvacMinHours": 20,
+    "vacantHeatWarnF": 58,
+    "vacantCoolWarnF": 82
+  },
   "profileDefaults": {
     "rooms": 100,
     "sqftPerRoom": 550,
@@ -61,7 +200,10 @@
     "hvacType": "central_plant",
     "occupancy": 0.65,
     "occupiedHoursPerRoom": 14,
-    "setpoints": { "occupiedHeatF": 68, "occupiedCoolF": 74 },
+    "setpoints": {
+      "occupiedHeatF": 68,
+      "occupiedCoolF": 74
+    },
     "smartRoomControls": false,
     "lightingHoursPerDay": 24,
     "hotWaterGalPerOccupiedRoomDay": 20,
@@ -71,8 +213,31 @@
     "state": "IL",
     "city": "Chicago",
     "country": "US",
-    "seasonalOccupancy": [0.82, 0.85, 0.95, 1.0, 1.05, 1.12, 1.15, 1.12, 1.05, 1.0, 0.9, 0.88]
+    "seasonalOccupancy": [
+      0.82,
+      0.85,
+      0.95,
+      1.0,
+      1.05,
+      1.12,
+      1.15,
+      1.12,
+      1.05,
+      1.0,
+      0.9,
+      0.88
+    ]
   },
-  "source": "PLACEHOLDER, synthetic. Ballpark lodging values informed by EIA CBECS lodging end-use shares and ENERGY STAR hotel benchmarks (site EUI roughly 80 to 100 kBtu/ft2 in cold climates). Setpoint sensitivities (about 3% heating and 4% cooling energy per degree F) and driver weights are rules of thumb to be replaced or confirmed (docs/11 Phase 7).",
-  "verified": false
+  "source": "PLACEHOLDER, synthetic. Ballpark lodging values informed by EIA CBECS lodging end-use shares and ENERGY STAR hotel benchmarks (site EUI roughly 80 to 100 kBtu/ft2 in cold climates). Setpoint sensitivities (about 3% heating and 4% cooling energy per degree F) and driver weights are rules of thumb to be replaced or confirmed (docs/11 Phase 7). Recovery after a setback is an illustrative placeholder: 0.15 kBtu per room per degree F is roughly the air in a 3,000 ft3 room (about 0.05) plus some furnishings, 2 returns per booked room per day, and equipment efficiency of 0.8 (gas) or 2.3 (heat pump) for heating and COP 3 for cooling; if research shows the per-degree sensitivities are already net of recovery, set kBtuPerRoomPerF to 0.",
+  "verified": false,
+  "recovery": {
+    "kBtuPerRoomPerF": 0.15,
+    "returnsPerBookedRoomPerDay": 2,
+    "referenceOccupiedHoursPerRoom": 14,
+    "heatingEfficiency": {
+      "gas": 0.8,
+      "electric": 2.3
+    },
+    "coolingCOP": 3.0
+  }
 }

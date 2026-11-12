@@ -1,0 +1,7 @@
+[
+  { "id": "eia", "name": "U.S. Energy Information Administration (EIA)", "what": "Electricity, gas and heating oil prices by state", "url": "https://www.eia.gov/" },
+  { "id": "resstock", "name": "NREL ResStock", "what": "How U.S. homes use energy and what upgrades save", "url": "https://resstock.nrel.gov/datasets" },
+  { "id": "recs", "name": "EIA Residential Energy Consumption Survey (RECS)", "what": "Energy use by end use, region and home type", "url": "https://www.eia.gov/consumption/residential/" },
+  { "id": "rewiring", "name": "Rewiring America API", "what": "Rebates and incentives by ZIP", "url": "https://docs.rewiringamerica.org/" },
+  { "id": "pvwatts", "name": "NREL PVWatts", "what": "Solar production estimates", "url": "https://developer.nrel.gov/docs/solar/pvwatts/" }
+]

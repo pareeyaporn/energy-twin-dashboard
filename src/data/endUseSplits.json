@@ -1,0 +1,13 @@
+{
+  "5A": {
+    "gas":      { "elec": { "heating": 0.03, "cooling": 0.12, "waterHeating": 0.00, "other": 0.85 }, "fuel": { "heating": 0.72, "waterHeating": 0.22, "other": 0.06 } },
+    "oil":      { "elec": { "heating": 0.03, "cooling": 0.05, "waterHeating": 0.00, "other": 0.92 }, "fuel": { "heating": 0.82, "waterHeating": 0.18, "other": 0.00 } },
+    "electric": { "elec": { "heating": 0.38, "cooling": 0.10, "waterHeating": 0.14, "other": 0.38 }, "fuel": null }
+  },
+  "2B": {
+    "electric": { "elec": { "heating": 0.08, "cooling": 0.38, "waterHeating": 0.12, "other": 0.42 }, "fuel": null },
+    "gas":      { "elec": { "heating": 0.01, "cooling": 0.40, "waterHeating": 0.00, "other": 0.59 }, "fuel": { "heating": 0.35, "waterHeating": 0.55, "other": 0.10 } }
+  },
+  "source": "EIA RECS 2020 consumption & expenditures by end use (tables CE3.x/CE4.x); NREL ResStock baseline — PLACEHOLDER",
+  "verified": false
+}

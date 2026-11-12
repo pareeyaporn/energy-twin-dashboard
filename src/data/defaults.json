@@ -1,0 +1,15 @@
+{
+  "efficiency": {
+    "furnace":   { "pre2005": 0.78, "2005plus": 0.90 },
+    "boiler":    { "pre2005": 0.80, "2005plus": 0.86 },
+    "baseboard": { "any": 1.0 },
+    "heat_pump": { "pre2010": 2.3, "2010plus": 2.8 },
+    "central_ac_cop": { "pre2010": 2.9, "2010plus": 3.8 }
+  },
+  "equipmentAgeAssumption": "Use yearBuilt unless inspection notes give equipment age",
+  "avgElecKWhPer1800sqft": { "5A": 9500, "2B": 13500, "4A": 10500 },
+  "kWhPerUnit": { "therm": 29.31, "oil_gallon": 40.6, "propane_gallon": 26.8 },
+  "baseTonsPer1000sqft": { "5A": 1.6, "2B": 1.5, "4A": 1.4 },
+  "source": "AHRI/DOE minimum efficiency history; EIA RECS averages — PLACEHOLDER",
+  "verified": false
+}

@@ -1,0 +1,7 @@
+{
+  "pre1980":   { "attic": 0.30, "walls": 0.22, "windows": 0.20, "air_leaks": 0.20, "foundation": 0.08 },
+  "1980_1999": { "attic": 0.25, "walls": 0.20, "windows": 0.22, "air_leaks": 0.23, "foundation": 0.10 },
+  "2000plus":  { "attic": 0.22, "walls": 0.18, "windows": 0.25, "air_leaks": 0.25, "foundation": 0.10 },
+  "source": "Typical building-envelope heat-loss distribution (DOE Building America guidance); calibrate against ResStock — PLACEHOLDER",
+  "verified": false
+}

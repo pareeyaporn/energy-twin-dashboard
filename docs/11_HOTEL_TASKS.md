@@ -137,8 +137,8 @@ a bill-calibration view, a 12-month forecast band, 3D, and live IoT.
 - [x] 5.8 Ghost upgrades: applying a package shows it on the twin (solar on the roof, LED glow, thermostat icons) with a before/after split view
 - [x] 5.9 Stress-test buttons (heat wave, cold snap, conference week, +20% price): trigger a scenario and show the twin reacting
 - [x] 5.10 Respect `reduceEffects`; keyboard and screen-reader support; component tests for layer switching, zone selection and the time scrubber through the store
-- [ ] 5.11 Lightweight 3D with React Three Fiber — now planned in detail as **Phase 9** below
-      (Built: layered diagram, time scrubber, meter, flow, ghost upgrades, stress tests. Not built: count-up animation of the header numbers; colors fade but numbers do not animate.)
+- [x] 5.11 Lightweight 3D with React Three Fiber — built as **Phase 9** below (3D twin, 9.1–9.27), including the header count-up (9.21).
+      The 2D layers were later redesigned in Phase 10 (animated Flow Sankey, Equipment cards, Rooms façade).
 
 ## Phase 6 — AI advisor (P1) [CC]
 - [x] 6.1 Design note (see [12_BACKEND_ARCHITECTURE.md](12_BACKEND_ARCHITECTURE.md)): the model receives a precomputed context (baseline by zone, current scenario, three packages, and a few precomputed
@@ -178,7 +178,7 @@ Replace synthetic values in `src/data/hotel/` with sourced ones; set `verified: 
 - [x] 7b.4 [LV] LV11 and LV12: the breakdown on every upgrade card, the package cards and the comparison tables; packages first, comparison collapsed below
 - [x] 7b.5 Calibrate smart room controls to the IL-TRM 4.4.8 Chicago-hotel range (guest-room fan saving while empty); now $1,715 a year for 100 rooms
 - [x] 7b.6 Research pass 2: PVWatts, IL-TRM v14 (GREM, lighting controls, lighting-HVAC interaction, showerheads), eGRID, EPA gas factor, CBECS benchmark. Remaining items are in `docs/08` (A1–A5, B1–B7)
-- [ ] 7b.7 Small UI fixes: one "some inputs are defaults" note instead of a tag on every number; compact number row on mobile; twin split-view labels (CC)
+- [x] 7b.7 Small UI fixes: one "some inputs are defaults" note instead of a tag on every number; compact number row on mobile; twin split-view labels (CC) — defaults note and mobile row by LV15; split labels in the 2D twin
 
 ## Phase 9 — 3D digital twin with seasons and day–night (CC; decided November 2026)
 

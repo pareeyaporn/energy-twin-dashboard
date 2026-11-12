@@ -42,3 +42,40 @@ describe('3D environment', () => {
     expect(sceneIntensityColor(1)).toBe('#e9605a');
   });
 });
+
+import { cameraViews } from '../layout';
+import { pedestrianCounts } from '../People';
+import { streetGeometry } from '../Street';
+import { hash01 } from '../HotelScene';
+
+describe('3D camera, street and people', () => {
+  it('has a home view, a wider fly-in start and a close view for every zone and the roof', () => {
+    for (const [rooms, floors] of [[100, 5], [300, 20]] as const) {
+      const l = buildingLayout(rooms, floors);
+      const v = cameraViews(l);
+      const dist = (p: number[], t: number[]) => Math.hypot(p[0]! - t[0]!, p[1]! - t[1]!, p[2]! - t[2]!);
+      expect(dist(v.intro.position, v.intro.target)).toBeGreaterThan(dist(v.home.position, v.home.target));
+      // The home view is far enough to fit the whole height in a 38° field of view.
+      expect(dist(v.home.position, v.home.target)).toBeGreaterThan(l.roofY / (2 * Math.tan((19 * Math.PI) / 180)));
+      for (const f of Object.values(v.focus)) expect(f.position[1]).toBeGreaterThan(0);
+      expect(Object.keys(v.focus)).toHaveLength(7);
+    }
+  });
+  it('puts the street in front of the entrance path and scales pedestrians with guests out', () => {
+    const g = streetGeometry(3.2);
+    expect(g.sidewalkZ).toBeGreaterThan(3.2 / 2 + 5.5);
+    expect(g.roadZ).toBeGreaterThan(g.sidewalkZ);
+    expect(pedestrianCounts(0, 100)).toEqual({ street: 0, entrance: 0 });
+    const few = pedestrianCounts(10, 100);
+    const many = pedestrianCounts(50, 100);
+    expect(many.street).toBeGreaterThan(few.street);
+    expect(pedestrianCounts(300, 300).street).toBeLessThanOrEqual(12);
+  });
+  it('spreads deterministic pseudo-random values over [0, 1)', () => {
+    const xs = Array.from({ length: 500 }, (_, i) => hash01(i));
+    expect(Math.min(...xs)).toBeGreaterThanOrEqual(0);
+    expect(Math.max(...xs)).toBeLessThan(1);
+    expect(hash01(42)).toBe(hash01(42));
+    expect(xs.filter((x) => x < 0.5).length).toBeGreaterThan(200);
+  });
+});

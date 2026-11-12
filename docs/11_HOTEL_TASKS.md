@@ -230,6 +230,10 @@ clicking the rooftop-solar zone without one shows a translucent full-roof previe
 - [x] 9.22 Performance and accessibility: no auto-rotate, particles or count-up with "reduce effects"; one shadow-casting light; smooth on a
       typical laptop; responsive layout; screen-reader summary of the scene
 - [x] 9.23 Verify with screenshots (January night, July afternoon), update `docs/04` (3D spec) and `docs/13`, and record anything visual-only
+- [x] 9.24 Camera glide to the selected zone and a short opening fly-in (`cameraViews`), home view and fog scaled for tall hotels
+- [x] 9.25 Realistic look by default (materials, facade detail, physical sky, street, cars, streetlights) with an "Energy view" toggle
+- [x] 9.26 People: pedestrians on the sidewalk and at the entrance, counted from guests out at the hour (engine), frozen with reduce effects
+- [x] 9.27 Peer benchmark in the engine (`benchmarkComparison`, ENERGY STAR and CBECS, sourced); card by LV15
       (scenery) as such
 
 ## Phase 8 — Demo hardening (all)

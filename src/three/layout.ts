@@ -92,3 +92,41 @@ export function solarSlotCount(totalSlots: number, roofFraction: number): number
   if (roofFraction <= 0) return 0;
   return Math.max(1, Math.round(totalSlots * Math.min(1, roofFraction)));
 }
+
+export type Vec3 = [number, number, number];
+export interface CameraView {
+  position: Vec3;
+  target: Vec3;
+}
+export type CameraFocus = 'guest_rooms' | 'lobby_common' | 'kitchen_restaurant' | 'hallways_shared' | 'central_hvac' | 'hot_water' | 'solar';
+
+/**
+ * Camera positions for the 3D twin: the home view, a wide "fly-in" start, and one close view per zone (plus the roof for solar),
+ * so a selection can glide the camera to it. Pure, from the layout only.
+ */
+export function cameraViews(l: BuildingLayout): { home: CameraView; intro: CameraView; focus: Record<CameraFocus, CameraView> } {
+  // Fits low hotels by width and tall towers by height (the camera's vertical field of view is 38°).
+  const span = Math.max(l.width * 1.1, 4.5 + l.roofY * 0.7);
+  const mid: Vec3 = [-1.2, l.roofY / 2, 0];
+  const home: CameraView = { position: [span * 1.45, span * 0.95, span * 1.6], target: mid };
+  const intro: CameraView = { position: [-span * 2.4, span * 2.2, span * 3.2], target: [0, l.roofY * 0.8, 0] };
+  const near = (t: Vec3, dist: number, up = 0.45, side = 0.55): CameraView => ({
+    target: t,
+    position: [t[0] + dist * side, t[1] + dist * up, t[2] + dist],
+  });
+  const lobby = l.podium.lobby;
+  const kitchen = l.podium.kitchen;
+  return {
+    home,
+    intro,
+    focus: {
+      guest_rooms: near([0, l.roofY * 0.6, l.depth / 2], Math.max(13, l.roofY * 1.5), 0.3, 0.4),
+      lobby_common: near([lobby.x, lobby.h, l.depth / 2], 11, 0.35, 0.25),
+      kitchen_restaurant: near([kitchen.x, kitchen.h, l.depth / 2], 11, 0.35, 0.45),
+      hallways_shared: near([0, l.core.y, l.depth / 2], Math.max(12, l.roofY * 1.4), 0.25, 0.2),
+      central_hvac: { target: [l.plant.x, l.roofY + 0.4, 0], position: [l.plant.x + 6, l.roofY + 7, 9] },
+      hot_water: near([l.hotWater.x, l.hotWater.h, l.hotWater.z], 9.5, 0.45, 0.8),
+      solar: { target: [-l.width / 4, l.roofY, 0], position: [-l.width / 4 + 3, l.roofY + 9, 9] },
+    },
+  };
+}

@@ -219,6 +219,11 @@ $34,163 a year, 4.3 years; baseline about $410,400 a year). Log: `docs/14`.
 discount rate. It uses the same savings stream as the net benefit and NPV, so year 5 and year 10 equal `netBenefit5`/`netBenefit10` and
 `npv5`/`npv10` (tested). Shown by prompt LV14.
 
+**Peer benchmark.** `benchmarkComparison(result, floorAreaSqft)` returns the modeled site EUI and its difference from published
+peers in `defaults.peerBenchmarks` (ENERGY STAR hotel median 63.0 and CBECS 2018 lodging mean 85.7 kBtu/ft², both national, all
+climates). Comparison only: nothing in the model is adjusted toward them. The demo hotel (91.1) sits 45% above the ENERGY STAR
+median, partly explained by Chicago's climate and the restaurant; this is shown, not tuned away. Shown by prompt LV15.
+
 ## 9. Budget optimizer (Phase 3)
 `optimizeInvestmentPortfolio(profile, options)` tests every subset of the eligible upgrades (2^n, so 256 for the demo hotel, the empty set counted but never returned).
 It keeps a package only if it is valid (requirements and exclusions), costs no more than the budget at the **mid** estimate, has a comfort score of at least 0.70, and saves at least 1% of the current bill.

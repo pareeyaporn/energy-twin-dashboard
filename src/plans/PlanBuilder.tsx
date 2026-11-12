@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Copy, FlaskConical, Pencil, Plus, Trash2 } from "lucide-react";
 import { CATALOG_CATEGORIES } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
-import { selectActiveCustomPlan, selectCatalog, selectCustomPlanEvaluation } from "@/store/hotelDerived";
+import { selectActiveCustomPlan, selectCatalog, selectCustomPlanEvaluation, selectVisibleCustomPlans } from "@/store/hotelDerived";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CatalogCard } from "./CatalogCard";
@@ -10,7 +10,7 @@ import { PlanSummary } from "./PlanSummary";
 
 /** Choose, create, duplicate, rename and delete custom plans. */
 function PlanPicker() {
-  const plans = useTwin((s) => s.customPlans);
+  const plans = useTwin(selectVisibleCustomPlans);
   const active = useTwin(selectActiveCustomPlan);
   const setActive = useTwin((s) => s.setActiveCustomPlan);
   const create = useTwin((s) => s.createCustomPlan);
@@ -77,7 +77,7 @@ function PlanPicker() {
 export function PlanBuilder({ compact = false }: { compact?: boolean }) {
   const catalog = useTwin(selectCatalog);
   const active = useTwin(selectActiveCustomPlan);
-  const plans = useTwin((s) => s.customPlans);
+  const plans = useTwin(selectVisibleCustomPlans);
   const rate = useTwin((s) => s.hotelDiscountRate);
   const evaluation = useTwin((s) => selectCustomPlanEvaluation(s));
   const add = useTwin((s) => s.addPlanUpgrade);

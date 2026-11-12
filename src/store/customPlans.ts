@@ -9,6 +9,8 @@ export interface CustomPlan {
   items: PlanItem[];
   /** Set when the plan was copied from an AI package (its label), for display. */
   copiedFrom?: string;
+  /** The portfolio property the plan was made for; plans without one (made before the portfolio existed) show everywhere. */
+  propertyId?: string;
 }
 
 export const PLANS_STORAGE_KEY = "energy-twin:custom-plans:v1";
@@ -34,7 +36,7 @@ export function sanitizePlans(raw: unknown): { plans: CustomPlan[]; next: number
       if (!it || !CATALOG_IDS.includes(it.id as UpgradeId) || items.some((x) => x.id === it.id)) continue;
       items.push(typeof it.quantity === "number" && Number.isFinite(it.quantity) ? { id: it.id, quantity: it.quantity } : { id: it.id });
     }
-    plans.push({ id: p.id, name: p.name.slice(0, 80), items, ...(typeof p.copiedFrom === "string" ? { copiedFrom: p.copiedFrom } : {}) });
+    plans.push({ id: p.id, name: p.name.slice(0, 80), items, ...(typeof p.copiedFrom === "string" ? { copiedFrom: p.copiedFrom } : {}), ...(typeof p.propertyId === "string" ? { propertyId: p.propertyId } : {}) });
   }
   const next = typeof r.next === "number" && Number.isFinite(r.next) ? Math.max(1, Math.floor(r.next)) : plans.length + 1;
   const active = typeof r.active === "string" && plans.some((p) => p.id === r.active) ? r.active : (plans[0]?.id ?? null);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { FinancialBreakdown, PackageComfort } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
-import { selectCustomPlanEvaluation } from "@/store/hotelDerived";
+import { selectCustomPlanEvaluation, selectVisibleCustomPlans } from "@/store/hotelDerived";
 import { pct, tonnes, usd, verifiedIncentives, years } from "./format";
 
 interface Column {
@@ -30,7 +30,7 @@ const ROWS: { label: string; value: (c: Column) => string; better?: (a: number, 
 /** The AI plan and your plans side by side, all from the same engine calculation. */
 export function PlanCompare({ onCustomize }: { onCustomize: (packageId: string) => void }) {
   const hotelPlan = useTwin((s) => s.hotelPlan);
-  const plans = useTwin((s) => s.customPlans);
+  const plans = useTwin(selectVisibleCustomPlans);
   const rate = useTwin((s) => s.hotelDiscountRate);
   const budget = useTwin((s) => s.hotel.profile.budget);
   const state = useTwin();

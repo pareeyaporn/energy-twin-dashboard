@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import {
   DEFAULT_FINANCE,
+  PORTFOLIO_DEFAULTS,
   STRESS_TESTS,
+  hotelPortfolio,
+  optimizePortfolioBudget,
   advisor,
   calculateBaselineEnergy,
   hotelData,
@@ -18,13 +21,16 @@ import type {
   PlanItem,
   UpgradeId,
   PortfolioResult,
+  PortfolioObjective,
+  PortfolioOrganization,
+  PortfolioPlan,
   ResolvedProfile,
   Scenario,
   ScenarioResult,
   StressTest,
   ZoneId,
 } from "@/engine/hotel";
-import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, withoutKeys } from "./hotelDerived";
+import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, selectPortfolioItems, withoutKeys } from "./hotelDerived";
 import { readStoredPlans, writeStoredPlans } from "./customPlans";
 import type { CustomPlan } from "./customPlans";
 export type { CustomPlan } from "./customPlans";
@@ -75,6 +81,26 @@ export interface SavedScenario {
   name: string;
   scenario: Scenario;
   stressTest: StressTest["id"] | null;
+}
+
+/** What is kept for a portfolio property while another one is open, so returning to it restores the user's work. */
+export interface PropertySnapshot {
+  hotelInput: HotelInput;
+  hotelPresetId: string | null;
+  hotel: ResolvedProfile;
+  baseline: EnergyResult;
+  scenario: Scenario;
+  activeStressTest: StressTest["id"] | null;
+  scenarioResult: ScenarioResult | null;
+  hotelPlan: PortfolioResult | null;
+  planBeforeStress: PortfolioResult | null;
+  hotelPlanBaseline: EnergyResult | null;
+  optimizeOnScenario: boolean;
+  activeHotelPackageId: string | null;
+  savedScenarios: SavedScenario[];
+  nextScenarioNumber: number;
+  advisorMessages: AdvisorMessage[];
+  selectedZone: ZoneId | null;
 }
 
 export interface TwinState {
@@ -160,6 +186,23 @@ export interface TwinState {
   askAdvisor: (question: string) => Promise<void>;
   clearAdvisor: () => void;
   resetHotel: () => void;
+
+  // ---- Hotel portfolio (Phase 13). The single-hotel fields above always describe the open hotel. ----
+  /** The synthetic demonstration hotel chain. */
+  portfolio: PortfolioOrganization;
+  /** The portfolio property shown in the single-hotel screens; null before one is opened from the portfolio. */
+  activePropertyId: string | null;
+  /** Saved state of the other properties (input, what-if, stress test, plan, saved scenarios, advisor). */
+  propertyStates: Record<string, PropertySnapshot>;
+  portfolioBudget: number;
+  portfolioObjective: PortfolioObjective;
+  portfolioPlan: PortfolioPlan | null;
+  portfolioOptimizing: boolean;
+  /** Load a property into the single-hotel screens, saving the open one first (as the preset switcher does, but restorable). */
+  openProperty: (id: string) => void;
+  setPortfolioBudget: (n: number) => void;
+  setPortfolioObjective: (o: PortfolioObjective) => void;
+  runPortfolioOptimizer: () => Promise<void>;
 
   /** Custom investment plans (kept in the browser's local storage; numbers are always recomputed by the engine). */
   customPlans: CustomPlan[];
@@ -257,8 +300,39 @@ function initialHotelState() {
     playing: false,
     playbackSpeed: 1,
     compareMode: "after" as CompareMode,
+    portfolio: hotelPortfolio,
+    activePropertyId: null as string | null,
+    propertyStates: {} as Record<string, PropertySnapshot>,
+    portfolioBudget: PORTFOLIO_DEFAULTS.budget,
+    portfolioObjective: PORTFOLIO_DEFAULTS.objective,
+    portfolioPlan: null as PortfolioPlan | null,
+    portfolioOptimizing: false,
   };
 }
+
+function snapshotOf(s: TwinState): PropertySnapshot {
+  return {
+    hotelInput: s.hotelInput,
+    hotelPresetId: s.hotelPresetId,
+    hotel: s.hotel,
+    baseline: s.baseline,
+    scenario: s.scenario,
+    activeStressTest: s.activeStressTest,
+    scenarioResult: s.scenarioResult,
+    hotelPlan: s.hotelPlan,
+    planBeforeStress: s.planBeforeStress,
+    hotelPlanBaseline: s.hotelPlanBaseline,
+    optimizeOnScenario: s.optimizeOnScenario,
+    activeHotelPackageId: s.activeHotelPackageId,
+    savedScenarios: s.savedScenarios,
+    nextScenarioNumber: s.nextScenarioNumber,
+    advisorMessages: s.advisorMessages,
+    selectedZone: s.selectedZone,
+  };
+}
+
+/** Saves the open property (if any) into `propertyStates`. */
+const savedStates = (s: TwinState) => (s.activePropertyId ? { ...s.propertyStates, [s.activePropertyId]: snapshotOf(s) } : s.propertyStates);
 
 export const useTwin = create<TwinState>((set, get) => ({
   presets,
@@ -315,13 +389,16 @@ export const useTwin = create<TwinState>((set, get) => ({
         hotelPlan: null,
         hotelPlanBaseline: null,
         activeHotelPackageId: null,
+        ...(s.activePropertyId ? { portfolioPlan: null } : {}),
       };
     }),
   selectHotelPreset: (id) => {
     const preset = hotelData.presets.find((p) => p.id === id);
     if (!preset) return;
     const hotelInput: HotelInput = { ...preset.input };
-    set({
+    set((s) => ({
+      propertyStates: savedStates(s),
+      activePropertyId: null,
       hotelInput,
       hotelPresetId: id,
       ...recomputeHotel(hotelInput),
@@ -331,12 +408,12 @@ export const useTwin = create<TwinState>((set, get) => ({
       hotelPlan: null,
       hotelPlanBaseline: null,
       activeHotelPackageId: null,
-    });
+    }));
   },
   setHotelBudget: (n) => get().setHotelInput({ budget: Math.max(0, n) }),
   setHotelObjective: (objective) => get().setHotelInput({ objective }),
   setHotelDiscountRate: (r) =>
-    set({ hotelDiscountRate: Number.isFinite(r) ? Math.min(0.3, Math.max(0, r)) : DEFAULT_FINANCE.discountRate, hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null }),
+    set({ hotelDiscountRate: Number.isFinite(r) ? Math.min(0.3, Math.max(0, r)) : DEFAULT_FINANCE.discountRate, hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null, portfolioPlan: null }),
   setOptimizeOnScenario: (optimizeOnScenario) => set({ optimizeOnScenario, hotelPlan: null, hotelPlanBaseline: null, activeHotelPackageId: null }),
   setScenario: (patch, clear) =>
     set((s) => {
@@ -424,7 +501,7 @@ export const useTwin = create<TwinState>((set, get) => ({
         scenario: effectiveScenario(s.scenario, s.activeStressTest),
         scenarioResult: s.scenarioResult,
         plan: s.hotelPlan,
-        syntheticDemo: s.hotelPresetId !== null,
+        syntheticDemo: s.hotelPresetId !== null || s.activePropertyId !== null,
         // Same rule as the optimizer and the comparison cards (selectUpgradeBaseline).
         measureUpgradesOnScenario: s.optimizeOnScenario,
       },
@@ -442,6 +519,53 @@ export const useTwin = create<TwinState>((set, get) => ({
   clearAdvisor: () => set({ advisorMessages: [], advisorBusy: false }),
   resetHotel: () => set({ ...initialHotelState(), optimizing: false }),
 
+  openProperty: (id) =>
+    set((s) => {
+      if (id === s.activePropertyId) return {};
+      const property = s.portfolio.properties.find((p) => p.id === id);
+      if (!property) return {};
+      const propertyStates = savedStates(s);
+      const saved = propertyStates[id];
+      // Keep the active custom plan only if it belongs to the newly opened hotel (or to no hotel).
+      const visible = s.customPlans.filter((p) => !p.propertyId || p.propertyId === id);
+      const activeCustomPlanId = visible.some((p) => p.id === s.activeCustomPlanId) ? s.activeCustomPlanId : (visible[visible.length - 1]?.id ?? null);
+      if (saved) return { ...saved, propertyStates, activePropertyId: id, activeCustomPlanId };
+      const hotelInput: HotelInput = { ...property.input };
+      return {
+        propertyStates,
+        activePropertyId: id,
+        activeCustomPlanId,
+        hotelInput,
+        hotelPresetId: property.presetId ?? null,
+        ...recomputeHotel(hotelInput),
+        scenario: {},
+        activeStressTest: null,
+        scenarioResult: null,
+        hotelPlan: null,
+        planBeforeStress: null,
+        hotelPlanBaseline: null,
+        optimizeOnScenario: false,
+        activeHotelPackageId: null,
+        savedScenarios: [],
+        nextScenarioNumber: 1,
+        advisorMessages: [],
+        selectedZone: null,
+      };
+    }),
+  setPortfolioBudget: (n) => set({ portfolioBudget: Number.isFinite(n) ? Math.max(0, Math.min(50_000_000, n)) : PORTFOLIO_DEFAULTS.budget, portfolioPlan: null }),
+  setPortfolioObjective: (portfolioObjective) => set({ portfolioObjective, portfolioPlan: null }),
+  runPortfolioOptimizer: async () => {
+    if (get().portfolioOptimizing) return;
+    const items = selectPortfolioItems(get());
+    set({ portfolioOptimizing: true, portfolioPlan: null });
+    const s = get();
+    const plan = optimizePortfolioBudget(items, { budget: s.portfolioBudget, objective: s.portfolioObjective, discountRate: s.hotelDiscountRate });
+    // Computed at once; the short wait lets the UI show that it is testing combinations.
+    await new Promise((r) => setTimeout(r, 1200));
+    const same = selectPortfolioItems(get()) === items && get().portfolioBudget === plan.budget && get().portfolioObjective === plan.objective;
+    set(same ? { portfolioOptimizing: false, portfolioPlan: plan } : { portfolioOptimizing: false });
+  },
+
   customPlans: [] as CustomPlan[],
   activeCustomPlanId: null as string | null,
   nextPlanNumber: 1,
@@ -454,7 +578,8 @@ export const useTwin = create<TwinState>((set, get) => ({
   createCustomPlan: (name, items = []) => {
     const n = get().nextPlanNumber;
     const id = `plan-${n}-${get().customPlans.length + 1}`;
-    const plan: CustomPlan = { id, name: name?.trim() || `My plan ${n}`, items: dedupeItems(items) };
+    const property = get().activePropertyId;
+    const plan: CustomPlan = { id, name: name?.trim() || `My plan ${n}`, items: dedupeItems(items), ...(property ? { propertyId: property } : {}) };
     setPlans(set, get, [...get().customPlans, plan], n + 1, id);
     return id;
   },

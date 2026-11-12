@@ -12,6 +12,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { SavedScenarios } from "@/components/SavedScenarios";
 import { cn } from "@/lib/utils";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -167,6 +168,8 @@ export function ScenarioSimulator() {
             </div>
             <Switch id="scenario-optimize" checked={optimizeOnScenario} onCheckedChange={setOptimizeOnScenario} />
           </div>
+
+          <SavedScenarios />
         </aside>
 
         <div className="min-w-0 space-y-6">

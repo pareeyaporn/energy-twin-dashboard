@@ -3,7 +3,7 @@ import { BenchmarkCard } from "@/components/BenchmarkCard";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Leaf, Wallet, Zap } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
-import { selectDisplayed, selectOpportunities, selectZoneRows } from "@/store/hotelDerived";
+import { selectDisplayed, selectIsSynthetic, selectOpportunities, selectZoneRows } from "@/store/hotelDerived";
 import { Badge } from "@/components/ui/badge";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import type { Category } from "@/engine/hotel/types";
@@ -57,7 +57,7 @@ export function Overview() {
   const displayed = useTwin(selectDisplayed);
   const zoneRows = useTwin(selectZoneRows);
   const opportunities = useTwin(selectOpportunities);
-  const presetId = useTwin((s) => s.hotelPresetId ?? s.activePropertyId);
+  const presetId = useTwin((s) => (selectIsSynthetic(s) ? "synthetic" : null));
   const hasScenario = useTwin((s) => s.scenarioResult !== null);
   const profile = useTwin((s) => s.hotel.profile);
   const { result } = displayed;

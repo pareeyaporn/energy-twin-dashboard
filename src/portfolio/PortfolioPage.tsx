@@ -8,6 +8,7 @@ import { CityMap } from "./CityMap";
 import { PortfolioCharts } from "./PortfolioCharts";
 import { PortfolioOptimizer } from "./PortfolioOptimizer";
 import { PortfolioStress } from "./PortfolioStress";
+import { AddHotelDialog } from "./AddHotelDialog";
 import { PortfolioTable } from "./PortfolioTable";
 
 const compact = (n: number, unit: string) =>
@@ -22,8 +23,13 @@ export function PortfolioPage() {
   const openProperty = useTwin((s) => s.openProperty);
   const setActivePlan = useTwin((s) => s.setActiveCustomPlan);
   const hydrate = useTwin((s) => s.hydrateCustomPlans);
-  // Custom plans live in the browser's storage; read them after mount (the server renders without them).
-  useEffect(() => hydrate(), [hydrate]);
+  const hydrateHotels = useTwin((s) => s.hydrateUserHotels);
+  const removeHotel = useTwin((s) => s.removeUserHotel);
+  // Custom plans and the user's own hotels live in the browser's storage; read them after mount (the server renders without them).
+  useEffect(() => {
+    hydrate();
+    hydrateHotels();
+  }, [hydrate, hydrateHotels]);
   const navigate = useNavigate();
   const explore = (id: string) => {
     openProperty(id);
@@ -54,9 +60,12 @@ export function PortfolioPage() {
           <h1 className="flex items-center gap-2 text-xl font-semibold"><Building2 className="size-5 text-primary" />{org.name}</h1>
           <p className="text-xs text-muted-foreground">
             {t.properties} hotels in {org.city} ·{" "}
-            <span className="rounded-full border border-glass-border px-1.5 py-0.5" data-testid="portfolio-synthetic">Synthetic demonstration chain · modeled estimates</span>
+            <span className="rounded-full border border-glass-border px-1.5 py-0.5" data-testid="portfolio-synthetic">
+              {summary.properties.some((p) => !p.synthetic) ? "Sample hotels are synthetic · yours use your inputs · modeled estimates" : "Synthetic demonstration chain · modeled estimates"}
+            </span>
           </p>
         </div>
+        <AddHotelDialog />
       </header>
 
       <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8" aria-label="Portfolio totals">
@@ -72,7 +81,7 @@ export function PortfolioPage() {
 
       <section aria-label="Property comparison" className="space-y-2">
         <h2 className="text-base font-semibold">Compare the hotels</h2>
-        <PortfolioTable rows={summary.properties} onExplore={explore} />
+        <PortfolioTable rows={summary.properties} onExplore={explore} onRemove={removeHotel} />
       </section>
 
       <PortfolioCharts rows={summary.properties} />

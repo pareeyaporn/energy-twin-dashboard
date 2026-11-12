@@ -25,14 +25,17 @@ import type {
   PortfolioObjective,
   PortfolioOrganization,
   PortfolioPlan,
+  PortfolioProperty,
   ResolvedProfile,
   Scenario,
   ScenarioResult,
   StressTest,
   ZoneId,
 } from "@/engine/hotel";
-import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, selectPortfolioItems, selectPortfolioSummary, withoutKeys } from "./hotelDerived";
+import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, selectIsSynthetic, selectPortfolioItems, selectPortfolioSummary, withoutKeys } from "./hotelDerived";
 import { readStoredPlans, writeStoredPlans } from "./customPlans";
+import { readUserHotels, userProperty, writeUserHotels } from "./userHotels";
+import type { ChicagoAreaId } from "./userHotels";
 import type { CustomPlan } from "./customPlans";
 export type { CustomPlan } from "./customPlans";
 import presetsJson from "@/data/presetHomes.json";
@@ -105,6 +108,12 @@ export interface PropertySnapshot {
 }
 
 export type PortfolioStressPlanChoice = "ai" | "mine" | "none";
+export type UserHotel = PortfolioProperty & { areaId: ChicagoAreaId };
+
+/** The sample chain plus the user's hotels (a stable object per list of user hotels). */
+function portfolioWith(userHotels: UserHotel[]): PortfolioOrganization {
+  return userHotels.length ? { ...hotelPortfolio, properties: [...hotelPortfolio.properties, ...userHotels] } : hotelPortfolio;
+}
 
 export interface TwinState {
   presets: PresetHome[];
@@ -225,6 +234,15 @@ export interface TwinState {
   setPortfolioStressTest: (id: StressTest["id"] | null) => void;
   setPortfolioStressScope: (ids: string[]) => void;
   setPortfolioStressPlan: (c: PortfolioStressPlanChoice) => void;
+  /** Hotels the user added ("Add my hotel"), kept in this browser; they join the portfolio after the sample chain. */
+  userHotels: UserHotel[];
+  nextUserHotelNumber: number;
+  userHotelsHydrated: boolean;
+  /** Reads the user's hotels from local storage (call after mount, in the browser). */
+  hydrateUserHotels: () => void;
+  /** Adds a hotel from the user's inputs (blank fields use defaults); returns its id. It does not open it. */
+  addUserHotel: (input: HotelInput, areaId: ChicagoAreaId) => string;
+  removeUserHotel: (id: string) => void;
 
   /** Custom investment plans (kept in the browser's local storage; numbers are always recomputed by the engine). */
   customPlans: CustomPlan[];
@@ -357,6 +375,14 @@ function snapshotOf(s: TwinState): PropertySnapshot {
   };
 }
 
+/** When the open hotel is one the user added, its edited input is saved (state and local storage). */
+function savedUserEdit(s: TwinState, hotelInput: HotelInput): Partial<TwinState> {
+  if (!s.activePropertyId || !s.userHotels.some((h) => h.id === s.activePropertyId)) return {};
+  const userHotels = s.userHotels.map((h) => (h.id === s.activePropertyId ? { ...h, input: hotelInput } : h));
+  writeUserHotels(userHotels, s.nextUserHotelNumber);
+  return { userHotels, portfolio: portfolioWith(userHotels) };
+}
+
 /** Saves the open property (if any) into `propertyStates`. */
 const savedStates = (s: TwinState) => (s.activePropertyId ? { ...s.propertyStates, [s.activePropertyId]: snapshotOf(s) } : s.propertyStates);
 
@@ -416,6 +442,7 @@ export const useTwin = create<TwinState>((set, get) => ({
         hotelPlanBaseline: null,
         activeHotelPackageId: null,
         ...(s.activePropertyId ? { portfolioPlan: null } : {}),
+        ...savedUserEdit(s, hotelInput),
       };
     }),
   selectHotelPreset: (id) => {
@@ -527,7 +554,7 @@ export const useTwin = create<TwinState>((set, get) => ({
         scenario: effectiveScenario(s.scenario, s.activeStressTest),
         scenarioResult: s.scenarioResult,
         plan: s.hotelPlan,
-        syntheticDemo: s.hotelPresetId !== null || s.activePropertyId !== null,
+        syntheticDemo: selectIsSynthetic(s),
         // Same rule as the optimizer and the comparison cards (selectUpgradeBaseline).
         measureUpgradesOnScenario: s.optimizeOnScenario,
         portfolio: {
@@ -550,12 +577,19 @@ export const useTwin = create<TwinState>((set, get) => ({
     }));
   },
   clearAdvisor: () => set({ advisorMessages: [], advisorBusy: false }),
-  resetHotel: () => set({ ...initialHotelState(), optimizing: false }),
+  resetHotel: () =>
+    set((s) => ({
+      ...initialHotelState(),
+      optimizing: false,
+      portfolio: portfolioWith(s.userHotels),
+      portfolioStressScope: portfolioWith(s.userHotels).properties.map((p) => p.id),
+    })),
   demoResets: 0,
   resetDemo: () => {
     advisor.clearAdvisorCache();
-    set((s) => ({ ...initialHotelState(), optimizing: false, customPlans: [], activeCustomPlanId: null, nextPlanNumber: 1, customPlansHydrated: true, demoResets: s.demoResets + 1 }));
+    set((s) => ({ ...initialHotelState(), optimizing: false, customPlans: [], activeCustomPlanId: null, nextPlanNumber: 1, customPlansHydrated: true, userHotels: [], nextUserHotelNumber: 1, userHotelsHydrated: true, demoResets: s.demoResets + 1 }));
     writeStoredPlans([], 1, null);
+    writeUserHotels([], 1);
   },
 
   openProperty: (id) =>
@@ -633,6 +667,50 @@ export const useTwin = create<TwinState>((set, get) => ({
     setPlans(set, get, [...s.customPlans, ...created], n, forOpen ?? s.activeCustomPlanId);
     set({ portfolioCustomPlanIds: ids });
     return created.map((p) => p.id);
+  },
+  userHotels: [] as UserHotel[],
+  nextUserHotelNumber: 1,
+  userHotelsHydrated: false,
+  hydrateUserHotels: () => {
+    if (get().userHotelsHydrated) return;
+    const stored = readUserHotels();
+    const hotels = stored.hotels.filter((h) => !get().userHotels.some((x) => x.id === h.id));
+    const userHotels = [...get().userHotels, ...hotels];
+    set((s) => ({
+      userHotels,
+      nextUserHotelNumber: Math.max(s.nextUserHotelNumber, stored.next),
+      userHotelsHydrated: true,
+      portfolio: portfolioWith(userHotels),
+      portfolioStressScope: [...s.portfolioStressScope, ...hotels.map((h) => h.id)],
+    }));
+  },
+  addUserHotel: (input, areaId) => {
+    const s = get();
+    const n = s.nextUserHotelNumber;
+    const id = `my-hotel-${n}`;
+    const clean: HotelInput = { ...input, name: input.name?.trim() || `My hotel ${n}` };
+    const hotel: UserHotel = { ...userProperty(id, clean, areaId, s.userHotels.length), areaId };
+    const userHotels = [...s.userHotels, hotel];
+    writeUserHotels(userHotels, n + 1);
+    set({ userHotels, nextUserHotelNumber: n + 1, portfolio: portfolioWith(userHotels), portfolioPlan: null, portfolioStressScope: [...s.portfolioStressScope, id] });
+    return id;
+  },
+  removeUserHotel: (id) => {
+    const s = get();
+    if (!s.userHotels.some((h) => h.id === id)) return;
+    if (s.activePropertyId === id) s.selectHotelPreset(hotelData.presets[0]!.id);
+    const userHotels = get().userHotels.filter((h) => h.id !== id);
+    writeUserHotels(userHotels, get().nextUserHotelNumber);
+    const { [id]: _drop, ...propertyStates } = get().propertyStates;
+    const { [id]: _plan, ...portfolioCustomPlanIds } = get().portfolioCustomPlanIds;
+    set({
+      userHotels,
+      portfolio: portfolioWith(userHotels),
+      propertyStates,
+      portfolioCustomPlanIds,
+      portfolioPlan: null,
+      portfolioStressScope: get().portfolioStressScope.filter((x) => x !== id),
+    });
   },
   setPortfolioStressTest: (portfolioStressTestId) => set({ portfolioStressTestId }),
   setPortfolioStressScope: (ids) => set((s) => ({ portfolioStressScope: s.portfolio.properties.map((p) => p.id).filter((id) => ids.includes(id)) })),

@@ -3,6 +3,7 @@ import { useShallow } from "zustand/react/shallow";
 import { Trash2 } from "lucide-react";
 import { advisor } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
+import { selectIsSynthetic } from "@/store/hotelDerived";
 import { Button } from "@/components/ui/button";
 import {
   Conversation,
@@ -26,7 +27,7 @@ export function AdvisorPanel() {
       busy: s.advisorBusy,
       ask: s.askAdvisor,
       clear: s.clearAdvisor,
-      synthetic: s.hotelPresetId !== null || s.activePropertyId !== null,
+      synthetic: selectIsSynthetic(s),
     })),
   );
   const [question, setQuestion] = useState("");

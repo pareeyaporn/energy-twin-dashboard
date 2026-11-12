@@ -110,7 +110,7 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 `optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, `hotelDiscountRate`, `customPlans` / `activeCustomPlanId` (local storage),
 `planBeforeStress`, twin controls (`selectedZone`, `twinLayer`, time with modes
 `seasons` / `day` / `year`, `compareMode`)
-the portfolio (`portfolio`, `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioCustomPlanIds`, the portfolio stress test) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
+the portfolio (`portfolio`, `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioCustomPlanIds`, the portfolio stress test, `userHotels` from Add my hotel) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
 `applyHotelPackage`, `askAdvisor`, `openProperty` and `runPortfolioOptimizer`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
 `selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, `selectCatalog`, `selectCustomPlanEvaluation`,
 `selectPlanExplanation`, `selectStressReport`, `selectPortfolioSummary`, `selectPortfolioCustomEvaluation`, `selectPortfolioStressReport`, `selectVisibleCustomPlans`, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, BookOpen, Check, ChevronDown, Loader2, Sparkles, TriangleAlert } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useTwin } from "@/store/useTwin";
+import { selectIsSynthetic } from "@/store/hotelDerived";
 import type { Objective, RankedPackage } from "@/engine/hotel/types";
 import { Button } from "@/components/ui/button";
 import { BudgetInput } from "@/components/BudgetInput";
@@ -100,7 +101,7 @@ export function BudgetOptimizer({ compact = false, workspace = false }: { compac
   const hotel = useTwin((s) => s.hotel);
   const plan = useTwin((s) => s.hotelPlan);
   const optimizing = useTwin((s) => s.optimizing);
-  const preset = useTwin((s) => s.hotelPresetId ?? s.activePropertyId);
+  const preset = useTwin((s) => (selectIsSynthetic(s) ? "synthetic" : null));
   const setBudget = useTwin((s) => s.setHotelBudget);
   const setObjective = useTwin((s) => s.setHotelObjective);
   const run = useTwin((s) => s.runHotelOptimizer);

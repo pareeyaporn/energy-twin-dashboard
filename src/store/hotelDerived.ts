@@ -192,7 +192,12 @@ const labelOf = memoLast((hotel: ResolvedProfile, presetId: string | null) => {
   const p = hotel.profile;
   return { title: p.name, city: `${p.city}, ${p.state}`, rooms: p.rooms, synthetic: presetId !== null };
 });
-export const selectHotelLabel = (s: TwinState) => labelOf(s.hotel, s.activePropertyId ?? s.hotelPresetId);
+/** True when the open hotel's data is synthetic: a preset, or a sample portfolio hotel (not one the user added). */
+export const selectIsSynthetic = (s: TwinState): boolean => {
+  if (s.activePropertyId) return s.portfolio.properties.find((p) => p.id === s.activePropertyId)?.synthetic ?? true;
+  return s.hotelPresetId !== null;
+};
+export const selectHotelLabel = (s: TwinState) => labelOf(s.hotel, selectIsSynthetic(s) ? "synthetic" : null);
 export const selectHotelCost = (s: TwinState) => selectDisplayed(s).result.annual.cost;
 export const selectHotelBaselineCost = (s: TwinState) => s.baseline.annual.cost;
 

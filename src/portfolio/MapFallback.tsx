@@ -76,8 +76,8 @@ export function MapFallback({
               }
             }}
           >
-            <circle r={on ? 20 : 15} fill={colors[r.id]} opacity="0.25" className={reduce ? undefined : "animate-pulse"} />
-            <circle r={on ? 9 : 7} fill={colors[r.id]} stroke="var(--background)" strokeWidth="2" />
+            <circle r={on ? 20 : 15} fill={colors[r.id]} opacity="0.25" className={reduce ? undefined : "animate-pulse"} style={{ transition: reduce ? undefined : "fill 450ms ease" }} />
+            <circle r={on ? 9 : 7} fill={colors[r.id]} stroke={r.synthetic ? "var(--background)" : "var(--foreground)"} strokeWidth="2" style={{ transition: reduce ? undefined : "fill 450ms ease" }} />
             {on && <circle r="13" fill="none" stroke="var(--foreground)" strokeWidth="1.5" />}
           </g>
         );

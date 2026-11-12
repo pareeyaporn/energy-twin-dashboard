@@ -36,7 +36,7 @@ export function PropertyCard({ row, onExplore, onClose }: { row: PropertySummary
           </div>
         ))}
       </dl>
-      <p className="mt-2 text-[11px] text-muted-foreground">Demonstration property · synthetic data · modeled estimates</p>
+      <p className="mt-2 text-[11px] text-muted-foreground">{row.synthetic ? "Demonstration property · synthetic data · modeled estimates" : "Your hotel · your inputs (defaults where blank) · modeled estimates"}</p>
       <Button size="sm" className="mt-2 w-full" onClick={() => onExplore(row.id)} data-testid={`explore-${row.id}`}>
         Explore digital twin <ArrowRight />
       </Button>

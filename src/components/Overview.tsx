@@ -57,7 +57,7 @@ export function Overview() {
   const displayed = useTwin(selectDisplayed);
   const zoneRows = useTwin(selectZoneRows);
   const opportunities = useTwin(selectOpportunities);
-  const presetId = useTwin((s) => s.hotelPresetId);
+  const presetId = useTwin((s) => s.hotelPresetId ?? s.activePropertyId);
   const hasScenario = useTwin((s) => s.scenarioResult !== null);
   const profile = useTwin((s) => s.hotel.profile);
   const { result } = displayed;

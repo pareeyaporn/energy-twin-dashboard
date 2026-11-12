@@ -172,3 +172,10 @@ EPA eGRID (emission factors), utility bill upload and calibration, building-mana
       the worst case: a scenario, a plan and two extra budgets). The size is bounded by design (at most 8 upgrades, 3 packages plus the winner,
       2 extra budgets; each question sends a fresh context), so no summarizing or larger limit is needed. Do not summarize with a model: the
       number check needs the exact figures.
+
+## Portfolio questions (November 2026)
+
+The advisor context has a `portfolio` section (the hotel chain's totals, each hotel ranked by investment priority with its best package, and the
+portfolio optimizer's plan once it has run). Questions such as "Which hotel should we invest in first?" are recognized as portfolio questions;
+the template answer uses only that section, and the number check covers it like the rest of the context. The function's system prompt names the
+section; Lovable Cloud redeploys the function when `supabase/functions/advisor` changes on `main`.

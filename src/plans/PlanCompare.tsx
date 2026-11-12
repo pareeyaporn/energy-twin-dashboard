@@ -15,7 +15,7 @@ interface Column {
 
 const ROWS: { label: string; value: (c: Column) => string; better?: (a: number, b: number) => boolean; num?: (c: Column) => number }[] = [
   { label: "Gross installation cost", value: (c) => usd(c.f.grossCost.mid) },
-  { label: "Verified incentives", value: (c) => (verifiedIncentives(c.f) > 0 ? usd(verifiedIncentives(c.f)) : "$0") },
+  { label: "Utility incentives (published rates)", value: (c) => (verifiedIncentives(c.f) > 0 ? usd(verifiedIncentives(c.f)) : "$0") },
   { label: "Net investment", value: (c) => usd(c.f.netInvestment.mid) },
   { label: "Annual savings", value: (c) => usd(c.f.annualSavings.mid), num: (c) => c.f.annualSavings.mid, better: (a, b) => a > b },
   { label: "Simple payback", value: (c) => years(c.f.simplePaybackYears), num: (c) => c.f.simplePaybackYears ?? Infinity, better: (a, b) => a < b },

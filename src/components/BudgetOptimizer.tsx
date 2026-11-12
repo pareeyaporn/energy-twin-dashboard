@@ -100,7 +100,7 @@ export function BudgetOptimizer({ compact = false, workspace = false }: { compac
   const hotel = useTwin((s) => s.hotel);
   const plan = useTwin((s) => s.hotelPlan);
   const optimizing = useTwin((s) => s.optimizing);
-  const preset = useTwin((s) => s.hotelPresetId);
+  const preset = useTwin((s) => s.hotelPresetId ?? s.activePropertyId);
   const setBudget = useTwin((s) => s.setHotelBudget);
   const setObjective = useTwin((s) => s.setHotelObjective);
   const run = useTwin((s) => s.runHotelOptimizer);

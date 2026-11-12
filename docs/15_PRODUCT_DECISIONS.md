@@ -170,3 +170,12 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
 - **Portfolio stress tests** apply the single-hotel test to the chosen hotels only; the others keep their normal-year cost. Plans are the AI
   portfolio (none until the optimizer has run), my portfolio, or none. The check whether a hotel's recommendation changes under a persistent
   change stays in each hotel's twin, because it needs two optimizer runs per hotel.
+
+## 17. Demo hardening wording (November 2026)
+
+- **Incentives are "utility incentives at published rates"**, not "verified": the amounts follow ComEd's published worksheets, are estimated from
+  the modeled equipment, and need the utility's approval for a real project.
+- **"AI recommended" means the optimizer's pick.** Both investment views say so: the optimizer tests every combination with the energy model,
+  and the AI advisor only explains results.
+- **Every portfolio hotel is labeled synthetic** on every screen, not only the two presets.
+- **"Reset demo" clears everything in the browser** (including saved custom plans) but keeps the reduce-effects preference.

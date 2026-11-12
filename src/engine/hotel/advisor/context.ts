@@ -15,6 +15,8 @@ import type {
   UpgradeId,
 } from '../types';
 import { parseBudgets } from './intent';
+import type { PortfolioPlan, PortfolioSummary } from '../portfolio';
+import { upgradeDef } from '../upgrades';
 
 const r0 = (n: number) => Math.round(n);
 const r1 = (n: number) => Math.round(n * 10) / 10;
@@ -136,6 +138,59 @@ export interface AdvisorContext {
   plan: AdvisorPlan | null;
   /** Plans for other budgets named in the question (for example "$30,000"). */
   otherBudgets: AdvisorPlan[];
+  /** The hotel chain (Phase 13), when the app has one. Optional for backwards compatibility. */
+  portfolio?: AdvisorPortfolio | null;
+}
+
+export interface AdvisorPortfolioHotel {
+  name: string;
+  neighborhood: string;
+  segment: string;
+  rooms: number;
+  annualCost: number;
+  /** Site energy intensity, kBtu per ft² a year. */
+  energyIntensity: number;
+  savingsPotential: number;
+  investmentRequired: number;
+  paybackYears: number | null;
+  bestPackage: string | null;
+  /** 0–100, 10-year NPV per dollar invested, relative to this portfolio. */
+  priorityScore: number;
+}
+
+export interface AdvisorPortfolio {
+  organization: string;
+  syntheticDemo: boolean;
+  /** The hotel open in the twin, if it came from the portfolio. */
+  openHotel: string | null;
+  totals: {
+    hotels: number;
+    rooms: number;
+    annualCost: number;
+    annualElecKWh: number;
+    annualGasTherms: number;
+    annualCarbonTonnes: number;
+    savingsPotential: number;
+    investmentRequired: number;
+  };
+  /** Sorted by priority score, highest first. */
+  hotels: AdvisorPortfolioHotel[];
+  definitions: string[];
+  /** The portfolio optimizer's last result (null until it has run). */
+  plan: null | {
+    budget: number;
+    objective: string;
+    grossCost: number;
+    incentives: number;
+    netInvestment: number;
+    remainingBudget: number;
+    annualSavings: number;
+    annualSavingsPctOfPortfolioCost: number;
+    paybackYears: number | null;
+    npv10Years: number;
+    carbonAvoidedTonnes: number;
+    allocations: { hotel: string; package: string | null; grossCost: number; netInvestment: number; annualSavings: number; paybackYears: number | null }[];
+  };
 }
 
 export interface AdvisorInput {
@@ -148,6 +203,81 @@ export interface AdvisorInput {
   syntheticDemo: boolean;
   /** Measure upgrades against the what-if (as the optimizer does when "optimize for this scenario" is on). Defaults to true. */
   measureUpgradesOnScenario?: boolean;
+  /** The hotel chain, if any (summary from the engine, the portfolio optimizer's plan, and which hotel is open). */
+  portfolio?: { organization: string; summary: PortfolioSummary; plan: PortfolioPlan | null; openHotel: string | null; syntheticDemo: boolean } | null;
+}
+
+const OBJECTIVE_LABEL: Record<string, string> = {
+  balanced: 'balanced',
+  annual_savings: 'annual savings',
+  npv10: '10-year net present value',
+  payback: 'fastest payback',
+  carbon: 'carbon reduction',
+};
+
+const packageName = (ids: readonly UpgradeId[]) => ids.map((id) => upgradeDef(id).label).join(' + ');
+
+/** The portfolio part of the context, rounded like the rest. */
+export function summarizePortfolio(p: NonNullable<AdvisorInput['portfolio']>): AdvisorPortfolio {
+  const t = p.summary.totals;
+  const plan = p.plan;
+  return {
+    organization: p.organization,
+    syntheticDemo: p.syntheticDemo,
+    openHotel: p.openHotel,
+    totals: {
+      hotels: t.properties,
+      rooms: t.rooms,
+      annualCost: r0(t.cost),
+      annualElecKWh: r0(t.elecKWh),
+      annualGasTherms: r0(t.gasTherms),
+      annualCarbonTonnes: r0(t.carbonKg / 1000),
+      savingsPotential: r0(t.savingsPotential),
+      investmentRequired: r0(t.investmentRequired),
+    },
+    hotels: [...p.summary.properties]
+      .sort((a, b) => b.priorityScore - a.priorityScore || a.name.localeCompare(b.name))
+      .map((h) => ({
+        name: h.name,
+        neighborhood: h.neighborhood,
+        segment: h.segment,
+        rooms: h.rooms,
+        annualCost: r0(h.annual.cost),
+        energyIntensity: r1(h.siteEui),
+        savingsPotential: r0(h.potential?.annualSavings ?? 0),
+        investmentRequired: r0(h.potential?.netInvestment ?? 0),
+        paybackYears: h.potential?.paybackYears == null ? null : r1(h.potential.paybackYears),
+        bestPackage: h.potential ? packageName(h.potential.upgradeIds) : null,
+        priorityScore: h.priorityScore,
+      })),
+    definitions: p.summary.definitions,
+    plan: plan
+      ? {
+          budget: r0(plan.budget),
+          objective: OBJECTIVE_LABEL[plan.objective] ?? plan.objective,
+          grossCost: r0(plan.totals.grossCost),
+          incentives: r0(plan.totals.incentives),
+          netInvestment: r0(plan.totals.netInvestment),
+          remainingBudget: r0(plan.totals.remainingBudget),
+          annualSavings: r0(plan.totals.annualSavings),
+          annualSavingsPctOfPortfolioCost: r1(plan.totals.shareOfPortfolioCost * 100),
+          paybackYears: plan.totals.paybackYears == null ? null : r1(plan.totals.paybackYears),
+          npv10Years: r0(plan.totals.npv10),
+          carbonAvoidedTonnes: r0(plan.totals.carbonAvoidedKg / 1000),
+          allocations: plan.allocations.map((a) => {
+            const f = a.evaluation?.financials;
+            return {
+              hotel: a.name,
+              package: a.evaluation ? packageName(a.evaluation.upgradeIds) : null,
+              grossCost: r0(f?.grossCost.mid ?? 0),
+              netInvestment: r0(f?.netInvestment.mid ?? 0),
+              annualSavings: r0(f?.annualSavings.mid ?? 0),
+              paybackYears: f?.simplePaybackYears == null ? null : r1(f.simplePaybackYears),
+            };
+          }),
+        }
+      : null,
+  };
 }
 
 const roleName = (p: RankedPackage) => p.roleLabel;
@@ -330,5 +460,6 @@ export function buildAdvisorContext(input: AdvisorInput, question = ''): Advisor
     },
     plan: plan ? summarizePlan(plan) : null,
     otherBudgets,
+    portfolio: input.portfolio ? summarizePortfolio(input.portfolio) : null,
   };
 }

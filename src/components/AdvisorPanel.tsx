@@ -26,7 +26,7 @@ export function AdvisorPanel() {
       busy: s.advisorBusy,
       ask: s.askAdvisor,
       clear: s.clearAdvisor,
-      synthetic: s.hotelPresetId !== null,
+      synthetic: s.hotelPresetId !== null || s.activePropertyId !== null,
     })),
   );
   const [question, setQuestion] = useState("");

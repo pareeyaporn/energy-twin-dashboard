@@ -17,6 +17,8 @@ export interface HourPoint {
   gasThermsPerHour: number;
   costPerHour: number;
   byZone: Record<ZoneId, { elecKW: number; gasThermsPerHour: number }>;
+  /** The same hour by end use (heating, cooling, lighting, ...). */
+  byEndUse: Record<EndUse, { elecKW: number; gasThermsPerHour: number }>;
 }
 
 /**
@@ -33,6 +35,7 @@ export function typicalDayProfile(result: EnergyResult, month: number, data: Hot
     gasThermsPerHour: 0,
     costPerHour: 0,
     byZone: Object.fromEntries(ZONE_IDS.map((z) => [z, { elecKW: 0, gasThermsPerHour: 0 }])) as HourPoint['byZone'],
+    byEndUse: Object.fromEntries(END_USES.map((u) => [u, { elecKW: 0, gasThermsPerHour: 0 }])) as HourPoint['byEndUse'],
   }));
   for (const c of result.cells) {
     if (c.month !== month) continue;
@@ -49,6 +52,9 @@ export function typicalDayProfile(result: EnergyResult, month: number, data: Hot
       const zp = pt.byZone[c.zone];
       zp.elecKW += kW;
       zp.gasThermsPerHour += th;
+      const up = pt.byEndUse[c.endUse];
+      up.elecKW += kW;
+      up.gasThermsPerHour += th;
     }
   }
   return points;

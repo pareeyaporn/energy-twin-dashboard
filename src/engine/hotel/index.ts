@@ -42,6 +42,7 @@ export {
   calculateFinancialMetrics,
   DEFAULT_FINANCE,
   BENEFIT_YEARS,
+  PROJECTION_YEARS,
   financialBreakdown,
   incentiveLines,
   netBenefitOver,
@@ -52,7 +53,19 @@ export type { IncentiveOverrides, SavingsStream } from './finance';
 export { evaluatePackage, packageMetrics, solarDegradation } from './package';
 export { compareUpgrades } from './comparison';
 export type { UpgradeComparisonRow } from './comparison';
-export { climateSolar, regionalSolar, solarCostPerW, exportCreditPerKWh, solarYield, daylightShape } from './solar';
+export {
+  climateSolar,
+  regionalSolar,
+  solarCostPerW,
+  exportCreditPerKWh,
+  solarYield,
+  daylightShape,
+  daylight,
+  sunElevationDeg,
+  sunAzimuthDeg,
+  solarHourKW,
+  outdoorTempF,
+} from './solar';
 export type { EvaluateOptions } from './package';
 export { optimizeInvestmentPortfolio, normalizedWeights } from './optimizer';
 export { explainPortfolio } from './explain';

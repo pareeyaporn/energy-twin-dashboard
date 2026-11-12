@@ -15,7 +15,8 @@ Style for every prompt: polished B2B SaaS look, professional typography, clear f
 | LV9 polish | Done |
 | LV11 upgrade comparison and the financial breakdown | Done |
 | LV12 layout fix (packages first, collapsed comparison, shared assumptions, short Source buttons, remaining budget and comfort back) | Done |
-| **LV13 NPV with an 8% / 3% switch, grid subregion field** | **Next** |
+| LV13 NPV with an 8% / 3% switch, grid subregion field | Done |
+| **LV14 year-by-year projection chart** (after the 3D twin PR is merged) | **Next** |
 
 ## Store API cheat sheet (already built; read it, do not change it)
 
@@ -213,3 +214,19 @@ comparison (quarter, half and full roof); keep them as separate rows. Display fo
 Don't modify src/engine, src/data, src/twin, src/store or supabase.
 ```
 
+
+## LV14 — Year-by-year financial projection (after the 3D twin PR is merged)
+
+```
+Add a "10-year projection" to each package card and to the solar and other rows of Compare all upgrades. In each package card, under
+the eight financial lines, add a small "Show 10-year projection" toggle. When opened, show a Recharts chart from
+evaluation.financials.projection (years 1 to 10): bars for each year's savings (savings.mid) and a line for cumulative net benefit
+(cumulativeNet.mid), with a shaded band from cumulativeNet.low to cumulativeNet.high and a dashed zero line, so the point where the line
+crosses zero is the payback. Add a second, dashed line "Discounted (NPV)" from cumulativeNpv, labeled "at {financials.discountRate as %}".
+Below the chart show a compact table with Year, Savings, Cumulative net benefit (low to high) and Discounted, and a note: "Savings grow
+with EIA price forecasts; solar output falls 0.5% a year; year 5 and year 10 equal the net benefit shown above. Estimate."
+In the Compare investments table add a "Projection" row with a small sparkline of cumulativeNet.mid for each package, and open the full
+chart in a dialog on click. In Compare all upgrades (table view), add the same sparkline column from row.financials.projection.
+Use the store values only; display formatting only; negative values in amber, positive in the savings color.
+Don't modify src/engine, src/data, src/twin, src/three, src/store or supabase.
+```

@@ -6,6 +6,7 @@ import type {
   HotelData,
   HotelProfile,
   IncentiveLine,
+  ProjectionYear,
   Range3,
   SolarDetails,
   UpgradeId,
@@ -24,6 +25,8 @@ export const DEFAULT_FINANCE: Omit<FinancialAssumptions, 'horizonYears'> = {
 
 /** The two fixed comparison periods every upgrade is shown over, besides the hotel's own horizon. */
 export const BENEFIT_YEARS = [5, 10] as const;
+/** Length of the year-by-year projection. */
+export const PROJECTION_YEARS = 10;
 
 const SCENARIOS = ['low', 'mid', 'high'] as const;
 
@@ -221,6 +224,17 @@ export function financialBreakdown(input: {
     mid: npvOver(years, stream('mid'), net.mid, r),
     high: npvOver(years, stream('high'), net.low, r),
   });
+  const projection: ProjectionYear[] = [];
+  const cum = { low: -net.high, mid: -net.mid, high: -net.low };
+  let cumNpv = -net.mid;
+  for (let t = 1; t <= PROJECTION_YEARS; t++) {
+    const savings: Range3 = { low: savingsInYear(stream('low'), t), mid: savingsInYear(stream('mid'), t), high: savingsInYear(stream('high'), t) };
+    cum.low += savings.low;
+    cum.mid += savings.mid;
+    cum.high += savings.high;
+    cumNpv += savings.mid / (1 + r) ** t;
+    projection.push({ year: t, savings, cumulativeNet: { ...cum }, cumulativeNpv: cumNpv });
+  }
   const applied = input.incentives.lines.filter((l) => l.applied);
   const listed = input.incentives.lines.filter((l) => !l.applied);
   const assumptions = [
@@ -257,6 +271,7 @@ export function financialBreakdown(input: {
     netBenefit10: benefit(BENEFIT_YEARS[1]),
     carbonAvoidedKgPerYear: input.carbonAvoidedKgPerYear,
     discountRate: r,
+    projection,
     npv5: npv(BENEFIT_YEARS[0]),
     npv10: npv(BENEFIT_YEARS[1]),
     solar: input.solar,

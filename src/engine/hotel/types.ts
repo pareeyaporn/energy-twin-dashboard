@@ -290,7 +290,7 @@ export interface HotelData {
     verified: boolean;
   };
   weather: {
-    climates: Record<string, { label: string; meanTempF: number[]; balancePointF: number; latitude?: number; solar?: ClimateSolar }>;
+    climates: Record<string, { label: string; meanTempF: number[]; highTempF?: number[]; lowTempF?: number[]; balancePointF: number; latitude?: number; solar?: ClimateSolar }>;
     cityToClimate: Record<string, string>;
     defaultClimate: string;
     source: string;
@@ -431,10 +431,26 @@ export interface FinancialBreakdown {
   discountRate?: number;
   npv5?: Range3;
   npv10?: Range3;
+  /**
+   * Year-by-year projection, years 1 to 10, from the same savings stream as the net benefit and NPV (so year 5 and year 10 match
+   * `netBenefit5` and `netBenefit10`). Optional in the type for backwards compatibility; the engine always sets it.
+   */
+  projection?: ProjectionYear[];
   /** Solar details when the upgrade includes solar. */
   solar: SolarDetails | null;
   /** Plain-language assumptions behind these numbers (shown next to them). */
   assumptions: string[];
+}
+
+export interface ProjectionYear {
+  /** 1 is the first year after installation. */
+  year: number;
+  /** Savings in this year (price growth and solar wear included; solar upkeep subtracted). */
+  savings: Range3;
+  /** Savings to date minus the net investment (negative until the upgrade has paid back). */
+  cumulativeNet: Range3;
+  /** The same, with savings discounted at `discountRate` (mid case). */
+  cumulativeNpv: number;
 }
 
 export interface SolarDetails {

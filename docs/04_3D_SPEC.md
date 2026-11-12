@@ -1,4 +1,54 @@
-# 04 — 3D simulator spec (`src/three/`) — make it WOW
+# 04 — 3D hotel twin spec (`src/three/`)
+
+> **Current (hotel, Phase 9, built).** The sections after "Home era" below describe the old house simulator and are kept only as
+> patterns. This section is the spec for what is built.
+
+## What it is
+
+An interactive 3D model of the hotel, shown as the default view of the twin's Zones layer on desktop (3D/2D switch beside the layer
+tabs). It is a visualization layer only: every energy number and color comes from the store, which calls the engine. The scenery
+(trees, snow, sky) follows the calendar and the sun's position.
+
+**Files.** `layout.ts` (geometry from rooms and floors, pure), `colors.ts` (sRGB versions of the app's cost scale),
+`environment.ts` (season, scenery, sky and light from the sun, presets, pure), `HotelScene.tsx` (the canvas), and in `src/twin`:
+`parts/View3D.tsx` (lazy loading, WebGL fallback, overlays, controls), `useCountUp.ts` (header numbers).
+
+## What drives what
+
+| Visual | Source |
+| --- | --- |
+| Zone colors (guest floors, lobby, restaurant, core, plant, hot-water room) | each zone's yearly cost, min–max scaled, blue → amber → red (same as 2D) |
+| Rooftop HVAC tint, fan speed | heating vs cooling demand at the clock's hour (`selectHourState().demandKW`) |
+| Windows, one per room | `selectRooms`: lit (guest in), dim (booked, guest out), dark (vacant); glass tint by daylight |
+| Blue sill under a window | the room is set back by smart controls (`RoomPoint.setback`); count in the readout |
+| Solar panels | applied package's solar size (quarter, half, full roof); none otherwise. Selecting the roof without solar shows a translucent full-roof preview, "Not installed — potential", with the modeled output of a full-roof array |
+| Sun position, sky color, stars, moonlight | `sunElevationDeg`, `sunAzimuthDeg` from the engine (latitude and month) |
+| Season (snow, bare / green / orange trees, snowfall) | the month (meteorological seasons) |
+| Readout: date and time, outdoor °F, rooms, kW by end use, solar, cost this hour | `selectHourState` (outdoor temperature modeled from NOAA normal highs and lows) |
+
+## Controls
+
+Orbit (drag), zoom (scroll), click a zone (selects it; the existing zone panel shows energy, cost, drivers and opportunities), keyboard
+zone buttons under the scene, "Explode floors", "Reset view", season presets (January night, April morning, July afternoon, October
+evening), and the twin's time controls ("Year + day" plays every hour of every month: a year in about 48 s at 1x).
+
+## Performance and accessibility
+
+- Lazy-loaded and client-only; WebGL detection plus an error boundary fall back to the 2D diagram. 2D on narrow screens and with
+  "reduce effects".
+- Windows and set-back sills are single instanced meshes; one shadow-casting light; geometry is procedural (no model files).
+- "Reduce effects": no snowfall, stars, fan spin, shadows or camera damping; pixel ratio 1. The header count-up runs only when the
+  system allows motion (`prefers-reduced-motion`) and effects are not reduced.
+- Screen readers: a description of the scene, zone buttons with `aria-pressed`, and the header cost's full value as its label.
+
+## Not claimed
+
+The scene is an illustration of modeled estimates for a typical day of each month, not real-time monitoring or a measured building.
+
+---
+
+# Home era (superseded)
+
 
 The 3D house is a **live picture of the energy model**. Every glow, leak, coin and color comes from engine
 numbers in the store. Judges should see it and say "whoa" — then learn it's real data.

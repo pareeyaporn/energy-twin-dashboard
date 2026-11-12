@@ -33,7 +33,7 @@ is built today, and what we will add. Product context is in [10_HOTEL_SPEC.md](1
                                        │ HTTPS (advisor question + precomputed context)
         ┌──────────────────────────────▼───────────────────────┐
         │  Lovable Cloud edge function: supabase/functions/advisor (Deno)   │
-        │  • holds the AI key (secret)   • 6 s timeout   • thin proxy       │
+        │  • holds the AI key (secret)   • 14 s timeout  • thin proxy       │
         └──────────────────────────────┬───────────────────────┘
                                        │ HTTPS
                                  LLM provider (TBD)

@@ -379,6 +379,9 @@ describe('askAdvisor', () => {
 });
 
 describe('advisorConfigFromEnv', () => {
+  it('waits 15 seconds for the advisor before using a template answer', () => {
+    expect(advisorConfigFromEnv({ VITE_SUPABASE_URL: 'https://p.supabase.co' }).timeoutMs).toBe(15000);
+  });
   it('uses VITE_ADVISOR_URL first, then the Lovable Cloud project URL, else nothing', () => {
     expect(advisorConfigFromEnv({})).toEqual({ endpoint: null, headers: {} });
     expect(advisorConfigFromEnv({ VITE_ADVISOR_URL: 'https://a.test/x' }).endpoint).toBe('https://a.test/x');

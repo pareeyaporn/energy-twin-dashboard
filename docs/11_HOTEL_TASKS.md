@@ -267,87 +267,96 @@ digital twin, and decide where a shared investment budget does the most good. Th
 Decisions (user): extend the store (additive); MapLibre with free tiles and an offline fallback; Claude Code adds the route and nav link;
 build P0 and the portfolio optimizer first.
 
+**P0 at a glance** (must have; built first, together with the portfolio optimizer 13.8–13.12):
+- 13.1–13.4 five synthetic Chicago properties (`properties.json`), types, labels, documented assumptions
+- 13.5–13.7 portfolio aggregation in the engine (totals, savings potential, investment required, priority score) and its tests
+- 13.13–13.17 store: active property, `openProperty`, save and restore per property, custom plans per property, selectors, tests
+- 13.18–13.21 MapLibre city map with markers, hover cards, color-by metric, legend, offline fallback, accessibility
+- 13.22–13.28 `/portfolio` page and top-bar link, KPI strip, comparison table, charts, breadcrumb, optimizer panel, tests
+
+P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress tests). P2: 13.33–13.36 (onboarding, venue types, organizations).
+
 ### 13A — Properties and data (P0)
-- [ ] 13.1 `src/data/hotel/properties.json`: one demonstration organization ("Energy Twin Hotels, demonstration portfolio") with five
+- [ ] 13.1 **P0** [CC] `src/data/hotel/properties.json`: one demonstration organization ("Energy Twin Hotels, demonstration portfolio") with five
       synthetic Chicago hotels, each labeled "Demonstration property": Downtown (Loop), Airport (Rosemont, near O'Hare), Lakeside
       (Streeterville), Convention (near McCormick Place), Boutique (River North). Each has its own id, name, neighborhood, latitude and
       longitude, type tag, and full hotel input (rooms, floor area, floors, year built, HVAC type, occupancy, seasonal occupancy, budget).
       Distinct configurations, never a scaled copy; every value is either a documented assumption or a default the profile flags.
-- [ ] 13.2 Two of the five reuse the existing presets' inputs (Boutique = the 100-room demo hotel, Downtown = the 300-room preset), so the
+- [ ] 13.2 **P0** [CC] Two of the five reuse the existing presets' inputs (Boutique = the 100-room demo hotel, Downtown = the 300-room preset), so the
       single-hotel demo numbers stay the same when opened from the portfolio
-- [ ] 13.3 Types: `PortfolioProperty`, `PortfolioOrganization`; a `buildingType` field ('hotel' now; resort, casino, convention center,
+- [ ] 13.3 **P0** [CC] Types: `PortfolioProperty`, `PortfolioOrganization`; a `buildingType` field ('hotel' now; resort, casino, convention center,
       entertainment venue listed as future, not simulated)
-- [ ] 13.4 Document the property assumptions (docs/13, docs/15); synthetic labels everywhere they are shown
+- [ ] 13.4 **P0** [CC] Document the property assumptions (docs/13, docs/15); synthetic labels everywhere they are shown
 
 ### 13B — Engine: aggregation (P0)
-- [ ] 13.5 `portfolioSummary(properties)`: per property, the existing baseline (`calculateBaselineEnergy`), energy intensity
+- [ ] 13.5 **P0** [CC] `portfolioSummary(properties)`: per property, the existing baseline (`calculateBaselineEnergy`), energy intensity
       (`benchmarkComparison`), and its savings potential and investment from the existing optimizer; portfolio totals (properties, rooms,
       kWh, therms, site energy, cost, CO₂, savings potential). Pure, cached per property
-- [ ] 13.6 Definitions (product decisions, docs/15): **savings potential** = the annual savings of the property's best package with a
+- [ ] 13.6 **P0** [CC] Definitions (product decisions, docs/15): **savings potential** = the annual savings of the property's best package with a
       positive 10-year NPV, at the portfolio's per-property cap; **investment required** = that package's net investment; **investment
       priority score** = 10-year NPV per dollar invested, scaled 0–100 across the portfolio
-- [ ] 13.7 Tests: totals equal the sum of the properties; each property's numbers equal the single-hotel engine's for the same input
+- [ ] 13.7 **P0** [CC] Tests: totals equal the sum of the properties; each property's numbers equal the single-hotel engine's for the same input
 
 ### 13C — Engine: portfolio optimizer (P1, built first with P0)
-- [ ] 13.8 Candidates per property: every valid upgrade combination (same enumeration, budget, comfort and exclusion rules as the
+- [ ] 13.8 **P1, built with P0** [CC] Candidates per property: every valid upgrade combination (same enumeration, budget, comfort and exclusion rules as the
       single-hotel optimizer), evaluated with the same financial breakdown (gross cost, verified incentives, net investment, savings,
       NPV, CO₂); savings interactions computed inside each hotel, never summed across upgrades
-- [ ] 13.9 Allocation: one package (or none) per property under the shared budget: a multiple-choice knapsack solved by dynamic programming
+- [ ] 13.9 **P1, built with P0** [CC] Allocation: one package (or none) per property under the shared budget: a multiple-choice knapsack solved by dynamic programming
       at $1,000 budget steps, exact for additive objectives (annual savings, 10-year NPV, carbon, balanced score); fastest payback (a ratio)
       solved exactly by iterating the same dynamic program (Dinkelbach); method stated in the results
-- [ ] 13.10 Inputs: total budget (default $500,000), objective (annual savings, 10-year NPV, payback, carbon, balanced), discount rate and
+- [ ] 13.10 **P1, built with P0** [CC] Inputs: total budget (default $500,000), objective (annual savings, 10-year NPV, payback, carbon, balanced), discount rate and
       horizon from the existing settings; the budget is compared with gross cost, as in the single-hotel optimizer (docs/15)
-- [ ] 13.11 Results: per property the recommended package, investment, incentives, annual savings; totals: investment, remaining budget,
+- [ ] 13.11 **P1, built with P0** [CC] Results: per property the recommended package, investment, incentives, annual savings; totals: investment, remaining budget,
       annual savings, 5- and 10-year NPV, simple payback, carbon reduction, % of portfolio energy cost; "open this hotel's package"
-- [ ] 13.12 Tests: the allocation never exceeds the budget; it matches a brute-force search on a small case; each property's figures equal
+- [ ] 13.12 **P1, built with P0** [CC] Tests: the allocation never exceeds the budget; it matches a brute-force search on a small case; each property's figures equal
       `evaluatePackage` for that package; the $50,000 single-hotel answer is unchanged
 
 ### 13D — Store (P0, additive)
-- [ ] 13.13 `portfolio` (organization and properties), `activePropertyId`, `propertyInputs` (each property's current input),
+- [ ] 13.13 **P0** [CC] `portfolio` (organization and properties), `activePropertyId`, `propertyInputs` (each property's current input),
       `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioOptimizing`; actions `openProperty(id)`, `runPortfolioOptimizer()`,
       `setPortfolioBudget`, `setPortfolioObjective`
-- [ ] 13.14 `openProperty` loads that property's input into the existing single-hotel state (as the preset switcher does) and saves the
+- [ ] 13.14 **P0** [CC] `openProperty` loads that property's input into the existing single-hotel state (as the preset switcher does) and saves the
       previous property's input, what-if, stress test and plan, so returning restores them; the existing screens keep working unchanged
-- [ ] 13.15 Custom plans gain an optional `propertyId`; the plan builder shows the active property's plans (existing plans stay visible)
-- [ ] 13.16 Selectors: `selectPortfolioSummary`, `selectPortfolioRows`, `selectActiveProperty`, memoized per property input
-- [ ] 13.17 Tests: switching properties and back restores state; the demo hotel's figures are identical before and after a round trip
+- [ ] 13.15 **P0** [CC] Custom plans gain an optional `propertyId`; the plan builder shows the active property's plans (existing plans stay visible)
+- [ ] 13.16 **P0** [CC] Selectors: `selectPortfolioSummary`, `selectPortfolioRows`, `selectActiveProperty`, memoized per property input
+- [ ] 13.17 **P0** [CC] Tests: switching properties and back restores state; the demo hotel's figures are identical before and after a round trip
 
 ### 13E — City map (P0)
-- [ ] 13.18 `maplibre-gl` (lazy-loaded) with a free dark basemap (no API key); attribution shown; an offline SVG fallback of Chicago
+- [ ] 13.18 **P0** [CC] `maplibre-gl` (lazy-loaded) with a free dark basemap (no API key); attribution shown; an offline SVG fallback of Chicago
       (lakefront, river, major roads) if the tiles cannot load
-- [ ] 13.19 Glowing markers for each property, keyboard focusable; hover or click opens a card: name, rooms, occupancy, annual energy,
+- [ ] 13.19 **P0** [CC] Glowing markers for each property, keyboard focusable; hover or click opens a card: name, rooms, occupancy, annual energy,
       annual cost, energy intensity, savings potential, priority score, "Demonstration property", **Explore digital twin**
-- [ ] 13.20 Color by: energy cost, energy intensity, savings potential, investment priority; legend; a note that larger hotels naturally
+- [ ] 13.20 **P0** [CC] Color by: energy cost, energy intensity, savings potential, investment priority; legend; a note that larger hotels naturally
       spend more, so cost is not efficiency
-- [ ] 13.21 Respect reduce effects (no pulsing); screen-reader list of the properties as an alternative to the map
+- [ ] 13.21 **P0** [CC] Respect reduce effects (no pulsing); screen-reader list of the properties as an alternative to the map
 
 ### 13F — Portfolio dashboard and navigation (P0)
-- [ ] 13.22 Route `/portfolio` (new file, small) and a "Portfolio" link in the top bar (Lovable-owned, minimal edit)
-- [ ] 13.23 KPI strip: properties, rooms, electricity, natural gas, energy cost, CO₂, savings potential, investment budget
-- [ ] 13.24 Comparison table: property, location, rooms, floor area, occupancy, energy cost, energy intensity, potential savings,
+- [ ] 13.22 **P0** [CC, minimal LV edit] Route `/portfolio` (new file, small) and a "Portfolio" link in the top bar (Lovable-owned, minimal edit)
+- [ ] 13.23 **P0** [CC] KPI strip: properties, rooms, electricity, natural gas, energy cost, CO₂, savings potential, investment budget
+- [ ] 13.24 **P0** [CC] Comparison table: property, location, rooms, floor area, occupancy, energy cost, energy intensity, potential savings,
       investment required, payback, priority; sortable
-- [ ] 13.25 Charts: energy cost by property, energy intensity (site kBtu/ft², electricity and gas converted to one unit), savings potential,
+- [ ] 13.25 **P0** [CC] Charts: energy cost by property, energy intensity (site kBtu/ft², electricity and gas converted to one unit), savings potential,
       electricity vs natural gas
-- [ ] 13.26 Breadcrumb in the twin when a property is open: Portfolio → Chicago → hotel name; "Back to portfolio"
-- [ ] 13.27 Portfolio optimizer panel (13C results) with budget and objective
-- [ ] 13.28 Tests: page renders, sort works, "Explore digital twin" opens the property
+- [ ] 13.26 **P0** [CC] Breadcrumb in the twin when a property is open: Portfolio → Chicago → hotel name; "Back to portfolio"
+- [ ] 13.27 **P0** [CC] Portfolio optimizer panel (13C results) with budget and objective
+- [ ] 13.28 **P0** [CC] Tests: page renders, sort works, "Explore digital twin" opens the property
 
 ### 13G — Custom portfolio plan and comparison (P1)
-- [ ] 13.29 Build a portfolio plan from each property's custom plan; totals across properties; budget used and remaining
-- [ ] 13.30 "Customize AI plan" copies each property's recommended package into that property's custom plan
-- [ ] 13.31 AI portfolio vs my portfolio: investment, savings, payback, NPV, carbon, comfort
+- [ ] 13.29 **P1** [CC] Build a portfolio plan from each property's custom plan; totals across properties; budget used and remaining
+- [ ] 13.30 **P1** [CC] "Customize AI plan" copies each property's recommended package into that property's custom plan
+- [ ] 13.31 **P1** [CC] AI portfolio vs my portfolio: investment, savings, payback, NPV, carbon, comfort
 
 ### 13H — Portfolio stress tests (P1)
-- [ ] 13.32 Apply a stress test to one property, a selection or all; per property and total: normal vs stressed cost, with the
+- [ ] 13.32 **P1** [CC] Apply a stress test to one property, a selection or all; per property and total: normal vs stressed cost, with the
       recommended plan, cost avoided; temporary vs persistent rules as in Phase 12
 
 ### 13I — Later (P2)
-- [ ] 13.33 Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
+- [ ] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
       optimizer, AI vs custom; skip and reopen
-- [ ] 13.34 Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
+- [ ] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
       their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model
-- [ ] 13.35 Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data
-- [ ] 13.36 Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07)
+- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data
+- [ ] 13.36 **P2** [CC] Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07)
 
 Known limits: all five hotels share Chicago weather (O'Hare normals); property types differ through size, age, HVAC and occupancy only (the
 model has no ballroom, pool or 24/7 food-service drivers); heat-pump water heaters are not modeled, so the optimizer cannot pick them.

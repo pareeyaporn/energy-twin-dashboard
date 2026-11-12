@@ -317,6 +317,9 @@ export function simulate(
           weather: e0 * w.weather * weatherTerm * fanMult,
           schedule: e0 * w.schedule * schedTerm * fanMult,
         };
+        // Equipment condition (stress test): heating and cooling use more (or less) energy for the same load.
+        const hvacMult = u === 'heating' || u === 'cooling' ? (c.hvacEnergyMult ?? 1) : 1;
+        if (hvacMult !== 1) for (const lt of Object.keys(loadKBtu) as LoadType[]) loadKBtu[lt] *= hvacMult;
         const siteKBtu = loadKBtu.base + loadKBtu.occupancy + loadKBtu.weather + loadKBtu.schedule;
         const elecKWh = (siteKBtu * fuel.electric) / KBTU_PER_KWH;
         const gasTherms = (siteKBtu * fuel.gas) / KBTU_PER_THERM;

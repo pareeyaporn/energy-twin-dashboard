@@ -233,6 +233,14 @@ amounts the result is exactly what the optimizer computes. `evaluatePlan` conver
 common area or roof, kW) into amounts and adds plan notes; `explainPlan` lists each upgrade's marginal contribution, budget use and
 the best upgrades left out with the reason.
 
+**Stress tests (Phase 12).** `STRESS_TESTS` holds eight events with a category, a duration (`temporary` or `persistent`) and the exact
+assumptions. Two scenario inputs were added: `hvacEnergyChangePct` scales heating and cooling energy for the same load (an "HVAC equipment
+condition" driver in "why it changed"), and `solarOutputChangePct` scales solar output (it affects plans with solar only).
+`stressTestReport(hotel, test, normalScenario, stressedScenario, plan, options)` returns the hotel's yearly energy and cost normally and
+under the test, and the plan's cost and savings in both years from `evaluatePackage` (custom plans with their amounts), the extra costs the
+plan avoids (savings under stress minus normal savings), and, for persistent changes only, payback and NPV in both. `stressRecommendation`
+runs the optimizer on both years for the objective winner (two runs, so the panel calls it after rendering).
+
 ## 9. Budget optimizer (Phase 3)
 `optimizeInvestmentPortfolio(profile, options)` tests every subset of the eligible upgrades (2^n, so 256 for the demo hotel, the empty set counted but never returned).
 It keeps a package only if it is valid (requirements and exclusions), costs no more than the budget at the **mid** estimate, has a comfort score of at least 0.70, and saves at least 1% of the current bill.

@@ -111,3 +111,14 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
   Chicago quotes. The ±15% range around each median is a team placeholder. Users can override the price per W for their hotel.
 - **Export credit stays $0** until the hotel's tariff is confirmed (docs/14, pass 5); users can enter a value. It does not affect the
   presets, which export nothing.
+
+## 12. Stress tests (November 2026)
+
+- **Magnitudes are illustrative what-ifs, not forecasts**: heat wave +10 °F in July; cold snap −12 °F in January; low solar −15% for a year
+  (PVWatts year-to-year variation is smaller in most years); conference surge +25 points in September; off-season −20 points in
+  January–March; HVAC decline +10% heating and cooling energy; electricity and gas +20%.
+- **Temporary events** (weather, occupancy, a cloudy year) show their effect in the year they happen. They do not change payback, NPV or the
+  recommendation, because how often they recur is not modeled, and they do not switch the optimizer to the stressed hotel.
+- **Persistent changes** (HVAC decline, price rises) are re-evaluated every year: payback and NPV are shown under them, the optimizer
+  switches to them as before, the user's plan from before the test is kept for the comparison, and the panel says whether the pick changes.
+- **The plan tested** is the AI package applied to the twin, otherwise the active custom plan, otherwise the AI's pick; the user can choose.

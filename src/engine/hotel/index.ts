@@ -29,6 +29,8 @@ export {
   eligibleUpgrades,
   validateUpgradeSet,
   prepareUpgradeContext,
+  prepareScenarioContext,
+  contextFromBaseline,
   calculateUpgradeSavings,
   solarSizeKw,
   areasOf,
@@ -41,3 +43,5 @@ export { evaluatePackage } from './package';
 export type { EvaluateOptions } from './package';
 export { optimizeInvestmentPortfolio } from './optimizer';
 export { explainPortfolio } from './explain';
+export { opportunitiesByZone } from './opportunities';
+export type { ZoneOpportunity } from './opportunities';

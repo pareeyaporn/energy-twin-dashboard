@@ -46,6 +46,7 @@ For each upgrade find **low, mid and high** values. Sources: NREL ComStock, DOE 
 - [ ] Zone allocation of each end use (guest rooms, lobby, kitchen, hallways, central plant, hot water) and the central-plant share by HVAC type: DOE or ComStock hotel prototype models. *Currently fixed guesses.*
 - [ ] Driver weights (base, occupancy, weather, schedule) for each end use: calibrate so a month-by-month profile looks like a real hotel's (ComStock hotel hourly profiles, utility interval data if available). *Currently rule-of-thumb weights.*
 - [ ] **A. Smart-room-control inputs:** per-degree heating and cooling sensitivity to setpoint, and the share of time a booked room has a guest present. *Currently 3% and 4% per °F; 14 hours per day.*
+- [ ] **A. Setback recovery:** thermal mass of a guest room per °F, number of times a booked room is set back and recovered per day, and whether published per-degree setback savings are already net of recovery. *Currently 0.15 kBtu per room per °F and 2 returns per day; at these values recovery cuts the smart-controls saving roughly in half.*
 - [ ] Setpoint references and comfort limits (ASHRAE 55): reference 68/74 °F, occupied limits 67 to 77 °F, vacant limits 55 and 85 °F, common-area hours floor. *Currently placeholders.*
 - [ ] Benchmark occupancy behind the EUI, default occupancy, seasonal occupancy curve for Chicago hotels (STR, Choose Chicago or similar). *Currently 62%, 65%, a synthetic curve.*
 - [ ] Hot water per occupied room per day (ASHRAE or ENERGY STAR). *Currently 20 gallons.*

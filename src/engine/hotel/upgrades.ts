@@ -1,5 +1,6 @@
 import { calculateBaselineEnergy, simulate, sumCells } from './baseline';
 import { applyScenario, comfortFlags } from './conditions';
+import { simulateEnergyScenario } from './scenarios';
 import { KBTU_PER_KWH, KBTU_PER_THERM, LOAD_TYPES, UPGRADE_ORDER } from './constants';
 import { hotelData } from './data';
 import { isResolved, resolveProfile } from './profile';
@@ -14,6 +15,7 @@ import type {
   PackageComfort,
   ResolvedProfile,
   SavingsScenario,
+  Scenario,
   UpgradeDef,
   UpgradeId,
   UpgradeOutcome,
@@ -109,6 +111,31 @@ export function prepareUpgradeContext(
 ): UpgradeContext {
   const resolved = isResolved(input) ? input : resolveProfile(input, data);
   return { profile: resolved.profile, baseline: baseline ?? calculateBaselineEnergy(resolved, data), data, smartCellsCache: {} };
+}
+
+/**
+ * A context whose baseline is the hotel under a what-if (for example electricity +20% or 85% occupancy), so upgrade savings,
+ * payback and the optimizer are all measured against that situation. If the scenario already turns smart room controls on,
+ * that upgrade no longer applies.
+ */
+export function prepareScenarioContext(
+  input: HotelInput | ResolvedProfile,
+  scenario: Scenario,
+  data: HotelData = hotelData,
+): UpgradeContext {
+  const resolved = isResolved(input) ? input : resolveProfile(input, data);
+  return contextFromBaseline(resolved, simulateEnergyScenario(resolved, scenario, data).after, data);
+}
+
+/** A context for a baseline you already have (for example a what-if's `after`). Smart room controls already on there no longer apply. */
+export function contextFromBaseline(
+  input: HotelInput | ResolvedProfile,
+  baseline: EnergyResult,
+  data: HotelData = hotelData,
+): UpgradeContext {
+  const resolved = isResolved(input) ? input : resolveProfile(input, data);
+  const profile: HotelProfile = { ...resolved.profile, smartRoomControls: baseline.conditions.smartRoomControls };
+  return { profile, baseline, data, smartCellsCache: {} };
 }
 
 export function isContext(x: HotelInput | ResolvedProfile | UpgradeContext): x is UpgradeContext {

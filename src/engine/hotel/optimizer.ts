@@ -7,6 +7,7 @@ import {
   calculateUpgradeSavings,
   eligibleUpgrades,
   isContext,
+  prepareScenarioContext,
   prepareUpgradeContext,
   upgradeDef,
   validateUpgradeSet,
@@ -96,7 +97,12 @@ export function optimizeInvestmentPortfolio(
   options: OptimizerOptions = {},
   data: HotelData = hotelData,
 ): PortfolioResult {
-  const ctx = isContext(input) ? input : prepareUpgradeContext(input, data);
+  const scenario = options.scenario && Object.keys(options.scenario).length > 0 ? options.scenario : null;
+  const ctx = isContext(input)
+    ? input
+    : scenario
+      ? prepareScenarioContext(input, scenario, data)
+      : prepareUpgradeContext(input, data);
   const d = ctx.data;
   const p = ctx.profile;
   const baselineCost = ctx.baseline.annual.cost;
@@ -226,6 +232,7 @@ export function optimizeInvestmentPortfolio(
   }
 
   return {
+    scenario,
     budget,
     objective,
     baselineAnnualCost: baselineCost,

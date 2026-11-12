@@ -210,6 +210,18 @@ At $5,000 nothing fits; the cheapest useful upgrade is occupancy sensors at abou
 - Fastest payback is always a small package (occupancy sensors), because payback ignores size. The 1% savings floor stops anything smaller than that winning.
 - The comfort constraint (0.70) has not rejected anything yet, since no package loses more than 0.20.
 
+## 10. Twin support: zone opportunities, optimizing under a scenario, setback recovery
+**Zone opportunities (`opportunitiesByZone`).** For each zone, the upgrades that would lower that zone's energy cost, biggest first. Each upgrade is evaluated on its own against the context's baseline and the zone figure is the *net* change in that zone
+(LEDs add some heating, solar also trims the hot-water zone's electric share). Each entry carries the whole upgrade's cost, payback and comfort impact. The store's `selectOpportunities` measures against the current scenario when there is one.
+
+**Optimizing under a scenario.** `optimizeInvestmentPortfolio(profile, { scenario })` builds its baseline from the what-if (for example electricity +20%), so savings, payback and ranking are all relative to that situation, and records the scenario in the result.
+`prepareScenarioContext` and `contextFromBaseline` build the context. If the scenario already turns smart room controls on, that upgrade is no longer offered. In the store, `optimizeOnScenario` switches this on; a plan made on a scenario is dropped when the scenario changes,
+and the before and after views for an applied package compare against the situation the plan was measured against.
+
+**Setback recovery.** A set-back guest room needs energy to return to the occupied setpoint. For every booked room, `returns per day × days` events each cost `setback depth × 0.15 kBtu per °F`, spread over heating or cooling months by degree days and divided by the equipment efficiency
+(0.8 for gas heat, 2.3 for electric heat, COP 3 for cooling). The number of returns scales with how much time guests are away (14 occupied hours is the reference) and is zero when guests are always in their rooms. It is added to guest-room heating and cooling as occupancy-driven load,
+so it applies to scenarios and to the smart-controls upgrade alike, and it is zero whenever there is no setback, so the baseline is unchanged. At the placeholder values it cuts the smart controls' modeled saving roughly in half. The parameters are placeholders; if research shows the published per-degree savings are already net of recovery, set `kBtuPerRoomPerF` to 0.
+
 ---
 
 ## Appendix A — Store contract (task 1.10): approved and built

@@ -3,7 +3,9 @@
 import {
   STRESS_TESTS,
   applyScenario,
+  contextFromBaseline,
   energyFlows,
+  opportunitiesByZone,
   equipmentInventory,
   roomOccupancyPattern,
   simulateEnergyScenario,
@@ -86,11 +88,18 @@ export function selectActiveHotelPackage(s: Pick<TwinState, "hotelPlan" | "activ
 const packageResult = memoLast((baseline: EnergyResult, pkg: RankedPackage) => toEnergyResult(baseline, pkg.evaluation.outcome.cells));
 
 const displayedOf = memoLast(
-  (hotel: ResolvedProfile, baseline: EnergyResult, scenarioResult: ScenarioResult | null, pkg: RankedPackage | null): Displayed => {
+  (
+    hotel: ResolvedProfile,
+    baseline: EnergyResult,
+    scenarioResult: ScenarioResult | null,
+    pkg: RankedPackage | null,
+    planBaseline: EnergyResult | null,
+  ): Displayed => {
     if (pkg) {
       const smart = pkg.evaluation.upgradeIds.includes("smart_room_controls");
-      const conditions = smart ? applyScenario(hotel.profile, baseline.conditions, { smartRoomControls: true }) : baseline.conditions;
-      return { kind: "package", result: packageResult(baseline, pkg), conditions, package: pkg };
+      const template = planBaseline ?? baseline;
+      const conditions = smart ? applyScenario(hotel.profile, template.conditions, { smartRoomControls: true }) : template.conditions;
+      return { kind: "package", result: packageResult(template, pkg), conditions, package: pkg };
     }
     if (scenarioResult) return { kind: "scenario", result: scenarioResult.after, conditions: scenarioResult.after.conditions, package: null };
     return { kind: "baseline", result: baseline, conditions: baseline.conditions, package: null };
@@ -99,12 +108,12 @@ const displayedOf = memoLast(
 
 /** What the twin and the charts show: the applied package, else the scenario, else the baseline. */
 export const selectDisplayed = (s: TwinState): Displayed =>
-  displayedOf(s.hotel, s.baseline, s.scenarioResult, selectActiveHotelPackage(s));
+  displayedOf(s.hotel, s.baseline, s.scenarioResult, selectActiveHotelPackage(s), s.hotelPlanBaseline);
 
-/** Before (the baseline) and after (what is displayed). */
+/** Before (the baseline; for a package, the situation the plan was measured against) and after (what is displayed). */
 export const selectCompare = (s: TwinState): { before: EnergyResult; after: EnergyResult; kind: DisplayKind } => {
   const d = selectDisplayed(s);
-  return { before: s.baseline, after: d.result, kind: d.kind };
+  return { before: d.kind === "package" ? (s.hotelPlanBaseline ?? s.baseline) : s.baseline, after: d.result, kind: d.kind };
 };
 
 export interface ZoneRow {
@@ -130,7 +139,7 @@ const zoneRowsOf = memoLast((hotel: ResolvedProfile, baseline: EnergyResult, dis
     deltaCost: displayed.byZone[zone].cost - baseline.byZone[zone].cost,
   }));
 });
-export const selectZoneRows = (s: TwinState): ZoneRow[] => zoneRowsOf(s.hotel, s.baseline, selectDisplayed(s).result);
+export const selectZoneRows = (s: TwinState): ZoneRow[] => zoneRowsOf(s.hotel, selectCompare(s).before, selectDisplayed(s).result);
 
 const typicalDayOf = memoLast((result: EnergyResult, month: number) => typicalDayProfile(result, month));
 export const selectTypicalDay = (s: TwinState) => typicalDayOf(selectDisplayed(s).result, s.timeMonth);
@@ -155,3 +164,9 @@ export const selectHotelLabel = (s: TwinState) => {
 };
 export const selectHotelCost = (s: TwinState) => selectDisplayed(s).result.annual.cost;
 export const selectHotelBaselineCost = (s: TwinState) => s.baseline.annual.cost;
+
+/** Upgrades that would help each zone, measured against the current scenario's result if there is one, else the baseline. */
+const opportunitiesOf = memoLast((hotel: ResolvedProfile, measuredAgainst: EnergyResult) =>
+  opportunitiesByZone(contextFromBaseline(hotel, measuredAgainst)),
+);
+export const selectOpportunities = (s: TwinState) => opportunitiesOf(s.hotel, s.scenarioResult?.after ?? s.baseline);

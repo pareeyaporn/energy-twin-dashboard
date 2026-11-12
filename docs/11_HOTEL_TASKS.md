@@ -113,6 +113,11 @@ Phase 4 (UI) needs the store contract from 1.10. Phase 5 needs Phases 1–2. Pha
 - [ ] 4.7 [LV] Banner and disclaimers: "Estimates from synthetic and public data, not an engineering audit"
 - [ ] 4.8 [CC] Review the Lovable output, remove leftover residential copy ("Maya", "home", "attic"), check the build and the demo path
 
+## Phase 5a — Engine support for the twin (built)
+- [x] 5a.1 `opportunitiesByZone`: upgrades that help each zone, with zone savings, cost, payback and comfort impact (store: `selectOpportunities`)
+- [x] 5a.2 Optimizing under a scenario: `optimizeInvestmentPortfolio(..., { scenario })`, `prepareScenarioContext`, store `optimizeOnScenario`
+- [x] 5a.3 Setback recovery energy (placeholder parameters, research task in `docs/08`)
+
 ## Phase 5 — Interactive digital twin, 2D, Tier A (P1) [CC component, LV places it]
 Needs Phases 1–2. In scope (**Tier A**): room grid, zone heat-map, equipment layer, time scrubber, simulated live meter, energy flow diagram,
 ghost upgrades, stress-test events. Out of scope for now: fault injection and anomaly detection, an operational playbook optimizer,

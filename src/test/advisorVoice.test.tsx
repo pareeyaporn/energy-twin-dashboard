@@ -104,7 +104,7 @@ describe("voice in the Ask tab", () => {
     expect(ask).toHaveBeenCalledWith("What if occupancy rises to 85%?");
   });
 
-  it("reads new answers aloud only when the speaker is on, and remembers the choice", () => {
+  it("reads new answers aloud only when the speaker is on, and remembers the choice (browser voice when the human voice is unavailable)", async () => {
     render(<AdvisorPanel />);
     const add = (text: string) =>
       act(() => useTwin.setState((s) => ({ advisorMessages: [...s.advisorMessages, { id: `m${s.advisorMessages.length}`, role: "advisor", text, source: "fallback" } as never] })));
@@ -113,11 +113,11 @@ describe("voice in the Ask tab", () => {
     fireEvent.click(screen.getByTestId("voice-speak"));
     expect(window.localStorage.getItem(VOICE_STORAGE_KEY)).toBe("on");
     add("The cost goes from $374,741 → $399,140.");
-    expect(spoken).toEqual(["The cost goes from $374,741 to $399,140."]);
     expect(screen.getByTestId("voice-stop")).toBeTruthy();
+    await vi.waitFor(() => expect(spoken).toEqual(["The cost goes from $374,741 to $399,140."]));
   });
 
-  it("shows a short note when the mic is blocked, and hides voice where the browser has none", () => {
+  it("shows a short note when the mic is blocked, and hides the mic where the browser has no speech recognition", () => {
     render(<AdvisorPanel />);
     fireEvent.click(screen.getByTestId("voice-mic"));
     act(() => FakeRecognition.last!.onerror?.({ error: "not-allowed" }));
@@ -126,7 +126,7 @@ describe("voice in the Ask tab", () => {
     cleanup();
     for (const k of ["SpeechRecognition", "SpeechSynthesisUtterance", "speechSynthesis"]) delete (window as unknown as Record<string, unknown>)[k];
     render(<AdvisorPanel />);
-    expect(screen.queryByTestId("voice-controls")).toBeNull();
+    expect(screen.queryByTestId("voice-mic")).toBeNull();
     expect(screen.getByLabelText("Ask the advisor")).toBeTruthy();
   });
 });

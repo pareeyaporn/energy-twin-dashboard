@@ -100,22 +100,22 @@ export function toolAnswer(runs: readonly ToolRun[], context: AdvisorContext): s
   for (const r of runs) {
     const x = r.result;
     if ('error' in x) {
-      s.push(`I could not run that: ${String(x['error'])}`);
+      s.push(`Sorry, I couldn't run that one: ${String(x['error'])}`);
       continue;
     }
     if (r.name === 'run_scenario') {
       const b = o(x['before']);
       const a = o(x['after']);
       const c = o(x['change']);
-      s.push(`With ${describeSettings(o(x['settings']))}, the estimated yearly energy cost goes from ${usd(nn(b['annualCost']))} to ${usd(nn(a['annualCost']))} (${nn(c['annualCost']) >= 0 ? '+' : '-'}${usd(Math.abs(nn(c['annualCost'])))}, ${pct(nn(c['annualCostPct']))}).`);
+      s.push(`Good question. With ${describeSettings(o(x['settings']))}, your estimated yearly energy cost would go from ${usd(nn(b['annualCost']))} to ${usd(nn(a['annualCost']))} (${nn(c['annualCost']) >= 0 ? '+' : '-'}${usd(Math.abs(nn(c['annualCost'])))}, ${pct(nn(c['annualCostPct']))}).`);
       const d = (x['drivers'] as Obj[] | undefined)?.[0];
-      if (d) s.push(`The biggest driver is ${String(d['driver']).toLowerCase()} (${usd(nn(d['annualCostChange']))}).`);
+      if (d) s.push(`Most of that comes from ${String(d['driver']).toLowerCase()} (${usd(nn(d['annualCostChange']))}).`);
     } else if (r.name === 'find_best_plan') {
       const best = x['bestPackage'] as Obj | null;
-      if (!best) s.push(`With ${usd(nn(x['budget']))}, no package fits: ${String(x['emptyReason'] ?? 'nothing meets the budget and comfort limits')}.`);
+      if (!best) s.push(`Honestly, with ${usd(nn(x['budget']))} nothing fits yet: ${String(x['emptyReason'] ?? 'nothing meets the budget and comfort limits')}.`);
       else {
-        s.push(`With ${usd(nn(x['budget']))} to spend, the model tested ${nn(x['combinationsTested'])} combinations and ${nn(x['packagesThatFit'])} fit.`);
-        s.push(`The best is ${planSentence(best)}.`);
+        s.push(`With ${usd(nn(x['budget']))} to spend, I had the model test ${nn(x['combinationsTested'])} combinations, and ${nn(x['packagesThatFit'])} of them fit.`);
+        s.push(`My top pick is ${planSentence(best)}.`);
       }
     } else if (r.name === 'evaluate_upgrades') {
       s.push(`${(x['upgrades'] as string[]).join(' + ')}: ${usd(nn(x['netInvestment']))} after counted incentives, saving about ${usd(nn(x['annualSavings']))} a year${x['paybackYears'] === null ? ', with no payback' : `, paying back in about ${nn(x['paybackYears'])} years`}.`);
@@ -125,20 +125,20 @@ export function toolAnswer(runs: readonly ToolRun[], context: AdvisorContext): s
       const b = o(x['before']);
       const a = o(x['after']);
       const c = o(x['change']);
-      s.push(`${String(x['test'])}: ${String(x['description'])} The estimated cost goes from ${usd(nn(b['annualCost']))} to ${usd(nn(a['annualCost']))} (${usd(nn(c['annualCost']))}, ${pct(nn(c['annualCostPct']))}); it is a ${String(x['kind'])}.`);
+      s.push(`Here's what a ${String(x['test']).toLowerCase()} would do. ${String(x['description'])} The estimated cost goes from ${usd(nn(b['annualCost']))} to ${usd(nn(a['annualCost']))} (${usd(nn(c['annualCost']))}, ${pct(nn(c['annualCostPct']))}); it is a ${String(x['kind'])}.`);
     } else if (r.name === 'portfolio_overview') {
       const t = o(x['totals']);
       const top = (x['hotels'] as Obj[])[0];
-      s.push(`${String(x['organization'])}'s ${nn(t['hotels'])} hotels spend an estimated ${usd(nn(t['annualCost']))} a year on energy, with about ${usd(nn(t['savingsPotential']))} a year of savings potential.`);
-      if (top) s.push(`${String(top['name'])} is the top priority (${nn(top['priorityScore'])} of 100), saving about ${usd(nn(top['savingsPotential']))} a year.`);
+      s.push(`Across the chain, ${String(x['organization'])}'s ${nn(t['hotels'])} hotels spend an estimated ${usd(nn(t['annualCost']))} a year on energy, with about ${usd(nn(t['savingsPotential']))} a year of savings potential.`);
+      if (top) s.push(`I'd start with ${String(top['name'])}: it's the top priority (${nn(top['priorityScore'])} of 100), saving about ${usd(nn(top['savingsPotential']))} a year.`);
     } else if (r.name === 'portfolio_optimize') {
       const t = o(x['totals']);
-      s.push(`Splitting ${usd(nn(x['budget']))} across the hotels saves about ${usd(nn(t['annualSavings']))} a year for ${usd(nn(t['netInvestment']))} after counted incentives${t['paybackYears'] === null ? '' : `, paying back in about ${nn(t['paybackYears'])} years`}.`);
+      s.push(`If you split ${usd(nn(x['budget']))} across the hotels, you'd save about ${usd(nn(t['annualSavings']))} a year for ${usd(nn(t['netInvestment']))} after counted incentives${t['paybackYears'] === null ? '' : `, paying back in about ${nn(t['paybackYears'])} years`}.`);
       const funded = (x['hotels'] as Obj[]).filter((h) => nn(h['netInvestment']) > 0).slice(0, 3);
       if (funded.length) s.push(`It funds ${funded.map((h) => `${String(h['hotel'])} (${String(h['package'])})`).join('; ')}.`);
     }
   }
-  s.push(context.hotel.syntheticDemo ? 'These are planning estimates for a synthetic demo hotel, not an engineering audit.' : 'These are planning estimates, not an engineering audit or a guarantee of savings.');
+  s.push(context.hotel.syntheticDemo ? 'Keep in mind these are planning estimates for a synthetic demo hotel, not an engineering audit.' : 'Keep in mind these are planning estimates, not an engineering audit or a guarantee of savings.');
   return s.join(' ');
 }
 

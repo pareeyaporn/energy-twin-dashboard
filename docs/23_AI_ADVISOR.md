@@ -157,6 +157,11 @@ question once (tasks 15.10–15.11). Rehearsed answers are then saved and replay
 
 ## 10. Voice (mic in, spoken answers)
 
+**Warmer wording (November 2026).** The AI is told to sound like a friendly, experienced energy advisor (warm, direct, "you" and "your
+hotel", a short natural opening, written to be read aloud), and the offline template answers were reworded the same way ("Good question.
+With occupancy at 85%, your estimated yearly energy cost would go from …", "My top pick is …", "Keep in mind these are planning estimates
+…"). Only the phrasing changed: every number still comes from the engine and passes the same check.
+
 Built at the user's request (November 2026). `src/advisor/voice.ts` (pure helpers, tested) and `src/advisor/VoiceControls.tsx`, placed in
 the Ask box by one line in `AdvisorPanel.tsx` (Lovable-owned, minimal edit).
 
@@ -164,8 +169,12 @@ the Ask box by one line in `AdvisorPanel.tsx` (Lovable-owned, minimal edit).
   Uses the browser's own speech recognition (Chrome and Edge; Safari partly; Firefox none), which needs an internet connection (Chrome sends
   the audio to its speech service). Spoken numbers are normalized for the parser: "85 percent" → "85%", "50,000 dollars" → "$50,000",
   "250 thousand dollars" → "$250,000", "76 degrees" → "76°F".
-- **Spoken answers:** the speaker button (off by default, remembered in the browser) reads each **new** answer aloud with the browser's
-  speech synthesis (works offline). It reads the answer exactly as shown, after the number check, reworded for the ear only (arrows → "to",
+- **Spoken answers:** the speaker button (off by default, remembered in the browser) reads each **new** answer aloud in a **human voice**:
+  OpenAI text-to-speech through the `tts` backend function (`supabase/functions/tts`, model `gpt-4o-mini-tts`, voice `nova`, a warm
+  "friendly energy advisor" delivery; key `OPENAI_API_KEY` in Lovable Cloud secrets only). The function speaks exactly the text it is
+  sent (no generation), is rate-limited and capped at 1,500 characters, and the browser caches the audio per answer, so rehearsed answers
+  replay instantly. If the function is not deployed, has no key, is slow (7 s) or fails, the browser's own speech synthesis reads it
+  instead (works offline). It reads the answer exactly as shown, after the number check, reworded for the ear only (arrows → "to",
   "+$" → "plus $", units spelled out); a Stop button cuts it short. Nothing is read for answers already on screen.
 - **Failures:** blocked mic, no connection or no speech → a one-line note and typing still works; browsers without either API show no
   voice buttons.

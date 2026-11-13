@@ -3,8 +3,8 @@
 // state is copied when the tour starts and put back exactly when it ends, so the user's own hotel, what-if and plans are unchanged.
 import { create } from "zustand";
 import { useTwin } from "@/store/useTwin";
-import { TOUR_STEPS } from "./steps";
-import type { TourView, WorkspaceTab } from "./steps";
+import { tourSteps } from "./steps";
+import type { TourMode, TourView, WorkspaceTab } from "./steps";
 
 // v2 (November 2026): the portfolio-first tour shows once to browsers that finished or skipped the earlier one.
 export const TOUR_STORAGE_KEY = "energy-twin:tour:v2";
@@ -61,6 +61,9 @@ function snapshotApp(): Record<string, unknown> {
 
 export interface TourState {
   active: boolean;
+  /** Quick (8 steps, the default) or full (every feature); chosen on the welcome card or from the top bar. */
+  mode: TourMode;
+  setMode: (mode: TourMode) => void;
   index: number;
   /** +1 moving forward, -1 back; a step whose target is missing is skipped in this direction. */
   direction: 1 | -1;
@@ -68,7 +71,7 @@ export interface TourState {
   origin: TourOrigin | null;
   /** Set when the tour ends; the overlay restores the page and tab (and runs `then`), then clears it. */
   restore: { path: string; tab: WorkspaceTab | null; then?: "optimize" } | null;
-  start: (origin: { path: string; tab: WorkspaceTab | null }) => void;
+  start: (origin: { path: string; tab: WorkspaceTab | null }, mode?: TourMode) => void;
   next: () => void;
   back: () => void;
   /** Move past a step that cannot be shown (its target is missing). */
@@ -85,15 +88,17 @@ export interface TourState {
   clearRestore: () => void;
 }
 
-const last = TOUR_STEPS.length - 1;
+const lastIndex = (mode: TourMode) => tourSteps(mode).length - 1;
 
 export const useTour = create<TourState>((set, get) => ({
   active: false,
+  mode: "quick",
+  setMode: (mode) => set({ mode }),
   index: 0,
   direction: 1,
   origin: null,
   restore: null,
-  start: (origin) => set({ active: true, index: 0, direction: 1, origin: { ...origin, view: currentView(), snapshot: snapshotApp(), focused: false }, restore: null }),
+  start: (origin, mode) => set({ active: true, mode: mode ?? "quick", index: 0, direction: 1, origin: { ...origin, view: currentView(), snapshot: snapshotApp(), focused: false }, restore: null }),
   focusHotel: (propertyId) => {
     const s = get();
     if (!s.active || !s.origin) return;
@@ -106,7 +111,7 @@ export const useTour = create<TourState>((set, get) => ({
   next: () => {
     const s = get();
     if (!s.active) return;
-    if (s.index >= last) s.end("completed");
+    if (s.index >= lastIndex(s.mode)) s.end("completed");
     else set({ index: s.index + 1, direction: 1 });
   },
   back: () => {
@@ -118,7 +123,7 @@ export const useTour = create<TourState>((set, get) => ({
     if (!s.active) return;
     const i = s.index + s.direction;
     if (i < 0) set({ index: 0, direction: 1 });
-    else if (i > last) s.end("completed");
+    else if (i > lastIndex(s.mode)) s.end("completed");
     else set({ index: i });
   },
   end: (outcome, then) => {

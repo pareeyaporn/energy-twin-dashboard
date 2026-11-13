@@ -22,7 +22,7 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { AdvisorMessageExtras } from "@/advisor/AdvisorMessageExtras";
 
 export function AdvisorPanel() {
-  const { messages, busy, step, ask, clear, synthetic } = useTwin(
+  const { messages, busy, step, ask, clear, synthetic, hotelName } = useTwin(
     useShallow((s) => ({
       messages: s.advisorMessages,
       busy: s.advisorBusy,
@@ -30,6 +30,7 @@ export function AdvisorPanel() {
       ask: s.askAdvisor,
       clear: s.clearAdvisor,
       synthetic: selectIsSynthetic(s),
+      hotelName: s.hotel.profile.name,
     })),
   );
   const [question, setQuestion] = useState("");
@@ -44,7 +45,10 @@ export function AdvisorPanel() {
       <header className="flex shrink-0 items-start justify-between gap-2 border-b border-border p-4">
         <div>
           <h2 className="text-base font-semibold">AI advisor</h2>
-          {synthetic && <p className="mt-1 text-xs text-muted-foreground">Synthetic demo data</p>}
+          {/* Sidebar redesign (at the user's request): the context the answers use, in one line (the briefing stays on the Hotel step). */}
+          <p className="mt-0.5 text-xs text-muted-foreground" data-testid="advisor-context">
+            About {hotelName}{synthetic ? " · Synthetic demo data" : ""} · explains the model's results
+          </p>
         </div>
         <Button
           type="button"
@@ -60,7 +64,7 @@ export function AdvisorPanel() {
       <Conversation aria-label="Advisor conversation" className="min-h-0" aria-busy={busy}>
         <ConversationContent className="gap-5">
           {messages.length === 0 && !busy && (
-            <ConversationEmptyState title="Energy Twin advisor" description="" />
+            <ConversationEmptyState title="Energy Twin advisor" description="Ask about costs, upgrades, risks or what-ifs, or pick a suggested question below. Answers explain the model's numbers; they never invent new ones." />
           )}
           {messages.map((message) => (
             <Message key={message.id} from={message.role === "user" ? "user" : "assistant"}>

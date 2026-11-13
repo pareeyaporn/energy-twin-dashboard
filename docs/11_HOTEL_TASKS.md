@@ -506,6 +506,7 @@ decision summary). Each part has its own heading below.
 - [x] 14C.6 [CC] Browser check, desktop 1440×900 and phone 390×844, first visit to finish, no console errors — *done*
 
 - [x] 14C.7 [CC] One story in 19 steps: the portfolio optimizer, the top-priority hotel followed through the hotel steps (state restored
+- [x] 14C.9 [CC] Quick (8 steps) and full (18 steps) tours chosen on the welcome card; new page order (top opportunity, 3D map), briefing in the insights step, a carbon step on the Flow view, details and bills merged into the equipment step, stress tests kept on Scenario, plans merged into the report step, the advisor step shows a tool-computed what-if — *done (November 2026); checked in a browser on desktop and iPhone 13, no step skipped (docs/16)*
       at the end), equipment, zones, build-your-own, the report (the PDF's sections and verdict) and the advisor (an example answer from
       the model's numbers) — *done (November 2026); storage key v2 so it shows once to browsers that saw the earlier tour; docs/16*
 - [x] 14C.8 [CC] Page cleanup (product review): portfolio page decision first (optimizer moved up, 7-column table, detail in "Deeper
@@ -632,6 +633,46 @@ Display only: no engine, data, ranking, optimizer or store change.
 - [ ] 14I.7 **P2** [CC] Later — *a skyline-first establishing view when the hotels' extent forces a low zoom (today the all-hotels view of
       Chicago sits near zoom 11, where the tiles carry few buildings); building hover; the hotel's own footprint highlighted (needs a matched
       OSM building id per hotel, not assumed)*
+
+### 14J Hotel Analysis sidebar redesign (built November 2026; branch `hotel/sidebar-redesign`, layout in docs/10 §9 "Hotel sidebar layout")
+
+Goal: the sidebar beside the twin becomes an action-oriented control center (understand the hotel, see its biggest opportunity, start a
+simulation in 15–20 s), with about half the initial content and no feature removed. No engine, data, store, insight-rule, benchmark,
+calibration, optimizer or advisor-backend change. Lovable-owned files edited at the user's request: `src/app/HotelDashboard.tsx` (tab bar),
+`HotelTab`, `BenchmarkCard`, `HomePanel`, `ScenarioSimulator`, `BudgetOptimizer`, `AdvisorPanel`.
+
+- [x] **Step navigation:** numbered steps, cyan active state, progress line, sticky on tablet/phone; tab names unchanged for the tour.
+- [x] **Hotel overview** (name, city · rooms · floor area, compact annual cost with the exact value in the tooltip, energy intensity,
+  data status from `selectUtilityStatus` + `selectIsSynthetic` in `src/utility/dataStatus.ts`, preset picker, Edit → full profile form).
+- [x] **Concise briefing** (`briefingConciseTemplate`: the template's lead, the top finding's title and the next step; an AI briefing
+  shows its first two sentences, `briefingSummary`); "View full briefing" (closed on load) shows the full text, label and method.
+- [x] **Top opportunities:** top 2 in the engine's order, "View all N insights" / "Show top 2"; compact cards (icon, category · impact,
+  title, one figure, one sentence, the action, ⓘ for the rest of the text and the method, Ask AI icon with the insight's question).
+- [x] **Hotel health** (`HotelHealthCard`): intensity, "+X% vs ENERGY STAR hotel median" from `benchmarkComparison`, data status, caveat;
+  "View benchmarks & sources" opens the full comparison (values, bars, sources, note, a climate/amenity/type caveat).
+- [x] **Hotel profile & data:** collapsed live line, "Manage utility data" in the header (the manager opens even when collapsed); open:
+  profile summary and the utility data section (privacy note in a tooltip). `UtilityDataSection` gained `onManage` and `embedded` props
+  (default behavior unchanged).
+- [x] **Simulate this hotel →** switches to the Scenario step through the same tab state.
+- [x] Consistency pass: Scenario (impact and key controls first, advanced under "More controls"), Invest (spacing), Ask (context line,
+  helpful empty state).
+- [x] Tests `src/test/hotelSidebar.test.tsx`; `insights.test.tsx` and `aiAssistant.test.tsx` now expand before checking hidden content.
+- [ ] Later: the portfolio's Add my hotel dialog still says "under Hotel, Edit details" (the button is now "Edit" in the overview);
+  `src/portfolio/` was out of scope.
+
+**Insight label mapping** (display only, `insightLabel` in `src/insights/EnergyInsights.tsx`; from each insight's `id`, `category` and
+`priority`; the engine's order is kept and nothing is re-ranked). `priority` is the engine's size threshold relative to the bill (docs/13 §14).
+
+| Insight (`id`) | Category shown | Impact label, `priority` high | Impact label, medium | Color |
+| --- | --- | --- | --- | --- |
+| `investment` | Investment opportunity | Large saving | Saving | cyan |
+| `cost_driver` | Cost reduction | Major cost driver | Cost driver | cyan |
+| `intensity` | **Benchmark observation** (engine category: operational efficiency) | Well above benchmark | Above benchmark | cyan |
+| `occupancy` | Operational efficiency | High sensitivity | Moderate sensitivity | cyan |
+| `price`, `weather` | Energy resilience | Significant exposure | Exposure to watch | amber when high, else cyan |
+| `equipment` | Equipment performance | Significant exposure | Exposure to watch | amber when high, else cyan |
+
+"High priority" / "Worth a look" are no longer shown; amber is kept for genuine warnings (a large stress exposure).
 
 ## Phase 15 — AI assistant (CC; built November 2026, docs/23)
 The rule stays: the AI never produces a number. It may ask the engine to compute one, and every number in its text must be in the context

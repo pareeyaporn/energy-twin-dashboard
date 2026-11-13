@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useTwin } from "@/store/useTwin";
 import { selectEnergyInsights, selectPortfolioSummary } from "@/store/hotelDerived";
-import { TOUR_STEPS, bodyOf } from "@/tour/steps";
+import { TOUR_STEPS, bodyOf, tourSteps } from "@/tour/steps";
 import { REPORT_SECTIONS, advisorExample, finishSummary, insightFor, projectionSeries, reportOutline, topPriorityId } from "@/tour/insights";
 import { overlaps, placeCard } from "@/tour/layout";
 import { TOUR_STORAGE_KEY, readTourOutcome, useTour } from "@/tour/useTour";
@@ -50,11 +50,14 @@ describe("tour card placement", () => {
 });
 
 describe("tour steps", () => {
-  it("are 19 short steps: the portfolio first, then one hotel, ending with a clear action", () => {
-    expect(TOUR_STEPS).toHaveLength(19);
+  it("the full tour has 18 short steps and the quick tour 8: the portfolio first, then one hotel, ending with a clear action", () => {
+    expect(TOUR_STEPS).toHaveLength(18);
+    const quick = tourSteps("quick");
+    expect(quick.map((x) => x.id)).toEqual(["welcome", "ranking", "portfolio", "explore", "drivers", "optimizer", "advisor", "finish"]);
+    expect(tourSteps("full")).toBe(TOUR_STEPS);
     expect(TOUR_STEPS.slice(0, 5).every((x) => x.route === "/")).toBe(true);
     expect(TOUR_STEPS.slice(5).every((x) => x.route === "/hotel" && x.focus)).toBe(true);
-    expect(TOUR_STEPS.map((x) => x.id)).toEqual(expect.arrayContaining(["portfolio-optimizer", "explore", "equipment", "insights", "profile", "plans", "report", "advisor", "projections", "optimizer"]));
+    expect(TOUR_STEPS.map((x) => x.id)).toEqual(expect.arrayContaining(["portfolio-optimizer", "explore", "equipment", "insights", "flow", "report", "advisor", "projections", "optimizer", "ranking"]));
     expect(TOUR_STEPS[0]!.id).toBe("welcome");
     expect(TOUR_STEPS.at(-1)!.title).toBe("You're ready to explore!");
     for (const s of TOUR_STEPS) {
@@ -104,10 +107,10 @@ describe("tour views", () => {
     useTwin.getState().setTwinLayer("rooms");
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
-    act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "seasons") }));
+    act(() => useTour.setState({ mode: "full", index: TOUR_STEPS.findIndex((s) => s.id === "seasons") }));
     expect(useTwin.getState().timeMode).toBe("seasons");
     expect(useTwin.getState().playing).toBe(true);
-    act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "drivers") }));
+    act(() => useTour.setState({ mode: "full", index: TOUR_STEPS.findIndex((s) => s.id === "drivers") }));
     expect(useTwin.getState().playing).toBe(false);
     act(() => useTour.getState().end("skipped"));
     expect(useTwin.getState().twinLayer).toBe("rooms");
@@ -162,8 +165,8 @@ describe("one story, one hotel (the top priority), and nothing changed afterward
     expect(o.headline.length).toBeGreaterThan(10);
     const ex = advisorExample(s)!;
     expect(ex.answer).toMatch(/\$/);
-    expect(ex.answer).toMatch(/top choice is/);
-    expect(ex.answer).toMatch(/solar/i);
+    expect(ex.question).toMatch(/85%/);
+    expect(ex.answer).toMatch(/occupancy at 85%/i);
     expect(useTwin.getState().hotelPlan).toBeNull(); // nothing was run or stored
   });
 });
@@ -215,9 +218,12 @@ describe("tour flow", () => {
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
     expect(await screen.findByText("Welcome to Energy Twin")).toBeTruthy();
-    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 19");
+    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 8");
+    expect(screen.getByTestId("tour-full").textContent).toMatch(/Full tour · 18 steps/);
+    expect(screen.getByTestId("tour-next").textContent).toMatch(/Quick tour · 8 steps/);
     expect((await screen.findByTestId("tour-insight")).textContent).toMatch(/a year on energy across/);
-    fireEvent.click(screen.getByTestId("tour-next"));
+    fireEvent.click(screen.getByTestId("tour-full"));
+    expect(useTour.getState().mode).toBe("full");
     expect(useTour.getState().index).toBe(1);
     act(() => useTour.getState().back());
     expect(useTour.getState().index).toBe(0);
@@ -230,6 +236,16 @@ describe("tour flow", () => {
     const after = snap();
     expect(after).toBe(before);
   }, 30000);
+
+  it("Quick tour: the welcome's main button picks the 8-step story and counts it", async () => {
+    pathname = "/";
+    render(<TourButton autoStart={false} />);
+    fireEvent.click(screen.getByTestId("take-tour"));
+    fireEvent.click(await screen.findByTestId("tour-next"));
+    expect(useTour.getState().mode).toBe("quick");
+    expect(useTour.getState().index).toBe(1);
+    await vi.waitFor(() => expect(screen.getByTestId("tour-progress").textContent).toMatch(/of 8$/));
+  });
 
   it("Skip ends the tour, saves the choice and asks to return to the starting page", () => {
     render(<TourButton autoStart={false} />);
@@ -251,7 +267,7 @@ describe("tour flow", () => {
   it("goes to the portfolio page for the portfolio steps", () => {
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
-    act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "portfolio") }));
+    act(() => useTour.setState({ mode: "full", index: TOUR_STEPS.findIndex((s) => s.id === "portfolio") }));
     expect(navigate).toHaveBeenCalledWith({ to: "/" });
   });
 });

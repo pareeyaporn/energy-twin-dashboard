@@ -32,6 +32,7 @@ describe("energy insights in the app", () => {
 
   it("render as cards whose buttons open the feature they name", () => {
     render(<EnergyInsights />);
+    fireEvent.click(screen.getByTestId("insights-toggle")); // the Hotel step shows the top 2; open all
     const cards = screen.getAllByTestId("insight-card");
     expect(cards.length).toBeGreaterThanOrEqual(3);
     const card = (id: string) => cards.find((c) => c.getAttribute("data-insight") === id);
@@ -59,13 +60,14 @@ describe("energy insights in the app", () => {
       expect(navigate).toHaveBeenCalledWith({ to: "/portfolio" });
     }
     // How was this calculated?
-    fireEvent.click(within(cards[0]!).getByText(/How was this calculated/));
+    fireEvent.click(within(cards[0]!).getByTestId("insight-how"));
     expect(within(cards[0]!).getByText(/Estimates|baseline|simulation/i)).toBeTruthy();
   });
 
   it("a hotel above the other hotels' median intensity links to the portfolio comparison", () => {
     get().openProperty("ohare-gateway");
     render(<EnergyInsights />);
+    fireEvent.click(screen.getByTestId("insights-toggle"));
     const card = screen.getAllByTestId("insight-card").find((c) => c.getAttribute("data-insight") === "intensity")!;
     expect(card.textContent).toMatch(/median of the other 4 hotels/);
     fireEvent.click(within(card).getByTestId("insight-action"));

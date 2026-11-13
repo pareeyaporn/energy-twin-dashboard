@@ -1,3 +1,4 @@
+import { AskAbout } from "@/advisor/AskAbout";
 import { ArrowRight, Info, Target } from "lucide-react";
 import type { PropertySummary } from "@/engine/hotel";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export function StartHere({ rows, onExplore, onWhy }: { rows: PropertySummary[];
       </div>
       <div className="flex shrink-0 flex-wrap gap-2">
         <Button size="sm" variant="ghost" onClick={() => onWhy(s.top.id)} data-testid="priority-why"><Info /> Why this ranking?</Button>
+        <AskAbout scope="portfolio" question="Which hotel should we invest in first, and why?" label="Ask AI" className="self-center" />
         <Button size="sm" onClick={() => onExplore(s.top.id)} data-testid="start-here-open">Open {s.top.name} <ArrowRight /></Button>
       </div>
     </section>

@@ -5,6 +5,7 @@ import { useTwin } from "@/store/useTwin";
 import { DefaultEstimate, DefaultEstimateNotice } from "./DefaultEstimate";
 import { BenchmarkCard } from "./BenchmarkCard";
 import { EnergyInsights } from "@/insights/EnergyInsights";
+import { Briefing } from "@/advisor/Briefing";
 import { UtilityDataSection } from "@/utility/UtilityDataSection";
 import { HomePanel } from "./HomePanel";
 import { HotelProfileForm, hvacOptions } from "./HotelProfileForm";
@@ -29,6 +30,7 @@ export function HotelTab() {
     <div className="space-y-5 p-5">
       {/* Claude Code edit (November 2026, page cleanup): what deserves attention comes first; the sample-hotel picker moves down
           (hotels are chosen from the portfolio; the demo script still uses it for the 300-room sample). */}
+      <Briefing />
       <EnergyInsights />
       <dl className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm" aria-label="Hotel summary">
         <div className="mb-2"><DefaultEstimateNotice fields={rows.map((row) => row[2])} /></div>

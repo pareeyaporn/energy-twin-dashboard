@@ -143,7 +143,7 @@ export function explain(id: MetricId, s: TwinState): Explanation {
           })(),
         ],
         sources: [GRID, "EPA GHG Emission Factors Hub 2025 (natural gas: 53.06 kg CO₂ per MMBtu plus CH₄ and N₂O, AR5)"],
-        limits: ["Annual average grid factors, not hourly marginal emissions.", "Estimates, not verified carbon savings.", ...synthLimit],
+        limits: ["Annual average grid factors, not hourly marginal emissions.", "Covers electricity and on-site natural gas (Scope 1 and 2 energy). Not included: refrigerant leaks, district steam, fuel oil, propane, generator diesel, vehicles, power-line losses and supply-chain (Scope 3) emissions.", "Estimates, not verified carbon savings.", ...synthLimit],
       };
     case "intensity":
       return {
@@ -244,7 +244,7 @@ export function explain(id: MetricId, s: TwinState): Explanation {
         how: "For each hotel, electricity use times its grid region's factor plus gas use times the natural-gas factor; the portfolio figure is the sum.",
         inputs: [{ label: "Grid factors", value: "Each hotel's eGRID subregion (by city)", cls: "verified" }],
         sources: [GRID, "EPA GHG Emission Factors Hub 2025 (natural gas)"],
-        limits: ["Annual average factors, not marginal; estimates, not verified carbon accounting."],
+        limits: ["Annual average factors, not marginal; estimates, not verified carbon accounting.", "Covers electricity and on-site natural gas (Scope 1 and 2 energy). Not included: refrigerant leaks, district steam, fuel oil, propane, generator diesel, vehicles, power-line losses and supply-chain (Scope 3) emissions."],
       };
     case "portfolioIntensity":
       return {

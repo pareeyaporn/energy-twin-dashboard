@@ -31,6 +31,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 - `docs/17_PORTFOLIO_MAP_DESIGN.md` — the portfolio city map's design: colors, basemap restyle, markers, overlap handling, card, list, toolbar, legend, mobile, fallback
 - `docs/18_INVESTMENT_REPORT.md` — the investment results and the PDF report: every figure, its engine source, wording and attribution rules
 - `docs/21_CALCULATION_TRANSPARENCY.md` — "How was this calculated?": every explanation, data labels, financial assumptions, limits
+- `docs/24_HOW_IT_WORKS.md` — how the calculation works in plain language: top-down method, what the JSON data files are, what the equipment list does and doesn't change
 - `docs/22_PITCH_AND_QA.md` — the pitch: why it is a wow, seven demo moments, and the questions judges will ask with short answers
 - `docs/23_AI_ADVISOR.md` — the AI assistant: engine tools the AI may call, the protocol, action buttons, follow-ups, briefing, report summary, column mapping, guardrails, privacy
 - `docs/19_UTILITY_DATA.md` — utility data: the Utility Data Manager, Excel template and upload, validation, calibration method and metrics, baseline choice, privacy, limits

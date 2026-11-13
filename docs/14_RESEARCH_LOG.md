@@ -368,6 +368,19 @@ York, Florida or Colorado utility incentive has been researched, so hotels there
 
 Used only in the pitch (docs/22 part 5); no model value changed.
 
+## Pass 13 (November 2026, hotel fuel mix; not used in calculations)
+
+Computed from the EIA CBECS 2018 public microdata (`cbecs2018_final_public.csv`), hotels and resorts only (`PBAPLUS` = 38, n = 272,
+weighted with `FINALWT` = 65,786 buildings). Used in `docs/24` §3 to state what the model covers; no model value changed.
+
+| Value | Figure | Method | Status |
+| --- | --- | --- | --- |
+| Electricity share of major-fuel energy | 57.1% | Σ ELBTU × FINALWT ÷ Σ MFBTU × FINALWT | Verified method |
+| Natural gas share | 39.2% | Σ NGBTU × FINALWT ÷ the same | Verified method |
+| District heat (steam, hot water) share | 2.7% | Σ DHBTU × FINALWT ÷ the same | Verified method |
+| Fuel oil share | 1.0% | Σ FKBTU × FINALWT ÷ the same | Verified method |
+| Hotels using natural gas / fuel oil / propane / district heat / solar | 63.7% / 7.1% / 13.9% / 4.7% / 2.7% | weighted share with `NGUSED`, `FKUSED`, `PRUSED`, `DHUSED`, `SOUSED` = 1 | Verified method; propane is not in MFBTU |
+
 ## Pass 14 (November 2026, refrigerant GWPs)
 
 | Value | Figure | Source | Status |

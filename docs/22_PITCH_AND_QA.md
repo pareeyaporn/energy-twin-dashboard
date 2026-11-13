@@ -1,0 +1,167 @@
+# 22 — Pitch: why Energy Twin is a wow, and the questions judges will ask
+
+For the pitch owner, the slides and Q&A. Every figure below is the app's own output for the **synthetic** demo data (November 2026,
+`DEMO_FIGURES=1 npx vitest run src/test/demoScript.test.ts` prints them; re-run before the demo). Say "estimate" and "synthetic" out loud
+when quoting them. Where an answer needs a fact we do not have (market size, pricing), it says so: fill it in with a sourced figure or leave it
+out, never improvise a number.
+
+---
+
+## Part 1 — Why this is a cool project
+
+### The one-liner
+
+**"See the savings before you spend."** Energy Twin turns an existing hotel into a virtual testing ground: see where the energy money goes,
+test decisions before you make them, and get the upgrades that pay back best for your budget, with a report you can take to the owner.
+
+### The problem in one breath
+
+Hotels run 24/7, occupancy swings the bill, and most owners and general managers have no energy team. Every vendor says their product is the
+answer (solar, smart thermostats, LEDs). Nobody shows them, for *their* building and *their* budget, which one actually pays back, and by how
+much, before they spend.
+
+### Seven wow moments (in demo order)
+
+1. **"Start here."** The portfolio page answers the chain executive's first question in one line: which hotel to invest in first, and why.
+   It is **not** the biggest bill: Lakefront Convention Hotel spends the most ($591,679 a year), but Riverwalk Grand returns more per dollar
+   (priority 100 of 100). That is a real insight, computed, not a ranking by size.
+2. **A living building.** The 3D twin plays a year: snow in January, cooling on July afternoons, guests checking in and out, lit windows that
+   are the rooms with guests in them. Every glow and number is the simulation (a January night needs about 80 kW of heating, a July afternoon
+   102 kW of cooling), not decoration.
+3. **Decisions before you make them.** Occupancy from 60% to 85% (a conference season) adds $12,869 a year, not 42% more: base loads run
+   whether rooms are full or not. Smart room controls then claw back only $1,014, because at 85% few rooms are empty. That is the kind of
+   counter-intuitive answer an operator needs before buying.
+4. **The optimizer tests every combination.** 256 combinations of upgrades on that scenario, 10 fit the $50,000 budget and the comfort limit.
+   The best: LED lighting plus occupancy sensors, $38,940 installed, saving $10,302 a year, paying back in 3.8 years, $73,209 net over 10
+   years, 27 t of CO₂ a year. Solar on the full roof costs $159,500 and takes 18.5 years here, so it is **not** recommended, and the app says
+   why.
+5. **Honest money.** ComEd's 2025 lighting incentive would cut the net cost to $24,184 (2.3-year payback), but the 2026 rate is not
+   confirmed, so it is shown **separately as illustrative** and never counted. The app refuses to make a plan look better than the evidence
+   allows. Plans that do not pay back are called "not financially attractive".
+6. **Your real bills, your real building.** Upload 12 months of utility bills (or edit the sample spreadsheet live) and the model calibrates to
+   them, electricity and gas separately, with ASHRAE Guideline 14 fit metrics (NMBE, CV(RMSE)). Correct the equipment you actually have
+   (a 95% boiler instead of the 80% assumed) and the baseline follows, never counted as a saving.
+7. **A report you can take to the owner.** One click on Reports: a multi-page PDF with the recommendation, before and after, the investment,
+   the 10-year cash flow, every assumption, the sources and the risks, labeled as estimates.
+
+### Why it is different
+
+| Others | Energy Twin |
+| --- | --- |
+| Benchmarking (ENERGY STAR Portfolio Manager) tells you how you did last year | Simulates what happens **next** and ranks what to buy within a budget |
+| Net-zero design tools (for example Eden) design **new** homes | Works on **existing** commercial buildings, operations **and** investments |
+| Vendor calculators sell one product | Compares every upgrade and combination on the same assumptions, and says when the answer is "don't" |
+| Generic AI chatbots invent numbers | The engine computes every number; the AI only explains, and the app **rejects** any answer with a number not in the results |
+
+### What makes it credible (say this; judges reward it)
+
+- **Every number is sourced or labeled.** EIA prices, NOAA weather normals, NREL ComStock hotel energy, EPA eGRID grid emissions, NREL
+  PVWatts solar, the Illinois technical reference manual for upgrade savings, ComEd's own incentive worksheets. Each figure has a "How was
+  this calculated?" with its inputs labeled: published source, your input, modeled estimate, synthetic, assumption.
+- **No invented precision.** Ranges (low to high) where they are defensible; no confidence scores; "estimates, not an engineering audit"
+  everywhere.
+- **Validated where it can be.** Smart room controls savings sit inside the Illinois rulebook's deemed range for a Chicago hotel; whole-hotel
+  and lighting savings agree with published hotel case studies (docs/14).
+- **Built to be checked.** 552 automated tests; a test fails if any figure in the demo script stops matching the engine.
+
+### Built in 48 hours
+
+Lovable for the interface, Claude Code for the engine, data, 3D twin, optimizer, reports and tests, synced through GitHub. Sourced data for four
+cities, a deterministic simulation (same input, same output), an exact optimizer, a 3D digital twin, a portfolio map across four cities,
+a utility-bill calibration, an editable equipment inventory, a PDF report, an AI advisor with number checking and a 19-step guided tour.
+
+### The 20-second close
+
+"Hotels make investment decisions on vendor promises. Energy Twin lets them see the savings before they spend: for one building or a whole
+chain, with honest numbers, their own bills, and a report they can take to the owner. Simulate smarter. Spend better. Save energy."
+
+---
+
+## Part 2 — Questions judges will ask (and short answers)
+
+Owner column: **P** = pitch lead, **E** = engine lead, **T** = tech lead. Keep answers under 20 seconds; offer to show it in the app.
+
+### The product and the user
+
+| # | Question | Owner | Answer |
+| --- | --- | --- | --- |
+| 1 | Who is the user? | P | Hotel general managers and chief engineers for one building; owners, asset managers and chain executives for the portfolio. The homepage is the portfolio; one click opens a hotel. |
+| 2 | Why hotels first? | P | They run 24/7, occupancy swings the bill, they are numerous and similar enough to model, and most have no energy team. The engine is built for commercial buildings; hotels are the first type. |
+| 3 | What does the operator actually do with it? | P | Find where the money goes, test a change (occupancy, temperatures, schedules, prices, a heat wave), pick upgrades for a budget, and download a report for the owner or the bank. |
+| 4 | Isn't this just a dashboard? | P | No: a dashboard shows last month. This simulates what happens if you change something and optimizes what to buy. Show the occupancy what-if and the optimizer. |
+| 5 | How is this different from ENERGY STAR Portfolio Manager? | P | Portfolio Manager benchmarks past performance. We simulate the future and rank investments within a budget; we use ENERGY STAR's hotel median only as a comparison. |
+| 6 | How is it different from Eden (or other winners)? | P | Eden designs new net-zero homes for architects. We work on existing commercial buildings, their day-to-day operations and their investments. |
+| 7 | Does it work for a chain? | P | Yes: the portfolio page totals every hotel, ranks them by return per dollar, and splits one budget across them (the portfolio optimizer). Show "Start here" and "Split one budget". |
+
+### Accuracy and data
+
+| # | Question | Owner | Answer |
+| --- | --- | --- | --- |
+| 8 | How accurate is it? | E | Planning-grade estimates from published data, shown as ranges and labeled; not an engineering audit. With 12 months of bills it calibrates to them and reports the fit with ASHRAE Guideline 14 metrics. |
+| 9 | Is the data real? | E | The hotels are synthetic demonstration properties (labeled everywhere). The inputs are real and sourced: EIA prices, NOAA weather, NREL ComStock, EPA eGRID, PVWatts, the Illinois TRM, ComEd worksheets. Every figure has "How was this calculated?". |
+| 10 | Have you validated it? | E | Against published hotel case studies (whole-hotel and lighting savings agree) and the Illinois rulebook's deemed savings for guest-room controls (inside its range). Field studies in milder climates report more for that measure; we report it rather than tune it (docs/14). |
+| 11 | What if my building is different from your defaults? | E | Edit the profile, correct the equipment (boiler efficiency, chiller, LED share, existing solar), and upload your bills. The baseline follows; corrections are never counted as savings. |
+| 12 | Why is the hotel's intensity 37% above the ENERGY STAR median? | E | Chicago's cold climate and a restaurant raise it; the median is national. It is context, not a rating. |
+| 13 | Which cities do you support? | E | Chicago, New York, Miami and Denver with sourced weather, prices and grid data. Savings parameters still come from the Illinois rulebook, and incentives only apply in ComEd's territory. |
+| 14 | Do you model demand charges or time-of-use tariffs? | E | Not yet: all-in average prices from EIA. Tariffs are on the roadmap. |
+
+### The money
+
+| # | Question | Owner | Answer |
+| --- | --- | --- | --- |
+| 15 | Why isn't solar recommended? | E | For this hotel the full roof costs $159,500 and pays back in about 18.5 years; the optimizer finds better uses of $50,000. It says so instead of hiding it. Show "Compare all upgrades". |
+| 16 | Are incentives included? | E | Only confirmed ones for the analysis year (2026): ComEd's guest-room controls incentive counts. ComEd's 2025 lighting rate is shown separately as illustrative until the 2026 rate is confirmed. Funds are limited and never guaranteed. |
+| 17 | What discount rate do you use? | E | 8% by default for commercial investments (a team choice, editable; 3% as an alternative). Energy prices grow with the EIA Annual Energy Outlook 2026. Every payback, NPV and net benefit recalculates. |
+| 18 | Why is LED + sensors the best package? | E | It saves $10,302 a year for $38,940 on the 85% scenario: lighting runs 24/7 in a hotel and sensors cut corridor and lobby hours. The comparison shows every upgrade on the same assumptions. |
+| 19 | Do upgrades double-count savings? | E | No. Upgrades are applied in sequence in one simulation (LED lighting adds a little heating, for example), so the package saving is the real combined effect, and the per-upgrade contributions add up to it. |
+| 20 | What if a plan is a bad investment? | E | The app says "not financially attractive" when it never pays back, pays back after the equipment wears out, or has a negative 10-year NPV. We never present every plan as a good one. |
+
+### The AI
+
+| # | Question | Owner | Answer |
+| --- | --- | --- | --- |
+| 21 | Where is the AI? | T | Two places: the advisor explains the results in plain English, and the engine's optimizer does the deciding (an exact search, not a language model). The AI never produces a number. |
+| 22 | Can the AI hallucinate a saving? | T | The app checks every number in the answer against the computed results and rejects the answer if one does not match, falling back to a template answer built from the model's numbers. Show the advisor. |
+| 23 | Which model, and what does it cost to run? | T | Claude, called from a backend function; one short call per question, cached for repeated questions. The engine runs in the browser, so simulations and the optimizer cost nothing per use. |
+| 24 | Why not let the AI do the optimization? | T | Money decisions need reproducible, auditable numbers. A deterministic engine gives the same answer every time and can be tested (552 tests); the AI is best at explaining it. |
+
+### Technical
+
+| # | Question | Owner | Answer |
+| --- | --- | --- | --- |
+| 25 | How does the simulation work? | E | Benchmark energy by climate (NREL ComStock) split by zone, end use and month, driven by occupancy, weather (NOAA normals), schedules and setpoints; upgrades rescale the affected loads. Equations in docs/13. |
+| 26 | How does the optimizer work? | E | It tests every combination of eligible upgrades for the hotel (256 on the demo scenario) against the budget and a comfort limit, and ranks them by your objective. For a chain, an exact search splits one budget across hotels. |
+| 27 | Is the 3D twin real data or decoration? | T | Every color, glowing window and readout comes from the simulation for that hour; scenery (trees, cars) is visual only. It falls back to 2D on weak hardware. |
+| 28 | Does it work offline / on a phone? | T | The engine runs in the browser, so everything except a live AI answer works offline after loading; saved answers replay. Layouts work on phones. |
+| 29 | Where is my data stored? | T | In this version, in the browser only (utility bills, equipment, plans); nothing is sent to our servers or to the AI. Accounts and a database are on the roadmap. |
+| 30 | How did you build it in 48 hours? | T | Lovable for the interface, Claude Code for the engine, data, 3D twin and tests, synced through GitHub with short branches and pull requests. |
+
+### Business and next steps
+
+| # | Question | Owner | Answer |
+| --- | --- | --- | --- |
+| 31 | Who pays? | P | Team decision: fill in (for example a per-property subscription for owners and chains, or a tool for energy consultants and utilities). Do not quote prices we have not set. |
+| 32 | How big is the market? | P | Fill in with a sourced figure (number of US hotels and their energy spend, from a named source), or skip; never estimate on stage. |
+| 33 | What's next? | P | Real buildings with real bills, tariffs and demand charges, accounts and roles, more cities with local incentives, then other building types (resorts, convention centers, offices). |
+| 34 | Could a utility use this? | P | Yes: it already applies a utility's own incentive rules by program year and territory; a utility could use it to target customers and explain programs. |
+| 35 | What's the biggest weakness? | E | Honest answer: savings parameters come from the Illinois rulebook for every city, some installed costs are still assumptions, and bills are compared with normal-year weather. Each is labeled in the app and listed in docs/08 and docs/13. |
+
+### Tough or skeptical questions
+
+| # | Question | Owner | Answer |
+| --- | --- | --- | --- |
+| 36 | Why should I trust your numbers over a vendor's? | E | Because we show the work: every input, source and assumption, the same assumptions for every option, and we say when the answer is "don't buy it". |
+| 37 | Your smart thermostat savings look low. | E | They match Illinois' deemed savings for a Chicago hotel. Field studies elsewhere report more, mainly in milder climates and against guests leaving units at extreme settings. We report it rather than tune it. |
+| 38 | Isn't a 3.8-year payback too good to be true? | E | It is an estimate for a synthetic hotel, from published lighting savings and costs; real quotes and an audit come next. With the 2025 lighting incentive it would be 2.3 years, which we deliberately do not count. |
+| 39 | What happens with a building you can't model? | E | The app labels what it does not know: unsupported equipment is informational, unknown replacements say "needs more information", and building types we do not simulate are not offered. |
+| 40 | What did you cut? | P | Accounts, tariffs, weather-normalized bills and more building types. We chose depth and honesty over breadth. |
+
+---
+
+## Part 3 — Lines to have ready
+
+- "Every number on this screen comes from the engine. The AI explains them; it can't invent them."
+- "It's not the biggest bill that should get the money first; it's the best return per dollar."
+- "We'd rather tell you not to buy solar than sell you an 18-year payback."
+- "This is synthetic data with real sources. Give it your bills and it calibrates to your building."
+- "See the savings before you spend."

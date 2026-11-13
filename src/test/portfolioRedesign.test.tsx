@@ -173,6 +173,12 @@ describe("portfolio page redesign", () => {
     expect(screen.getByTestId("portfolio-plan-kpis").textContent).toContain(compactUsd(get().portfolioPlan!.totals.annualSavings));
   });
 
+  it("the header button and the planner's run button have different labels", () => {
+    render(<PortfolioPage />);
+    expect(screen.getAllByRole("button", { name: /Optimize portfolio/ })).toHaveLength(1);
+    expect(screen.getByTestId("run-portfolio").textContent).toMatch(/Find the best split/);
+  });
+
   it("Optimize portfolio in the header scrolls to the optimizer, without animation when effects are reduced", () => {
     const spy = vi.fn();
     Element.prototype.scrollIntoView = spy;

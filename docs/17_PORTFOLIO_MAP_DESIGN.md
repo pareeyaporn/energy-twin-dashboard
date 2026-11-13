@@ -281,7 +281,7 @@ are spaced evenly (48–64 px), headings larger, cyan only for primary actions, 
 
 1. **Overview.** Tagline, "Your Hotel Portfolio", the subtitle "See where energy costs are highest, discover savings opportunities, and invest
    smarter.", a context line (organization · hotels · city, the cities or "N cities") and the synthetic label as a small pill. Actions: Ask AI
-   (ghost, the portfolio chat), Add hotel (outline), **Optimize portfolio** (primary, scrolls to the optimizer). Organization (and City for a
+   (ghost, the portfolio chat), Add hotel (outline), **Optimize portfolio** (primary, scrolls to the optimizer). The planner's run button is **Find the best split**, so the two buttons never share a label. Organization (and City for a
    multi-city organization) stay visible; Brand, Region and Ownership sit in "Filters (n)" (a popover, a collapsible on phones) with chips (×)
    and Reset filters; "Showing X of Y hotels" on the right. Four KPI cards (`PortfolioKpis.tsx`): annual energy spend, potential annual savings
    (slightly highlighted, with savings ÷ spend and a thin bar), annual carbon emissions, properties; compact values (`format.ts`), the exact value

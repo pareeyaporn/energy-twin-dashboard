@@ -75,7 +75,7 @@ export function PortfolioOptimizer({ onExplore, onEdit }: { onExplore: (id: stri
           </label>
           <Button onClick={() => void run()} disabled={busy} className="sm:ml-auto" data-testid="run-portfolio">
             {busy ? <Loader2 className="animate-spin motion-reduce:animate-none" /> : <Sparkles />}
-            {busy ? "Testing combinations…" : "Optimize portfolio"}
+            {busy ? "Testing combinations…" : "Find the best split"}
           </Button>
         </div>
 
@@ -103,7 +103,7 @@ function AiPortfolio({ onExplore }: { onExplore: (id: string) => void }) {
       <div className="rounded-xl border border-dashed border-glass-border px-5 py-10 text-center" data-testid="portfolio-plan-empty">
         <Sparkles className="mx-auto size-5 text-primary" aria-hidden />
         <p className="mt-3 text-sm font-medium">{busy ? "Testing every combination across your hotels…" : "Set your budget to discover the best investment opportunities across your hotels."}</p>
-        <p className="mt-1 text-xs text-muted-foreground">Then press Optimize portfolio. The engine picks at most one upgrade package per hotel within the budget.</p>
+        <p className="mt-1 text-xs text-muted-foreground">Then press Find the best split. The engine picks at most one upgrade package per hotel within the budget.</p>
         <OptimizerMethod />
       </div>
     );

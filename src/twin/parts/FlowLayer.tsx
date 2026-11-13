@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { energyFlows, energyFlowsAt } from "@/engine/hotel";
+import { useEffect, useMemo, useState } from "react";
+import { energyFlows, energyFlowsAt, hotelData, refrigerantEmissions } from "@/engine/hotel";
 import type { FlowGraph, FlowLink } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
 import { selectCompare } from "@/store/hotelDerived";
@@ -8,8 +8,8 @@ import { useTweened } from "../useTweened";
 import { flowBands, pathKeys, sankeyLayout } from "./sankey";
 import type { FlowMetric, Fuel, PlacedBand } from "./sankey";
 
-const FUEL_COLOR: Record<Fuel, string> = { elec: "var(--primary)", gas: "var(--heat)" };
-const FUEL_LABEL: Record<Fuel, string> = { elec: "Electricity", gas: "Natural gas" };
+const FUEL_COLOR: Record<Fuel, string> = { elec: "var(--primary)", gas: "var(--heat)", refrigerant: "#a78bfa" };
+const FUEL_LABEL: Record<Fuel, string> = { elec: "Electricity", gas: "Natural gas", refrigerant: "Refrigerant leaks" };
 const NODE_COLOR = { source: "", zone: "var(--efficient)", category: "var(--muted-foreground)" } as const;
 
 type Period = "year" | "hour";
@@ -17,6 +17,11 @@ type Period = "year" | "hour";
 const kwh = (n: number) => `${Math.round(n).toLocaleString("en-US")} kWh`;
 const therms = (n: number) => `${Math.round(n).toLocaleString("en-US")} therms`;
 const money = (n: number, period: Period) => (period === "year" ? `${usd(n)} / yr` : `$${n < 10 ? n.toFixed(2) : Math.round(n).toLocaleString("en-US")} / h`);
+const carbon = (kg: number, period: Period) =>
+  period === "year"
+    ? `${(kg / 1000).toLocaleString("en-US", { maximumFractionDigits: kg < 10000 ? 1 : 0 })} t CO₂e / yr`
+    : `${kg.toLocaleString("en-US", { maximumFractionDigits: kg < 10 ? 1 : 0 })} kg CO₂e / h`;
+const METRIC_NAME: Record<FlowMetric, string> = { cost: "cost", energy: "site energy", carbon: "carbon" };
 const energy = (kbtu: number, period: Period) =>
   period === "year" ? `${(kbtu / 1000).toLocaleString("en-US", { maximumFractionDigits: 0 })} MMBtu / yr` : `${(kbtu / 3.412).toLocaleString("en-US", { maximumFractionDigits: 1 })} kW-equiv.`;
 
@@ -39,8 +44,8 @@ function Toggle<T extends string>({ label, value, options, onChange }: { label: 
 }
 
 /**
- * Where the energy and money go: grid and gas → zones → uses, as an animated Sankey. Band width is the chosen metric (cost or site
- * energy) for the year or for the clock's hour; electricity is cyan and gas amber. Every value comes from the engine's flow graph.
+ * Where the energy, money and carbon go: grid and gas → zones → uses, as an animated Sankey. Band width is the chosen metric (cost, site
+ * energy or carbon) for the year or for the clock's hour; electricity is cyan and gas amber. Every value comes from the engine's flow graph.
  */
 export function FlowLayer() {
   const compare = useTwin(selectCompare);
@@ -55,7 +60,17 @@ export function FlowLayer() {
   const [selected, setSelected] = useState<string | null>(null);
 
   const result = mode === "before" ? compare.before : compare.after;
-  const graph: FlowGraph = useMemo(() => (period === "year" ? energyFlows(result) : energyFlowsAt(result, month, hour)), [result, period, month, hour]);
+  const profile = useTwin((s) => s.hotel.profile);
+  const hydrateEquipment = useTwin((s) => s.hydrateEquipment);
+  // Saved equipment (with any refrigerant records) loads on first use, as in the Equipment tab.
+  useEffect(() => hydrateEquipment(), [hydrateEquipment]);
+  // Entered refrigerant leaks: carbon only, shown in the Carbon view (they carry no energy or cost).
+  const leaks = useMemo(() => refrigerantEmissions(profile).leaks, [profile]);
+  const graph: FlowGraph = useMemo(
+    () => (period === "year" ? energyFlows(result, leaks) : energyFlowsAt(result, month, hour, hotelData, leaks)),
+    [result, period, month, hour, leaks],
+  );
+  const refrigerantKg = useMemo(() => graph.links.filter((l) => l.source === "refrigerant").reduce((a, l) => a + l.refrigerantCarbonKg, 0), [graph]);
   const bands = useMemo(() => flowBands(graph, metric), [graph, metric]);
   const target = useMemo(() => Object.fromEntries(bands.map((b) => [b.key, b.value])), [bands]);
   const eased = useTweened(target, reduce);
@@ -76,7 +91,7 @@ export function FlowLayer() {
   const label = (id: string) => graph.nodes.find((n) => n.id === id)?.label ?? id;
   const lit = pathKeys(bands, hover ?? selected);
   const active = lit.size > 0;
-  const fmt = (v: number) => (metric === "cost" ? money(v, period) : energy(v, period));
+  const fmt = (v: number) => (metric === "cost" ? money(v, period) : metric === "carbon" ? carbon(v, period) : energy(v, period));
   const animate = !reduce;
   const dur = `${(1.6 / Math.max(0.5, speed)).toFixed(2)}s`;
   const sel = layout.bands.find((b) => b.key === selected);
@@ -92,11 +107,14 @@ export function FlowLayer() {
         .twin-band { transition: stroke-opacity 180ms ease; }
       `}</style>
       <div className="flex flex-wrap items-center gap-2">
-        <Toggle label="Width shows" value={metric} onChange={setMetric} options={[{ id: "cost", label: "Cost" }, { id: "energy", label: "Energy" }]} />
+        <Toggle label="Width shows" value={metric} onChange={setMetric} options={[{ id: "cost", label: "Cost" }, { id: "energy", label: "Energy" }, { id: "carbon", label: "Carbon" }]} />
         <Toggle label="Period" value={period} onChange={setPeriod} options={[{ id: "year", label: "Annual" }, { id: "hour", label: "This hour" }]} />
         <span className="ml-auto flex items-center gap-3 text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1.5"><span aria-hidden className="h-2 w-4 rounded-full" style={{ background: FUEL_COLOR.elec }} /> Electricity</span>
           <span className="flex items-center gap-1.5"><span aria-hidden className="h-2 w-4 rounded-full" style={{ background: FUEL_COLOR.gas }} /> Natural gas</span>
+          {metric === "carbon" && refrigerantKg > 0 && (
+            <span className="flex items-center gap-1.5"><span aria-hidden className="h-2 w-4 rounded-full" style={{ background: FUEL_COLOR.refrigerant }} /> Refrigerant leaks</span>
+          )}
           {mode === "before" && <span className="rounded-full border border-glass-border px-1.5">Before</span>}
         </span>
       </div>
@@ -106,7 +124,7 @@ export function FlowLayer() {
         viewBox={`0 0 ${layout.width} ${layout.height}`}
         className="h-auto w-full min-w-[620px] md:min-w-0"
         role="img"
-        aria-label={`Energy flow, ${metric === "cost" ? "cost" : "site energy"}, ${period === "year" ? "annual" : `${monthLabel(month)} ${hourLabel(hour)}`}. Details in the table below.`}
+        aria-label={`Energy flow, ${METRIC_NAME[metric]}, ${period === "year" ? "annual" : `${monthLabel(month)} ${hourLabel(hour)}`}. Details in the table below.`}
         onMouseLeave={() => setHover(null)}
         data-testid="flow-sankey"
       >
@@ -162,7 +180,7 @@ export function FlowLayer() {
           </g>
         )}
         {layout.nodes.map((n) => {
-          const fill = n.kind === "source" ? FUEL_COLOR[n.id === "gas" ? "gas" : "elec"] : NODE_COLOR[n.kind];
+          const fill = n.kind === "source" ? FUEL_COLOR[n.id === "gas" ? "gas" : n.id === "refrigerant" ? "refrigerant" : "elec"] : NODE_COLOR[n.kind];
           const dim = active && ![...lit].some((k) => k.startsWith(`${n.id}>`) || k.includes(`>${n.id}:`));
           return (
             <g key={n.id} opacity={dim ? 0.35 : 1} onMouseEnter={() => setHover(n.id)} className="cursor-default transition-opacity">
@@ -185,10 +203,11 @@ export function FlowLayer() {
             </div>
             <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setSelected(null)}>Close</button>
           </div>
-          <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-4">
-            <div><dt className="text-muted-foreground">Energy</dt><dd className="tabular-nums">{sel.fuel === "elec" ? kwh(selLink.elecKWh) : therms(selLink.gasTherms)}{period === "hour" ? " this hour" : " / yr"}</dd></div>
-            <div><dt className="text-muted-foreground">Cost</dt><dd className="tabular-nums">{money(sel.fuel === "elec" ? selLink.elecCostUsd : selLink.gasCostUsd, period)}</dd></div>
-            <div><dt className="text-muted-foreground">Share of total</dt><dd className="tabular-nums">{total > 0 ? `${((sel.value / total) * 100).toFixed(1)}%` : "—"} <span className="text-muted-foreground">({metric === "cost" ? "of cost" : "of energy"})</span></dd></div>
+          <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-5">
+            <div><dt className="text-muted-foreground">Energy</dt><dd className="tabular-nums">{sel.fuel === "refrigerant" ? "None (leaked gas)" : <>{sel.fuel === "elec" ? kwh(selLink.elecKWh) : therms(selLink.gasTherms)}{period === "hour" ? " this hour" : " / yr"}</>}</dd></div>
+            <div><dt className="text-muted-foreground">Cost</dt><dd className="tabular-nums">{sel.fuel === "refrigerant" ? "Not priced" : money(sel.fuel === "elec" ? selLink.elecCostUsd : selLink.gasCostUsd, period)}</dd></div>
+            <div><dt className="text-muted-foreground">Carbon</dt><dd className="tabular-nums">{carbon(sel.fuel === "elec" ? selLink.elecCarbonKg : sel.fuel === "gas" ? selLink.gasCarbonKg : selLink.refrigerantCarbonKg, period)}</dd></div>
+            <div><dt className="text-muted-foreground">Share of total</dt><dd className="tabular-nums">{total > 0 ? `${((sel.value / total) * 100).toFixed(1)}%` : "—"} <span className="text-muted-foreground">(of {METRIC_NAME[metric]})</span></dd></div>
             <div><dt className="text-muted-foreground">Whole link</dt><dd className="tabular-nums">{money(selLink.costUsd, period)}</dd></div>
           </dl>
           <p className="mt-1.5 text-[11px] text-muted-foreground">Modeled estimate.</p>
@@ -197,7 +216,7 @@ export function FlowLayer() {
 
       <table className="sr-only" aria-label="Energy cost flows">
         <thead>
-          <tr><th>From</th><th>To</th><th>Electricity</th><th>Gas</th><th>Cost</th></tr>
+          <tr><th>From</th><th>To</th><th>Electricity</th><th>Gas</th><th>Cost</th><th>Carbon</th></tr>
         </thead>
         <tbody>
           {graph.links.map((l) => (
@@ -207,14 +226,19 @@ export function FlowLayer() {
               <td>{kwh(l.elecKWh)}</td>
               <td>{therms(l.gasTherms)}</td>
               <td>{money(l.costUsd, period)}</td>
+              <td>{carbon(l.carbonKg, period)}</td>
             </tr>
           ))}
         </tbody>
       </table>
       <p className="text-xs text-muted-foreground" data-testid="flow-caption">
         {period === "year"
-          ? `Annual ${metric === "cost" ? "cost" : "site energy"}, modeled estimate. Band width is ${metric === "cost" ? "dollars" : "energy"} per year; the moving dots are illustrative, not real-time flow.`
+          ? `Annual ${METRIC_NAME[metric]}, modeled estimate. Band width is ${metric === "cost" ? "dollars" : metric === "carbon" ? "tonnes of CO₂e (energy × EPA emission factors)" : "energy"} per year; the moving dots are illustrative, not real-time flow.`
           : `A typical ${monthLabel(month)} day at ${hourLabel(hour)}, modeled from the monthly totals (follows the twin's clock). Not real-time monitoring.`}{" "}
+        {metric === "carbon" &&
+          (refrigerantKg > 0
+            ? `Includes ${carbon(refrigerantKg, period)} from refrigerant top-ups you entered in Equipment (reported next to the energy carbon, not in it). `
+            : "Energy carbon only: add refrigerant top-ups from service records in Equipment to include leaks. ")}
         Hover a band to follow its path; click it for details.
       </p>
     </div>

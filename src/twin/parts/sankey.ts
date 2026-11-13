@@ -2,8 +2,8 @@
 // Pure geometry: it only places the values it is given (from the engine's flow graph); it computes no energy or money.
 import type { FlowGraph, FlowNode } from "@/engine/hotel";
 
-export type FlowMetric = "cost" | "energy";
-export type Fuel = "elec" | "gas";
+export type FlowMetric = "cost" | "energy" | "carbon";
+export type Fuel = "elec" | "gas" | "refrigerant";
 
 export interface Band {
   key: string;
@@ -46,10 +46,12 @@ const COLUMN: Record<FlowNode["kind"], number> = { source: 0, zone: 1, category:
 export function flowBands(graph: FlowGraph, metric: FlowMetric): Band[] {
   const out: Band[] = [];
   for (const l of graph.links) {
-    const elec = metric === "cost" ? l.elecCostUsd : l.elecKBtu;
-    const gas = metric === "cost" ? l.gasCostUsd : l.gasKBtu;
+    const elec = metric === "cost" ? l.elecCostUsd : metric === "carbon" ? l.elecCarbonKg : l.elecKBtu;
+    const gas = metric === "cost" ? l.gasCostUsd : metric === "carbon" ? l.gasCarbonKg : l.gasKBtu;
     if (elec > 0) out.push({ key: `${l.source}>${l.target}:elec`, source: l.source, target: l.target, fuel: "elec", value: elec });
     if (gas > 0) out.push({ key: `${l.source}>${l.target}:gas`, source: l.source, target: l.target, fuel: "gas", value: gas });
+    if (metric === "carbon" && l.refrigerantCarbonKg > 0)
+      out.push({ key: `${l.source}>${l.target}:refrigerant`, source: l.source, target: l.target, fuel: "refrigerant", value: l.refrigerantCarbonKg });
   }
   return out;
 }

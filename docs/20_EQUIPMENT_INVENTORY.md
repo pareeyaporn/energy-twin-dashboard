@@ -81,6 +81,14 @@ otherwise the baseline is exactly the estimated one (tested).
 public-area air handling schedule edits `commonAreaHvacHours`; "smart guest-room controls already installed" on the room HVAC card edits
 `smartRoomControls`. One value, used everywhere. (HVAC system type stays in the hotel profile.)
 
+**Refrigerant (carbon only, never energy):** cooling equipment (chillers, rooftop units, room units, VRF) and the kitchen's cold
+storage can record a refrigerant and the **pounds added in a year** from service records. Carbon = pounds × 0.45359 × the refrigerant's
+100-year GWP (EPA GHG Emission Factors Hub 2025, Tables 11–12: R-410A 1,924, R-407C 1,624, R-134a 1,300, R-32 677, R-404A 3,943,
+R-507A 3,985); EPA's simplified material balance treats what was added as what leaked. R-22 (HCFC-22) is recorded but not counted
+(ozone-depleting, outside EPA's GHG inventory scope). Nothing is assumed when blank. The leaks appear in the Flow tab's **Carbon** view as a
+third source and in the carbon "How was this calculated?" panel, **reported next to the energy carbon, not inside it**; they change no
+energy, cost, savings or package ranking (`src/engine/hotel/refrigerant.ts`, `holdsRefrigerant`, tests in `__tests__/refrigerant.test.ts`).
+
 **Informational (shown, labeled, never change consumption):** quantities, nameplate capacities (except below), ages, notes, schedules
 without a modeled setting, kitchen, laundry, elevators, plug loads, storage, pumps, fan coils, and added equipment without a lever
 (adding a dishwasher does not add consumption). A heat-pump water heater can be recorded but is **not modeled**: it changes the fuel, which

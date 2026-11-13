@@ -587,6 +587,26 @@ operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" br
 - [ ] 14G.9 P2 [CC] Heat-pump water heaters and fuel switching; per-appliance demand; hourly solar self-consumption for existing arrays;
       multi-step undo; persisting card-edited schedules for sample hotels
 
+### 14H 3D portfolio map (`src/portfolio/camera3d.ts`, `buildings3d.ts`; branch `portfolio/map-3d`; design in docs/17 "3D mode")
+- [x] 14H.1 **P1** [CC] Real 3D buildings from the basemap's own tiles (Carto dark-matter, Protomaps schema, OpenStreetMap footprints and
+      heights; no key, no extra source) in navy with soft light — *done: height `render_height` → `height` → floors × 3 m → a 6 m block drawn
+      dimmer; attribution and the note under the map say heights are approximate*
+- [x] 14H.2 **P1** [CC] Camera: tilted default (pitch 55°, bearing −25° in one city) framing every hotel with a pitch-aware fit
+      (`fitPitchedCamera`); rotate and tilt in 3D; Show all hotels flies back; a picked hotel flies to zoom 15; card-aware fit padding — *done*
+- [x] 14H.3 **P1** [CC] 2D / 3D toggle (local storage, 3D by default) and the fallback chain: no buildings → flat street map; no WebGL, tiles
+      failing or a lost WebGL context → the drawn map — *done; filters, metrics, ranking, selection sync, overlap fan-out, view kept across a
+      hotel visit and the tour's map step unchanged (no store change)*
+- [x] 14H.4 **P2** [CC] Animated markers (slow halo pulse, selected: brighter halo, ring and a light beam in 3D), card fade-in, calm with
+      Reduce effects or `prefers-reduced-motion` — *done*
+- [x] 14H.5 **P3** [CC] Optional data columns (off by default), heights strictly proportional to the store's values, scale in the legend;
+      faint sky and fog — *done*
+- [x] 14H.6 [CC] Tests and browser check — *done: `src/test/portfolioMap3d.test.tsx`; Playwright at 1440 × 900, iPhone 13 and with reduced
+      motion (all five hotels in view and at their coordinates, filters, ranking, selection sync, Explore hotel, 2D/3D, Show all hotels, columns,
+      no page errors)*
+- [ ] 14H.7 **P2** [CC] Later — *a skyline-first establishing view when the hotels' extent forces a low zoom (today the all-hotels view of
+      Chicago sits near zoom 11, where the tiles carry few buildings); building hover; the hotel's own footprint highlighted (needs a matched
+      OSM building id per hotel, not assumed)*
+
 ## Phase 15 — AI assistant (CC; built November 2026, docs/23)
 The rule stays: the AI never produces a number. It may ask the engine to compute one, and every number in its text must be in the context
 or in this answer's tool results.

@@ -8,9 +8,57 @@ import {
   selectIsSynthetic,
   selectPlanContext,
   selectPortfolioSummary,
+  selectUtilityAnalysis,
+  selectUtilitySet,
 } from "@/store/hotelDerived";
+import { PROVENANCE_LABEL } from "@/store/utilityData";
 import { buildHotelReport, buildPortfolioReport } from "./data";
-import type { HotelReportData, PortfolioReportData } from "./data";
+import type { HotelReportData, PortfolioReportData, ReportUtility } from "./data";
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** The open hotel's utility records for the report: source, period, actual vs modeled vs calibrated, the active baseline (docs/19). */
+export function utilityForReport(s: TwinState): ReportUtility | null {
+  const set = selectUtilitySet(s);
+  const a = selectUtilityAnalysis(s);
+  if (!set || !a) return null;
+  const months = set.records.map((r) => r.month).filter((m): m is number => typeof m === "number");
+  const dated = set.records.filter((r) => r.start && r.end);
+  const period = dated.length
+    ? `${dated[0]!.start} to ${dated[dated.length - 1]!.end} (${set.records.length} bills)`
+    : months.length
+      ? `${MONTHS[Math.min(...months)]}–${MONTHS[Math.max(...months)]} ${set.year} (${set.records.length} monthly records)`
+      : `${set.records.length} records`;
+  const calibratedActive = set.baseline === "calibrated" && s.baseline.calibration.method === "utility_bills";
+  const fuel = (f: typeof a.report.elec, label: string) => ({
+    fuel: label,
+    unit: f.unit,
+    bills: f.bills,
+    coverageDays: f.coverageDays,
+    actual: f.actualTotal,
+    modeled: f.modeledTotal,
+    calibrated: f.calibratedTotal,
+    nmbeBefore: f.before?.nmbePct ?? null,
+    cvrmseBefore: f.before?.cvrmsePct ?? null,
+    nmbeAfter: f.usable ? (f.after?.nmbePct ?? null) : null,
+    cvrmseAfter: f.usable ? (f.after?.cvrmsePct ?? null) : null,
+    calibrated_used: f.usable && calibratedActive,
+    note: f.reason,
+  });
+  const synthetic = (set.provenance === "sample" || set.provenance === "sample_edited") && !set.markedActual;
+  return {
+    source: PROVENANCE_LABEL[set.provenance] + (set.fileName ? ` (${set.fileName})` : ""),
+    synthetic,
+    billingPeriod: period,
+    activeBaseline: calibratedActive ? "Calibrated baseline (fitted to the records)" : "Original modeled baseline",
+    fuels: [fuel(a.report.elec, "Electricity"), fuel(a.report.gas, "Natural gas")],
+    limits: [
+      "Bills are compared with normal-year weather (NOAA 1991–2020), not the billing year's weather.",
+      "Monthly records calibrate monthly totals; no hourly accuracy is claimed.",
+      ...(synthetic ? ["These records are synthetic sample data, not the hotel's real bills."] : []),
+    ],
+  };
+}
 
 /**
  * Synthetic when the app says so, and also when the hotel was started from a synthetic sample and only edited (for example its
@@ -41,6 +89,7 @@ export function aiReportFromState(s: TwinState, role?: string): HotelReportData 
     catalog: selectCatalog(s).items,
     synthetic: isSyntheticHotel(s),
     scenarioNote: plan.scenario ? SCENARIO_NOTE : null,
+    utility: utilityForReport(s),
   });
 }
 
@@ -64,6 +113,7 @@ export function customReportFromState(s: TwinState, planId?: string): HotelRepor
     synthetic: isSyntheticHotel(s),
     scenarioNote: s.optimizeOnScenario && s.scenarioResult ? SCENARIO_NOTE : null,
     quantities,
+    utility: utilityForReport(s),
   });
 }
 

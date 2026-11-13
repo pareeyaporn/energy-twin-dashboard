@@ -166,6 +166,32 @@ function HotelPreview({ d }: { d: HotelReportData }) {
         <div className="p-5">
           <H2>Assumptions and methodology</H2>
           <List items={d.assumptions} />
+          {d.utility && (
+            <>
+              <H3>Utility data and baseline</H3>
+              <Table
+                head={["Fuel", "Bills (actual)", "Modeled", "Calibrated", "NMBE / CV before", "NMBE / CV after"]}
+                right={[1, 2, 3, 4, 5]}
+                rows={d.utility.fuels.map((x) => [
+                x.fuel,
+                `${Math.round(x.actual).toLocaleString("en-US")} ${x.unit}`,
+                `${Math.round(x.modeled).toLocaleString("en-US")} ${x.unit}`,
+                x.calibrated_used ? `${Math.round(x.calibrated).toLocaleString("en-US")} ${x.unit}` : "not used",
+                x.cvrmseBefore === null ? "-" : `${x.nmbeBefore!.toFixed(1)}% / ${x.cvrmseBefore.toFixed(1)}%`,
+                x.cvrmseAfter === null ? "-" : `${x.nmbeAfter!.toFixed(1)}% / ${x.cvrmseAfter.toFixed(1)}%`,
+              ])}
+              />
+              <List
+                items={[
+              `Source: ${d.utility.source}. Billing period: ${d.utility.billingPeriod}.`,
+              `Baseline used in this report: ${d.utility.activeBaseline}.`,
+              ...d.utility.fuels.filter((x) => x.note).map((x) => `${x.fuel}: ${x.note}`),
+              "NMBE and CV(RMSE) are ASHRAE Guideline 14 measures of how far the model is from the bills (monthly criteria: within ±5% and 15%).",
+              ...d.utility.limits,
+            ]}
+              />
+            </>
+          )}
           <H3>Utility incentives</H3>
           <List
             items={[

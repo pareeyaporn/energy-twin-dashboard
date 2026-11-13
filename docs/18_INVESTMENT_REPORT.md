@@ -132,6 +132,10 @@ moment of the click** (the engine has no clock). Example: `EnergyTwin_LakeshoreI
 demonstration data · not an engineering audit" (or the non-synthetic wording) and **Page N of M**; cyan accents; tables keep rows whole across
 page breaks and repeat their header row; pages follow the content (a hotel report is about five pages, a portfolio report three).
 
+**Utility data:** when the hotel has utility records (docs/19), the assumptions page adds "Utility data and baseline": source, billing period,
+actual vs modeled vs calibrated use per fuel, NMBE / CV(RMSE) before and after calibration, which baseline the report used, and the limits.
+Without records the section is left out.
+
 ### Hotel report (AI or custom plan)
 
 | Page | Contents | Figures from |

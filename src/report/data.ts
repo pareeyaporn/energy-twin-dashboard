@@ -56,6 +56,8 @@ export interface HotelReportData {
   kind: "ai" | "custom";
   title: string;
   planName: string;
+  /** Utility records and calibration (null when the hotel has none). */
+  utility: ReportUtility | null;
   /** "AI recommended · Maximum savings" or "Custom plan". */
   planLabel: string;
   hotel: {
@@ -263,6 +265,35 @@ export interface HotelReportInput {
   scenarioNote?: string | null;
   /** Custom plan quantities, by upgrade (in the catalog unit). */
   quantities?: Partial<Record<string, number>>;
+  /** The hotel's utility records and calibration, when it has any (docs/19). */
+  utility?: ReportUtility | null;
+}
+
+/** Utility data in the report: where the records come from, the billing period, actual vs modeled vs calibrated, the active baseline. */
+export interface ReportUtility {
+  /** "Sample data (synthetic)", "Uploaded utility data", ... */
+  source: string;
+  /** True for the sample (or edited sample) unless the user marked the records as real. */
+  synthetic: boolean;
+  billingPeriod: string;
+  /** "Calibrated baseline" or "Original modeled baseline". */
+  activeBaseline: string;
+  fuels: {
+    fuel: string;
+    unit: string;
+    bills: number;
+    coverageDays: number;
+    actual: number;
+    modeled: number;
+    calibrated: number;
+    nmbeBefore: number | null;
+    cvrmseBefore: number | null;
+    nmbeAfter: number | null;
+    cvrmseAfter: number | null;
+    calibrated_used: boolean;
+    note: string | null;
+  }[];
+  limits: string[];
 }
 
 /** Every figure of a hotel investment report (AI package or custom plan), from the engine's evaluation and its baseline. */
@@ -405,6 +436,7 @@ export function buildHotelReport(i: HotelReportInput): HotelReportData {
       ...(i.scenarioNote ? [i.scenarioNote] : []),
     ],
     risks,
+    utility: i.utility ?? null,
     sources: [...new Set(upgrades.map((u) => u.source).concat(i.baseline.sources ?? []).filter(Boolean))]
       .slice(0, 10)
       .map((x) => (x.length > 320 ? `${x.slice(0, 317).trimEnd()}…` : x))

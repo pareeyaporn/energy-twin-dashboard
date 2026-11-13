@@ -40,6 +40,21 @@ describe("PDF report", () => {
     expect(pages(buf)).toBeGreaterThanOrEqual(3);
   }, 60_000);
 
+  it("renders the utility data and baseline section when the hotel has records", async () => {
+    const hotel = presetProfile("demo-chicago-100");
+    const ctx = prepareUpgradeContext(hotel);
+    const pkg = optimizeInvestmentPortfolio(ctx, {}).objectiveWinner!;
+    const fuel = (name: string, unit: string) => ({ fuel: name, unit, bills: 12, coverageDays: 365, actual: 1000, modeled: 950, calibrated: 998, nmbeBefore: 2.6, cvrmseBefore: 4.2, nmbeAfter: 0, cvrmseAfter: 1.7, calibrated_used: true, note: null });
+    const data = buildHotelReport({
+      kind: "ai", hotel, baseline: ctx.baseline, evaluation: pkg.evaluation, planLabel: "AI", budget: 50_000, discountRate: 0.08, catalog: upgradeCatalog(ctx).items, synthetic: true,
+      utility: { source: "Sample data (synthetic)", synthetic: true, billingPeriod: "Jan–Dec 2025 (12 monthly records)", activeBaseline: "Calibrated baseline (fitted to the records)", fuels: [fuel("Electricity", "kWh"), fuel("Natural gas", "therms")], limits: ["Bills are compared with normal-year weather."] },
+    });
+    const buf = await renderToBuffer(<ReportDocument data={data} generated="November 13, 2026" />);
+    expect(buf.subarray(0, 5).toString()).toBe("%PDF-");
+    if (process.env["REPORT_OUT"]) writeFileSync(`${process.env["REPORT_OUT"]}/report-utility-test.pdf`, buf);
+    expect(pages(buf)).toBeGreaterThanOrEqual(3);
+  }, 60_000);
+
   it("renders a portfolio report", async () => {
     const items = hotelPortfolio.properties.map((property) => ({ property }));
     const summary = portfolioSummary(items);

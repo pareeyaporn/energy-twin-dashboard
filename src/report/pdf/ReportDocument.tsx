@@ -350,6 +350,31 @@ function HotelReport({ d, generated }: { d: HotelReportData; generated: string }
           {t("Energy Twin simulates the hotel's energy use by zone, end use and month from its characteristics, local weather normals, occupancy and published benchmarks, then applies each upgrade to that simulation and prices the result with the hotel's energy prices. Financial results use one common breakdown for every plan.")}
         </Text>
         <Bullets items={d.assumptions} />
+        {d.utility && (
+          <>
+            <Text style={st.h3}>Utility data and baseline</Text>
+            <Table
+              cols={[{ label: "Fuel", w: 14 }, { label: "Bills (actual)", w: 18, right: true }, { label: "Modeled", w: 17, right: true }, { label: "Calibrated", w: 17, right: true }, { label: "NMBE / CV before", w: 17, right: true }, { label: "NMBE / CV after", w: 17, right: true }]}
+              rows={d.utility.fuels.map((x) => [
+                x.fuel,
+                `${Math.round(x.actual).toLocaleString("en-US")} ${x.unit}`,
+                `${Math.round(x.modeled).toLocaleString("en-US")} ${x.unit}`,
+                x.calibrated_used ? `${Math.round(x.calibrated).toLocaleString("en-US")} ${x.unit}` : "not used",
+                x.cvrmseBefore === null ? "-" : `${x.nmbeBefore!.toFixed(1)}% / ${x.cvrmseBefore.toFixed(1)}%`,
+                x.cvrmseAfter === null ? "-" : `${x.nmbeAfter!.toFixed(1)}% / ${x.cvrmseAfter.toFixed(1)}%`,
+              ])}
+            />
+            <Bullets
+              items={[
+              `Source: ${d.utility.source}. Billing period: ${d.utility.billingPeriod}.`,
+              `Baseline used in this report: ${d.utility.activeBaseline}.`,
+              ...d.utility.fuels.filter((x) => x.note).map((x) => `${x.fuel}: ${x.note}`),
+              "NMBE and CV(RMSE) are ASHRAE Guideline 14 measures of how far the model is from the bills (monthly criteria: within ±5% and 15%).",
+              ...d.utility.limits,
+            ]}
+            />
+          </>
+        )}
         <Text style={st.h3}>Utility incentives</Text>
         <Bullets
           items={[

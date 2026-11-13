@@ -204,5 +204,7 @@ calibration is not possible). The active one is marked.
 | UI | `src/utility/` (`UtilityDataSection`, `UtilityDataManager`, `SpreadsheetGrid`, `CalibrationReview`, `UtilityBadge`, `excel.ts`) |
 | Tests | `src/engine/hotel/__tests__/bills.test.ts` (calibration recovers known factors, bounds, insufficient data, poor fit, periods, metrics, units, validation), `src/test/utilityStore.test.ts`, `src/test/UtilityDataManager.test.tsx`, `src/test/utilityExcel.test.ts` (xlsx round trip) |
 
-Not yet connected: the PDF investment report (built on a separate branch) should add the data source, billing period, historical use,
-selected baseline and calibration metrics from `selectUtilityAnalysis` when the branches are merged.
+**In the investment report:** when the hotel has records, the report (preview and PDF) adds "Utility data and baseline": the source (sample
+data is labeled synthetic unless marked as real), the billing period, actual vs modeled vs calibrated use per fuel, NMBE and CV(RMSE) before
+and after, the baseline the report's figures used (calibrated only when the user chose it), and the limits (normal-year weather, no hourly
+accuracy). Built by `utilityForReport` (`src/report/fromStore.ts`) from `selectUtilityAnalysis`.

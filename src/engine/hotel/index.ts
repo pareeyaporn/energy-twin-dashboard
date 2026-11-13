@@ -143,6 +143,9 @@ export {
 export type { PreparedProperty, PropertySummary, PortfolioSummary, PortfolioAllocation, PortfolioPlan, PortfolioTotals } from './portfolio';
 export { evaluatePortfolioCustomPlan, portfolioStressReport } from './portfolioPlans';
 export type { PortfolioCustomRow, PortfolioCustomEvaluation, PortfolioStressRow, PortfolioStressReport } from './portfolioPlans';
+export { refrigerantEmissions, refrigerantOptions, KG_PER_LB } from './refrigerant';
+export { holdsRefrigerant } from './equipment';
+export type { RefrigerantLeak, RefrigerantSummary } from './refrigerant';
 export { energyInsights, INSIGHT_THRESHOLDS, INSIGHT_CATEGORY_LABEL } from './insights';
 export type { EnergyInsight, InsightAction, InsightCategory, InsightInput } from './insights';
 export { impactSummary, stressKind, stressPeriodText, STRESS_KIND_LABEL } from './impact';

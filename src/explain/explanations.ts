@@ -1,7 +1,7 @@
 // "How was this calculated?" (Improvement 6): one explanation per major figure, written from the engine's real inputs for the open hotel.
 // Each says what the figure means, how it is computed, its main inputs with their data class, the sources and the limits. The text
 // describes the implementation in src/engine/hotel (docs/13); if the engine changes, update the matching entry here.
-import { ANALYSIS_YEAR, DEFAULT_FINANCE, hotelData } from "@/engine/hotel";
+import { ANALYSIS_YEAR, DEFAULT_FINANCE, hotelData, refrigerantEmissions } from "@/engine/hotel";
 import type { TwinState } from "@/store/useTwin";
 import { selectIsSynthetic } from "@/store/hotelDerived";
 
@@ -135,6 +135,12 @@ export function explain(id: MetricId, s: TwinState): Explanation {
         inputs: [
           { label: "Grid region", value: `${p.gridSubregion}: ${b.emissionFactors.elecKgPerKWh.toFixed(3)} kg CO₂e per kWh`, cls: s.hotel.defaulted.includes("gridSubregion") ? "verified" : "user" },
           { label: "Natural gas", value: `${b.emissionFactors.gasKgPerTherm.toFixed(2)} kg CO₂e per therm`, cls: "verified" },
+          ...(() => {
+            const r = refrigerantEmissions(p);
+            return r.leaks.length
+              ? [{ label: "Refrigerant leaks (entered, reported separately)", value: `${(r.carbonKg / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 })} t CO₂e a year from ${r.leaks.length} system${r.leaks.length > 1 ? "s" : ""} (lb added × 0.454 × GWP, EPA)`, cls: "user" as const }]
+              : [];
+          })(),
         ],
         sources: [GRID, "EPA GHG Emission Factors Hub 2025 (natural gas: 53.06 kg CO₂ per MMBtu plus CH₄ and N₂O, AR5)"],
         limits: ["Annual average grid factors, not hourly marginal emissions.", "Covers electricity and on-site natural gas (Scope 1 and 2 energy). Not included: refrigerant leaks, district steam, fuel oil, propane, generator diesel, vehicles, power-line losses and supply-chain (Scope 3) emissions.", "Estimates, not verified carbon savings.", ...synthLimit],

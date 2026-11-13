@@ -14,6 +14,7 @@ import type {
   HotelData,
   HotelProfile,
   HvacType,
+  RefrigerantRecord,
   ZoneId,
 } from './types';
 
@@ -62,6 +63,14 @@ export interface EquipmentItem {
   /** Fields the operator entered. */
   userEntered: string[];
   added: boolean;
+  /** Entered refrigerant top-ups (cooling and refrigeration equipment). */
+  refrigerant?: RefrigerantRecord;
+}
+
+const REFRIGERANT_TEMPLATES = new Set(['chiller', 'rooftop_unit', 'walk_in_refrigeration']);
+/** Equipment that holds refrigerant: anything that cools, the kitchen's cold storage, and added chillers, rooftop units and walk-ins. */
+export function holdsRefrigerant(i: Pick<EquipmentItem, 'id' | 'template' | 'roles'>): boolean {
+  return i.roles.includes('cooling') || i.id === 'kitchen-cold' || (i.template !== undefined && REFRIGERANT_TEMPLATES.has(i.template));
 }
 
 const KIND_LABEL: Record<EfficiencyKind | 'kw', string> = {
@@ -272,6 +281,7 @@ function applyOverride(item: EquipmentItem, o: EquipmentOverride, data: HotelDat
   if (o.schedule !== undefined) (x.schedule = o.schedule), mark('schedule');
   if (o.ageYears !== undefined) (x.ageYears = o.ageYears), mark('ageYears');
   if (o.notes !== undefined) (x.notes = o.notes), mark('notes');
+  if (o.refrigerant !== undefined) (x.refrigerant = { ...o.refrigerant }), mark('refrigerant');
   if (o.efficiency !== undefined) {
     // The first lever takes the generic efficiency; a solar item's "efficiency" is not used (its size is the capacity).
     const l = x.levers.find((v) => v.lever !== 'existingSolarKw');
@@ -351,6 +361,14 @@ export function validateEquipment(
     if (o.schedule !== undefined) (txt(o.schedule, 120) ? (clean.schedule = o.schedule.trim()) : bad('schedule', 'A schedule needs 1 to 120 characters.'));
     if (o.ageYears !== undefined) (inRange(o.ageYears, boundsOf('ageYears', data)) ? (clean.ageYears = o.ageYears) : bad('ageYears', 'Age must be 0 to 100 years.'));
     if (o.notes !== undefined) (typeof o.notes === 'string' && o.notes.length <= 500 ? (clean.notes = o.notes) : bad('notes', 'Notes can have up to 500 characters.'));
+    if (o.refrigerant !== undefined) {
+      const r = o.refrigerant as Partial<RefrigerantRecord> | null;
+      const known = data.emissions.refrigerants ?? {};
+      if (!holdsRefrigerant(item)) bad('refrigerant', `${item.label} holds no refrigerant.`);
+      else if (!r || typeof r.type !== 'string' || !(r.type in known)) bad('refrigerant', 'Choose a refrigerant from the list.');
+      else if (!inRange(r.lbsPerYear, [0, 10000])) bad('refrigerant', 'Pounds added a year must be 0 to 10,000.');
+      else clean.refrigerant = { type: r.type, lbsPerYear: r.lbsPerYear as number };
+    }
     const checkLever = (l: LeverValue | undefined, v: unknown, field: string) => {
       if (!l) return false;
       const b = boundsOf(l.kind, data);

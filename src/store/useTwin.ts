@@ -86,6 +86,14 @@ export interface AdvisorMessage {
   /** For advisor messages: "ai" if the model's answer passed the number check, "fallback" if the template answer was used. */
   source?: "ai" | "fallback";
   reason?: advisor.FallbackReason;
+  /** Engine tools that ran for this answer (docs/23): their results are the cards and the source of the action buttons. */
+  runs?: advisor.ToolRun[];
+  /** Suggested next questions (number-checked when the AI wrote them). */
+  followUps?: string[];
+  /** Where the question was asked: the hotel's Ask tab or the portfolio page. */
+  scope?: advisor.AdvisorScope;
+  /** The hotel the answer was computed for (an action applies only while it is still open). */
+  hotelRef?: ResolvedProfile;
 }
 
 export interface SavedScenario {
@@ -239,8 +247,17 @@ export interface TwinState {
   setPlaying: (b: boolean) => void;
   setPlaybackSpeed: (n: number) => void;
   setCompareMode: (m: CompareMode) => void;
-  askAdvisor: (question: string) => Promise<void>;
+  askAdvisor: (question: string, options?: { scope?: advisor.AdvisorScope }) => Promise<void>;
   clearAdvisor: () => void;
+  /** "Running the model: find_best_plan…" while the AI's tools run (null otherwise). */
+  advisorStep: string | null;
+  /**
+   * Adopt a plan the advisor computed (find_best_plan) as the hotel's plan, with one package applied to the twin. Only when the
+   * advisor computed it for the hotel that is open; returns false otherwise (docs/23).
+   */
+  adoptHotelPlan: (plan: PortfolioResult, baseline: EnergyResult, packageId: string, forHotel: ResolvedProfile) => boolean;
+  /** Adopt a portfolio plan the advisor computed (portfolio_optimize) as the portfolio page's plan. */
+  adoptPortfolioPlan: (plan: PortfolioPlan) => void;
   resetHotel: () => void;
   /**
    * "Reset demo": everything back to the starting state in one step: the hotel, what-if, stress test, plans, saved scenarios, advisor,
@@ -417,6 +434,7 @@ function initialHotelState() {
     advisorMessages: [] as AdvisorMessage[],
     advisorBusy: false,
     advisorSeq: 1,
+    advisorStep: null as string | null,
     selectedZone: null as ZoneId | null,
     twinLayer: "zones" as TwinLayer,
     timeMode: "day" as TimeMode,
@@ -716,9 +734,10 @@ export const useTwin = create<TwinState>((set, get) => ({
   setPlaying: (playing) => set({ playing }),
   setPlaybackSpeed: (n) => set({ playbackSpeed: Number.isFinite(n) && n > 0 ? n : 1 }),
   setCompareMode: (compareMode) => set({ compareMode }),
-  askAdvisor: async (question) => {
+  askAdvisor: async (question, options) => {
     const q = question.trim();
     if (!q || get().advisorBusy) return;
+    const scope = options?.scope ?? "hotel";
     const n = get().advisorSeq;
     set((s) => ({
       advisorBusy: true,
@@ -747,17 +766,48 @@ export const useTwin = create<TwinState>((set, get) => ({
       },
       q,
     );
-    // Validated AI answers are also kept in local storage, so a rehearsed demo question answers the same way at once (task 8.2).
-    const answer = await advisor.askAdvisor(q, context, { ...advisor.getAdvisorConfig(), store: advisorAnswerStore });
+    // The AI may ask the engine for tools (a what-if, a plan for a budget, a comparison, a stress test, the chain); they run here, in
+    // the browser, and the answer may only quote numbers from the context or those results (docs/23). Validated AI answers are also
+    // kept in local storage, so a rehearsed demo question answers the same way at once (task 8.2).
+    const env: advisor.ToolEnv = {
+      hotel: s.hotel,
+      baseline: s.baseline,
+      discountRate: s.hotelDiscountRate,
+      portfolio: { name: s.portfolio.name, items: selectPortfolioItems(s), budget: s.portfolioBudget, objective: s.portfolioObjective },
+    };
+    const answer = await advisor.askAdvisorAgent(q, context, env, { ...advisor.getAdvisorConfig(), store: advisorAnswerStore }, {
+      scope,
+      onStep: (step) => set({ advisorStep: `Running the model: ${step.tools.map((t) => t.replace(/_/g, " ")).join(", ")}…` }),
+    });
     set((st) => ({
       advisorBusy: false,
+      advisorStep: null,
       advisorMessages: [
         ...st.advisorMessages,
-        { id: `m-${n + 1}`, role: "advisor", text: answer.text, source: answer.source, ...(answer.reason ? { reason: answer.reason } : {}) },
+        {
+          id: `m-${n + 1}`,
+          role: "advisor",
+          text: answer.text,
+          source: answer.source,
+          ...(answer.reason ? { reason: answer.reason } : {}),
+          ...(answer.runs.length ? { runs: answer.runs } : {}),
+          ...(answer.followUps.length ? { followUps: answer.followUps } : {}),
+          scope,
+          hotelRef: s.hotel,
+        },
       ],
     }));
   },
-  clearAdvisor: () => set({ advisorMessages: [], advisorBusy: false }),
+  clearAdvisor: () => set({ advisorMessages: [], advisorBusy: false, advisorStep: null }),
+  adoptHotelPlan: (plan, baseline, packageId, forHotel) => {
+    const s = get();
+    if (s.hotel !== forHotel || s.optimizing) return false;
+    const all = [...plan.packages, ...(plan.objectiveWinner ? [plan.objectiveWinner] : [])];
+    if (!all.some((p) => p.evaluation.id === packageId)) return false;
+    set({ hotelPlan: plan, hotelPlanBaseline: baseline, activeHotelPackageId: packageId, ...(s.activePropertyId ? { portfolioPlan: null } : {}) });
+    return true;
+  },
+  adoptPortfolioPlan: (plan) => set({ portfolioPlan: plan, portfolioBudget: plan.budget, portfolioObjective: plan.objective }),
   resetHotel: () => {
     set((s) => ({
       ...initialHotelState(),
@@ -795,6 +845,7 @@ export const useTwin = create<TwinState>((set, get) => ({
   resetDemo: () => {
     writeEquipment({});
     advisor.clearAdvisorCache();
+    advisor.clearAgentCache();
     set((s) => ({
       ...initialHotelState(),
       optimizing: false,

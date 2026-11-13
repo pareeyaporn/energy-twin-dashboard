@@ -182,8 +182,11 @@ for synthetic data unless a source is named.
 - **Value:** see where the money goes, test a decision before making it, and get the best upgrades for a budget with costs, savings ranges,
   payback, NPV and carbon, plus a report to take to the owner. Example: at $50,000 the app recommends LED lighting + occupancy sensors
   ($38,940, $10,302 a year, 3.8-year payback) and says no to solar (18.5 years).
-- **Tied to the prompt:** *fill in with the hackathon prompt's own words* (the repo does not record it); state the one sentence that maps the
-  prompt to "existing hotels deciding energy investments".
+- **Tied to the prompt** (Open Track: "Build something that improves how people live, work or connect"): it improves how people **work**.
+  Hotel general managers, engineers and owners make six-figure energy decisions from vendor pitches and spreadsheets; Energy Twin turns that
+  into minutes of evidence: test the decision, see the payback, take a report to the owner. It also touches how people **live**: guest comfort
+  is a constraint in every plan, and every plan shows the carbon it avoids. Built in Lovable, with real public datasets (EIA, NOAA, NREL, EPA)
+  and supplemental code, as the prompt allows.
 - **In the demo:** act 1 (the problem and the $120,178 bill), "Start here", the optimizer.
 
 ### 2. Evidence and opportunity

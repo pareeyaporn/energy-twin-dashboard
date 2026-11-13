@@ -393,6 +393,29 @@ exhibit-hall, pool or round-the-clock restaurant drivers. Heat-pump water heater
 
 ---
 
+### Investment priority, exactly (as implemented in `portfolioSummary`)
+
+1. A hotel's candidates are the single-hotel optimizer's eligible upgrade combinations for its own systems (equipment compatibility is decided
+   there: for example, smart room controls are not offered to a hotel that has them).
+2. Its **best package** is the candidate with the highest 10-year NPV among those whose gross installed cost fits the hotel's own budget and whose
+   10-year NPV is positive. None: no savings potential and a score of 0.
+3. **Return per dollar** = that package's 10-year NPV ÷ its net investment (installed cost minus incentives counted in the base case).
+4. **Score** = round(return per dollar ÷ the highest return per dollar among the hotels shown × 100). The best hotel scores 100; scores are
+   relative to the hotels shown, so filters change them.
+
+Energy spending, floor area and intensity are not inputs: a large hotel can spend the most and still rank lower (in the Chicago chain, Lakefront
+Convention Hotel spends the most, $591,679 a year, while Riverwalk Grand ranks first). The UI restates these steps (`src/portfolio/priority.ts`)
+and a test checks its scores equal the engine's.
+
+### Multi-city portfolios
+
+`PropertySummary` carries the hotel's resolved `city` and `state` (labels). A hotel's city and state pick its weather (NOAA normals), solar output
+(PVWatts), prices (EIA), grid factor (eGRID) and intensity and end-use split (ComStock), research pass 11; incentives apply only in their
+territory (`states`). Still Chicago- or Illinois-based for every city: the upgrade savings parameters (IL-TRM), hourly load shapes, the seasonal
+occupancy default and the age factor. Synthetic national organization: Meridian Hotels & Resorts (4 hotels, 910 rooms, about $1.57 million a year,
+savings potential about $113,000 a year; no incentives apply outside Illinois). Its top priority is Midtown Tower Hotel (New York), whose best
+package returns about 2.04 dollars of 10-year NPV per dollar.
+
 ## Appendix A — Store contract (task 1.10): approved and built
 
 Approved and implemented in `src/store/useTwin.ts` (hotel fields added next to the home-era ones, nothing removed) with helpers and selectors in `src/store/hotelDerived.ts`.

@@ -62,7 +62,8 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 | `src/data/` | Claude Code | JSON only. Every value carries a source; `hotel/` is the data set (three home-era files remain only because the store imports them) |
 | `src/twin/` | Claude Code | The clickable 2D hotel diagram (`<HotelTwin />`). Lovable only places it |
 | `src/plans/` | Claude Code | Investment modes: AI plan, Build your own (catalog), Compare. Placed by `BudgetOptimizer` (minimal hook) |
-| `src/portfolio/` | Claude Code | Hotel portfolio page: city map (MapLibre, drawn fallback), totals, comparison, charts, portfolio optimizer. Route `src/routes/portfolio.tsx` |
+| `src/portfolio/` | Claude Code | Hotel portfolio page, the homepage: city map (MapLibre, drawn fallback, multi-city), totals, comparison, charts, portfolio optimizer, priority explanation |
+| `src/app/` | Claude Code | The homepage (`/`, the portfolio), the hotel dashboard (`/hotel`, moved from `src/routes/index.tsx`) and the landing rules |
 | `src/tour/` | Claude Code | First-visit onboarding tour (spotlight steps, replay from the top bar). Steps and behavior in `docs/16` |
 | `src/three/` | Claude Code | The 3D hotel twin (built, Phase 9). Loaded by `src/twin/parts/View3D.tsx`; Lovable places only `<HotelTwin />` |
 | `supabase/functions/` | Claude Code | Backend functions (AI advisor). Keys are read only here |
@@ -111,7 +112,7 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 `optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, `hotelDiscountRate`, `customPlans` / `activeCustomPlanId` (local storage),
 `planBeforeStress`, twin controls (`selectedZone`, `twinLayer`, time with modes
 `seasons` / `day` / `year`, `compareMode`)
-the portfolio (`portfolio`, `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioCustomPlanIds`, the portfolio stress test, `userHotels` from Add my hotel) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
+the portfolio (`portfolio`, `organizations` / `organizationId`, `portfolioFilter` (brand, region, ownership, city), `portfolioView` (map metric, selected hotel, list, table sort, camera, scroll: view state kept across a hotel visit), `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioCustomPlanIds`, the portfolio stress test, `userHotels` from Add my hotel) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
 `applyHotelPackage`, `askAdvisor`, `openProperty` and `runPortfolioOptimizer`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
 `selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, `selectCatalog`, `selectCustomPlanEvaluation`,
 `selectPlanExplanation`, `selectStressReport`, `selectPortfolioSummary`, `selectPortfolioCustomEvaluation`, `selectPortfolioStressReport`, `selectVisibleCustomPlans`, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).

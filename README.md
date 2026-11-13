@@ -60,7 +60,7 @@ ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustra
 | Workspace UI (Lovable, prompts LV1–LV15) | Built |
 | Flow, Rooms and Equipment layers (animated Sankey, room façade, equipment cards) | Built (Phase 10) |
 | Investment catalog and custom plans; stress tests | Built (Phases 11 and 12) |
-| Hotel portfolio (`/portfolio`): synthetic five-hotel Chicago chain on a MapLibre map, totals, comparison table, charts, one budget split across hotels, open any hotel in the twin; my portfolio (custom plan per hotel) vs the AI portfolio; portfolio stress tests | Built (Phase 13 P0 and P1) |
+| Hotel portfolio, the homepage (`/`; the hotel dashboard is `/hotel`): synthetic Chicago chains and a multi-city organization (New York, Miami, Denver) on a MapLibre map (city markers when zoomed out; a per-city schematic offline), "Start here" and the investment priority explained, the view kept when you visit a hotel and come back, totals, comparison table, charts, one budget split across hotels, open any hotel in the twin; my portfolio (custom plan per hotel) vs the AI portfolio; portfolio stress tests | Built (Phase 13 P0 and P1) |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
 | Onboarding tour (15 steps with live figures, a time-lapse and the energy flow; first visit and replay; `docs/16`) | Built |
 | Add my hotel (saved in the browser, on the map, its own twin) | Built |
@@ -102,7 +102,8 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | `src/twin/` | Clickable hotel twin (2D layers, controls, the 3D wrapper) |
 | `src/three/` | 3D hotel scene (building, scenery, street, people, camera) |
 | `src/plans/` | Investment modes: AI recommended, Build your own (catalog), Compare |
-| `src/portfolio/` | Hotel portfolio page: city map, totals, comparison, charts, portfolio optimizer |
+| `src/portfolio/` | Hotel portfolio page: city map, totals, comparison, charts, portfolio optimizer, priority explanation |
+| `src/app/` | The homepage (portfolio), the hotel dashboard (`/hotel`) and the landing rules |
 | `src/tour/` | First-visit onboarding tour |
 | `supabase/functions/` | Backend function: the AI advisor |
 | `docs/` | Specs and plans |

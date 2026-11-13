@@ -395,11 +395,69 @@ Display only: no calculation, assumption or data changes. Each task is one point
       optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 15 steps with live figures, a time-lapse, the energy flow and a 10-year projection chart) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
 - [x] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
       their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model — *done: "More building types (coming later)" cards on the portfolio page, from `properties.json`*
-- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Multi-city data done (November 2026, research pass 11): New York, Miami and Denver have sourced weather, solar, prices, grid subregion and ComStock intensity and end-use split, and utility incentives now apply only in their territory; multi-city hotels in the portfolio UI and map are next. Then: real utility data (bill upload and calibration). Later: role-based access (accounts and a database)*
+- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Multi-city data done (November 2026, research pass 11): New York, Miami and Denver have sourced weather, solar, prices, grid subregion and ComStock intensity and end-use split, and utility incentives now apply only in their territory; multi-city portfolio UI done (November 2026, 14D below): a national synthetic organization (Meridian Hotels & Resorts: New York, Miami, Denver), city markers and chips on the street map, a per-city schematic on the drawn map, a city filter, totals by city and a city choice in Add my hotel. Real utility data: the engine's monthly bill calibration is built (`src/engine/hotel/bills.ts`); its Utility Data Manager is a separate task. Later: role-based access (accounts and a database)*
 - [x] 13.36 **P2** [CC] Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07) — *transitions done (marker colors fade between metrics; the twin's figures count up when a hotel opens); the demo script is the storyline owner's (docs/07)*
 
-Known limits: all five hotels share Chicago weather (O'Hare normals); property types differ through size, age, HVAC and occupancy only (the
+Known limits: the five Lakefront hotels share Chicago weather (O'Hare normals; the Meridian hotels use their own cities'); property types differ through size, age, HVAC and occupancy only (the
 model has no ballroom, pool or 24/7 food-service drivers); heat-pump water heaters are not modeled, so the optimizer cannot pick them.
+
+## Phase 14 — Operator experience (CC; November 2026)
+
+### 14D — Portfolio workflow and multi-city (built November 2026; branch `portfolio/workflow-multicity`)
+
+The portfolio is the homepage and the way into every hotel; the hotel dashboard is one click away and back. Improvement 4 of the
+operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" brief and the multi-city part of 13.35. Design in docs/17.
+
+- [x] 14D.1 [CC] Portfolio as the homepage — *done: `/` (and `/portfolio`) show the portfolio (`src/app/PortfolioHome.tsx`); the hotel dashboard
+      moved unchanged from `src/routes/index.tsx` to `src/app/HotelDashboard.tsx`, served at `/hotel`; `/overview`, `/scenario`, `/optimizer` link
+      back to `/hotel`. Header "Your Hotel Portfolio", the subtitle, the tagline "See the savings before you spend." and an **Optimize portfolio**
+      button that scrolls to the portfolio optimizer*
+- [x] 14D.2 [CC] Landing rules — *done (`src/app/landing.ts`): new visitors and Reset demo land on the portfolio; a returning user lands where they
+      last were (portfolio or hotel, local storage `energy-twin:last-view:v1`), on the first load of a visit only; an organization with a single
+      hotel opens that hotel directly*
+- [x] 14D.3 [CC] KPI cards — *done: annual energy cost, savings potential (with the net investment), carbon and properties (with rooms and cities)
+      first; electricity, gas, total energy, energy intensity, rooms and the budget in a compact strip (collapsible on phones); "Estimate" on
+      every modeled figure; the synthetic label in the header*
+- [x] 14D.4 [CC] "Which hotel deserves my attention first?" — *done: **Start here** names the top investment priority hotel, the reason from the
+      engine (its best package's 10-year NPV, net investment, NPV per dollar, savings and payback) and, when different, notes that the biggest
+      spender ranks lower because its upgrades return less per dollar; **Open <hotel>** and **Why this ranking?** buttons. Omitted (with a short
+      note) when no hotel has a package with a positive 10-year NPV*
+- [x] 14D.5 [CC] Explain the investment priority — *done: `src/portfolio/priority.ts` restates the engine's rule exactly and
+      `PriorityExplainer.tsx` shows it for every hotel shown (best package, net investment, 10-year NPV, NPV per dollar, score, and energy cost for
+      comparison only); opened from Start here, the hotel card ("Why?") and the table's Priority header; a test checks the scores equal the
+      engine's*
+- [x] 14D.6 [CC] Ranked, sortable comparison — *done: the table sorts by any column (cost, intensity, savings, priority…), hotel names open the
+      hotel, the location shows the city, the sort is kept in the store, and the hotel you last opened is highlighted*
+- [x] 14D.7 [CC] Drill-down and breadcrumb — *done: opening a hotel keeps its property context; the hotel shows "Portfolio › <organization> ›
+      <hotel>" (Portfolio and the organization go back), the city is in the hotel's subtitle*
+- [x] 14D.8 [CC] Return without losing context — *done: store `portfolioView` (additive): map metric, selected hotel (its card reopens), list
+      open or closed, table sort, the street map's camera, scroll position and an anchor; the organization and filters were already in the
+      store. Changing organization or filters clears what no longer applies*
+- [x] 14D.9 [CC] Cross-property decisions — *done: a portfolio hotel's Invest tab shows **This hotel in <organization>**: its priority and rank,
+      its savings potential and energy cost as shares of the portfolio's, and, once the portfolio optimizer has run, the package the shared
+      budget gives it and its share of the plan's savings, with a link to the portfolio optimizer. The portfolio optimizer's rows open each
+      hotel's plan (the Invest tab). Same engine figures; a reconciliation test checks a hotel's baseline equals its portfolio row and its
+      allocation equals the single-hotel evaluation*
+- [x] 14D.10 [CC] Multi-city organization — *done: Meridian Hotels & Resorts (synthetic) in `organizations.json`: Midtown Tower Hotel (New York,
+      420 rooms), Brickell Bay Suites and South Beach Inn (Miami), LoDo Union Station Hotel (Denver), each on its own city's sourced data (pass 11).
+      The Chicago chains and every demo figure are unchanged*
+- [x] 14D.11 [CC] Multi-city map — *done: zoomed out over several cities, the street map shows one marker per city (hotels, the city's figure for
+      the metric); city markers and city chips zoom to a city; the drawn map becomes a labeled schematic with one panel per city (no streets or
+      coastlines are drawn for cities without sourced map data), its legend below the panels; the city filter and totals by city*
+- [x] 14D.12 [CC] Add my hotel in any supported city — *done: City (Chicago, New York, Miami, Denver) then area; a note says what applies there
+      (no utility incentives researched outside Illinois; savings parameters calibrated to Chicago)*
+- [x] 14D.13 [CC] Marker hover preview and colors — *done: the tooltip shows location, rooms, energy cost, intensity, savings and priority, with
+      "Click to open · Explore hotel"; cost and intensity use blue → amber → red with the legend saying high = spends more / uses more per ft²;
+      savings potential and priority use a green scale (high = a bigger opportunity), never red*
+- [x] 14D.14 [CC] Top bar — *done (minimal Lovable edit): Portfolio, Hotel analysis, Reports (opens the hotel's Invest tab, where the investment
+      results are; TODO: point it at the investment report once the report feature is merged), Tour, Sources, and Reset demo (secondary, returns
+      to the portfolio)*
+- [x] 14D.15 [CC] Tour routes — *done (minimal): hotel steps use `/hotel`, the portfolio step `/`; the tour content will be reworked separately*
+- [x] 14D.16 [CC] Tests and browser check — *done: `src/test/portfolioWorkflow.test.tsx` (multi-city resolution, Chicago chain unchanged, city
+      filter and panels, Add my hotel in Miami, priority equals the engine, Start here and the explainer, the hotel → portfolio round trip, Reset
+      demo, reconciliation, landing rules); Playwright on desktop 1440×900 and phone 390×844, street map and drawn map*
+- [ ] 14D.17 **P2** [CC] Later — *marker clustering within a city at very low zoom; panning on the drawn schematic; arrow keys between markers;
+      per-city savings parameters (beyond Chicago's IL-TRM) and utility incentives outside Illinois*
 
 ## Phase 8 — Demo hardening (all)
 - [x] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

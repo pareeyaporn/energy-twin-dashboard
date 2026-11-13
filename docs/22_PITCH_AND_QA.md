@@ -7,6 +7,15 @@ out, never improvise a number.
 
 ---
 
+**Energy Twin: Simulate Smarter. Spend Better. Save Energy.**
+
+What if hotel owners could see the impact of energy upgrades before spending a dollar? Energy Twin turns existing hotels into AI-powered
+virtual testing grounds. Operators can visualize energy flows, simulate changing conditions, and stress-test decisions across one property
+or an entire portfolio. Our optimizer finds the best upgrade combinations within a budget, revealing projected savings, payback, and carbon
+impact. **Stop guessing. Start simulating. Invest with confidence.**
+
+---
+
 ## Part 1 — Why this is a cool project
 
 ### The one-liner
@@ -202,9 +211,12 @@ for synthetic data unless a source is named.
   year with $109,905 a year of savings potential (modeled).
 - **Why existing buildings:** earlier winners such as Eden cover new-build design; existing buildings are most of the stock and need
   operations plus investment decisions.
-- **Gaps to close:** (a) *user evidence*: 2–3 quotes or conversations with hotel GMs, engineers or owners (even short calls) would make this
-  criterion; (b) a *market size in dollars* from a named source (for example US hotel energy spend), or leave it out. Do not estimate either on
-  stage.
+- **Market size (verified, Part 5):** US hotels and resorts spend about $5.2 billion a year on energy (EIA CBECS 2018), about $6.2 billion
+  with motels and inns.
+- **Why now (verified, Part 5):** EIA links record electricity demand to commercial growth, largely data centers, and expects commercial
+  prices to keep rising; cities such as New York fine buildings, hotels included, for carbon (search excerpt).
+- **User evidence:** published, not interviews (Part 5): the industry association on operating costs, trade press on financing and
+  franchise economics, a chief engineer's own payback decision. Say plainly that there were no interviews in 48 hours; name a pilot as next.
 
 ### 3. Product judgment and MVP
 
@@ -246,3 +258,83 @@ for synthetic data unless a source is named.
 - **Path forward:** real hotels with real bills (pilot with 1–3 properties), tariffs and demand charges, accounts and roles, more cities with
   local incentives, then resorts, convention centers and offices.
 - **Gaps:** choose the business model and one pilot target to name.
+
+---
+
+## Part 5 — Why we built it, the market, and what operators say
+
+Every figure is marked **verified** (read in the source document) or **search excerpt** (from a search result or a secondary page, not
+the original). Quote verified figures freely; quote search excerpts only with "reported" or leave them out.
+
+### Why we decided to build this
+
+1. **Electricity is getting more expensive, and data centers are a big reason.**
+   - *Verified:* EIA's Short-Term Energy Outlook (January 2026): commercial electricity sales grow 2.4% in 2026 and 4.3% in 2027, "largely
+     attributed to increasing demand from large computing facilities, that include data centers", with data center growth named in
+     Virginia, Georgia and Ohio.
+   - *Verified:* EIA's Short-Term Energy Outlook (November 2026, Table 2): the average commercial electricity price rises from 13.37 cents per
+     kWh in 2025 to 14.01 in 2026 and 14.26 in 2027; US generation reaches a record of almost 4,390 billion kWh in 2026, "driven by
+     growing demand from the commercial sector".
+   - *Verified (already in the app):* EIA's Annual Energy Outlook 2026 projects commercial electricity rising from 13.48 to 16.62 cents per
+     kWh between 2025 and 2035 (2.12% a year); the app uses this for every 10-year projection.
+   - *Search excerpt:* DOE's December 2024 announcement of the LBNL data center report: data center load "has tripled over the past decade
+     and is projected to double or triple by 2028". (The LBNL report itself could not be opened from the build session; check it before
+     quoting its percentages.)
+2. **Governments are pricing carbon in buildings, and hotels are in scope.**
+   - *Search excerpt:* New York City's Local Law 97 sets yearly greenhouse-gas limits for buildings over 25,000 ft², hotels included, with
+     fines of $268 per tonne of CO₂e above the limit from the 2024 compliance period, and lower limits from 2030 (compliance guides; nyc.gov
+     could not be opened from the build session).
+   - *To verify before quoting:* building performance standards elsewhere in the US and the EU's recast Energy Performance of Buildings
+     Directive (2024). We have not checked their figures; say "governments in the US and abroad are adding building carbon rules" without
+     numbers unless someone checks them.
+3. **So the question for every hotel becomes: which upgrades pay back, and how much carbon they avoid, before we spend.** That is what
+   Energy Twin answers, with carbon in every plan (from EPA eGRID grid factors) and the price path built into every payback.
+
+**How to say it (20 seconds):** "We started from two trends. Data centers are pushing electricity demand to records, and EIA expects
+commercial prices to keep climbing. At the same time, cities like New York now fine buildings, hotels included, for their carbon. Hotels
+can't guess anymore. Energy Twin shows them what to fix, what it saves and what it avoids, before they spend."
+
+### The market figure (verified, with one calculation)
+
+- **US hotels and resorts spend about $5.2 billion a year on energy** (2018; $4.4 billion of it electricity), across about 66,000 buildings.
+  Add motels, inns and B&Bs and it is about **$6.2 billion**.
+- **All US lodging buildings: $11.5 billion a year** ($11,513 million, EIA's published table). This is a broader category: it also includes
+  dormitories, retirement and nursing homes, shelters and convents.
+- **Source and method:** EIA, Commercial Buildings Energy Consumption Survey 2018. The lodging total is EIA's published Table C2
+  ("Total energy expenditures by major fuel"). The hotel figure is computed from EIA's public microdata (`cbecs2018_final_public.csv`):
+  the sum of major-fuel expenditures (`MFEXP`) times EIA's survey weight (`FINALWT`) for buildings whose activity (`PBAPLUS`) is
+  38 "Hotel/resort" ($5,170 million, 272 surveyed buildings) and 39 "Motel/inn/bed and breakfast" ($1,019 million, only 32 surveyed buildings,
+  so less precise). Check: the same method gives $11,521 million for all lodging, against EIA's published $11,513 million.
+- **Caveats to say if asked:** 2018 dollars (commercial electricity prices have risen since; see the EIA figures above), and an estimate from a
+  survey sample.
+- **How to say it:** "US hotels spend over five billion dollars a year on energy, by EIA's own survey."
+
+### What operators and the industry say (no calls needed)
+
+- *Search excerpt (AHLA):* the American Hotel & Lodging Association reports that hotel owners say operating costs remain their biggest
+  challenge, naming energy among the rising costs alongside labor, insurance and supplies.
+- *Search excerpt (Lodging Magazine, September 2025, "Rethinking Guestroom Energy"):* a development executive says lenders are allowing
+  less leverage, so owners need more equity, and frames energy savings as a way to raise net operating income; the article notes brands
+  hesitate to require energy spending because franchisees pay for it. (The magazine's site could not be opened from the build session; check
+  the exact wording before quoting.)
+- *Search excerpt (Buildings, 2012):* Harry Hobbs, chief engineer of the InterContinental San Francisco, on a stairwell occupancy-sensor
+  retrofit: $45,000, with a $17,000 rebate, expected to save $35,000 a year (about a 10-month payback). Old, but a real chief engineer
+  making exactly the decision Energy Twin models.
+- *Search excerpt (Wyndham Owner Trends Report, March 2026):* among 325 owners and developers, energy efficiency is one of the top uses of AI
+  for those already using it (54%).
+- *Counterpoint to be ready for (search excerpt, CBRE):* hotels' combined utility costs rose only 2.0% in 2024. Answer: one year of utility
+  costs is not the trend; EIA's outlook has commercial electricity prices rising, and carbon rules add a cost that utility bills do not show.
+
+**Honest framing on stage:** "We could not interview operators in 48 hours, so we used published evidence: EIA's own data, the industry
+association and trade press." Then the next step: "Our first pilot is to run Energy Twin on a real hotel's bills."
+
+**Sources (search results, for the team to check):** [AHLA: rising costs and staffing challenges](https://www.ahla.com/news/rising-cost-staffing-challenges-persist-hotels-travel-demand-expected-hold-steady);
+[Lodging Magazine: Rethinking Guestroom Energy](https://lodgingmagazine.mydigitalpublication.com/articles/rethinking-guestroom-energy);
+[Buildings: Hotel Efficiency Optimization](https://buildings.com/feature/article/10189814/hotel-efficiency-optimization);
+[Wyndham Owner Trends Report](https://corporate.wyndhamhotels.com/news-releases/hotel-owners-at-an-ai-crossroads-as-confidence-and-growth-plans-hold-firm-wyndham-owner-trends-report-finds/);
+[CBRE: operating costs 2025](https://www.cbre.com/insights/articles/all-eyes-on-operating-costs-in-2025-lessons-learned-in-2024);
+[DOE: data center electricity demand report](https://www.energy.gov/articles/doe-releases-new-report-evaluating-increase-electricity-demand-data-centers);
+[LBNL 2024 data center report](https://eta.lbl.gov/publications/2024-lbnl-data-center-energy-usage-report);
+[NYC Buildings: Local Law 97](https://www.nyc.gov/assets/buildings/pdf/presentations/2023bsls/ll97.pdf).
+**Verified documents:** [EIA STEO November 2026](https://www.eia.gov/outlooks/steo/pdf/steo_full.pdf); [EIA STEO January 2026](https://www.eia.gov/outlooks/steo/archives/jan26.pdf);
+[EIA CBECS 2018 Table C2](https://www.eia.gov/consumption/commercial/data/2018/ce/xls/c2.xlsx); [EIA CBECS 2018 microdata](https://www.eia.gov/consumption/commercial/data/2018/index.php?view=microdata).

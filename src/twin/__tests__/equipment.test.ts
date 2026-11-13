@@ -11,7 +11,7 @@ describe('equipment systems', () => {
       const items = equipmentInventory({ ...demo.profile, hvacType: hvac });
       for (const i of items) {
         const s = systemOf(i);
-        expect(['hvac', 'water', 'lighting', 'other']).toContain(s.group);
+        expect(['hvac', 'water', 'lighting', 'kitchen', 'laundry', 'other', 'renewables']).toContain(s.group);
         expect(s.endUses.length).toBeGreaterThan(0);
       }
     }

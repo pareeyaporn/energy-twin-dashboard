@@ -166,7 +166,7 @@ export function estimatedInventory(p: HotelProfile, data: HotelData = hotelData)
     base({ id: 'elevators', zone: 'hallways_shared', label: 'Elevators', category: 'other', count: Math.max(1, Math.ceil(p.floors / e.elevators.perFloors)), ...kw(e.elevators.ratedKW), fuel: 'electric', schedule: 'On demand', efficiency: 'Not specified', modelNote: 'Informational.' }),
     base({ id: 'laundry', zone: 'hallways_shared', label: 'Laundry dryers', category: 'laundry', count: 1, ...kbtu(e.laundry.dryerKBtuH), fuel: 'gas', schedule: 'Daytime', efficiency: 'Not specified', modelNote: 'Informational.' }),
     base({
-      id: 'dhw-heater', zone: 'hot_water', label: 'Gas water heaters', category: 'water', count: heaters, ...kbtu(heaterTotal / heaters), fuel: 'gas',
+      id: 'dhw-heater', zone: 'hot_water', label: 'Water heaters', category: 'water', count: heaters, ...kbtu(heaterTotal / heaters), fuel: 'gas',
       schedule: '24/7, peaks morning and evening', efficiency: `Thermal efficiency about ${ref.waterHeaterEfficiency.toFixed(2)} (assumed)`,
       levers: [lever('waterHeaterEfficiency', 'thermal', ref.waterHeaterEfficiency)], roles: ['hotWater'],
       modelNote: 'Its efficiency sets the gas used for hot water.',

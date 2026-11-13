@@ -104,7 +104,7 @@ describe("HotelTwin layers", () => {
     expect(screen.queryByRole("group", { name: /Hotel cross-section/ })).toBeNull();
 
     fireEvent.click(tab("Equipment"));
-    expect(screen.getAllByText("estimate").length).toBeGreaterThan(5);
+    expect(screen.getAllByText("estimated").length).toBeGreaterThan(5);
     expect(screen.getAllByText(/Schedule:/).length).toBeGreaterThan(5);
 
     fireEvent.click(tab("Flow"));
@@ -120,7 +120,7 @@ describe("HotelTwin layers", () => {
     render(<HotelTwin />);
     fireEvent.click(zoneButton(/Hot water:/));
     fireEvent.click(screen.getByRole("tab", { name: "Equipment" }));
-    expect(screen.getByText(/Water heaters/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Water heaters/).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Elevators/)).toBeNull();
   });
 

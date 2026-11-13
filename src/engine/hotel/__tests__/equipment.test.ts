@@ -91,10 +91,10 @@ describe('equipment levers (current equipment changes the baseline)', () => {
     const yearly = 40 * hotelData.weather.climates['chicago']!.solar!.kWhPerKwYear.mid;
     expect(base.annual.elecKWh - r.annual.elecKWh).toBeCloseTo(yearly, 0);
     expect(r.annual.gasTherms).toBeCloseTo(base.annual.gasTherms, 6);
-    const p = withEq([{ id: 'pv', template: 'solar_pv', quantity: 1, capacity: 40 }]).profile;
-    expect(p.equipmentLevers!.existingSolarKw).toBe(40);
+    const resolved = withEq([{ id: 'pv', template: 'solar_pv', quantity: 1, capacity: 40 }]);
+    expect(resolved.profile.equipmentLevers!.existingSolarKw).toBe(40);
     const roof = usableRoofKw(demo.profile);
-    const ctx = prepareUpgradeContext(p);
+    const ctx = prepareUpgradeContext(resolved);
     const size = evaluatePackage(ctx, ['rooftop_solar']).sizing.solarKw;
     expect(size).toBeLessThanOrEqual(roof - 40 + 0.1);
   });

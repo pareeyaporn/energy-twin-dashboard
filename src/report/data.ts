@@ -11,7 +11,7 @@ import type {
   ResolvedProfile,
   Totals,
 } from "@/engine/hotel";
-import { ZONE_LABELS } from "@/engine/hotel";
+import { ZONE_LABELS, currentEquipment } from "@/engine/hotel";
 import { HVAC_LABEL } from "@/portfolio/metrics";
 
 export const KBTU_PER_KWH = 3.412;
@@ -126,6 +126,11 @@ export interface HotelReportData {
   comfort: { score: number; notes: string[] };
   interpretation: { verdict: "attractive" | "marginal" | "unattractive"; headline: string; sentences: string[] };
   assumptions: string[];
+  /**
+   * The hotel's current equipment as the model uses it (docs/20): one line per item with quantity, capacity, efficiency and its
+   * provenance ("your data" or "estimated"), and how many items the operator corrected.
+   */
+  equipment?: { lines: string[]; corrected: number; note: string };
   risks: string[];
   sources: string[];
 }
@@ -404,6 +409,7 @@ export function buildHotelReport(i: HotelReportInput): HotelReportData {
       `Occupancy ${Math.round(p.occupancy * 100)}% a year on average, with the hotel's seasonal pattern.`,
       ...(i.scenarioNote ? [i.scenarioNote] : []),
     ],
+    equipment: equipmentOf(p),
     risks,
     sources: [...new Set(upgrades.map((u) => u.source).concat(i.baseline.sources ?? []).filter(Boolean))]
       .slice(0, 10)
@@ -490,4 +496,25 @@ export function reportFileName(name: string, date: Date): string {
   const clean = name.replace(/[^A-Za-z0-9]+/g, " ").trim().split(" ").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join("") || "Hotel";
   const d = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   return `EnergyTwin_${clean}_InvestmentReport_${d}.pdf`;
+}
+
+const fmt = (v: number) => v.toLocaleString("en-US", { maximumFractionDigits: v < 10 ? 2 : 0 });
+
+/** The current equipment lines for the report: what the model uses, and whether each item is estimated or entered by the operator. */
+function equipmentOf(p: ResolvedProfile["profile"]): NonNullable<HotelReportData["equipment"]> {
+  const items = currentEquipment(p);
+  const lines = items.map((i) => {
+    const cap = i.capacity ? `${i.count} × ${fmt(i.capacity.value)} ${i.capacity.unit}` : `${i.count}`;
+    const prov = i.estimated ? "estimated" : i.added ? "added by the operator" : `operator data (${i.userEntered.map((f) => f.replace("levers.", "")).join(", ")})`;
+    return `${i.label}: ${cap}; ${i.efficiency}; ${prov}.`;
+  });
+  const corrected = items.filter((i) => !i.estimated).length + (p.equipment ?? []).filter((o) => o.removed).length;
+  return {
+    lines,
+    corrected,
+    note:
+      corrected > 0
+        ? "The operator corrected the equipment listed as operator data; the baseline above is recalculated from it (a correction, not a saving). Efficiencies, lighting LED share, water-heater efficiency and existing solar change the model; quantities, ages and nameplates are informational."
+        : "All equipment is estimated from rules of thumb (placeholders), not a site survey.",
+  };
 }

@@ -350,6 +350,13 @@ function HotelReport({ d, generated }: { d: HotelReportData; generated: string }
           {t("Energy Twin simulates the hotel's energy use by zone, end use and month from its characteristics, local weather normals, occupancy and published benchmarks, then applies each upgrade to that simulation and prices the result with the hotel's energy prices. Financial results use one common breakdown for every plan.")}
         </Text>
         <Bullets items={d.assumptions} />
+        {d.equipment && (
+          <>
+            <Text style={st.h3}>Current equipment</Text>
+            <Text style={{ marginBottom: 2 }}>{t(d.equipment.note)}</Text>
+            <Bullets items={d.equipment.lines} />
+          </>
+        )}
         <Text style={st.h3}>Utility incentives</Text>
         <Bullets
           items={[

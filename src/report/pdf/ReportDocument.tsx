@@ -194,6 +194,17 @@ function CashFlow({ values, width = 520, height = 150 }: { values: number[]; wid
   );
 }
 
+function AiSummary({ text }: { text?: string | undefined }) {
+  if (!text) return null;
+  return (
+    <View style={[st.callout, { borderLeftColor: MUTED }]} wrap={false}>
+      <Text style={{ fontFamily: "Helvetica-Bold", marginBottom: 3 }}>Executive summary</Text>
+      <Text style={{ marginBottom: 3 }}>{t(text)}</Text>
+      <Text style={{ fontSize: 7, color: MUTED }}>{t("Summary written by AI from the figures in this report. Modeled estimates, not a guarantee.")}</Text>
+    </View>
+  );
+}
+
 function Verdict({ v }: { v: HotelReportData["interpretation"] }) {
   const color = v.verdict === "attractive" ? GREEN : v.verdict === "marginal" ? AMBER : RED;
   return (
@@ -232,6 +243,7 @@ function HotelReport({ d, generated }: { d: HotelReportData; generated: string }
           <Kpi label="Carbon avoided" value={`${num(d.environment.carbonKgAvoided / 1000, 1)} t CO2e`} note={`${pct(d.environment.carbonPct)} of emissions a year`} />
           <Kpi label="Budget left" value={usd(d.investment.remainingBudget)} note={`of ${usd(d.budget)}${d.investment.overBudget ? " (over budget)" : ""}`} tone={d.investment.overBudget ? "bad" : undefined} />
         </View>
+        <AiSummary text={d.aiSummary} />
         <Verdict v={d.interpretation} />
 
         <Text style={st.h2}>Property overview</Text>
@@ -426,6 +438,7 @@ function PortfolioReport({ d, generated }: { d: PortfolioReportData; generated: 
           <Kpi label="Carbon avoided" value={`${num(t0.carbonAvoidedKg / 1000, 1)} t CO2e`} note="a year" />
           <Kpi label="Portfolio energy spend" value={usd(d.current.cost)} note={`${num(d.current.siteEui, 1)} kBtu/ft² on average`} />
         </View>
+        <AiSummary text={d.aiSummary} />
         <Verdict v={d.interpretation} />
         <Text style={st.h2}>Investment by property</Text>
         <Table

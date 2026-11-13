@@ -486,6 +486,7 @@ decision summary). Each part has its own heading below.
 - [x] 14.E13 [CC] Twin header and portfolio card / table show the data and baseline status
 - [x] 14.E14 [CC] Tests: calibration, periods, metrics, units, validation, store, editor, xlsx round trip; browser check desktop and phone
 - [x] 14.E15 [CC] PDF investment report: add data source, billing period, historical use, selected baseline and calibration metrics — *done (November 2026): "Utility data and baseline" in the hotel report (preview and PDF): source and synthetic label, billing period, actual vs modeled vs calibrated per fuel, NMBE / CV(RMSE) before and after, the baseline the report used, limits; `utilityForReport` in `src/report/fromStore.ts`; tests in `src/report/__tests__/reportUtility.test.ts` and the PDF test*
+- [x] 14.E19 [CC] Linked use and cost in the spreadsheet: typing kWh or therms updates the cost at the month's rate, and the other way round — *done (November 2026): "Keep use and cost in step" checkbox (on for sample and manual entry, off for uploads), rate captured at focus, paste not linked; `src/utility/linkedCells.ts`; tests in `src/test/linkedCells.test.ts` and `UtilityDataManager.test.tsx` (docs/19 §2)*
 - [ ] 14.E16 [CC] Several meters per fuel with their own billing periods (advanced import with a meter column)
 - [ ] 14.E17 [CC] Weather normalization to the billing year's actual weather (needs daily historical weather per billing period)
 - [ ] 14.E18 [TEAM] Try the template with a real hotel's bills; check the bounds and thresholds against real data
@@ -584,6 +585,32 @@ operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" br
       `src/test/equipmentInventory.test.tsx` (store, persistence, independence, reconciliation, report, UI); browser check desktop and phone*
 - [ ] 14G.9 P2 [CC] Heat-pump water heaters and fuel switching; per-appliance demand; hourly solar self-consumption for existing arrays;
       multi-step undo; persisting card-edited schedules for sample hotels
+
+## Phase 15 — AI assistant (CC; built November 2026, docs/23)
+The rule stays: the AI never produces a number. It may ask the engine to compute one, and every number in its text must be in the context
+or in this answer's tool results.
+- [x] 15.1 [CC] Tool-using advisor: seven engine tools run in the browser (`src/engine/hotel/advisor/tools.ts`), at most two rounds, the
+      function returns `{ text }` or `{ toolCalls }` (`supabase/functions/advisor`), the number check covers the context plus the tool results,
+      a result card per tool; offline, a keyword parser calls the same tools and a template answers from them — *done*
+- [x] 15.2 [CC] Action buttons derived only from tool runs (apply a what-if, apply a package, make it my plan, preview the report, open a stress
+      test, open the portfolio plan); a plan applies only to the hotel it was computed for — *done (`src/advisor/actions.ts`)*
+- [x] 15.3 [CC] Follow-up questions from the AI, number-checked, topped up with deterministic ones — *done*
+- [x] 15.4 [CC] `<AskAbout question />` by the KPI cost, on each insight card, the recommended plan and the portfolio's Start here — *done*
+- [x] 15.5 [CC] Briefing at the top of the Hotel tab: three sentences, number-checked, cached per hotel context, template fallback, hidden for
+      the session on request — *done (`src/advisor/Briefing.tsx`)*
+- [x] 15.6 [CC] AI executive summary in the report preview and PDF, labeled, validated, at most 8 s, nothing extra on fallback — *done
+      (`src/report/aiSummary.ts`)*
+- [x] 15.7 [CC] "Suggest with AI" in the utility mapping step: headers and unit names only, privacy note, user confirms, guessMapping stays on
+      fallback — *done (`src/utility/AiMappingSuggest.tsx`)*
+- [x] 15.8 [CC] Portfolio tools and an "Ask about the portfolio" chat with suggested chain questions — *done (`src/advisor/PortfolioChat.tsx`)*
+- [x] 15.9 [CC] Tests (`advisorTools.test.ts`, `aiAssistant.test.tsx`, `advisorFunction.test.ts`) and a browser check on desktop and phone with
+      the function unreachable and mocked — *done*
+- [ ] 15.10 [team] Redeploy the advisor function (the tool protocol is new) and ask the live model each new question once: "What should I do with
+      $50,000?", "What if occupancy rises to 85%?", "Which hotel should we invest in first, and why?", "How would you split $250,000 across
+      the chain?"; check the cards and that answers are marked AI
+- [ ] 15.11 [team] Open the report preview once with the live model and read the executive summary; open the Hotel tab and read the briefing
+- [ ] 15.12 P2 [CC] A per-hotel `find_best_plan` for any portfolio hotel (chain questions such as "what would $50,000 buy at the second
+      hotel?"); streaming answers; units in the column-mapping suggestion
 
 ## Phase 8 — Demo hardening (all)
 - [x] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

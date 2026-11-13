@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { reportFileName } from "./data";
 import type { ReportData } from "./data";
 import { ReportPreview } from "./ReportPreview";
+import { withAiSummary } from "./aiSummary";
 
 const today = () => new Date();
 const longDate = (d: Date) => d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -36,13 +37,37 @@ export function ReportActions({ getData, label = "Investment summary", compact =
   const [done, setDone] = useState<string | null>(null);
   const [preview, setPreview] = useState<ReportData | null>(null);
 
+  // The AI executive summary (docs/23) is added before the preview or the PDF when the AI is set up; it waits at most 8 seconds and
+  // nothing extra appears if it is slow, fails or quotes a number the report does not hold.
+  const [summarizing, setSummarizing] = useState(false);
+  const prepare = async (data: ReportData): Promise<ReportData> => {
+    if (data.aiSummary) return data;
+    setSummarizing(true);
+    try {
+      return await withAiSummary(data);
+    } catch {
+      return data;
+    } finally {
+      setSummarizing(false);
+    }
+  };
+  const openPreview = async (data: ReportData | null) => {
+    if (!data || busy) return;
+    setBusy(true);
+    try {
+      setPreview(await prepare(data));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const download = async (data: ReportData | null) => {
     if (!data || busy) return;
     setBusy(true);
     setError(null);
     setDone(null);
     try {
-      setDone(await downloadReport(data));
+      setDone(await downloadReport(await prepare(data)));
     } catch (e) {
       setError(e instanceof Error ? e.message : "The PDF could not be generated.");
     } finally {
@@ -55,9 +80,9 @@ export function ReportActions({ getData, label = "Investment summary", compact =
       <div className={`flex flex-wrap gap-2 ${compact ? "" : "items-center"}`}>
         <Button size="sm" variant="accent" className="min-w-0 flex-1 sm:flex-none" disabled={busy} onClick={() => void download(getData())} data-testid="report-download">
           {busy ? <Loader2 className="animate-spin motion-reduce:animate-none" /> : <Download />}
-          {busy ? "Preparing PDF…" : "Download PDF report"}
+          {summarizing ? "Writing summary…" : busy ? "Preparing PDF…" : "Download PDF report"}
         </Button>
-        <Button size="sm" variant="outline" className="min-w-0 flex-1 sm:flex-none" disabled={busy} onClick={() => setPreview(getData())} data-testid="report-preview">
+        <Button size="sm" variant="outline" className="min-w-0 flex-1 sm:flex-none" disabled={busy} onClick={() => void openPreview(getData())} data-testid="report-preview">
           <Eye /> Preview report
         </Button>
       </div>

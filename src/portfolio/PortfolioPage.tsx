@@ -22,6 +22,7 @@ import { PriorityExplainer } from "./PriorityExplainer";
 import { StartHere } from "./StartHere";
 import { cityGroups } from "./cities";
 import { OPTIMIZER_ANCHOR } from "./anchors";
+import { PortfolioChat } from "@/advisor/PortfolioChat";
 
 const compact = (n: number, unit: string) =>
   `${n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e4 ? `${Math.round(n / 1000).toLocaleString("en-US")}k` : Math.round(n).toLocaleString("en-US")} ${unit}`;
@@ -117,6 +118,7 @@ export function PortfolioPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <PortfolioChat />
           <Button
             size="sm"
             variant="accent"

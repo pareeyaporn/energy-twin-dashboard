@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Trash2 } from "lucide-react";
 import type { GridField, GridIssue, GridMode, UtilityGridRow } from "@/engine/hotel";
+import { fuelOf, isLinkedField, linkedEdit, rowRate } from "./linkedCells";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -23,14 +24,27 @@ export interface SpreadsheetGridProps {
   onChange: (rows: UtilityGridRow[]) => void;
   onUndo: () => void;
   onRemoveRow?: (index: number) => void;
+  /** Keep each month's use and cost in step (typed edits only; pasting keeps the pasted values). */
+  linked?: boolean;
+  /** The hotel's prices, used when a month has no cost yet. */
+  fallbackRates?: { elec: number | null; gas: number | null };
 }
 
 /**
  * A small spreadsheet: click a cell to edit; arrow keys, Enter and Tab move between cells; pasting cells copied from Excel fills the
  * block from the focused cell; Ctrl/Cmd+Z undoes. Cells with an error are outlined red, warnings amber.
  */
-export function SpreadsheetGrid({ rows, mode, issues, onChange, onUndo, onRemoveRow }: SpreadsheetGridProps) {
+export function SpreadsheetGrid({ rows, mode, issues, onChange, onUndo, onRemoveRow, linked = false, fallbackRates }: SpreadsheetGridProps) {
   const ref = useRef<HTMLTableElement>(null);
+  // The rate captured when a linked cell gets focus, per row and fuel, so typing (or clearing) does not change it mid-edit.
+  const rates = useRef(new Map<string, number | null>());
+  const rateFor = (r: number, f: EditField) => {
+    if (!isLinkedField(f)) return null;
+    const fuel = fuelOf(f);
+    const key = `${r}-${fuel}`;
+    if (!rates.current.has(key)) rates.current.set(key, rowRate(rows[r]!, fuel, fallbackRates?.[fuel]));
+    return rates.current.get(key) ?? null;
+  };
   const columns = mode === "periods" ? [...DATE_COLUMNS, ...VALUE_COLUMNS] : VALUE_COLUMNS;
   const issueAt = (r: number, f: GridField) => {
     const here = issues.filter((x) => x.row === r && (x.field === f || (x.field === null && f !== "start" && f !== "end")));
@@ -45,7 +59,8 @@ export function SpreadsheetGrid({ rows, mode, issues, onChange, onUndo, onRemove
       el.select();
     }
   };
-  const set = (r: number, f: EditField, v: string) => onChange(rows.map((row, i) => (i === r ? { ...row, [f]: v } : row)));
+  const set = (r: number, f: EditField, v: string) =>
+    onChange(rows.map((row, i) => (i !== r ? row : linked && isLinkedField(f) ? linkedEdit(row, f, v, rateFor(r, f)) : { ...row, [f]: v })));
 
   const onKey = (e: React.KeyboardEvent<HTMLInputElement>, r: number, c: number) => {
     const el = e.currentTarget;
@@ -126,7 +141,10 @@ export function SpreadsheetGrid({ rows, mode, issues, onChange, onUndo, onRemove
                       onChange={(e) => set(r, col.field, e.target.value)}
                       onKeyDown={(e) => onKey(e, r, c)}
                       onPaste={(e) => onPaste(e, r, c)}
-                      onFocus={(e) => e.currentTarget.select()}
+                      onFocus={(e) => {
+                        e.currentTarget.select();
+                        if (isLinkedField(col.field)) rates.current.delete(`${r}-${fuelOf(col.field)}`);
+                      }}
                       className={`num w-full rounded border bg-background/60 px-2 py-1 text-right tabular-nums outline-none focus:border-primary focus:ring-1 focus:ring-primary ${
                         state === "error" ? "border-destructive bg-destructive/10" : state === "warning" ? "border-amber-500/70 bg-amber-500/10" : "border-transparent hover:border-border"
                       } ${col.field === "start" || col.field === "end" ? "text-left" : ""}`}

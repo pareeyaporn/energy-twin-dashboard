@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Map as MlMap, Marker } from "maplibre-gl";
 import type { PropertySummary } from "@/engine/hotel";
+import { CityCluster } from "./CityCluster";
 import { HotelMarker } from "./HotelMarker";
+import { useTwin } from "@/store/useTwin";
 import { fitPadding, overlayPadding } from "./mapTypes";
 import type { MapViewProps } from "./mapTypes";
 import { spreadOffsets } from "./spread";
@@ -11,6 +13,8 @@ import type { Offsets } from "./spread";
 /** Free dark basemap, no API key (attribution shown on the map). Restyled after load (`restyleBasemap`). */
 export const MAP_STYLE_URL = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 const LOAD_TIMEOUT_MS = 8000;
+/** Below this zoom, with hotels in several cities, each city shows as one marker (the hotels of a city would overlap). */
+export const CITY_CLUSTER_ZOOM = 7;
 
 /** The navy palette the basemap is repainted with (see docs/17). */
 export const BASEMAP = {
@@ -85,13 +89,17 @@ export function restyleBasemap(m: MlMap): void {
  * page can show the drawn fallback map instead. Hotel markers are React components rendered into MapLibre markers.
  */
 export function MapLibreView(props: MapViewProps & { onFail: () => void }) {
-  const { rows, colors, ranks, hoverId, selectedId, metricLabel, valueText, onHover, onSelect, flyTo, fitNonce, reduce } = props;
+  const { rows, colors, ranks, hoverId, selectedId, metricLabel, valueText, onHover, onSelect, flyTo, fitNonce, fitIds, cities = [], cityValueText, onPickCity, reduce } = props;
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<MlMap | null>(null);
   const markers = useRef<Map<string, Marker>>(new Map());
   const [containers, setContainers] = useState<Record<string, HTMLElement>>({});
   const [offsets, setOffsets] = useState<Offsets>({});
   const [ready, setReady] = useState(false);
+  const [zoom, setZoom] = useState(13);
+  const cityMarkers = useRef<Map<string, Marker>>(new Map());
+  const [cityEls, setCityEls] = useState<Record<string, HTMLElement>>({});
+  const lakeLabel = useRef<HTMLElement | null>(null);
   const handlers = useRef(props);
   handlers.current = props;
   const lib = useRef<typeof import("maplibre-gl") | null>(null);
@@ -106,6 +114,7 @@ export function MapLibreView(props: MapViewProps & { onFail: () => void }) {
       const m = map.current;
       if (!m) return;
       setOffsets(spreadOffsets(rowsRef.current.map((r) => ({ id: r.id, ...m.project([r.lng, r.lat]) }))));
+      setZoom(m.getZoom());
     });
   };
 
@@ -135,9 +144,44 @@ export function MapLibreView(props: MapViewProps & { onFail: () => void }) {
       changed = true;
     }
     if (changed) setContainers(Object.fromEntries([...markers.current].map(([id, mk]) => [id, mk.getElement()])));
+    syncCities();
     respread();
   };
+
+  const citiesRef = useRef(cities);
+  citiesRef.current = cities;
+  /** One marker per city (shown only when zoomed out over several cities). */
+  const syncCities = () => {
+    const m = map.current;
+    const L = lib.current;
+    if (!m || !L) return;
+    const want = new Map(citiesRef.current.map((g) => [g.city, g]));
+    let changed = false;
+    for (const [city, mk] of cityMarkers.current)
+      if (!want.has(city)) {
+        mk.remove();
+        cityMarkers.current.delete(city);
+        changed = true;
+      }
+    for (const g of want.values()) {
+      const existing = cityMarkers.current.get(g.city);
+      if (existing) {
+        existing.setLngLat([g.lng, g.lat]);
+        continue;
+      }
+      const el = document.createElement("div");
+      el.style.cssText = "width:0;height:0;";
+      cityMarkers.current.set(g.city, new L.Marker({ element: el, anchor: "center" }).setLngLat([g.lng, g.lat]).addTo(m));
+      changed = true;
+    }
+    if (changed) setCityEls(Object.fromEntries([...cityMarkers.current].map(([c, mk]) => [c, mk.getElement()])));
+  };
   const idsKey = rows.map((r) => `${r.id}@${r.lat},${r.lng}`).join("|");
+  const citiesKey = cities.map((g) => `${g.city}@${g.lat},${g.lng}`).join("|");
+  useEffect(() => {
+    syncCities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [citiesKey]);
   useEffect(() => {
     syncMarkers();
     // A different set of hotels (filters, organization): show them all.
@@ -155,11 +199,14 @@ export function MapLibreView(props: MapViewProps & { onFail: () => void }) {
         const mod = (await import("maplibre-gl")).default;
         await import("maplibre-gl/dist/maplibre-gl.css");
         if (cancelled || !box.current) return;
+        // Back from a hotel: the camera the user left (portfolioView.camera); otherwise all hotels.
+        const cam = useTwin.getState().portfolioView.camera;
         const m = new mod.Map({
           container: box.current,
           style: MAP_STYLE_URL,
-          bounds: boundsOf(rowsRef.current),
-          fitBoundsOptions: { padding: fitPadding(box.current.clientWidth), maxZoom: 13 },
+          ...(cam
+            ? { center: [cam.lng, cam.lat] as [number, number], zoom: cam.zoom }
+            : { bounds: boundsOf(rowsRef.current), fitBoundsOptions: { padding: fitPadding(box.current.clientWidth), maxZoom: 13 } }),
           attributionControl: { compact: true },
           fadeDuration: reduce ? 0 : 300,
           dragRotate: false,
@@ -178,6 +225,7 @@ export function MapLibreView(props: MapViewProps & { onFail: () => void }) {
           label.textContent = "Lake Michigan";
           label.setAttribute("aria-hidden", "true");
           label.style.cssText = "pointer-events:none;font:italic 500 12px/1 ui-sans-serif,system-ui;letter-spacing:.28em;text-transform:uppercase;color:#4d85b8;opacity:.75;white-space:nowrap;";
+          lakeLabel.current = label;
           new mod.Marker({ element: label }).setLngLat([-87.545, 41.8]).addTo(m);
           setReady(true);
           respread();
@@ -186,6 +234,10 @@ export function MapLibreView(props: MapViewProps & { onFail: () => void }) {
           if (!loaded) handlers.current.onFail();
         });
         m.on("zoom", respread);
+        m.on("moveend", () => {
+          const c = m.getCenter();
+          useTwin.getState().setPortfolioView({ camera: { lng: c.lng, lat: c.lat, zoom: m.getZoom() } });
+        });
         m.on("click", (e) => {
           // Marker clicks also reach the map; only a click on the map itself closes the card.
           const t = e.originalEvent?.target;
@@ -203,6 +255,7 @@ export function MapLibreView(props: MapViewProps & { onFail: () => void }) {
       if (timer) clearTimeout(timer);
       cancelAnimationFrame(raf.current);
       markers.current.clear();
+      cityMarkers.current.clear();
       map.current?.remove();
       map.current = null;
     };
@@ -221,13 +274,25 @@ export function MapLibreView(props: MapViewProps & { onFail: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flyTo?.n]);
 
-  // Fit all hotels.
+  // Fit all hotels, or the hotels of one city.
   useEffect(() => {
     const m = map.current;
-    if (!m || fitNonce === 0 || !rows.length) return;
-    m.fitBounds(boundsOf(rows), { padding: fitPadding(box.current?.clientWidth ?? 0), maxZoom: 13, duration: reduce ? 0 : 900 });
+    const subset = fitIds ? rows.filter((r) => fitIds.includes(r.id)) : rows;
+    if (!m || fitNonce === 0 || !subset.length) return;
+    m.fitBounds(boundsOf(subset), { padding: fitPadding(box.current?.clientWidth ?? 0), maxZoom: 13, duration: reduce ? 0 : 900 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fitNonce]);
+
+  // Zoomed out over several cities: one marker per city instead of overlapping hotels.
+  const clustered = cities.length > 1 && zoom < CITY_CLUSTER_ZOOM;
+  useEffect(() => {
+    for (const [id, mk] of markers.current) {
+      const hidden = clustered && id !== selectedId;
+      mk.getElement().style.visibility = hidden ? "hidden" : "visible";
+    }
+    for (const mk of cityMarkers.current.values()) mk.getElement().style.visibility = clustered ? "visible" : "hidden";
+    if (lakeLabel.current) lakeLabel.current.style.visibility = clustered ? "hidden" : "visible";
+  });
 
   // Hovered and selected markers draw above the others (the tooltip stays readable).
   useEffect(() => {
@@ -237,7 +302,16 @@ export function MapLibreView(props: MapViewProps & { onFail: () => void }) {
   const byId = new Map(rows.map((r) => [r.id, r]));
   return (
     <>
-      <div ref={box} className="h-full w-full" data-testid="maplibre-map" />
+      <div ref={box} className="h-full w-full" data-testid="maplibre-map" data-clustered={clustered ? "true" : "false"} />
+      {Object.entries(cityEls).map(([city, el]) => {
+        const g = cities.find((x) => x.city === city);
+        if (!g) return null;
+        return createPortal(
+          <CityCluster group={g} valueText={cityValueText?.(city) ?? ""} metricLabel={metricLabel} onPick={(c) => onPickCity?.(c)} />,
+          el,
+          `city-${city}`,
+        );
+      })}
       {Object.entries(containers).map(([id, el]) => {
         const r = byId.get(id);
         if (!r) return null;

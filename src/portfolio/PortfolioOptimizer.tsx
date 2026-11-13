@@ -116,7 +116,7 @@ function AiPortfolio({ onExplore }: { onExplore: (id: string) => void }) {
                       <td className="num p-1.5 text-right">{f ? usd(f.netInvestment.mid) : "—"}</td>
                       <td className="num p-1.5 text-right text-savings">{f ? usd(f.annualSavings.mid) : "—"}</td>
                       <td className="num p-1.5 text-right">{f?.simplePaybackYears != null ? `${f.simplePaybackYears.toFixed(1)} yr` : "—"}</td>
-                      <td className="p-1.5 text-right"><button type="button" className="whitespace-nowrap text-primary hover:underline" onClick={() => onExplore(a.propertyId)}>Open twin</button></td>
+                      <td className="p-1.5 text-right"><button type="button" className="whitespace-nowrap text-primary hover:underline" onClick={() => onExplore(a.propertyId)} data-testid={`open-hotel-plan-${a.propertyId}`}>Open hotel plan</button></td>
                     </tr>
                   );
                 })}

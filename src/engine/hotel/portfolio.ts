@@ -130,6 +130,9 @@ export interface PropertySummary {
   region?: string;
   ownership?: PortfolioProperty['ownership'];
   neighborhood: string;
+  /** The hotel's city and state, as resolved by its profile (labels; the profile uses them for weather, prices and grid). */
+  city: string;
+  state: string;
   segment: string;
   lat: number;
   lng: number;
@@ -203,6 +206,8 @@ export function portfolioSummary(
       ...(region ? { region } : {}),
       ...(ownership ? { ownership } : {}),
       neighborhood: prep.property.neighborhood,
+      city: p.city,
+      state: p.state,
       segment: prep.property.segment,
       lat: prep.property.lat,
       lng: prep.property.lng,

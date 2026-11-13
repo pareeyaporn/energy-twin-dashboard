@@ -25,7 +25,7 @@ function ScenarioPage() {
         <Link to="/" className="font-semibold">Energy Twin</Link>
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm"><Link to="/optimizer">Budget optimizer</Link></Button>
-          <Button asChild variant="ghost" size="sm"><Link to="/"><ArrowLeft />Dashboard</Link></Button>
+          <Button asChild variant="ghost" size="sm"><Link to="/hotel"><ArrowLeft />Dashboard</Link></Button>
         </div>
       </header>
       <ScenarioSimulator />

@@ -209,7 +209,7 @@ Price growth EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar: PVWatts C
 | High-efficiency HVAC equipment | $109,918 | 22,231 | 1,367 | $4,393 | 25.0 y | −$86,734 | −$60,220 | 16.5 |
 
 At $50,000 the optimizer picks LED lighting plus occupancy sensors ($38,940 gross and net, $9,022 a year, 4.3 years). ComEd's lighting
-incentives are 2025 rates, so under the program-year rule (docs/15 §22) they are not counted for the 2026 analysis; shown separately, "if
+incentives are 2025 rates, so under the program-year rule (docs/15 §21) they are not counted for the 2026 analysis; shown separately, "if
 ComEd renews the 2025 rate" they would give $14,756, $24,184 net and 2.7 years. Net cost and payback use the net investment; the budget is
 compared with the gross cost (docs/15).
 
@@ -464,6 +464,29 @@ changes"; it used to say "per year" for every test), adds carbon and percentage 
 `StressReport` (cost avoided = the plan's savings under the stress minus its normal savings). The cold snap costs much less than the heat wave
 because the extra heating is gas ($0.929 a therm, about $9.3 per MMBtu) while the extra cooling is electric ($0.1405 a kWh, about $41.2 per
 MMBtu), and only one month changes in each.
+
+### Investment priority, exactly (as implemented in `portfolioSummary`)
+
+1. A hotel's candidates are the single-hotel optimizer's eligible upgrade combinations for its own systems (equipment compatibility is decided
+   there: for example, smart room controls are not offered to a hotel that has them).
+2. Its **best package** is the candidate with the highest 10-year NPV among those whose gross installed cost fits the hotel's own budget and whose
+   10-year NPV is positive. None: no savings potential and a score of 0.
+3. **Return per dollar** = that package's 10-year NPV ÷ its net investment (installed cost minus incentives counted in the base case).
+4. **Score** = round(return per dollar ÷ the highest return per dollar among the hotels shown × 100). The best hotel scores 100; scores are
+   relative to the hotels shown, so filters change them.
+
+Energy spending, floor area and intensity are not inputs: a large hotel can spend the most and still rank lower (in the Chicago chain, Lakefront
+Convention Hotel spends the most, $591,679 a year, while Riverwalk Grand ranks first). The UI restates these steps (`src/portfolio/priority.ts`)
+and a test checks its scores equal the engine's.
+
+### Multi-city portfolios
+
+`PropertySummary` carries the hotel's resolved `city` and `state` (labels). A hotel's city and state pick its weather (NOAA normals), solar output
+(PVWatts), prices (EIA), grid factor (eGRID) and intensity and end-use split (ComStock), research pass 11; incentives apply only in their
+territory (`states`). Still Chicago- or Illinois-based for every city: the upgrade savings parameters (IL-TRM), hourly load shapes, the seasonal
+occupancy default and the age factor. Synthetic national organization: Meridian Hotels & Resorts (4 hotels, 910 rooms, about $1.57 million a year,
+savings potential about $113,000 a year; no incentives apply outside Illinois). Its top priority is Midtown Tower Hotel (New York), whose best
+package returns about 2.04 dollars of 10-year NPV per dollar.
 
 ## Appendix A — Store contract (task 1.10): approved and built
 

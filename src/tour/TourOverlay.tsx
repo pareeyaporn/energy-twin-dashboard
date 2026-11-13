@@ -104,7 +104,7 @@ export function TourOverlay() {
     const origin = useTour.getState().origin;
     // Each step shows the user's own view plus its own settings. The twin layer stays as the last step left it (switching back to the 3D
     // view mid-tour would rebuild the 3D scene); the user's layer comes back when the tour ends.
-    if (origin) applyView({ ...origin.view, twinLayer: currentView().twinLayer, ...(step.route === "/" ? step.view : {}) });
+    if (origin) applyView({ ...origin.view, twinLayer: currentView().twinLayer, ...(step.route === "/hotel" ? step.view : {}) });
     void (async () => {
       if (step.tab) {
         await waitFor(workspaceTabsReady, TOUR_TIMING.waitMs, signal);

@@ -145,7 +145,41 @@ under the map).
   group; Escape closes it; the legend's gradient is decorative (values are in text); the screen-reader list of hotels with an Explore
   button per hotel remains.
 
+## Multi-city mode (November 2026)
+
+An organization can have hotels in several cities (the synthetic Meridian Hotels & Resorts: New York, Miami, Denver).
+
+- **Street map.** Fit shows every hotel (a national extent). Below zoom 7 (`CITY_CLUSTER_ZOOM`), with hotels in more than one city, each city is
+  one marker (`CityCluster.tsx`): a pill with the city's hotel count, its name and its figure for the map's metric (sum for energy cost and
+  savings potential, floor-area-weighted intensity, best priority score), cyan border and glow. Hotel markers are hidden while clustered (the
+  selected hotel stays visible); the "Lake Michigan" label is hidden too. Clicking a city marker zooms to that city's hotels.
+- **City chips** above the map ("Cities: New York · 1, Miami · 2, Denver · 1") zoom to a city; the chosen chip is outlined. **Show all hotels**
+  fits every hotel again.
+- **Drawn map.** When the hotels are not all in Chicago, the drawn Chicago map is replaced by a schematic (`MultiCityFallback.tsx`): one panel per
+  city (two columns from 640 px), navy land with a faint grid, the city name and hotel count, the city's figure for the metric, and the hotels at
+  their relative positions within the city (scaled to fit; one hotel is centered). No streets or coastlines are drawn because none are sourced
+  for these cities; the panels say "Schematic: one panel per city, not to scale with each other". The legend moves below the panels so it never
+  covers a hotel. A city chip scrolls to its panel and outlines it.
+- **Filters and totals.** A City filter appears when the organization spans several cities; "By city" is the default grouping for such
+  organizations; the hotel card, tooltip and table show the city.
+
+## Homepage and the way back (November 2026)
+
+- The portfolio page is the homepage (`/`); the hotel dashboard is `/hotel`. The header reads "Your Hotel Portfolio" with the subtitle and the
+  tagline; **Optimize portfolio** scrolls to the optimizer.
+- KPI cards: energy cost, savings potential, carbon, properties first (large); the other totals in a compact strip (collapsible on phones).
+- **Start here** (between the KPIs and the map) highlights the top investment priority with its reason; **Why this ranking?** opens the
+  explanation (`PriorityExplainer.tsx`).
+- The view is remembered in the store (`portfolioView`): metric, selected hotel, list state, table sort, the street map's camera (saved on every
+  move end, restored when the map is created again) and the scroll position (restored after mount). Coming back from a hotel shows the same
+  view, its card open and its table row highlighted.
+- Marker tooltip: name; area, city and rooms; the metric's value; energy cost, intensity, savings and priority; "Click to open · Explore hotel".
+  The card's button reads **Explore hotel**.
+
 ## Files
+
+Added for multi-city and the workflow: `cities.ts` (grouping), `CityCluster.tsx`, `MultiCityFallback.tsx`, `priority.ts`, `PriorityExplainer.tsx`, `StartHere.tsx`, `HotelInPortfolio.tsx`, `anchors.ts`; `src/app/` (homepage, hotel dashboard, landing rules).
+
 
 `CityMap.tsx` (state, layout, toolbar, ranking) · `MapLibreView.tsx` (street map, restyle, React markers through portals, fly and fit) ·
 `MapFallback.tsx` (drawn map) · `HotelMarker.tsx` · `spread.ts` · `PropertyCard.tsx` · `PropertyList.tsx` · `MapLegend.tsx` ·

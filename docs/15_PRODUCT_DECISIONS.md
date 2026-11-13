@@ -280,3 +280,21 @@ Team choices for the utility data feature (docs/19); the Guideline 14 criteria a
   labeled synthetic, never marked as real unless the user edits it and ticks "These are my hotel's real utility records".
 - **Storage:** browser only, per hotel; nothing goes to the server or the AI advisor except whether the baseline is calibrated.
 
+## 25. The portfolio as the homepage; multi-city portfolios (November 2026)
+
+- **The portfolio is the homepage** (`/`); the single-hotel dashboard is `/hotel`. Operators of several hotels start from "which hotel first";
+  a single-hotel organization skips the portfolio.
+- **Landing:** new visitors and Reset demo land on the portfolio. A returning user lands where they last were, on the first load of a visit only
+  (afterwards, opening the portfolio is always the user's choice).
+- **"Start here" uses investment priority**, not energy cost or intensity: the question is where a dollar does the most. When the biggest spender
+  is a different hotel, the card says why it ranks lower, so spending is not mistaken for priority.
+- **A national synthetic organization** (Meridian Hotels & Resorts) carries the multi-city hotels, so the Chicago demo chain and every demo figure
+  stay unchanged.
+- **The drawn map for several cities is a schematic** (one panel per city), not a drawn U.S. map: no sourced map geometry is bundled for those
+  cities, and an invented outline would look like data.
+- **Map colors:** cost and intensity use blue → amber → red, with the legend saying what high means (spends more, uses more per ft²); savings
+  potential and priority use a green scale, never red, because high is good there.
+- **"Reports" in the top bar** opens the hotel's Invest tab (the investment results) until the investment report is merged.
+- **What the portfolio remembers** (organization, filters, metric, selected hotel, list, sort, camera, scroll) is view state only, in the store;
+  no figure depends on it.
+

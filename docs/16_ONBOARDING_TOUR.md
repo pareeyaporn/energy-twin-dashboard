@@ -68,3 +68,10 @@ The wording lives in `src/tour/steps.ts` and the figures in `src/tour/insights.t
   portfolio navigation, unchanged state). Checked end to end in a browser at 1440 × 900 and 390 × 844.
 - Known: the energy-flow view's moving dots are heavy for software rendering (a browser without a graphics card); on normal hardware they run
   smoothly.
+
+## Routes after the portfolio became the homepage (November 2026)
+
+The hotel steps now point at `/hotel` (the hotel dashboard) and the portfolio step at `/` (the homepage); the first-visit start works on `/`,
+`/portfolio` and `/hotel`. The tour therefore starts on the portfolio for a new visitor and moves to the hotel for the hotel steps. The step
+content is unchanged here and will be reworked for the portfolio-first journey separately.
+

@@ -34,7 +34,8 @@ describe("Portfolio page", () => {
 
   it("renders the chain, its totals, the drawn map (no WebGL in tests) and the synthetic label", () => {
     render(<PortfolioPage />);
-    expect(screen.getByRole("heading", { name: /Lakefront Hotel Group/ })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /Your Hotel Portfolio/ })).toBeTruthy();
+    expect(screen.getByTestId("portfolio-page").textContent).toContain("Lakefront Hotel Group");
     expect(screen.getByTestId("portfolio-synthetic").textContent).toMatch(/Synthetic/);
     expect(screen.getByTestId("map-fallback")).toBeTruthy();
     expect(screen.getAllByTestId("portfolio-row")).toHaveLength(5);
@@ -50,7 +51,7 @@ describe("Portfolio page", () => {
     expect(first()).toBe("Wells Street Hotel");
   });
 
-  it("hovering a marker shows a tooltip, clicking it opens its card, and Explore digital twin opens that hotel", () => {
+  it("hovering a marker shows a tooltip, clicking it opens its card, and Explore hotel opens that hotel", () => {
     render(<PortfolioPage />);
     fireEvent.mouseEnter(screen.getByTestId("marker-ohare-gateway"));
     expect(screen.getByTestId("marker-tooltip").textContent).toContain("O'Hare Gateway Hotel");
@@ -62,7 +63,7 @@ describe("Portfolio page", () => {
     fireEvent.click(screen.getByTestId("explore-ohare-gateway"));
     expect(useTwin.getState().activePropertyId).toBe("ohare-gateway");
     expect(useTwin.getState().hotel.profile.name).toBe("O'Hare Gateway Hotel");
-    expect(navigate).toHaveBeenCalledWith({ to: "/" });
+    expect(navigate).toHaveBeenCalledWith({ to: "/hotel" });
   });
 
   it("the hotel list ranks by the map's metric; hover highlights the marker, click selects and the card follows", () => {

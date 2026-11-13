@@ -128,8 +128,33 @@ export interface PortfolioFilter {
   brand: string | null;
   region: string | null;
   ownership: Ownership | null;
+  /** A city (multi-city organizations); optional so older code that sets the other three keeps working. */
+  city?: string | null;
 }
-const NO_FILTER: PortfolioFilter = { brand: null, region: null, ownership: null };
+const NO_FILTER: PortfolioFilter = { brand: null, region: null, ownership: null, city: null };
+
+/** What the portfolio map colors and ranks the hotels by. */
+export type PortfolioMapMetric = "cost" | "eui" | "potential" | "priority";
+
+/**
+ * How the portfolio page looked when the user left it for a hotel, so coming back shows the same map: the metric, the selected hotel
+ * (its card), whether the hotel list is open, a city to focus, and the scroll position. View only: no figure depends on it.
+ */
+export interface PortfolioView {
+  metric: PortfolioMapMetric;
+  selectedId: string | null;
+  listOpen: boolean;
+  /** Fly to this city when the page opens (a breadcrumb city link); null shows every hotel. */
+  focusCity: string | null;
+  scrollY: number;
+  /** Scroll to this section when the page opens (for example the portfolio optimizer, from a hotel's Invest tab). */
+  anchor: string | null;
+  /** The comparison table's sort column and direction. */
+  tableSort: { id: string; dir: 1 | -1 };
+  /** The street map's camera when the user left (restored on return); null fits all hotels. */
+  camera: { lng: number; lat: number; zoom: number } | null;
+}
+export const DEFAULT_PORTFOLIO_VIEW: PortfolioView = { metric: "eui", selectedId: null, listOpen: true, focusCity: null, scrollY: 0, anchor: null, tableSort: { id: "prio", dir: -1 }, camera: null };
 
 export interface TwinState {
   presets: PresetHome[];
@@ -254,6 +279,8 @@ export interface TwinState {
   organizations: PortfolioOrganization[];
   organizationId: string;
   portfolioFilter: PortfolioFilter;
+  portfolioView: PortfolioView;
+  setPortfolioView: (patch: Partial<PortfolioView>) => void;
   /** Switches the portfolio to another organization (clears the filter and the portfolio plan; the open hotel stays open). */
   setOrganization: (id: string) => void;
   setPortfolioFilter: (patch: Partial<PortfolioFilter>) => void;
@@ -385,6 +412,7 @@ function initialHotelState() {
     organizations: hotelOrganizations,
     organizationId: hotelPortfolio.id,
     portfolioFilter: NO_FILTER,
+    portfolioView: DEFAULT_PORTFOLIO_VIEW,
     activePropertyId: null as string | null,
     propertyStates: {} as Record<string, PropertySnapshot>,
     portfolioBudget: PORTFOLIO_DEFAULTS.budget,
@@ -832,9 +860,19 @@ export const useTwin = create<TwinState>((set, get) => ({
     set((s) => {
       if (id === s.organizationId || !s.organizations.some((o) => o.id === id)) return {};
       const portfolio = portfolioWith(s.userHotels, id);
-      return { organizationId: id, portfolio, portfolioFilter: NO_FILTER, portfolioPlan: null, portfolioStressScope: portfolio.properties.map((p) => p.id) };
+      return {
+        organizationId: id,
+        portfolio,
+        portfolioFilter: NO_FILTER,
+        // Another organization: keep the metric and the list, drop the selected hotel and any city focus.
+        portfolioView: { ...s.portfolioView, selectedId: null, focusCity: null, scrollY: 0, anchor: null, camera: null },
+        portfolioPlan: null,
+        portfolioStressScope: portfolio.properties.map((p) => p.id),
+      };
     }),
-  setPortfolioFilter: (patch) => set((s) => ({ portfolioFilter: { ...s.portfolioFilter, ...patch }, portfolioPlan: null })),
+  // Other hotels shown: the saved camera no longer frames them.
+  setPortfolioFilter: (patch) => set((s) => ({ portfolioFilter: { ...s.portfolioFilter, ...patch }, portfolioPlan: null, portfolioView: { ...s.portfolioView, camera: null } })),
+  setPortfolioView: (patch) => set((s) => ({ portfolioView: { ...s.portfolioView, ...patch } })),
   setPortfolioStressTest: (portfolioStressTestId) => set({ portfolioStressTestId }),
   setPortfolioStressScope: (ids) => set((s) => ({ portfolioStressScope: s.portfolio.properties.map((p) => p.id).filter((id) => ids.includes(id)) })),
   setPortfolioStressPlan: (portfolioStressPlan) => set({ portfolioStressPlan }),

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Info } from "lucide-react";
+import { useTwin } from "@/store/useTwin";
 import type { PropertySummary } from "@/engine/hotel";
 import { percent, usd } from "@/twin/format";
 import { HVAC_LABEL } from "./metrics";
@@ -16,7 +16,7 @@ type Col = {
 
 const COLS: Col[] = [
   { id: "name", label: "Property", value: (r) => r.name, show: (r) => r.name },
-  { id: "location", label: "Location", value: (r) => r.neighborhood, show: (r) => r.neighborhood },
+  { id: "location", label: "Location", value: (r) => `${r.city} ${r.neighborhood}`, show: (r) => `${r.neighborhood}, ${r.city}` },
   { id: "brand", label: "Brand · ownership", value: (r) => r.brand ?? "", show: (r) => [r.brand, r.ownership ? OWNERSHIP_LABEL[r.ownership] : undefined].filter(Boolean).join(" · ") || "—" },
   { id: "rooms", label: "Rooms", value: (r) => r.rooms, show: (r) => String(r.rooms), numeric: true },
   { id: "area", label: "Floor area", value: (r) => r.floorAreaSqft, show: (r) => `${Math.round(r.floorAreaSqft).toLocaleString("en-US")} ft²`, numeric: true },
@@ -30,10 +30,16 @@ const COLS: Col[] = [
   { id: "prio", label: "Priority", value: (r) => r.priorityScore, show: (r) => `${r.priorityScore}`, numeric: true },
 ];
 
-/** Every property side by side; click a header to sort. */
-export function PortfolioTable({ rows, onExplore, onRemove }: { rows: PropertySummary[]; onExplore: (id: string) => void; onRemove?: (id: string) => void }) {
-  const [sort, setSort] = useState<{ id: string; dir: 1 | -1 }>({ id: "prio", dir: -1 });
-  const col = COLS.find((c) => c.id === sort.id)!;
+/**
+ * Every property side by side, ranked: click a header to sort (by cost, intensity, savings, priority or any column); the sort is kept
+ * when you visit a hotel and come back, and the hotel you last opened is highlighted. Hotel names open the hotel.
+ */
+export function PortfolioTable({ rows, onExplore, onRemove, onWhy }: { rows: PropertySummary[]; onExplore: (id: string) => void; onRemove?: (id: string) => void; onWhy?: () => void }) {
+  const sort = useTwin((s) => s.portfolioView.tableSort);
+  const last = useTwin((s) => s.portfolioView.selectedId);
+  const setView = useTwin((s) => s.setPortfolioView);
+  const setSort = (f: (s: { id: string; dir: 1 | -1 }) => { id: string; dir: 1 | -1 }) => setView({ tableSort: f(sort) });
+  const col = COLS.find((c) => c.id === sort.id) ?? COLS[COLS.length - 1]!;
   const sorted = [...rows].sort((a, b) => {
     const x = col.value(a);
     const y = col.value(b);
@@ -59,6 +65,11 @@ export function PortfolioTable({ rows, onExplore, onRemove }: { rows: PropertySu
                     {c.label}
                     {on && (sort.dir === 1 ? <ArrowUp className="size-3" /> : <ArrowDown className="size-3" />)}
                   </button>
+                  {c.id === "prio" && onWhy && (
+                    <button type="button" onClick={onWhy} className="ml-1 inline-flex align-middle text-muted-foreground hover:text-primary" aria-label="How investment priority is ranked" data-testid="priority-info">
+                      <Info className="size-3" />
+                    </button>
+                  )}
                 </th>
               );
             })}
@@ -67,16 +78,20 @@ export function PortfolioTable({ rows, onExplore, onRemove }: { rows: PropertySu
         </thead>
         <tbody>
           {sorted.map((r) => (
-            <tr key={r.id} className="border-b border-border/50 hover:bg-accent/30" data-testid="portfolio-row">
+            <tr key={r.id} className={`border-b border-border/50 hover:bg-accent/30 ${r.id === last ? "bg-primary/10" : ""}`} data-testid="portfolio-row" data-last={r.id === last ? "true" : undefined}>
               {COLS.map((c) => (
                 <td key={c.id} className={`p-2 ${c.numeric ? "num text-right" : ""} ${c.id === "name" ? "font-medium" : ""}`}>
-                  {c.show(r)}
+                  {c.id === "name" ? (
+                    <button type="button" className="text-left hover:text-primary hover:underline" onClick={() => onExplore(r.id)} data-testid={`table-open-${r.id}`}>{c.show(r)}</button>
+                  ) : (
+                    c.show(r)
+                  )}
                   {c.id === "name" && !r.synthetic && <span className="ml-1.5 rounded-full border border-primary/40 px-1.5 text-[10px] font-normal text-primary">Your hotel</span>}
                   {c.id === "name" && <UtilityBadge propertyId={r.id} />}
                 </td>
               ))}
               <td className="p-2 text-right">
-                <button type="button" className="whitespace-nowrap text-primary hover:underline" onClick={() => onExplore(r.id)}>Open twin</button>
+                <button type="button" className="whitespace-nowrap text-primary hover:underline" onClick={() => onExplore(r.id)}>Analyze</button>
                 {!r.synthetic && onRemove && (
                   <button type="button" className="ml-2 whitespace-nowrap text-muted-foreground hover:text-loss hover:underline" onClick={() => onRemove(r.id)} aria-label={`Remove ${r.name}`}>Remove</button>
                 )}

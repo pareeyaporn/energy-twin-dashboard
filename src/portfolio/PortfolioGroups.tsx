@@ -3,14 +3,15 @@ import type { PropertySummary } from "@/engine/hotel";
 import { OWNERSHIP_LABEL } from "@/store/userHotels";
 import { usd } from "@/twin/format";
 
-type GroupBy = "brand" | "region" | "ownership";
-const LABEL: Record<GroupBy, string> = { brand: "Brand", region: "Region", ownership: "Ownership" };
+type GroupBy = "city" | "brand" | "region" | "ownership";
+const LABEL: Record<GroupBy, string> = { city: "City", brand: "Brand", region: "Region", ownership: "Ownership" };
 
-/** Totals by brand, region or ownership type: sums of each hotel's engine figures. */
+/** Totals by city, brand, region or ownership type: sums of each hotel's engine figures. */
 export function PortfolioGroups({ rows }: { rows: PropertySummary[] }) {
-  const [by, setBy] = useState<GroupBy>("brand");
+  const multiCity = new Set(rows.map((r) => r.city)).size > 1;
+  const [by, setBy] = useState<GroupBy>(multiCity ? "city" : "brand");
   const keyOf = (r: PropertySummary) => {
-    const v = r[by];
+    const v = by === "city" ? `${r.city}, ${r.state}` : r[by];
     return by === "ownership" && v ? OWNERSHIP_LABEL[v as keyof typeof OWNERSHIP_LABEL] : (v ?? "Unassigned");
   };
   const groups = new Map<string, { hotels: number; rooms: number; cost: number; potential: number; investment: number; area: number; site: number }>();

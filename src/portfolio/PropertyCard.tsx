@@ -14,6 +14,7 @@ export function PropertyCard({
   color,
   rank,
   metric,
+  onWhy,
 }: {
   row: PropertySummary;
   onExplore: (id: string) => void;
@@ -21,6 +22,8 @@ export function PropertyCard({
   color?: string | undefined;
   rank?: number | undefined;
   metric?: MapMetric | undefined;
+  /** Opens the explanation of the investment priority ranking. */
+  onWhy?: ((id: string) => void) | undefined;
 }) {
   const accent = color ?? "var(--primary)";
   const stats: { id: MapMetric | "rooms"; label: string; value: string }[] = [
@@ -49,7 +52,7 @@ export function PropertyCard({
           </span>
           <div className="min-w-0 flex-1">
             <div className="font-semibold leading-tight">{row.name}</div>
-            <div className="text-xs text-muted-foreground">{row.neighborhood} · {row.segment}</div>
+            <div className="text-xs text-muted-foreground">{row.neighborhood}, {row.city} · {row.segment}</div>
             {row.brand && <div className="text-[11px] text-primary">{row.brand}{row.region ? ` · ${row.region}` : ""}</div>}
           </div>
           {onClose && (
@@ -70,14 +73,19 @@ export function PropertyCard({
         <dl className="mt-2 space-y-0.5 text-[11px]">
           {minor.map(([k, v]) => (
             <div key={k} className="flex justify-between gap-2">
-              <dt className="text-muted-foreground">{k}</dt>
+              <dt className="text-muted-foreground">
+                {k}
+                {k === "Investment priority" && onWhy && (
+                  <button type="button" className="ml-1 text-primary hover:underline" onClick={() => onWhy(row.id)} data-testid="card-priority-why">Why?</button>
+                )}
+              </dt>
               <dd className="num">{v}</dd>
             </div>
           ))}
         </dl>
         <p className="mt-2 text-[10px] text-muted-foreground">{row.synthetic ? "Demonstration property · synthetic data · modeled estimates" : "Your hotel · your inputs (defaults where blank) · modeled estimates"}<UtilityBadge propertyId={row.id} /></p>
         <Button size="sm" className="mt-2.5 w-full" onClick={() => onExplore(row.id)} data-testid={`explore-${row.id}`}>
-          Explore digital twin <ArrowRight />
+          Explore hotel <ArrowRight />
         </Button>
       </div>
     </div>

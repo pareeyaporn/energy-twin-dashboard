@@ -21,7 +21,7 @@ export interface TourStep {
   title: string;
   body: string | ((s: TwinState) => string);
   /** Page the step lives on. */
-  route: "/" | "/portfolio";
+  route: "/hotel" | "/";
   /** Workspace tab to show first (main page only). */
   tab?: WorkspaceTab;
   /** The elements to highlight (their combined area); none = a centered card. */
@@ -55,7 +55,7 @@ export const TOUR_STEPS: TourStep[] = [
           ? `This is ${s.hotel.profile.name}, a sample hotel with synthetic data.`
           : `This is ${s.hotel.profile.name}, built from your inputs.`
       }`,
-    route: "/",
+    route: "/hotel",
     tab: "Hotel",
     hero: true,
     insight: true,
@@ -64,7 +64,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "profile",
     title: "Make it your hotel",
     body: "Change rooms, systems, occupancy or bills under Edit details, or add your own hotels with Add my hotel on the Portfolio page. Every number recalculates for your building.",
-    route: "/",
+    route: "/hotel",
     tab: "Hotel",
     target: () => all(workspacePanel()),
     insight: true,
@@ -73,7 +73,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "costs",
     title: "What you spend, at a glance",
     body: "Yearly energy cost, energy use and carbon, all modeled from the building, its systems, occupancy, local weather and prices.",
-    route: "/",
+    route: "/hotel",
     tab: "Hotel",
     target: () => all(visible('[data-testid="kpi-cost"]')?.parentElement),
     insight: true,
@@ -82,7 +82,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "twin",
     title: "See where the energy goes",
     body: "Explore the hotel by zone, room by room, system by system or as an energy flow. Colors show where the money goes.",
-    route: "/",
+    route: "/hotel",
     tab: "Hotel",
     target: () => {
       const t = twin();
@@ -95,7 +95,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "seasons",
     title: "Watch a year go by",
     body: "Snow in January, cooling on July afternoons, guests checking in and out: the building and its meter follow every hour of every month.",
-    route: "/",
+    route: "/hotel",
     tab: "Hotel",
     target: () => all(document.getElementById("twin-panel")),
     view: { twinLayer: "zones", timeMode: "seasons", timeMonth: 0, timeHour: 18, playing: true, playbackSpeed: 4 },
@@ -105,7 +105,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "flow",
     title: "Follow every dollar",
     body: "From the electricity and gas meters to the systems that use them, zone by zone, hour by hour.",
-    route: "/",
+    route: "/hotel",
     tab: "Hotel",
     target: () => all(document.getElementById("twin-panel")),
     view: { twinLayer: "flow" },
@@ -115,7 +115,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "compare",
     title: "Before and after, on the building",
     body: "Apply any investment package, then switch between Before, After and Split to see the change on the building and in every number.",
-    route: "/",
+    route: "/hotel",
     tab: "Hotel",
     target: () => {
       const t = twin();
@@ -126,7 +126,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "drivers",
     title: "Test a decision before you make it",
     body: "Change occupancy, room temperatures, schedules or energy prices and watch the cost move. Nothing changes in your real hotel.",
-    route: "/",
+    route: "/hotel",
     tab: "Scenario",
     target: () => all(visible('aside[aria-label="Workspace"] [aria-label="Scenario controls"]') ?? workspacePanel()),
     insight: true,
@@ -135,7 +135,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "stress",
     title: "Prepare for the unexpected",
     body: "Heat waves, cold snaps, conference surges, worn equipment, price rises: see what each would add to your bill, and how a plan protects you.",
-    route: "/",
+    route: "/hotel",
     tab: "Hotel",
     target: () => all(visible('section[aria-label="Hotel digital twin"] section[aria-label="Stress tests"]')),
     insight: true,
@@ -144,7 +144,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "optimizer",
     title: "Find the best investments",
     body: "Enter a budget and Energy Twin tests every combination of upgrades, with installed cost, utility incentives and guest comfort counted.",
-    route: "/",
+    route: "/hotel",
     tab: "Invest",
     target: () => {
       const panel = visible('aside[aria-label="Workspace"]');
@@ -158,7 +158,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "projections",
     title: "See each investment's 10-year payoff",
     body: "Every package comes with a year-by-year projection: what you pay upfront after confirmed incentives, what it saves each year as prices rise, when it pays back and what it is worth after 10 years, with a low-to-high range and a discounted view.",
-    route: "/",
+    route: "/hotel",
     tab: "Invest",
     target: () => all(visible('aside[aria-label="Workspace"] section[aria-label="Investment packages"]') ?? workspacePanel()),
     insight: true,
@@ -167,7 +167,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "plans",
     title: "Build your own plan and compare",
     body: "Pick upgrades yourself, then put your plan next to the recommendation: upfront cost, savings, payback, 10-year value and carbon.",
-    route: "/",
+    route: "/hotel",
     tab: "Invest",
     target: () => all(visible('[role="tablist"][aria-label="Investment mode"]')),
   },
@@ -175,7 +175,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "advisor",
     title: "Ask in plain English",
     body: "Ask why heating costs so much or how to spend your budget. The AI explains the model's results, and every number it quotes is checked against them.",
-    route: "/",
+    route: "/hotel",
     tab: "Ask",
     target: () => all(workspacePanel()),
   },
@@ -183,7 +183,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "portfolio",
     title: "One view for the whole chain",
     body: "Every hotel on the map, colored by cost, efficiency or savings potential. Find the ones to fix first, split one budget across all of them, and stress-test the chain.",
-    route: "/portfolio",
+    route: "/",
     target: () => all(visible('section[aria-label="City map"]')),
     insight: true,
   },
@@ -191,7 +191,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "finish",
     title: "You're ready to explore!",
     body: "See where your hotel spends energy, test what could change, and discover investments that lower your operating costs. Replay this tour any time from the top bar.",
-    route: "/",
+    route: "/hotel",
     hero: true,
   },
 ];

@@ -160,8 +160,9 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
             <ScenarioSlider label="Electricity price change" value={electricityRateChangePct} displayValue={`${electricityRateChangePct > 0 ? "+" : ""}${electricityRateChangePct}%`} min={-50} max={100} step={5} overridden={scenario.electricityRateChangePct !== undefined} profileText="Relative to the current electricity price" onValueChange={(value) => setScenario({ electricityRateChangePct: value })} onReset={() => setScenario({}, ["electricityRateChangePct"])} />
           </div>
   );
+  const frame = variant === "panel" ? "min-w-0 rounded-xl border border-border/70 bg-card/60 p-4" : "panel min-w-0 p-5";
   const stressEl = (
-          <section className="panel min-w-0 p-5" aria-label="Stress tests">
+          <section className={frame} aria-label="Stress tests">
             <div className="mb-4"><h2 className="font-semibold">Stress tests</h2><p className="mt-1 text-xs text-muted-foreground">Select one event; select it again to clear it.</p></div>
             <div className="grid gap-3 @min-[340px]:grid-cols-2">
               {STRESS_TESTS.map((test) => {
@@ -172,13 +173,13 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
           </section>
   );
   const whyEl = (
-            <section className="panel min-w-0 p-5" aria-label="Why this changed">
+            <section className={frame} aria-label="Why this changed">
               <h2 className="font-semibold">Why this changed</h2>
               {!scenarioResult || scenarioResult.drivers.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Adjust a control or apply a stress test to see the largest cost drivers.</p> : <ul className="mt-4 space-y-4">{scenarioResult.drivers.map((driver) => <li key={driver.id} className="border-b border-border pb-4 last:border-0 last:pb-0"><div className="flex items-start justify-between gap-3"><h3 className="text-sm font-medium">{driver.label}</h3><span className={cn("num shrink-0 text-sm font-semibold", driver.deltaCost < 0 ? "text-savings" : driver.deltaCost > 0 ? "text-heat" : "text-muted-foreground")}>{signedMoney(driver.deltaCost)} / yr</span></div><p className="mt-2 text-xs leading-relaxed text-muted-foreground">{driver.detail}</p></li>)}</ul>}
             </section>
   );
   const comfortEl = (
-            <section className="panel min-w-0 p-5" aria-label="Comfort notes">
+            <section className={frame} aria-label="Comfort notes">
               <h2 className="font-semibold">Comfort notes</h2>
               {!scenarioResult ? <p className="mt-4 text-sm text-muted-foreground">Comfort notes appear when a scenario changes guest-room or common-area conditions.</p> : scenarioResult.flags.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">No comfort warnings for this scenario.</p> : <ul className="mt-4 space-y-3">{scenarioResult.flags.map((flag) => <li key={flag.id} role="note" className={cn("rounded-md border p-3 text-sm", flag.severity === "warn" ? "border-heat/30 bg-heat/10 text-heat" : "border-border text-muted-foreground")}>{flag.message}</li>)}</ul>}
             </section>
@@ -187,24 +188,30 @@ export function ScenarioSimulator({ variant = "page" }: { variant?: "page" | "pa
   if (variant === "panel") {
     // Workspace tab: controls and explanations only; the KPI strip and twin show the change.
     return (
-      <div className="@container space-y-5 p-5" aria-label="Scenario controls">
-        <Button asChild variant="link" className="h-auto px-0"><Link to="/scenario">Scenario in detail</Link></Button>
+      // Sidebar redesign (November 2026, at the user's request): the result summary and the key controls first (occupancy, smart room
+      // controls, setpoints), advanced controls behind "More controls", then stress tests and the explanations; same controls as before.
+      <div className="@container space-y-4 p-3 sm:p-4" aria-label="Scenario controls">
         {headerEl}
         <ScenarioImpact />
-        {occupancyEl}
-        {setpointsEl}
-        {smartEl}
-        <Collapsible className="border-t border-border pt-4">
-          <CollapsibleTrigger asChild>
-            <Button type="button" variant="ghost" size="sm" className="group w-full justify-between px-0 hover:bg-transparent">More controls<ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180" /></Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent>{moreEl}</CollapsibleContent>
-        </Collapsible>
+        <div className="space-y-5 rounded-xl border border-border/70 bg-card/60 p-4">
+          {occupancyEl}
+          {smartEl}
+          {setpointsEl}
+          <Collapsible className="border-t border-border pt-4">
+            <CollapsibleTrigger asChild>
+              <Button type="button" variant="ghost" size="sm" className="group w-full justify-between px-0 hover:bg-transparent">More controls<ChevronDown className="h-4 w-4 transition-transform group-data-[state=open]:rotate-180 motion-reduce:transition-none" /></Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="animate-in fade-in-0 duration-200 motion-reduce:animate-none">{moreEl}</CollapsibleContent>
+          </Collapsible>
+        </div>
         {stressEl}
         {whyEl}
         {comfortEl}
         <SavedScenarios />
-        <p className="text-xs text-muted-foreground">Scenario results are estimates, not a forecast or an engineering audit.</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">Scenario results are estimates, not a forecast or an engineering audit.</p>
+          <Button asChild variant="link" className="h-auto px-0 text-xs"><Link to="/scenario">Scenario in detail</Link></Button>
+        </div>
       </div>
     );
   }

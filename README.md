@@ -148,7 +148,7 @@ npx vitest run  # tests
 - [Equipment inventory](docs/20_EQUIPMENT_INVENTORY.md) (audit, data model, which edits change the model, current vs proposed)
 - [Calculation transparency](docs/21_CALCULATION_TRANSPARENCY.md) ("How was this calculated?", data labels, financial assumptions)
 - [How it works, in plain language](docs/24_HOW_IT_WORKS.md) (top-down method, the data files, what the equipment list changes)
-- [Pitch and Q&A](docs/22_PITCH_AND_QA.md) (why it is a wow, demo moments, 40 judge questions with answers)
+- [Pitch and Q&A](docs/22_PITCH_AND_QA.md) (why it is a wow, demo moments, 44 judge questions with answers)
 
 ## Working with Lovable
 

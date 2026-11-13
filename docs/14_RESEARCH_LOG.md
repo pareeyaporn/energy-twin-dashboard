@@ -366,7 +366,7 @@ York, Florida or Colorado utility incentive has been researched, so hotels there
 | Data center load | "tripled over the past decade… projected to double or triple by 2028" | DOE announcement of the LBNL 2024 report | Search excerpt (lbl.gov blocked) |
 | NYC Local Law 97 | buildings over 25,000 ft² incl. hotels; $268 per tCO₂e over the limit; limits tighten in 2030 | Compliance guides | Search excerpt (nyc.gov blocked) |
 
-Used only in the pitch (docs/22 part 5); no model value changed.
+Used only in the pitch (docs/22 Parts B and E); no model value changed.
 
 ## Pass 13 (November 2026, hotel fuel mix; not used in calculations)
 

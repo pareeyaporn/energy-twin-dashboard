@@ -1,8 +1,11 @@
 import type { MetricDef } from "./metrics";
 import { colorAt } from "./metrics";
 
-/** The map legend: the metric, its unit, the color scale with the portfolio's lowest, middle and highest values, and what high means. */
-export function MapLegend({ def, values }: { def: MetricDef; values: number[] }) {
+/**
+ * The map legend: the metric, its unit, the color scale with the portfolio's lowest, middle and highest values, and what high means. With
+ * the 3D data columns on, it also states their scale: heights proportional to the value, from the ground, the tallest = the highest hotel.
+ */
+export function MapLegend({ def, values, columns = false }: { def: MetricDef; values: number[]; columns?: boolean }) {
   const finite = values.filter(Number.isFinite);
   const lo = finite.length ? Math.min(...finite) : 0;
   const hi = finite.length ? Math.max(...finite) : 0;
@@ -28,6 +31,12 @@ export function MapLegend({ def, values }: { def: MetricDef; values: number[] })
         <span>Lowest</span>
         <span>Higher = {def.high}</span>
       </div>
+      {columns && (
+        <div className="mt-1 border-t border-glass-border pt-1 text-[10px] leading-snug text-muted-foreground" data-testid="map-legend-columns">
+          <span className="text-foreground/90">Columns:</span> height proportional to the value, from 0; tallest ={" "}
+          <span className="num text-foreground/90">{def.format(hi)}</span>
+        </div>
+      )}
     </div>
   );
 }

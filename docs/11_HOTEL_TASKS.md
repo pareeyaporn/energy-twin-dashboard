@@ -587,6 +587,32 @@ operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" br
 - [ ] 14G.9 P2 [CC] Heat-pump water heaters and fuel switching; per-appliance demand; hourly solar self-consumption for existing arrays;
       multi-step undo; persisting card-edited schedules for sample hotels
 
+### 14H Portfolio dashboard redesign (built November 2026; branch `portfolio/redesign`, design in docs/17)
+Same features and figures, a clearer hierarchy: understand the portfolio → discover opportunities → explore hotels → optimize investments.
+Display only: no engine, data, ranking, optimizer or store change.
+- [x] 14H.1 [CC] Header: tagline, "Your Hotel Portfolio", the subtitle, a context line from live data (organization · hotels · cities) and the
+      synthetic label (secondary); actions Ask AI (ghost, opens the portfolio chat), Add hotel, **Optimize portfolio** (scrolls to the optimizer,
+      no animation with reduce effects or the system's reduced-motion setting) — *done*
+- [x] 14H.2 [CC] Filters: Organization (and City for multi-city organizations) visible; Brand / Region / Ownership in a "Filters (n)" popover
+      (a collapsible on phones); active filter chips with ×, Reset filters; the store's `portfolioFilter` only — *done (`PortfolioFilters.tsx`)*
+- [x] 14H.3 [CC] KPI cards with compact values (exact in title and accessible label), icons, Estimate and "How was this calculated?"; the savings
+      card shows savings ÷ spend from the same totals; secondary totals as a separated strip ("More portfolio metrics" on phones) — *done
+      (`PortfolioKpis.tsx`, `format.ts`)*
+- [x] 14H.4 [CC] Top investment opportunity card (`StartHere.tsx`): the ranking's first hotel, savings, net investment, simple payback; Explore
+      this hotel; Why this hotel? (reason, contrast, package, link to the full ranking); Ask AI — *done*
+- [x] 14H.5 [CC] Section headings for Explore your hotels (map unchanged inside), Plan your portfolio investments, Compare properties; Advanced
+      analytics (closed by default) — *done*
+- [x] 14H.6 [CC] Optimizer: one toolbar (budget, presets, objective, run), tabs Recommended plan / My plan / Compare plans, results first (plan
+      KPIs from the totals, the allocation bar by hotel against gross cost with the unused remainder, current → optimized "Projected, if funded",
+      the package table, all totals, report actions), the method behind "How does the optimizer work?", an empty state — *done
+      (`PortfolioOptimizer.tsx`, `AllocationBar.tsx`, `allocation.ts`)*
+- [x] 14H.7 [CC] Compare properties: right-aligned numbers, unit hints, inline savings-potential bar, priority bar, Top marker, hover and last
+      visited states; "savings potential is each hotel's own best package" note; fixed the phone page overflow (an sr-only header escaped the
+      table's scroll container) — *done (`PortfolioTable.tsx`)*
+- [x] 14H.8 [CC] Tests (`src/test/portfolioRedesign.test.tsx`) and a browser check at 1440×900, 1280×800, 768×1024 and iPhone 13, tour included — *done*
+- [ ] 14H.9 P2 [CC] KPI cards 2 × 2 on narrow phones; a keyboard-only way to read the allocation of an unfunded hotel; merge with the 3D map
+      branch (`portfolio/map-3d`)
+
 ## Phase 15 — AI assistant (CC; built November 2026, docs/23)
 The rule stays: the AI never produces a number. It may ask the engine to compute one, and every number in its text must be in the context
 or in this answer's tool results.

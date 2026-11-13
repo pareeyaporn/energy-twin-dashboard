@@ -133,7 +133,7 @@ function AiPortfolio({ onExplore }: { onExplore: (id: string) => void }) {
           <table className="w-full min-w-[760px] text-sm">
             <caption className="sr-only">Recommended package per hotel (estimates)</caption>
             <thead>
-              <tr className="border-b border-glass-border text-left text-xs text-muted-foreground">
+              <tr className="border-b border-glass-border text-left text-xs text-muted-foreground [&_th]:whitespace-nowrap">
                 <th scope="col" className="px-3 py-2.5 font-medium">Hotel</th>
                 <th scope="col" className="px-3 py-2.5 font-medium">Recommended package</th>
                 <th scope="col" className="px-3 py-2.5 text-right font-medium">Gross cost</th>

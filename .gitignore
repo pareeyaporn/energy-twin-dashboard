@@ -33,3 +33,7 @@ dist-ssr
 
 # Claude Code agent worktrees
 .claude/worktrees/
+
+# Voice-over outputs from demo-videos/make_voiceover.py (large; keep local)
+demo-videos/*-voiced.mp4
+demo-videos/*-voice-cache/

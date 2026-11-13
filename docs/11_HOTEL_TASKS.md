@@ -698,6 +698,7 @@ or in this answer's tool results.
       the chain?"; check the cards and that answers are marked AI
 - [ ] 15.11 [team] Open the report preview once with the live model and read the executive summary; open the Hotel tab and read the briefing
 - [ ] 15.12 P2 [CC] A per-hotel `find_best_plan` for any portfolio hotel (chain questions such as "what would $50,000 buy at the second
+- [x] 15.13 [CC] Voice in the Ask tab: mic in (browser speech recognition, spoken numbers normalized) and spoken answers (browser speech synthesis, after the number check, off by default) — *done (November 2026); docs/23 §10, `src/test/advisorVoice.test.tsx`*
       hotel?"); streaming answers; units in the column-mapping suggestion
 
 ## Phase 8 — Demo hardening (all)

@@ -20,6 +20,7 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { AdvisorMessageExtras } from "@/advisor/AdvisorMessageExtras";
+import { VoiceControls } from "@/advisor/VoiceControls";
 
 export function AdvisorPanel() {
   const { messages, busy, step, ask, clear, synthetic, hotelName } = useTwin(
@@ -111,6 +112,8 @@ export function AdvisorPanel() {
             disabled={busy}
           />
           <PromptInputFooter className="justify-end">
+            {/* Claude Code edit (voice, at the user's request): mic in and spoken answers; src/advisor/VoiceControls.tsx. */}
+            <VoiceControls disabled={busy} onTranscript={(text, final) => (final ? send(text) : setQuestion(text))} />
             <PromptInputSubmit
               aria-label="Send question"
               title="Send question"

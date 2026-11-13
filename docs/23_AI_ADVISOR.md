@@ -155,6 +155,26 @@ question once (tasks 15.10–15.11). Rehearsed answers are then saved and replay
 - Observed during the browser check, not caused by this feature: on a phone, the portfolio page's map "Explore digital twin" marker buttons sit
   outside the viewport and widen the page (scroll width about 705 px on a 390 px screen).
 
+## 10. Voice (mic in, spoken answers)
+
+Built at the user's request (November 2026). `src/advisor/voice.ts` (pure helpers, tested) and `src/advisor/VoiceControls.tsx`, placed in
+the Ask box by one line in `AdvisorPanel.tsx` (Lovable-owned, minimal edit).
+
+- **Mic:** tap the mic, speak, and the words appear in the box as you talk; the question is sent when you stop (tap again to stop early).
+  Uses the browser's own speech recognition (Chrome and Edge; Safari partly; Firefox none), which needs an internet connection (Chrome sends
+  the audio to its speech service). Spoken numbers are normalized for the parser: "85 percent" → "85%", "50,000 dollars" → "$50,000",
+  "250 thousand dollars" → "$250,000", "76 degrees" → "76°F".
+- **Spoken answers:** the speaker button (off by default, remembered in the browser) reads each **new** answer aloud with the browser's
+  speech synthesis (works offline). It reads the answer exactly as shown, after the number check, reworded for the ear only (arrows → "to",
+  "+$" → "plus $", units spelled out); a Stop button cuts it short. Nothing is read for answers already on screen.
+- **Failures:** blocked mic, no connection or no speech → a one-line note and typing still works; browsers without either API show no
+  voice buttons.
+- **Privacy:** no new service of ours; the recognition is the browser's. The advisor receives the same text it would from typing.
+- **Demo:** allow the microphone once in rehearsal (the browser asks the first time); in a loud room, type instead.
+
+Tests: `src/test/advisorVoice.test.tsx` (normalizing, speech wording, voice choice, errors; the mic fills the box and sends; answers read
+only when on; no buttons without browser support). Checked in Chromium: the mic starts, a typed question's answer is spoken, no errors.
+
 ## For the pitch Q&A (copied into docs/22, Part D #22–25c)
 
 **Where is the AI?** In six places, all explaining or setting up the engine's numbers:

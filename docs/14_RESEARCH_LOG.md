@@ -348,3 +348,22 @@ occupancy default is Chicago's (STR via Choose Chicago); the age factor is relat
 room controls calibration come from the Illinois TRM (Chicago). **Incentives:** ComEd, Peoples Gas and Illinois Shines programs now carry
 `"states": ["IL"]` and are not listed or applied outside Illinois (they were applied to any hotel before; no effect on the Chicago hotels). No New
 York, Florida or Colorado utility incentive has been researched, so hotels there show none.
+
+## Pass 12 (November 2026, pitch evidence; not used in calculations)
+
+| Item | Value | Source | Status |
+| --- | --- | --- | --- |
+| US lodging energy expenditures, 2018 | $11,513 million (electricity $9,634 M, gas $1,454 M); 207 thousand buildings | EIA CBECS 2018 Table C2 (c2.xlsx) | Verified (downloaded) |
+| US hotels and resorts energy expenditures, 2018 | $5,170 million (electricity $4,372 M, gas $640 M); 65.8 thousand buildings; 3,428 million ft² | Computed: CBECS 2018 public microdata, Σ MFEXP × FINALWT where PBAPLUS = 38 (n = 272) | Verified method; the same sum for PBAPLUS 36–40 gives $11,521 M vs the published $11,513 M |
+| US motels, inns and B&Bs, 2018 | $1,019 million; 40.9 thousand buildings | Same, PBAPLUS = 39 (n = 32, small sample) | Verified method; less precise |
+| US lodging electricity, 2018 | 342 trillion Btu = 100.2 billion kWh (of 598 trillion Btu site energy); 8.4% of commercial-building electricity (4,081 trillion Btu) | EIA CBECS 2018 Table C1 (c1.xlsx) | Verified (downloaded) |
+| US hotels and resorts electricity, 2018 | 46.3 billion kWh (hotels, resorts, motels and inns: 55.4 billion kWh) | Computed: CBECS 2018 microdata, Σ ELCNS × FINALWT, PBAPLUS 38 (and 39); the same sum gives 100.3 billion kWh for all lodging | Verified method |
+| US electricity sold to ultimate customers, 2018 | 3,859 billion kWh (commercial 1,382) | EIA Electric Power Annual, Table 2.2 (epa_02_02.xlsx) | Verified (downloaded) |
+| Shares of US electricity sold, 2018 | lodging 2.6%, hotels and resorts 1.2%, hotels to inns 1.4% | Calculated from the rows above | Verified |
+| CBECS "Lodging" scope | hotels, resorts, motels, inns, B&Bs, dormitories, retirement and nursing homes, shelters, convents | EIA building type definitions page | Verified (fetched) |
+| Commercial electricity price | 13.37 (2025), 14.01 (2026), 14.26 (2027) ¢/kWh | EIA STEO November 2026, Table 2 | Verified (downloaded) |
+| Commercial electricity sales growth and data centers | +2.4% in 2026, +4.3% in 2027, "largely attributed to increasing demand from large computing facilities, that include data centers" | EIA STEO January 2026 | Verified (downloaded) |
+| Data center load | "tripled over the past decade… projected to double or triple by 2028" | DOE announcement of the LBNL 2024 report | Search excerpt (lbl.gov blocked) |
+| NYC Local Law 97 | buildings over 25,000 ft² incl. hotels; $268 per tCO₂e over the limit; limits tighten in 2030 | Compliance guides | Search excerpt (nyc.gov blocked) |
+
+Used only in the pitch (docs/22 part 5); no model value changed.

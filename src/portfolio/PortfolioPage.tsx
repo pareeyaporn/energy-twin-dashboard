@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { HowCalculated } from "@/explain/HowCalculated";
+import type { MetricId } from "@/explain/explanations";
 import { useUtilityHydration } from "@/utility/UtilityDataSection";
 import { useNavigate } from "@tanstack/react-router";
 import { Building2, ChevronDown, Sparkles } from "lucide-react";
@@ -84,10 +86,10 @@ export function PortfolioPage() {
   const cityNames = org.properties.length ? [...new Set(org.properties.map((p) => p.input.city ?? "Chicago"))] : [];
   const where = cityNames.length <= 1 ? cityNames[0] ?? org.city : `${cityNames.length} cities`;
   const intensity = t.floorAreaSqft > 0 ? t.siteKBtu / t.floorAreaSqft : 0;
-  const primary: { k: string; v: string; note?: string }[] = [
-    { k: "Annual energy cost", v: `${usd(t.cost)} / yr` },
-    { k: "Savings potential", v: `${usd(t.savingsPotential)} / yr`, note: `for ${usd(t.investmentRequired)} net` },
-    { k: "Carbon", v: `${Math.round(t.carbonKg / 1000).toLocaleString("en-US")} t CO₂e / yr` },
+  const primary: { k: string; v: string; note?: string; how?: MetricId }[] = [
+    { k: "Annual energy cost", v: `${usd(t.cost)} / yr`, how: "portfolioCost" },
+    { k: "Savings potential", v: `${usd(t.savingsPotential)} / yr`, note: `for ${usd(t.investmentRequired)} net`, how: "savingsPotential" },
+    { k: "Carbon", v: `${Math.round(t.carbonKg / 1000).toLocaleString("en-US")} t CO₂e / yr`, how: "portfolioCarbon" },
     { k: "Properties", v: String(t.properties), note: `${t.rooms.toLocaleString("en-US")} rooms${cities.length > 1 ? ` · ${cities.length} cities` : ""}` },
   ];
   const secondary: [string, string][] = [
@@ -131,7 +133,7 @@ export function PortfolioPage() {
         <dl className="grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid="portfolio-kpis">
           {primary.map((x) => (
             <div key={x.k} className="panel rounded-xl p-3">
-              <dt className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">{x.k}{x.k !== "Properties" && <span className="rounded-full border border-glass-border px-1.5 text-[9px]">Estimate</span>}</dt>
+              <dt className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">{x.k}<span className="flex items-center gap-1">{x.k !== "Properties" && <span className="rounded-full border border-glass-border px-1.5 text-[9px]">Estimate</span>}{x.how && <HowCalculated metric={x.how} />}</span></dt>
               <dd className="num text-lg font-semibold">{x.v}</dd>
               {x.note && <dd className="text-[11px] text-muted-foreground">{x.note}</dd>}
             </div>
@@ -143,7 +145,7 @@ export function PortfolioPage() {
         <dl className={`${moreKpis ? "grid" : "hidden"} grid-cols-2 gap-x-4 gap-y-1 rounded-xl border border-glass-border px-3 py-2 text-xs sm:flex sm:flex-wrap sm:gap-x-6`} data-testid="portfolio-kpis-secondary">
           {secondary.map(([k, v]) => (
             <div key={k} className="flex items-baseline gap-1.5">
-              <dt className="text-muted-foreground">{k}</dt>
+              <dt className="flex items-center gap-1 text-muted-foreground">{k}{k === "Energy intensity" && <HowCalculated metric="portfolioIntensity" />}</dt>
               <dd className="num font-medium">{v}</dd>
             </div>
           ))}

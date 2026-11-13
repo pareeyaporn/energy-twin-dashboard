@@ -84,7 +84,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: "profile",
     title: "Make it your hotel",
-    body: "Each hotel opens with its profile. Edit the details, or load 12 months of utility bills to calibrate the model to your building.",
+    body: "Each hotel opens with its profile. Correct its details and equipment, or load 12 months of utility bills to calibrate the model to your building.",
     route: "/hotel",
     tab: "Hotel",
     target: () => all(visible('[data-testid="utility-section"]') ?? workspacePanel()),

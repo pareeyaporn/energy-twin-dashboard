@@ -119,7 +119,7 @@ export function energyInsights(input: InsightInput, data: HotelData = hotelData)
     out.push({
       id: 'investment',
       title: good.length > 1 ? `${good.length} upgrades fit your budget and pay back` : 'An upgrade fits your budget and pays back',
-      body: `${best.label} would save about ${usd(f.annualSavings.mid)} a year for ${usd(f.netInvestment.mid)} after incentives, paying back in about ${f.simplePaybackYears!.toFixed(1)} years. The optimizer can combine upgrades within your ${usd(p.budget)} budget.`,
+      body: `${best.label} would save about ${usd(f.annualSavings.mid)} a year for ${usd(f.netInvestment.mid)}${f.incentivesTotal > 0 ? ' after counted incentives' : ''}, paying back in about ${f.simplePaybackYears!.toFixed(1)} years. The optimizer can combine upgrades within your ${usd(p.budget)} budget.`,
       metric: { value: f.annualSavings.mid, format: 'usd', label: 'a year saved by the best single upgrade' },
       category: 'investment_opportunity',
       priority: level(f.annualSavings.mid / bill, T.highShare),

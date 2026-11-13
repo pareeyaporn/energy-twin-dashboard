@@ -13,7 +13,7 @@ describe the implementation in `src/engine/hotel` (docs/13). **If the engine cha
 | Recommended investment plan (`src/report/ResultsSummary.tsx`) | Recommended investment (installed cost), estimated annual savings, payback, NPV (5 and 10 years), carbon avoided |
 | Energy insight cards (`src/insights/`) | Each card's own "How was this calculated?" (docs/13 §14) |
 | Sources panel (top bar → Sources) | Financial assumptions list, data labels, the model's main sources |
-| Portfolio (to add with the portfolio-workflow branch) | Energy intensity, savings potential, investment priority (explanations exist: `intensity`, `savingsPotential`, `investmentPriority`) |
+| Portfolio homepage KPIs | Annual energy cost, savings potential, carbon, energy intensity (portfolio-level: the sums over the hotels shown); investment priority has its own "Why this ranking?" explainer |
 
 The ⓘ opens a short panel: what it means, how (one or two sentences), the main inputs with a data label. "More detail" adds the technical
 formula, the sources and the limits. Every panel ends with the estimate statement below.

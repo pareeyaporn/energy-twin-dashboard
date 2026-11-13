@@ -28,7 +28,10 @@ export type MetricId =
   | "npv"
   | "netBenefit"
   | "savingsPotential"
-  | "investmentPriority";
+  | "investmentPriority"
+  | "portfolioCost"
+  | "portfolioCarbon"
+  | "portfolioIntensity";
 
 export interface ExplainInput {
   label: string;
@@ -218,6 +221,33 @@ export function explain(id: MetricId, s: TwinState): Explanation {
         inputs: [{ label: "Each hotel's budget and objective", value: "From its profile", cls: synthetic ? "synthetic" : "user" }],
         sources: [TRM],
         limits: ["A larger budget can raise the potential; it is not the technical maximum.", ...synthLimit],
+      };
+    case "portfolioCost":
+      return {
+        title: "Portfolio energy cost",
+        means: "What the hotels shown are estimated to pay for electricity and gas in a typical year, added up.",
+        how: "Each hotel is simulated on its own (its building, city weather, prices and, where chosen, its calibrated utility baseline and equipment corrections); the portfolio figure is the sum of their annual costs.",
+        inputs: [{ label: "Hotels included", value: "Those matching the current organization and filters", cls: "modeled" }, { label: "Prices", value: "Each hotel's state EIA averages, or its own rates or bills", cls: "verified" }],
+        sources: [BENCH, WEATHER, PRICES],
+        limits: ["All-in average prices; no demand charges.", "Synthetic demonstration hotels unless you added your own."],
+      };
+    case "portfolioCarbon":
+      return {
+        title: "Portfolio carbon emissions",
+        means: "Estimated CO₂-equivalent from the electricity and gas the hotels shown use, added up.",
+        how: "For each hotel, electricity use times its grid region's factor plus gas use times the natural-gas factor; the portfolio figure is the sum.",
+        inputs: [{ label: "Grid factors", value: "Each hotel's eGRID subregion (by city)", cls: "verified" }],
+        sources: [GRID, "EPA GHG Emission Factors Hub 2025 (natural gas)"],
+        limits: ["Annual average factors, not marginal; estimates, not verified carbon accounting."],
+      };
+    case "portfolioIntensity":
+      return {
+        title: "Portfolio energy intensity",
+        means: "Site energy per square foot a year for the hotels shown, taken together.",
+        how: "The hotels' total site energy (kBtu) divided by their total floor area, so larger hotels weigh more.",
+        inputs: [{ label: "Floor areas", value: "Each hotel's profile", cls: "modeled" }],
+        sources: [BENCH],
+        limits: ["A portfolio average; see each hotel's own intensity in the table."],
       };
     case "investmentPriority":
       return {

@@ -469,7 +469,7 @@ decision summary). Each part has its own heading below.
 - [x] 14F.5 [CC] No invented confidence scores; one estimate statement on every explanation — *done*
 - [x] 14F.6 [CC] Sources panel lists the hotel model's sources (the home-era ResStock, RECS and Rewiring America entries removed) — *done
       (minimal edit in Lovable's `SourcesSheet.tsx`)*
-- [ ] 14F.7 [CC] ⓘ on the portfolio KPIs (intensity, savings potential, investment priority) after the portfolio-workflow merge
+- [x] 14F.7 [CC] ⓘ on the portfolio KPIs — *done: annual energy cost, savings potential, carbon and energy intensity (portfolio-level explanations: `portfolioCost`, `portfolioCarbon`, `portfolioIntensity`); investment priority keeps its own "Why this ranking?" explainer*
 
 ### 14E — Utility data and calibration (built November 2026; docs/19)
 
@@ -552,7 +552,7 @@ operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" br
       "Click to open · Explore hotel"; cost and intensity use blue → amber → red with the legend saying high = spends more / uses more per ft²;
       savings potential and priority use a green scale (high = a bigger opportunity), never red*
 - [x] 14D.14 [CC] Top bar — *done (minimal Lovable edit): Portfolio, Hotel analysis, Reports (opens the hotel's Invest tab, where the investment
-      results are; TODO: point it at the investment report once the report feature is merged), Tour, Sources, and Reset demo (secondary, returns
+      results are, scrolled to Preview / Download PDF report when a plan exists — `openReports` in `src/app/landing.ts`), Tour, Sources, and Reset demo (secondary, returns
       to the portfolio)*
 - [x] 14D.15 [CC] Tour routes — *done (minimal): hotel steps use `/hotel`, the portfolio step `/`; the tour content will be reworked separately*
 - [x] 14D.16 [CC] Tests and browser check — *done: `src/test/portfolioWorkflow.test.tsx` (multi-city resolution, Chicago chain unchanged, city

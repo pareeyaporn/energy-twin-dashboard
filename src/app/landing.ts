@@ -48,3 +48,13 @@ export async function openTabWhenReady(tab: WorkspaceTab): Promise<boolean> {
   const tabs = await waitFor(() => Array.from(document.querySelectorAll('aside[aria-label="Workspace"] [role="tab"]')), 3000);
   return tabs.length > 0 && openWorkspaceTab(tab);
 }
+
+/**
+ * The top bar's Reports: the hotel's Invest tab, scrolled to the report buttons (Preview / Download PDF) when a plan exists; otherwise the
+ * Invest tab itself, where "Find the best investments" makes one. Navigation only: nothing is computed or changed.
+ */
+export async function openReports(): Promise<void> {
+  if (!(await openTabWhenReady("Invest"))) return;
+  const actions = await waitFor(() => Array.from(document.querySelectorAll('aside[aria-label="Workspace"] [data-testid="report-actions"]')), 1500);
+  actions[0]?.scrollIntoView({ block: "center", behavior: "smooth" });
+}

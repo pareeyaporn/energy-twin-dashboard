@@ -70,6 +70,16 @@ function AiPortfolio({ onExplore }: { onExplore: (id: string) => void }) {
   const plan = useTwin((s) => s.portfolioPlan);
   const busy = useTwin((s) => s.portfolioOptimizing);
   const run = useTwin((s) => s.runPortfolioOptimizer);
+  const properties = useTwin((s) => s.portfolio.properties);
+  // Upgrades whose installed cost is a placeholder (assumption or bound) for that hotel's HVAC type, labeled under the table.
+  const placeholder = new Set<string>();
+  for (const a of plan?.allocations ?? []) {
+    const hvac = properties.find((p) => p.id === a.propertyId)?.input.hvacType;
+    for (const id of a.evaluation?.upgradeIds ?? []) {
+      const d = upgradeDef(id);
+      if (((hvac && d.costStatusByHvac?.[hvac]) ?? d.costStatus ?? "placeholder") === "placeholder") placeholder.add(d.label);
+    }
+  }
   return (
     <div className="space-y-3">
       <p className="text-[11px] text-muted-foreground">Picked by the portfolio optimizer, an exact search over every hotel's combinations with the energy model. The AI advisor only explains results.</p>
@@ -123,6 +133,11 @@ function AiPortfolio({ onExplore }: { onExplore: (id: string) => void }) {
               </tbody>
             </table>
           </div>
+          {placeholder.size > 0 && (
+            <p className="text-[11px] text-heat" data-testid="portfolio-placeholder-costs">
+              Includes placeholder installed costs (assumptions, not quotes) for: {[...placeholder].join(", ")}. Get contractor quotes before deciding.
+            </p>
+          )}
           <p className="text-[11px] text-muted-foreground">
             {plan.combinationsTested.toLocaleString("en-US")} combinations tested across the hotels. {plan.method} {plan.notes.join(" ")}
           </p>

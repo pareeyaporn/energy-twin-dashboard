@@ -359,7 +359,9 @@ export function buildHotelReport(i: HotelReportInput): HotelReportData {
     ...(f.incentivesTotal > 0 ? ["Utility incentives use the published program rates, are estimated from the modeled equipment, need the utility's pre-approval and are subject to available funds; they are not guaranteed."] : []),
     ...(listed.length ? [`Incentives listed but not counted: ${listed.map((x) => x.label).join("; ")}.`] : []),
     ...(illustrative.length ? [`Shown for illustration only, not in the base case: ${illustrative.map((x) => `${x.label} (${usd(x.amount)})`).join("; ")}; these depend on a program rate that is not confirmed for the current year.`] : []),
-    ...(upgrades.some((u) => u.costStatus !== "sourced") ? ["Some installed costs are assumptions or bounds rather than quotes; obtain contractor quotes before deciding."] : []),
+    ...(upgrades.some((u) => u.costStatus !== "sourced")
+      ? [`Installed costs for ${upgrades.filter((u) => u.costStatus !== "sourced").map((u) => u.label).join(", ")} are placeholders (assumptions or bounds, not quotes); obtain contractor quotes before deciding.`]
+      : []),
     ...e.comfort.notes.map((n) => n.message),
     "Before investing, confirm equipment compatibility and scope with an energy audit or a qualified engineer.",
   ];
@@ -553,4 +555,9 @@ function equipmentOf(p: ResolvedProfile["profile"]): NonNullable<HotelReportData
         ? "The operator corrected the equipment listed as operator data; the baseline above is recalculated from it (a correction, not a saving). Efficiencies, lighting LED share, water-heater efficiency and existing solar change the model; quantities, ages and nameplates are informational."
         : "All equipment is estimated from rules of thumb (placeholders), not a site survey.",
   };
+}
+
+/** The package's upgrades whose installed cost is an assumption or bound, not a sourced cost (labeled on screen and in the PDF). */
+export function placeholderCostLabels(d: Pick<HotelReportData, "upgrades">): string[] {
+  return d.upgrades.filter((u) => u.costStatus !== "sourced").map((u) => u.label);
 }

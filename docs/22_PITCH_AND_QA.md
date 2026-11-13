@@ -209,7 +209,21 @@ before savings) → public assembly (museums, convention centers) → factories 
 they are a different engine. **Go-to-market lens:** cities that fine buildings for carbon (for example New York's Local Law 97) are where any
 of these types needs the tool first. (The app's data already lists resorts, casinos, convention centers and entertainment venues as future
 types: `futureBuildingTypes` in `src/data/hotel/properties.json`.) **Product next steps alongside:** a pilot on a real hotel's bills, tariffs and demand charges, accounts and
-roles, more cities with local incentives.
+roles, more cities with local incentives, and the product roadmap below.
+
+**Product roadmap (for hotels, before new building types).** Each is a known limit today, stated in the app and in the docs.
+
+| Next | In plain words | Why it matters | Task |
+| --- | --- | --- | --- |
+| Electrification and fuel switching | Model swapping a gas boiler or water heater for an electric heat pump: gas goes down, electricity goes up | The upgrade most carbon rules push owners toward | 14G.9 |
+| Weather normalization | Adjust a year's bills for its actual weather, so a cold winter doesn't look like waste | Fairer calibration to real bills | 14.E17 |
+| Tariffs and demand charges | Real utility rate structures instead of average prices | Bills for large hotels depend on peak demand | not yet a task |
+| Several meters per fuel | Main building, restaurant and laundry meters with their own billing dates, added up | Large hotels rarely have one meter | 14.E16 |
+| A real hotel's bills | Load one hotel's bills into the template and check the limits against real data | The first step of a pilot | 14.E18 |
+| Accounts and roles | Logins and roles for owners, managers and consultants; real portfolio data | Needed to sell to chains | 13.35 |
+| AI plans for any hotel in a chain | Ask "what would $50,000 buy at Riverwalk Grand?" from the portfolio page | Chain-level questions in one place | 15.12 |
+| Report extras | Stress-test results, the advisor's explanation and a monthly chart in the PDF | A fuller pack for finance teams | 14B.11 |
+| Marker clustering | Large chains (30+ hotels) grouped on the map with counts | Scales the map past a handful of hotels | 13.49 |
 
 ---
 
@@ -296,7 +310,7 @@ Owner: **P** = pitch lead, **E** = engine lead, **T** = tech lead. Keep answers 
 | --- | --- | --- | --- |
 | 32 | Who pays? | P | Team decision: fill in (for example a per-property subscription for owners and chains, or a tool for energy consultants and utilities). Do not quote prices we have not set. |
 | 33 | How big is the market? | P | US hotels and resorts spend about $5.2 billion a year on energy and use about 46 billion kWh, 1.2% of all US electricity sold (EIA CBECS 2018 and Electric Power Annual); with motels and inns about $6.2 billion. |
-| 34 | What's next? | P | A pilot on a real hotel's bills; tariffs and demand charges; accounts and roles; more cities with local incentives; then senior living and dorms, restaurant and retail chains, warehouses, and offices, schools and hospitals (B6). |
+| 34 | What's next? | P | A pilot on a real hotel's bills; electrification (heat pumps replacing gas, with the fuel switch modeled); weather-normalized calibration; tariffs and demand charges; accounts and roles; more cities with local incentives (product roadmap in B6); then senior living and dorms, restaurant and retail chains, warehouses, and offices, schools and hospitals (B6). |
 | 35 | Can this work for other buildings: hospitals, malls, museums, factories? | P | Yes; hotels are the first type, not the limit. The engine models a building as zones, end uses and drivers, and its national data (NREL ComStock, EIA CBECS) already covers offices, retail, schools, hospitals, clinics, restaurants and warehouses. Factories come last: their energy is mostly industrial processes, which needs different data (EIA's manufacturing survey) and models. |
 | 36 | Which buildings are next, and why those? | P | Senior living and dorms first: they work like hotels (rooms, hot water, kitchens, laundry), so most of the model carries over. Then restaurant and retail chains, because many similar sites fit the portfolio optimizer, and warehouses, where LED and controls pay back fast. Offices, schools and hospitals have the best data but more competitors. Data centers are a different product. |
 | 37 | Could a utility use this? | P | Yes: it already applies a utility's own incentive rules by program year and territory; a utility could use it to target customers and explain programs. |

@@ -67,7 +67,7 @@ function SourceChip({ label, source }: { label: string; source: string }) {
 
 type SortKey = "projection" | "label" | "gross" | "incentives" | "net" | "kwh" | "savings" | "payback" | "nb5" | "nb10" | "npv5" | "npv10" | "co2";
 const columns: { key: SortKey; label: string; value: (r: UpgradeComparisonRow) => number | string; show: (r: UpgradeComparisonRow) => React.ReactNode }[] = [
-  { key: "label", label: "Upgrade", value: (r) => r.label, show: (r) => r.label },
+  { key: "label", label: "Upgrade", value: (r) => r.label, show: (r) => <>{r.label}{r.costStatus === "placeholder" && <span className="block text-[10px] text-heat">Placeholder cost</span>}</> },
   { key: "gross", label: "Gross cost", value: (r) => r.financials.grossCost.mid, show: (r) => fmtMoney(r.financials.grossCost.mid) },
   { key: "incentives", label: "Incentives", value: (r) => r.financials.incentivesTotal, show: (r) => r.financials.incentives.some((i) => i.applied) ? fmtMoney(r.financials.incentivesTotal) : "None applied" },
   { key: "net", label: "Net investment", value: (r) => r.financials.netInvestment.mid, show: (r) => fmtMoney(r.financials.netInvestment.mid) },

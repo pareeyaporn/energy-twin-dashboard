@@ -1,7 +1,7 @@
 import type { PortfolioTotals } from "@/engine/hotel";
 import { percent, usd } from "@/twin/format";
 
-/** Portfolio totals as tiles (the same for the AI portfolio and mine). */
+/** Portfolio totals as a compact grid (the same for the AI portfolio and mine). Estimates. */
 export function TotalsGrid({ totals }: { totals: PortfolioTotals }) {
   const items: [string, string][] = [
     ["Investment (gross)", usd(totals.grossCost)],
@@ -14,11 +14,11 @@ export function TotalsGrid({ totals }: { totals: PortfolioTotals }) {
     ["CO₂ avoided", `${Math.round(totals.carbonAvoidedKg / 1000).toLocaleString("en-US")} t / yr`],
   ];
   return (
-    <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-glass-border bg-glass-border sm:grid-cols-4">
       {items.map(([k, v]) => (
-        <div key={k} className="rounded-lg bg-accent/30 p-2">
-          <dt className="text-[11px] text-muted-foreground">{k}</dt>
-          <dd className="num text-sm font-medium">{v}</dd>
+        <div key={k} className="min-w-0 bg-card p-3">
+          <dt className="text-xs text-muted-foreground">{k}</dt>
+          <dd className="num mt-0.5 text-sm font-medium">{v}</dd>
         </div>
       ))}
     </dl>

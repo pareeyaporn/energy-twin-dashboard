@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { HowCalculated } from "@/explain/HowCalculated";
-import type { MetricId } from "@/explain/explanations";
 import { useUtilityHydration } from "@/utility/UtilityDataSection";
 import { useNavigate } from "@tanstack/react-router";
-import { Building2, ChevronDown, Sparkles } from "lucide-react";
+import { Building2, ChevronDown, Plus, Sparkles } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
 import { selectPortfolioSummary } from "@/store/hotelDerived";
-import { usd } from "@/twin/format";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { openTabWhenReady } from "@/app/landing";
@@ -22,16 +19,15 @@ import { PriorityExplainer } from "./PriorityExplainer";
 import { StartHere } from "./StartHere";
 import { cityGroups } from "./cities";
 import { OPTIMIZER_ANCHOR } from "./anchors";
+import { PortfolioKpis } from "./PortfolioKpis";
+import { scrollToAnchor, SectionHeading } from "./Section";
 import { PortfolioChat } from "@/advisor/PortfolioChat";
 
-const compact = (n: number, unit: string) =>
-  `${n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e4 ? `${Math.round(n / 1000).toLocaleString("en-US")}k` : Math.round(n).toLocaleString("en-US")} ${unit}`;
-
-
 /**
- * The homepage, decision first: the totals, which hotel deserves attention first, the map, one budget across the chain and the
- * comparison; totals by group, the fuel split, the stress tests and the definitions sit in a closed "Deeper analysis" section. Numbers come from the store (the engine). Leaving for a hotel keeps the page's state
- * (organization, filters, map metric, selected hotel, list, table sort, scroll), so coming back shows the same view.
+ * The homepage, in the order of the story: understand the portfolio (header, filters, headline figures), the top investment opportunity,
+ * explore the hotels (the map), plan one budget across the chain, compare the properties, and the advanced analytics (closed by default).
+ * Numbers come from the store (the engine). Leaving for a hotel keeps the page's state (organization, filters, map metric, selected hotel,
+ * list, table sort, scroll), so coming back shows the same view.
  */
 export function PortfolioPage() {
   const org = useTwin((s) => s.portfolio);
@@ -46,7 +42,6 @@ export function PortfolioPage() {
   const removeHotel = useTwin((s) => s.removeUserHotel);
   const setView = useTwin((s) => s.setPortfolioView);
   const [why, setWhy] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
-  const [moreKpis, setMoreKpis] = useState(false);
   const [deeper, setDeeper] = useState(false);
   // Custom plans and the user's own hotels live in the browser's storage; read them after mount (the server renders without them).
   useEffect(() => {
@@ -58,7 +53,7 @@ export function PortfolioPage() {
     const v = useTwin.getState().portfolioView;
     const t = setTimeout(() => {
       if (v.anchor) {
-        document.querySelector(`[data-anchor="${v.anchor}"]`)?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+        scrollToAnchor(v.anchor, reduce);
         setView({ anchor: null });
       } else if (v.scrollY > 0) window.scrollTo({ top: v.scrollY });
     }, 120);
@@ -87,105 +82,101 @@ export function PortfolioPage() {
   const t = summary.totals;
   const cities = useMemo(() => cityGroups(summary.properties), [summary.properties]);
   const cityNames = org.properties.length ? [...new Set(org.properties.map((p) => p.input.city ?? "Chicago"))] : [];
-  const where = cityNames.length <= 1 ? cityNames[0] ?? org.city : `${cityNames.length} cities`;
-  const intensity = t.floorAreaSqft > 0 ? t.siteKBtu / t.floorAreaSqft : 0;
-  const primary: { k: string; v: string; note?: string; how?: MetricId }[] = [
-    { k: "Annual energy cost", v: `${usd(t.cost)} / yr`, how: "portfolioCost" },
-    { k: "Savings potential", v: `${usd(t.savingsPotential)} / yr`, note: `for ${usd(t.investmentRequired)} net`, how: "savingsPotential" },
-    { k: "Carbon", v: `${Math.round(t.carbonKg / 1000).toLocaleString("en-US")} t CO₂e / yr`, how: "portfolioCarbon" },
-    { k: "Properties", v: String(t.properties), note: `${t.rooms.toLocaleString("en-US")} rooms${cities.length > 1 ? ` · ${cities.length} cities` : ""}` },
-  ];
-  const secondary: [string, string][] = [
-    ["Electricity", compact(t.elecKWh, "kWh / yr")],
-    ["Natural gas", compact(t.gasTherms, "therms / yr")],
-    ["Total energy", compact(t.siteKBtu / 1000, "MMBtu / yr")],
-    ["Energy intensity", `${intensity.toFixed(1)} kBtu/ft² / yr`],
-    ["Rooms", t.rooms.toLocaleString("en-US")],
-    ["Investment budget", usd(budget)],
-  ];
+  const where = cityNames.length === 0 ? org.city : cityNames.length <= 3 ? cityNames.join(", ") : `${cityNames.length} cities`;
+  const hasSynthetic = org.properties.length === 0 || org.properties.some((p) => p.synthetic);
   const synthetic = summary.properties.some((p) => !p.synthetic) ? "Sample hotels are synthetic · yours use your inputs · modeled estimates" : "Synthetic demonstration portfolio · modeled estimates";
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5 p-3 md:p-6" data-testid="portfolio-page">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="flex items-center gap-2 text-xl font-semibold md:text-2xl"><Building2 className="size-5 text-primary" />Your Hotel Portfolio</h1>
-          <p className="text-sm text-muted-foreground">Monitor energy performance, identify opportunities, and prioritize investments across your properties.</p>
-          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-            <span className="text-primary">See the savings before you spend.</span>
-            <span>{org.properties.length} hotels in {where}</span>
-            <span className="rounded-full border border-glass-border px-1.5 py-0.5" data-testid="portfolio-synthetic">{synthetic}</span>
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <PortfolioChat />
-          <Button
-            size="sm"
-            variant="accent"
-            onClick={() => document.querySelector(`[data-anchor="${OPTIMIZER_ANCHOR}"]`)?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" })}
-            data-testid="optimize-portfolio"
-          >
-            <Sparkles /> Optimize portfolio
-          </Button>
-          <AddHotelDialog />
-        </div>
-      </header>
+    <div className="mx-auto w-full max-w-7xl space-y-12 overflow-x-clip px-3 pb-16 pt-5 md:space-y-16 md:px-6 md:pt-8" data-testid="portfolio-page">
+      {/* 1 · Overview: header, organization and filters, the headline figures. */}
+      <div className="space-y-7">
+        <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+          <div className="min-w-0 max-w-3xl">
+            <p className="text-xs font-medium text-primary">See the savings before you spend.</p>
+            <h1 className="mt-1.5 flex items-center gap-2.5 text-2xl font-semibold tracking-tight md:text-[2rem]">
+              <Building2 className="size-6 shrink-0 text-primary" aria-hidden />
+              Your Hotel Portfolio
+            </h1>
+            <p className="mt-2 text-sm text-muted-foreground md:text-base">See where energy costs are highest, discover savings opportunities, and invest smarter.</p>
+            <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs text-muted-foreground" data-testid="portfolio-context">
+              <span className="font-medium text-foreground/85">{org.name}</span>
+              <span aria-hidden>·</span>
+              <span>{org.properties.length} {org.properties.length === 1 ? "hotel" : "hotels"}</span>
+              <span aria-hidden>·</span>
+              <span>{where}</span>
+              {hasSynthetic && (
+                <span className="rounded-full border border-glass-border px-2 py-0.5 text-[11px] text-muted-foreground/90 sm:ml-1" data-testid="portfolio-synthetic">
+                  {synthetic}
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <PortfolioChat label="Ask AI" variant="ghost" />
+            <AddHotelDialog
+              trigger={
+                <Button size="sm" variant="outline" data-testid="add-my-hotel">
+                  <Plus /> Add hotel
+                </Button>
+              }
+            />
+            <Button size="sm" variant="accent" onClick={() => scrollToAnchor(OPTIMIZER_ANCHOR, reduce)} data-testid="optimize-portfolio">
+              <Sparkles /> Optimize portfolio
+            </Button>
+          </div>
+        </header>
 
-      <PortfolioFilters shown={t.properties} />
+        <PortfolioFilters shown={t.properties} />
 
-      <section aria-label="Portfolio totals" className="space-y-2">
-        <dl className="grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid="portfolio-kpis">
-          {primary.map((x) => (
-            <div key={x.k} className="panel rounded-xl p-3">
-              <dt className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">{x.k}<span className="flex items-center gap-1">{x.k !== "Properties" && <span className="rounded-full border border-glass-border px-1.5 text-[9px]">Estimate</span>}{x.how && <HowCalculated metric={x.how} />}</span></dt>
-              <dd className="num text-lg font-semibold">{x.v}</dd>
-              {x.note && <dd className="text-[11px] text-muted-foreground">{x.note}</dd>}
-            </div>
-          ))}
-        </dl>
-        <button type="button" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground sm:hidden" aria-expanded={moreKpis} onClick={() => setMoreKpis((o) => !o)}>
-          {moreKpis ? "Fewer figures" : "More figures"} <ChevronDown className={`size-3 transition-transform ${moreKpis ? "rotate-180" : ""}`} />
-        </button>
-        <dl className={`${moreKpis ? "grid" : "hidden"} grid-cols-2 gap-x-4 gap-y-1 rounded-xl border border-glass-border px-3 py-2 text-xs sm:flex sm:flex-wrap sm:gap-x-6`} data-testid="portfolio-kpis-secondary">
-          {secondary.map(([k, v]) => (
-            <div key={k} className="flex items-baseline gap-1.5">
-              <dt className="flex items-center gap-1 text-muted-foreground">{k}{k === "Energy intensity" && <HowCalculated metric="portfolioIntensity" />}</dt>
-              <dd className="num font-medium">{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+        <PortfolioKpis totals={t} budget={budget} cities={cities.length} />
+      </div>
 
+      {/* 2 · Top investment opportunity (the ranking's first hotel). */}
       <StartHere rows={summary.properties} onExplore={explore} onWhy={(id) => setWhy({ open: true, id })} />
 
-      <CityMap rows={summary.properties} onExplore={explore} reduce={reduce} onWhy={(id) => setWhy({ open: true, id })} />
+      {/* ---- 3 · Explore your hotels. Page layout only: this heading and wrapper belong to the page; <CityMap/> and its props are unchanged. ---- */}
+      <section aria-labelledby="portfolio-explore-heading" className="space-y-5" data-testid="portfolio-explore">
+        <SectionHeading id="portfolio-explore-heading" title="Explore your hotels" subtitle="Compare properties across your portfolio and discover where energy improvements matter most." />
+        <CityMap rows={summary.properties} onExplore={explore} reduce={reduce} onWhy={(id) => setWhy({ open: true, id })} />
+      </section>
+      {/* ---- end of the map section ---- */}
 
-      <div data-anchor={OPTIMIZER_ANCHOR} className="scroll-mt-4">
+      {/* 4 · Plan your portfolio investments. */}
+      <div data-anchor={OPTIMIZER_ANCHOR} className="scroll-mt-20">
         <PortfolioOptimizer onExplore={openPlan} onEdit={editPlan} />
       </div>
 
-      <section aria-label="Property comparison" className="space-y-2">
-        <h2 className="text-base font-semibold">Compare the hotels</h2>
+      {/* 5 · Compare properties. */}
+      <section aria-labelledby="portfolio-compare-heading" className="space-y-5" data-testid="portfolio-compare-section">
+        <SectionHeading
+          id="portfolio-compare-heading"
+          title="Compare properties"
+          subtitle="Each hotel on its own: energy cost, intensity and savings potential from its own best package, before any shared budget. Click a column to sort."
+        />
         <PortfolioTable rows={summary.properties} onExplore={explore} onRemove={removeHotel} onWhy={() => setWhy({ open: true, id: null })} />
       </section>
 
-      {/* Detail for a closer look, closed by default so the page leads with the decision. */}
+      {/* 6 · Advanced analytics, closed by default so the page leads with the decision. */}
       <Collapsible open={deeper} onOpenChange={setDeeper} asChild>
-        <section aria-label="Deeper analysis" className="space-y-4 rounded-xl border border-glass-border p-3" data-testid="portfolio-deeper">
+        <section aria-label="Advanced analytics" className="rounded-2xl border border-glass-border bg-card/30" data-testid="portfolio-deeper">
           <CollapsibleTrigger asChild>
-            <button type="button" className="flex w-full items-center justify-between gap-2 text-left" data-testid="portfolio-deeper-toggle">
-              <span>
-                <span className="block text-base font-semibold">Deeper analysis</span>
-                <span className="block text-xs text-muted-foreground">Totals by brand, region, ownership or city · electricity vs gas · portfolio stress tests · definitions</span>
+            <button
+              type="button"
+              className="flex w-full items-center justify-between gap-3 rounded-2xl p-5 text-left transition-colors hover:bg-card/40 motion-reduce:transition-none md:p-6"
+              data-testid="portfolio-deeper-toggle"
+            >
+              <span className="min-w-0">
+                <span className="block text-lg font-semibold tracking-tight md:text-xl">Advanced analytics</span>
+                <span className="mt-1 block text-sm text-muted-foreground">Totals by brand, region, ownership or city · electricity vs gas · portfolio stress tests · definitions</span>
               </span>
-              <ChevronDown className={`size-4 shrink-0 transition-transform ${deeper ? "rotate-180" : ""}`} />
+              <ChevronDown className={`size-5 shrink-0 text-muted-foreground transition-transform motion-reduce:transition-none ${deeper ? "rotate-180" : ""}`} aria-hidden />
             </button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-5">
+          <CollapsibleContent className="space-y-8 border-t border-glass-border p-5 md:p-6">
             <PortfolioGroups rows={summary.properties} />
             <PortfolioCharts rows={summary.properties} />
             <PortfolioStress />
-            <div className="space-y-1 text-[11px] text-muted-foreground" aria-label="Definitions and assumptions">
+            <div className="space-y-1 text-xs text-muted-foreground" aria-label="Definitions and assumptions">
               {summary.definitions.map((d) => <p key={d}>{d}</p>)}
               <p>{org.note}</p>
             </div>

@@ -25,14 +25,14 @@ export function PortfolioCompare() {
   const mine = useTwin(selectPortfolioCustomEvaluation);
   if (!ai) return <p className="text-xs text-muted-foreground">Run the portfolio optimizer (AI recommended) to compare it with your portfolio.</p>;
   return (
-    <div className="table-scroll overflow-x-auto" data-testid="portfolio-compare">
-      <table className="w-full min-w-[480px] text-xs">
+    <div className="table-scroll relative overflow-x-auto rounded-xl border border-glass-border" data-testid="portfolio-compare">
+      <table className="w-full min-w-[480px] text-sm">
         <caption className="sr-only">AI portfolio vs my portfolio (estimates)</caption>
         <thead>
-          <tr className="border-b border-border text-muted-foreground">
-            <th className="p-1.5 text-left font-medium">Measure</th>
-            <th className="p-1.5 text-right font-medium">AI portfolio</th>
-            <th className="p-1.5 text-right font-medium">My portfolio</th>
+          <tr className="border-b border-glass-border text-xs text-muted-foreground">
+            <th className="px-3 py-2 text-left font-medium">Measure</th>
+            <th className="px-3 py-2 text-right font-medium">AI portfolio</th>
+            <th className="px-3 py-2 text-right font-medium">My portfolio</th>
           </tr>
         </thead>
         <tbody>
@@ -42,10 +42,10 @@ export function PortfolioCompare() {
             const win = (x: number | null, y: number | null) =>
               r.better && x != null && y != null && Math.abs(x - y) > 1e-6 && (r.better === "high" ? x > y : x < y);
             return (
-              <tr key={r.label} className="border-b border-border/50">
-                <td className="p-1.5">{r.label}</td>
-                <td className={`num p-1.5 text-right ${win(a, m) ? "font-semibold text-savings" : ""}`}>{r.show(a)}</td>
-                <td className={`num p-1.5 text-right ${win(m, a) ? "font-semibold text-savings" : ""}`}>{r.show(m)}</td>
+              <tr key={r.label} className="border-b border-glass-border/60 last:border-0 hover:bg-foreground/[0.03]">
+                <td className="px-3 py-2">{r.label}</td>
+                <td className={`num px-3 py-2 text-right ${win(a, m) ? "font-semibold text-savings" : ""}`}>{r.show(a)}</td>
+                <td className={`num px-3 py-2 text-right ${win(m, a) ? "font-semibold text-savings" : ""}`}>{r.show(m)}</td>
               </tr>
             );
           })}

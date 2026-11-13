@@ -12,7 +12,7 @@ import { PORTFOLIO_SUGGESTED_QUESTIONS, useAdvisorUi } from "./uiStore";
  * (portfolio_overview, portfolio_optimize), so a question can chain them: rank the hotels, then split a budget. Every number in an
  * answer comes from the engine's results.
  */
-export function PortfolioChat() {
+export function PortfolioChat({ label = "Ask about the portfolio", variant = "outline" }: { label?: string; variant?: "outline" | "ghost" } = {}) {
   const open = useAdvisorUi((s) => s.portfolioChatOpen);
   const setOpen = useAdvisorUi((s) => s.setPortfolioChatOpen);
   const { messages, busy, step, ask } = useTwin(
@@ -31,8 +31,8 @@ export function PortfolioChat() {
   };
   return (
     <>
-      <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} data-testid="portfolio-chat-open">
-        <MessagesSquare /> Ask about the portfolio
+      <Button type="button" size="sm" variant={variant} onClick={() => setOpen(true)} aria-label={label === "Ask about the portfolio" ? undefined : `${label}: ask about the portfolio`} data-testid="portfolio-chat-open">
+        <MessagesSquare /> {label}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="flex max-h-[90dvh] w-[min(720px,calc(100vw-16px))] max-w-none flex-col gap-0 overflow-hidden p-0 sm:max-w-none" data-testid="portfolio-chat">

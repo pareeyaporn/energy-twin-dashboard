@@ -4,6 +4,7 @@ import { ChevronDown, CircleCheck, CircleAlert, CircleX } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
 import { cn } from "@/lib/utils";
 import type { HotelReportData, ReportMetricPair } from "./data";
+import { placeholderCostLabels } from "./data";
 import { aiReportFromState, customReportFromState, portfolioReportFromState } from "./fromStore";
 import { ReportActions } from "./ReportActions";
 import { HowCalculated } from "@/explain/HowCalculated";
@@ -160,6 +161,11 @@ export function ResultsSummary({ d, compact = false, show = "all" }: { d: HotelR
           <Tile how="npv" label="NPV, 10 years" value={usd(f.npv10)} note={`at ${pct(f.discountRate)} a year`} tone={f.npv10 < 0 ? "bad" : "good"} />
           <Tile how="carbon" label="Carbon avoided" value={`${num(d.environment.carbonKgAvoided / 1000, 1)} t`} note={`CO₂e a year (${pct(d.environment.carbonPct)})`} />
         </dl>
+      )}
+      {placeholderCostLabels(d).length > 0 && (
+        <p className="text-[11px] text-heat" data-testid="placeholder-costs">
+          Includes placeholder installed costs (assumptions, not quotes) for: {placeholderCostLabels(d).join(", ")}. Get contractor quotes before deciding.
+        </p>
       )}
       <Verdict v={d.interpretation} />
       {d.investment.illustrative.length > 0 && (

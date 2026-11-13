@@ -28,18 +28,18 @@ export function PortfolioCustomPlan({ onEdit }: { onEdit: (propertyId: string, p
           <Copy /> Customize AI plan
         </Button>
       </div>
-      <div className="table-scroll overflow-x-auto">
-        <table className="w-full min-w-[760px] text-xs">
+      <div className="table-scroll relative overflow-x-auto rounded-xl border border-glass-border">
+        <table className="w-full min-w-[760px] text-sm">
           <caption className="sr-only">My portfolio plan (estimates)</caption>
           <thead>
-            <tr className="border-b border-border text-left text-muted-foreground">
-              <th className="p-1.5 font-medium">Hotel</th>
-              <th className="p-1.5 font-medium">Plan</th>
-              <th className="p-1.5 text-right font-medium">Gross cost</th>
-              <th className="p-1.5 text-right font-medium">Net</th>
-              <th className="p-1.5 text-right font-medium">Savings / yr</th>
-              <th className="p-1.5 text-right font-medium">Payback</th>
-              <th className="p-1.5"><span className="sr-only">Edit</span></th>
+            <tr className="border-b border-glass-border text-left text-xs text-muted-foreground">
+              <th className="px-3 py-2 font-medium">Hotel</th>
+              <th className="px-3 py-2 font-medium">Plan</th>
+              <th className="px-3 py-2 text-right font-medium">Gross cost</th>
+              <th className="px-3 py-2 text-right font-medium">Net</th>
+              <th className="px-3 py-2 text-right font-medium">Savings / yr</th>
+              <th className="px-3 py-2 text-right font-medium">Payback</th>
+              <th className="px-3 py-2"><span className="sr-only">Edit</span></th>
             </tr>
           </thead>
           <tbody>
@@ -48,9 +48,9 @@ export function PortfolioCustomPlan({ onEdit }: { onEdit: (propertyId: string, p
               const chosen = choice[r.propertyId] ?? null;
               const warn = r.plan?.warnings.find((w) => w.severity === "warn" && w.kind !== "budget");
               return (
-                <tr key={r.propertyId} className="border-b border-border/50 align-top" data-testid="my-portfolio-row">
-                  <td className="p-1.5 font-medium">{r.name}</td>
-                  <td className="p-1.5">
+                <tr key={r.propertyId} className="border-b border-glass-border/60 last:border-0 hover:bg-foreground/[0.03] align-top" data-testid="my-portfolio-row">
+                  <td className="px-3 py-2 font-medium">{r.name}</td>
+                  <td className="px-3 py-2">
                     <select
                       aria-label={`Plan for ${r.name}`}
                       value={chosen?.id ?? ""}
@@ -63,11 +63,11 @@ export function PortfolioCustomPlan({ onEdit }: { onEdit: (propertyId: string, p
                     {r.plan?.evaluation && <div className="mt-0.5 text-[11px] text-muted-foreground">{r.plan.evaluation.name}</div>}
                     {warn && <div className="mt-0.5 text-[11px] text-heat">{warn.message}</div>}
                   </td>
-                  <td className="num p-1.5 text-right">{f ? usd(f.grossCost.mid) : "—"}</td>
-                  <td className="num p-1.5 text-right">{f ? usd(f.netInvestment.mid) : "—"}</td>
-                  <td className="num p-1.5 text-right text-savings">{f ? usd(f.annualSavings.mid) : "—"}</td>
-                  <td className="num p-1.5 text-right">{f?.simplePaybackYears != null ? `${f.simplePaybackYears.toFixed(1)} yr` : "—"}</td>
-                  <td className="p-1.5 text-right">
+                  <td className="num px-3 py-2 text-right">{f ? usd(f.grossCost.mid) : "—"}</td>
+                  <td className="num px-3 py-2 text-right">{f ? usd(f.netInvestment.mid) : "—"}</td>
+                  <td className="num px-3 py-2 text-right text-savings">{f ? usd(f.annualSavings.mid) : "—"}</td>
+                  <td className="num px-3 py-2 text-right">{f?.simplePaybackYears != null ? `${f.simplePaybackYears.toFixed(1)} yr` : "—"}</td>
+                  <td className="px-3 py-2 text-right">
                     <button type="button" className="inline-flex items-center gap-1 whitespace-nowrap text-primary hover:underline" onClick={() => onEdit(r.propertyId, chosen?.id ?? null)}>
                       <Pencil className="size-3" /> {chosen ? "Edit in twin" : "Build in twin"}
                     </button>

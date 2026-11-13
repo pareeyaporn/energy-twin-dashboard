@@ -1,0 +1,104 @@
+1
+00:00:01,960 --> 00:00:05,570
+This is Energy Twin: see the savings before you spend.
+
+2
+00:00:05,670 --> 00:00:10,550
+A whole hotel portfolio at a glance: spend, carbon and savings potential.
+
+3
+00:00:10,650 --> 00:00:15,460
+It tells you where to start: the best return per dollar.
+
+4
+00:00:15,560 --> 00:00:18,670
+Every hotel sits on a 3D map of Chicago.
+
+5
+00:00:18,770 --> 00:00:26,230
+Click a hotel, and the camera flies in among the towers.
+
+6
+00:00:26,330 --> 00:00:32,440
+Turn on columns, and each hotel's metric rises above it.
+
+7
+00:00:32,540 --> 00:00:39,800
+Give the chain one budget, and the optimizer splits it across the hotels.
+
+8
+00:00:39,900 --> 00:00:45,500
+Every dollar on this bar is a package the engine actually evaluated.
+
+9
+00:00:45,600 --> 00:00:53,510
+Open a hotel, and you get its digital twin: the building, its energy and its costs.
+
+10
+00:00:53,610 --> 00:01:01,770
+Each zone is colored by what it costs.
+
+11
+00:01:01,870 --> 00:01:08,770
+It's a living building. A January night, with the heating on…
+
+12
+00:01:08,870 --> 00:01:25,040
+…and a July afternoon, with cooling at its peak.
+
+13
+00:01:25,140 --> 00:01:43,780
+Press play, and a whole year goes by, hour by hour.
+
+14
+00:01:43,880 --> 00:01:54,830
+Explode the floors to see inside.
+
+15
+00:01:54,930 --> 00:01:58,740
+Follow the money from grid and gas to every zone.
+
+16
+00:01:58,840 --> 00:02:06,330
+Switch to carbon, and gas suddenly matters more than its bill suggests.
+
+17
+00:02:06,430 --> 00:02:08,390
+Ask a question in plain English.
+
+18
+00:02:08,490 --> 00:02:12,890
+The AI runs the engine and explains. It never invents a number.
+
+19
+00:02:12,990 --> 00:02:18,410
+One click puts the result on the twin.
+
+20
+00:02:18,510 --> 00:02:24,910
+Now test a fix, like smart room controls.
+
+21
+00:02:25,010 --> 00:02:30,610
+Then find the best investments for the budget. Every combination is tested.
+
+22
+00:02:30,710 --> 00:02:35,950
+Here's the top package: its cost, yearly savings, payback and carbon.
+
+23
+00:02:36,050 --> 00:02:40,160
+Apply it, and see before and after.
+
+24
+00:02:40,260 --> 00:02:48,060
+And one click turns it into a report for the owner and the bank.
+
+25
+00:02:48,160 --> 00:02:51,590
+Back to the chain, right where you left it.
+
+26
+00:02:51,690 --> 00:02:56,690
+Energy Twin. Simulate smarter. Spend better. Save energy.
+

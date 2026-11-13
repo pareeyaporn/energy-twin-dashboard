@@ -1,0 +1,88 @@
+1
+00:00:02,260 --> 00:00:09,810
+Meet Rachel. She runs a 100-room hotel in Chicago.
+
+2
+00:00:09,910 --> 00:00:23,990
+Right now, it's a January night, and the heating is running.
+
+3
+00:00:24,090 --> 00:00:40,880
+Press play, and the whole year runs: night and morning, winter and summer, every hour of it.
+
+4
+00:00:40,980 --> 00:00:46,180
+Same hotel, six months later. Now cooling is doing the work.
+
+5
+00:00:46,280 --> 00:00:50,480
+Bookings are climbing from sixty to eighty-five percent, and her owner wants the bill kept in check.
+
+6
+00:00:50,580 --> 00:00:56,350
+He gives her fifty thousand dollars and wants a recommendation by Friday. Solar? LEDs? Smart room controls? What would you buy?
+
+7
+00:00:56,450 --> 00:01:00,780
+US hotels spend about five point two billion dollars a year on energy.
+
+8
+00:01:00,880 --> 00:01:04,330
+Energy Twin lets her try those decisions on a virtual hotel first.
+
+9
+00:01:04,430 --> 00:01:15,530
+Rachel starts with a question: where is my hotel spending the most on energy? The briefing points her toward the biggest loads.
+
+10
+00:01:15,630 --> 00:01:23,150
+In the twin, she can follow the cost from electricity and gas to the systems and spaces using them.
+
+11
+00:01:23,250 --> 00:01:27,480
+She asks: at eighty-five percent, what if we turn on smart room controls?
+
+12
+00:01:27,580 --> 00:01:36,590
+The advisor asks the engine to run the what-if, and explains the result. Every number comes from the model.
+
+13
+00:01:36,690 --> 00:01:44,210
+On one side, the hotel today. On the other, empty rooms are set back automatically.
+
+14
+00:01:44,310 --> 00:01:49,320
+Now let's spend her fifty thousand dollars.
+
+15
+00:01:49,420 --> 00:01:57,750
+The winner: LEDs plus occupancy sensors. About thirty-nine thousand dollars, saving ten thousand three hundred a year, paid back in three point eight years.
+
+16
+00:01:57,850 --> 00:02:05,830
+Remember what you voted for? Let's ask the advisor why this package came out ahead.
+
+17
+00:02:05,930 --> 00:02:18,850
+And does it still win when we stress-test the assumptions, like electricity prices going up twenty percent?
+
+18
+00:02:18,950 --> 00:02:25,100
+On Friday, she brings her owner the recommendation and every assumption behind it.
+
+19
+00:02:25,200 --> 00:02:39,990
+He looks at it and asks: I own ten hotels. If I have another fifty thousand for the whole group, where should it go?
+
+20
+00:02:40,090 --> 00:02:46,490
+Energy Twin splits one budget across the group, and shows what each selected hotel would buy.
+
+21
+00:02:46,590 --> 00:02:51,200
+With a real customer, we'd start with one hotel, its bills and real quotes, then check the savings against the bills.
+
+22
+00:02:51,300 --> 00:02:56,300
+Energy Twin. Simulate smarter. Spend better. Save energy.
+

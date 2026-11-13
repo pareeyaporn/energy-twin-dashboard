@@ -333,12 +333,19 @@ export const selectVisibleCustomPlans = (s: TwinState) => visiblePlansOf(s.custo
 
 // ---- Hotel portfolio (Phase 13) ----
 
+/** A property's city as its profile resolves it (the input's city; the engine's default city when the input leaves it out). */
+export const propertyCity = (p: PortfolioProperty): string => p.input.city?.trim() || hotelData.defaults.profileDefaults.city;
+
 let lastItems: { property: PortfolioProperty; input: HotelInput }[] = [];
 /** Each property with its current input: the open one's live input, the others' saved or original input. Stable while unchanged. */
 export function selectPortfolioItems(s: TwinState): { property: PortfolioProperty; input: HotelInput }[] {
   const f = s.portfolioFilter;
   const shown = s.portfolio.properties.filter(
-    (p) => (!f.brand || p.brand === f.brand) && (!f.region || p.region === f.region) && (!f.ownership || p.ownership === f.ownership),
+    (p) =>
+      (!f.brand || p.brand === f.brand) &&
+      (!f.region || p.region === f.region) &&
+      (!f.ownership || p.ownership === f.ownership) &&
+      (!f.city || propertyCity(p) === f.city),
   );
   const next = shown.map((property) => ({
     property,

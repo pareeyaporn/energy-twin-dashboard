@@ -6,6 +6,7 @@ import { selectPlanExplanation } from "@/store/hotelDerived";
 import { Button } from "@/components/ui/button";
 import { PlanBuilder } from "./PlanBuilder";
 import { PlanCompare } from "./PlanCompare";
+import { HotelInPortfolio } from "@/portfolio/HotelInPortfolio";
 
 export type InvestMode = "ai" | "build" | "compare";
 
@@ -52,6 +53,7 @@ export function InvestModes({ ai, compact = false }: { ai: ReactNode; compact?: 
           </p>
         )}
         <div id={`invest-${mode}`} role="tabpanel" aria-labelledby={`invest-tab-${mode}`}>
+          {mode === "ai" && compact && <HotelInPortfolio />}
           {mode === "ai" && ai}
           {mode === "build" && <div className={compact ? "px-5 pb-5" : "px-4 pb-8 md:px-8"}><PlanBuilder compact={compact} /></div>}
           {mode === "compare" && (

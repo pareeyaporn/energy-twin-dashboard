@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DollarSign, Gauge, Maximize2, PiggyBank, Target } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { PropertySummary } from "@/engine/hotel";
 import { hasWebGL } from "@/twin/parts/View3D";
+import { useTwin } from "@/store/useTwin";
+import { allInChicago, cityGroups, cityValue } from "./cities";
 import { MapFallback } from "./MapFallback";
+import { MultiCityFallback } from "./MultiCityFallback";
 import { MapLegend } from "./MapLegend";
 import { MapLibreView } from "./MapLibreView";
 import { PropertyCard } from "./PropertyCard";
@@ -22,17 +25,46 @@ export function rankBy(rows: PropertySummary[], metric: MapMetric): PropertySumm
 
 /**
  * The portfolio's city map, the chain's command center: the street map (MapLibre, a free dark basemap repainted in navy) when WebGL and
- * the network allow, otherwise a drawn map of Chicago in the same look. Markers are colored and ranked by the chosen metric; hovering
- * shows a tooltip, clicking selects a hotel (card, fly-to); the list beside the map ranks the hotels and drives the same selection.
- * Display only: every value comes from the engine through the store.
+ * the network allow, otherwise a drawn map in the same look (Chicago; a schematic with one panel per city when the hotels are in several
+ * cities). Markers are colored and ranked by the chosen metric; hovering shows a tooltip, clicking selects a hotel (card, fly-to); the
+ * list beside the map ranks the hotels and drives the same selection. With several cities, chips zoom to a city and, zoomed out, the
+ * street map shows one marker per city. The metric, the selected hotel and the list state live in the store (`portfolioView`), so they
+ * are the same after visiting a hotel and coming back. Display only: every value comes from the engine through the store.
  */
-export function CityMap({ rows, onExplore, reduce }: { rows: PropertySummary[]; onExplore: (id: string) => void; reduce: boolean }) {
-  const [metric, setMetric] = useState<MapMetric>("eui");
+export function CityMap({ rows, onExplore, reduce, onWhy }: { rows: PropertySummary[]; onExplore: (id: string) => void; reduce: boolean; onWhy?: (id: string) => void }) {
+  const view = useTwin((s) => s.portfolioView);
+  const setView = useTwin((s) => s.setPortfolioView);
+  const metric: MapMetric = view.metric;
+  const setMetric = (m: MapMetric) => setView({ metric: m });
   const [hover, setHover] = useState<string | null>(null);
-  const [pinned, setPinned] = useState<string | null>(null);
-  const [listOpen, setListOpen] = useState(true);
+  const pinned = view.selectedId;
+  const setPinned = (id: string | null) => setView({ selectedId: id });
+  const listOpen = view.listOpen;
+  const setListOpen = (f: (o: boolean) => boolean) => setView({ listOpen: f(listOpen) });
   const [flyTo, setFlyTo] = useState<{ id: string; n: number } | null>(null);
-  const [fitNonce, setFitNonce] = useState(0);
+  const [fit, setFit] = useState<{ n: number; ids: string[] | null; city: string | null }>({ n: 0, ids: null, city: null });
+  const fitTo = (city: string | null) =>
+    setFit((f) => ({ n: f.n + 1, ids: city ? rows.filter((r) => r.city === city).map((r) => r.id) : null, city }));
+  const cities = useMemo(() => cityGroups(rows), [rows]);
+  const multi = cities.length > 1;
+  // Coming back from a hotel's breadcrumb city link: zoom to that city once the map is there.
+  const focused = useRef(false);
+  useEffect(() => {
+    if (focused.current || !view.focusCity) return;
+    focused.current = true;
+    const city = view.focusCity;
+    const t = setTimeout(() => {
+      fitTo(city);
+      setView({ focusCity: null });
+    }, 400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view.focusCity]);
+  // A selected hotel that is no longer shown (filters, another organization) is let go.
+  useEffect(() => {
+    if (pinned && !rows.some((r) => r.id === pinned)) setPinned(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows, pinned]);
   // Decided after mount (the server renders the drawn map).
   const [useTiles, setUseTiles] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -66,7 +98,14 @@ export function CityMap({ rows, onExplore, reduce }: { rows: PropertySummary[]; 
     },
     onBackground: () => setPinned(null),
     flyTo,
-    fitNonce,
+    fitNonce: fit.n,
+    fitIds: fit.ids,
+    cities,
+    cityValueText: (city) => {
+      const g = cities.find((x) => x.city === city);
+      return g ? def.format(cityValue(g, metric)) : "";
+    },
+    onPickCity: (city) => fitTo(city),
     reduce,
   };
 
@@ -111,7 +150,7 @@ export function CityMap({ rows, onExplore, reduce }: { rows: PropertySummary[]; 
         <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setFitNonce((n) => n + 1)}
+            onClick={() => fitTo(null)}
             className="inline-flex items-center gap-1.5 rounded-lg border border-glass-border px-2.5 py-1.5 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground"
             data-testid="map-fit"
           >
@@ -125,9 +164,33 @@ export function CityMap({ rows, onExplore, reduce }: { rows: PropertySummary[]; 
         </div>
       </div>
 
+      {multi && (
+        <div role="group" aria-label="Zoom to a city" className="flex flex-wrap items-center gap-1.5" data-testid="map-city-chips">
+          <span className="text-[11px] text-muted-foreground">Cities:</span>
+          {cities.map((g) => (
+            <button
+              key={g.city}
+              type="button"
+              onClick={() => fitTo(g.city)}
+              aria-pressed={fit.city === g.city}
+              className={`rounded-full border px-2.5 py-0.5 text-xs transition-colors ${fit.city === g.city ? "border-primary bg-primary/15 text-primary" : "border-glass-border text-muted-foreground hover:border-primary/40 hover:text-foreground"}`}
+              data-testid={`map-city-${g.city}`}
+            >
+              {g.city} <span className="num text-[10px] opacity-75">· {g.hotels}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="relative">
         <div className="relative h-[400px] overflow-hidden rounded-2xl border border-glass-border bg-[#060e1d] shadow-[0_24px_60px_-30px_rgb(0_0_0/0.9),inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_8%,transparent)] sm:h-[480px] lg:h-[540px]">
-          {tiles ? <MapLibreView {...props} onFail={() => setFailed(true)} /> : <MapFallback {...props} />}
+          {tiles ? (
+            <MapLibreView {...props} onFail={() => setFailed(true)} />
+          ) : allInChicago(rows) ? (
+            <MapFallback {...props} />
+          ) : (
+            <MultiCityFallback {...props} selectedOffset={!!selected} />
+          )}
           {/* A soft edge vignette keeps the overlays readable without hiding the map. */}
           <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] rounded-2xl shadow-[inset_0_0_80px_10px_rgb(6_14_29/0.75)]" />
           <div className="absolute bottom-3 left-3 z-10">
@@ -136,7 +199,7 @@ export function CityMap({ rows, onExplore, reduce }: { rows: PropertySummary[]; 
         </div>
         {selected && (
           <div className="mt-3 sm:absolute sm:left-3 sm:top-3 sm:z-20 sm:mt-0" data-testid="map-card-slot">
-            <PropertyCard row={selected} onExplore={onExplore} onClose={() => setPinned(null)} color={colors[selected.id]} rank={ranks[selected.id]} metric={metric} />
+            <PropertyCard row={selected} onExplore={onExplore} onClose={() => setPinned(null)} color={colors[selected.id]} rank={ranks[selected.id]} metric={metric} {...(onWhy ? { onWhy } : {})} />
           </div>
         )}
         <div className="mt-3 lg:absolute lg:right-3 lg:top-3 lg:z-20 lg:mt-0 lg:flex lg:max-h-[calc(100%-7.5rem)] lg:w-72 lg:flex-col">
@@ -157,13 +220,18 @@ export function CityMap({ rows, onExplore, reduce }: { rows: PropertySummary[]; 
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        {def.note} {!tiles && "Simplified map (the street map needs WebGL and a network connection); geography is approximate, hotel positions are exact."}
+        {def.note}{" "}
+        {!tiles &&
+          (allInChicago(rows)
+            ? "Simplified map (the street map needs WebGL and a network connection); geography is approximate, hotel positions are exact."
+            : "Simplified schematic (the street map needs WebGL and a network connection): one panel per city.")}
+        {multi && tiles && " Zoomed out, each city shows as one marker; click it or a city chip to zoom in."}
         {" "}Hotels close together fan out so each can be selected; a dot marks the true location.
       </p>
       <ul className="sr-only" aria-label="Hotels in the portfolio">
         {ranked.map((r) => (
           <li key={r.id}>
-            {r.name}, {r.neighborhood}: {def.label} {def.format(def.value(r))}.{" "}
+            {r.name}, {r.neighborhood}, {r.city}: {def.label} {def.format(def.value(r))}.{" "}
             <button type="button" onClick={() => onExplore(r.id)}>Explore digital twin</button>
           </li>
         ))}

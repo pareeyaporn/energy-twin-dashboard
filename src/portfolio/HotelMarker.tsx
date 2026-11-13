@@ -1,4 +1,5 @@
 import { Building2 } from "lucide-react";
+import { usd } from "@/twin/format";
 import type { PropertySummary } from "@/engine/hotel";
 
 /**
@@ -87,15 +88,22 @@ export function HotelMarker({
           <div
             id={tipId}
             role="tooltip"
-            className="absolute bottom-6 left-0 w-max max-w-[220px] -translate-x-1/2 rounded-lg border border-primary/25 bg-[oklch(0.18_0.04_263/0.96)] px-2.5 py-1.5 text-[11px] shadow-[0_8px_24px_-8px_rgb(0_0_0/0.8)] backdrop-blur"
+            className="absolute bottom-6 left-0 w-max max-w-[240px] -translate-x-1/2 rounded-lg border border-primary/25 bg-[oklch(0.18_0.04_263/0.96)] px-2.5 py-1.5 text-[11px] shadow-[0_8px_24px_-8px_rgb(0_0_0/0.8)] backdrop-blur"
             data-testid="marker-tooltip"
           >
             <div className="font-semibold leading-tight text-foreground">{row.name}</div>
+            <div className="text-[10px] text-muted-foreground">{row.neighborhood}, {row.city} · {row.rooms} rooms</div>
             <div className="mt-0.5 flex items-center gap-1.5 text-muted-foreground">
               <span className="size-1.5 rounded-full" style={{ background: color }} aria-hidden />
               {metricLabel} <span className="num font-medium text-foreground">{valueText}</span>
             </div>
-            <div className="mt-0.5 text-[10px] text-muted-foreground/80">Click for details</div>
+            <dl className="mt-1 grid grid-cols-2 gap-x-3 text-[10px]">
+              <dt className="text-muted-foreground">Energy cost</dt><dd className="num text-right">{usd(row.annual.cost)}</dd>
+              <dt className="text-muted-foreground">Intensity</dt><dd className="num text-right">{row.siteEui.toFixed(1)} kBtu/ft²</dd>
+              <dt className="text-muted-foreground">Savings</dt><dd className="num text-right">{row.potential ? `${usd(row.potential.annualSavings)}/yr` : "—"}</dd>
+              <dt className="text-muted-foreground">Priority</dt><dd className="num text-right">{row.priorityScore}/100</dd>
+            </dl>
+            <div className="mt-0.5 text-[10px] text-primary/90">Click to open · Explore hotel</div>
           </div>
         )}
       </div>

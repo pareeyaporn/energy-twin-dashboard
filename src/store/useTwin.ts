@@ -464,6 +464,9 @@ function snapshotOf(s: TwinState): PropertySnapshot {
   };
 }
 
+/** Hotel input fields that are investment settings, not building data (editing them keeps a sample hotel a sample). */
+const INVESTMENT_SETTINGS = new Set<keyof HotelInput>(["budget", "objective", "horizonYears"]);
+
 /** When the open hotel is one the user added, its edited input is saved (state and local storage). */
 function savedUserEdit(s: TwinState, hotelInput: HotelInput): Partial<TwinState> {
   if (!s.activePropertyId || !s.userHotels.some((h) => h.id === s.activePropertyId)) return {};
@@ -603,11 +606,15 @@ export const useTwin = create<TwinState>((set, get) => ({
     set((s) => {
       const hotelInput = mergeInput(s.hotelInput, patch, clear);
       const { hotel, baseline } = recomputeHotel(hotelInput);
+      // Investment settings (budget, objective, horizon) do not change the building, so a sample hotel stays a sample: its "Synthetic demo
+      // data" label, its utility data and its equipment corrections stay with it (14B.12). Editing the building makes it the user's hotel.
+      const investmentOnly =
+        (!clear || clear.every((k) => INVESTMENT_SETTINGS.has(k))) && Object.keys(patch).every((k) => INVESTMENT_SETTINGS.has(k as keyof HotelInput));
       return {
         hotelInput,
         hotel,
         baseline,
-        hotelPresetId: null,
+        hotelPresetId: investmentOnly ? s.hotelPresetId : null,
         scenarioResult: computeScenarioResult(hotel, effectiveScenario(s.scenario, s.activeStressTest)),
         hotelPlan: null,
         hotelPlanBaseline: null,

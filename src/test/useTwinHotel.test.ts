@@ -4,6 +4,7 @@ import { renderHook } from "@testing-library/react";
 import { CLOCK_STEP_MS, useTwinClock } from "@/twin/useTwinClock";
 import { useTwin, selectCurrentCost } from "@/store/useTwin";
 import {
+  selectIsSynthetic,
   selectCompare,
   selectDisplayed,
   selectEquipment,
@@ -50,6 +51,19 @@ describe("hotel state in the store", () => {
   it("keeps the home-era state working", () => {
     expect(selectCurrentCost(get())).toBe(2340);
     expect(get().budget).toBe(15000);
+  });
+
+  it("a sample hotel stays a sample when only its budget, objective or horizon change (14B.12); editing the building makes it the user's", () => {
+    get().selectHotelPreset("demo-chicago-300");
+    get().setHotelBudget(150_000);
+    get().setHotelObjective("payback");
+    get().setHotelInput({ horizonYears: 10 });
+    expect(get().hotelPresetId).toBe("demo-chicago-300");
+    expect(selectIsSynthetic(get())).toBe(true);
+    expect(get().hotel.profile.budget).toBe(150_000);
+    get().setHotelInput({ rooms: 310 });
+    expect(get().hotelPresetId).toBeNull();
+    get().resetHotel();
   });
 
   it("recomputes the baseline when the hotel changes and clears results that no longer apply", async () => {

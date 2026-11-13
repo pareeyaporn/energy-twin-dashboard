@@ -450,8 +450,8 @@ decision summary). Each part has its own heading below.
 - [x] 14B.10 [CC] Tests: figures equal the engine's for AI, custom and portfolio plans; honest readings; a real PDF is generated; state
       unchanged; browser check on desktop and phone — *done*
 - [ ] 14B.11 P2 [CC] Stress-test results and the advisor's explanation in the report; a monthly energy chart; brand fonts in the PDF
-- [ ] 14B.12 P2 [Store] Keep the "synthetic" label when a sample hotel's budget is edited (the app's badge disappears today; the report
-      already keeps the label)
+- [x] 14B.12 P2 [Store] Keep the "synthetic" label when a sample hotel's budget is edited (the app's badge disappears today; the report
+      already keeps the label) — *done (November 2026, approved store change): budget, objective and horizon edits keep `hotelPresetId`, so a sample stays labeled synthetic and keeps its utility data and equipment corrections; building edits still make it the user's hotel. Test in `src/test/useTwinHotel.test.ts`*
 
 
 ### 14F Calculation transparency (Improvement 6; `src/explain/`, docs/21)

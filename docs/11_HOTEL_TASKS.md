@@ -633,6 +633,46 @@ Display only: no engine, data, ranking, optimizer or store change.
       Chicago sits near zoom 11, where the tiles carry few buildings); building hover; the hotel's own footprint highlighted (needs a matched
       OSM building id per hotel, not assumed)*
 
+### 14J Hotel Analysis sidebar redesign (built November 2026; branch `hotel/sidebar-redesign`, layout in docs/10 §9 "Hotel sidebar layout")
+
+Goal: the sidebar beside the twin becomes an action-oriented control center (understand the hotel, see its biggest opportunity, start a
+simulation in 15–20 s), with about half the initial content and no feature removed. No engine, data, store, insight-rule, benchmark,
+calibration, optimizer or advisor-backend change. Lovable-owned files edited at the user's request: `src/app/HotelDashboard.tsx` (tab bar),
+`HotelTab`, `BenchmarkCard`, `HomePanel`, `ScenarioSimulator`, `BudgetOptimizer`, `AdvisorPanel`.
+
+- [x] **Step navigation:** numbered steps, cyan active state, progress line, sticky on tablet/phone; tab names unchanged for the tour.
+- [x] **Hotel overview** (name, city · rooms · floor area, compact annual cost with the exact value in the tooltip, energy intensity,
+  data status from `selectUtilityStatus` + `selectIsSynthetic` in `src/utility/dataStatus.ts`, preset picker, Edit → full profile form).
+- [x] **Concise briefing** (`briefingConciseTemplate`: the template's lead, the top finding's title and the next step; an AI briefing
+  shows its first two sentences, `briefingSummary`); "View full briefing" (closed on load) shows the full text, label and method.
+- [x] **Top opportunities:** top 2 in the engine's order, "View all N insights" / "Show top 2"; compact cards (icon, category · impact,
+  title, one figure, one sentence, the action, ⓘ for the rest of the text and the method, Ask AI icon with the insight's question).
+- [x] **Hotel health** (`HotelHealthCard`): intensity, "+X% vs ENERGY STAR hotel median" from `benchmarkComparison`, data status, caveat;
+  "View benchmarks & sources" opens the full comparison (values, bars, sources, note, a climate/amenity/type caveat).
+- [x] **Hotel profile & data:** collapsed live line, "Manage utility data" in the header (the manager opens even when collapsed); open:
+  profile summary and the utility data section (privacy note in a tooltip). `UtilityDataSection` gained `onManage` and `embedded` props
+  (default behavior unchanged).
+- [x] **Simulate this hotel →** switches to the Scenario step through the same tab state.
+- [x] Consistency pass: Scenario (impact and key controls first, advanced under "More controls"), Invest (spacing), Ask (context line,
+  helpful empty state).
+- [x] Tests `src/test/hotelSidebar.test.tsx`; `insights.test.tsx` and `aiAssistant.test.tsx` now expand before checking hidden content.
+- [ ] Later: the portfolio's Add my hotel dialog still says "under Hotel, Edit details" (the button is now "Edit" in the overview);
+  `src/portfolio/` was out of scope.
+
+**Insight label mapping** (display only, `insightLabel` in `src/insights/EnergyInsights.tsx`; from each insight's `id`, `category` and
+`priority`; the engine's order is kept and nothing is re-ranked). `priority` is the engine's size threshold relative to the bill (docs/13 §14).
+
+| Insight (`id`) | Category shown | Impact label, `priority` high | Impact label, medium | Color |
+| --- | --- | --- | --- | --- |
+| `investment` | Investment opportunity | Large saving | Saving | cyan |
+| `cost_driver` | Cost reduction | Major cost driver | Cost driver | cyan |
+| `intensity` | **Benchmark observation** (engine category: operational efficiency) | Well above benchmark | Above benchmark | cyan |
+| `occupancy` | Operational efficiency | High sensitivity | Moderate sensitivity | cyan |
+| `price`, `weather` | Energy resilience | Significant exposure | Exposure to watch | amber when high, else cyan |
+| `equipment` | Equipment performance | Significant exposure | Exposure to watch | amber when high, else cyan |
+
+"High priority" / "Worth a look" are no longer shown; amber is kept for genuine warnings (a large stress exposure).
+
 ## Phase 15 — AI assistant (CC; built November 2026, docs/23)
 The rule stays: the AI never produces a number. It may ask the engine to compute one, and every number in its text must be in the context
 or in this answer's tool results.

@@ -134,6 +134,7 @@ describe("briefing", () => {
     useFetch(() => ({ text: `The hotel spends an estimated $${cost} a year on energy. HVAC is the biggest issue. Next, test smart room controls.` }));
     render(<Briefing />);
     await waitFor(() => expect(screen.getByTestId("briefing").dataset["source"]).toBe("ai"), { timeout: 4000 });
+    fireEvent.click(screen.getByTestId("briefing-toggle"));
     expect(screen.getByText(/AI summary of the model's results/)).toBeTruthy();
   });
 });

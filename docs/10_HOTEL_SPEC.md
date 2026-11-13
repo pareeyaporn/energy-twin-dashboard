@@ -91,6 +91,32 @@ Use professional typography, clear financial metrics, intuitive charts and respo
 - **Known rough edges:** a "default (estimate)" tag on every number (to become one note), the number strip stacks tall on mobile, and the
   split line crosses the twin's labels (task 7b.7).
 
+**Hotel sidebar layout (November 2026, task 14J).** The Hotel Analysis sidebar (`/hotel`, 380 px beside the twin, width unchanged) is an
+action-oriented control center: a first-time user should understand the hotel, see its biggest opportunity and start a simulation in
+15–20 s. Nothing was removed; less is shown at first (the Hotel step's initial height went from 2,162 px to 1,076 px at 1440 × 900).
+- **Step navigation** (1 Hotel → 2 Scenario → 3 Invest → 4 Ask): numbered steps, the active one in cyan, earlier ones with a cyan outline,
+  a thin progress line under the bar. Outside the scroll area on desktop; sticky at the top on tablet and phone (the page scrolls there).
+  Each step's purpose is its tooltip. `src/app/HotelDashboard.tsx` (`WorkspaceTabs`).
+- **Hotel step, most important first:** (A) **Hotel overview**: name, city · rooms · floor area, annual energy cost today (compact, e.g.
+  $120.2K, exact value in the tooltip), energy intensity (kBtu/ft²/yr), both with "How was this calculated?", a data-status label
+  (`src/utility/dataStatus.ts`: synthetic estimate, user-entered · modeled, bills provided, calibrated to bills; from `selectUtilityStatus`
+  and `selectIsSynthetic`), the preset picker and **Edit** (the full profile form). (B) **Briefing**: concise on load (the template's lead,
+  the top finding's title and the next step; an AI briefing shows its first two sentences, which pass the same number check); **View full
+  briefing** shows the complete text, its label and method. (C) **Top opportunities**: the top 2 insights in the engine's order, **View
+  all N insights** for the rest; each card has a category and impact label (mapping in docs/11 §14J), one figure, one sentence, its action,
+  an ⓘ (the rest of the text and the method) and an Ask AI icon. (D) **Hotel health**: energy intensity, "+X% vs ENERGY STAR hotel median"
+  (from `benchmarkComparison`), the data status and the caveat "context, not a rating"; **View benchmarks & sources** opens the full
+  comparison. (E) **Hotel profile & data**: one live line ("Lakeshore Inn · 100 rooms · Modeled estimate") and **Manage utility data** in the
+  header (opens the Utility Data Manager even when closed); open, it shows the profile summary and the utility data section. (F) **Simulate
+  this hotel →** opens the Scenario step.
+- **Scenario / Invest / Ask:** same capabilities; Scenario puts the impact summary and key controls (occupancy, smart room controls,
+  setpoints) in one card, advanced controls under "More controls", "Scenario in detail" at the bottom; Invest is unchanged apart from
+  spacing; Ask states its context in one line ("About Lakeshore Inn · Synthetic demo data · explains the model's results") and does not
+  repeat the briefing.
+- **Look:** one card style (`src/app/sidebar.tsx`), cyan for main actions, key figures and selection, amber only for genuine warnings
+  (large stress exposures) and synthetic labels; expanders fade in briefly; animations are off with reduce effects and
+  `prefers-reduced-motion`.
+
 ## 10. Technical Architecture
 Preserve the existing app stack where possible (e.g. React, TypeScript, Tailwind). Recharts is suitable for charts; React Three Fiber is optional if lightweight 3D is achievable. Prefer a deterministic TypeScript engine for instant frontend simulations. If Python simulation code already exists, evaluate reuse before rewriting.
 

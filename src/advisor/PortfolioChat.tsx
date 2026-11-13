@@ -22,7 +22,7 @@ export function PortfolioChat() {
   const end = useRef<HTMLDivElement>(null);
   const list = messages.filter((m) => m.scope === "portfolio");
   useEffect(() => {
-    if (open) end.current?.scrollIntoView({ block: "end" });
+    if (open) end.current?.scrollIntoView?.({ block: "end" });
   }, [open, list.length, busy]);
   const send = (text: string) => {
     if (busy || !text.trim()) return;

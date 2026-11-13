@@ -149,7 +149,7 @@ export function AddHotelDialog({ trigger }: { trigger?: React.ReactNode }) {
               {errors.map((x) => <li key={x}>{x}</li>)}
             </ul>
           )}
-          <p className="text-[11px] text-muted-foreground">Results are modeled estimates, not an engineering audit. You can change any detail later under Hotel, Edit details.</p>
+          <p className="text-[11px] text-muted-foreground">Results are modeled estimates, not an engineering audit. You can change any detail later in the hotel's overview (Edit).</p>
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
             <Button type="submit" data-testid="add-hotel-submit">Add and open its twin</Button>

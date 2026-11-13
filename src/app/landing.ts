@@ -2,6 +2,7 @@
 // or the hotel dashboard), once per page load. An organization with a single hotel goes straight to that hotel.
 import type { WorkspaceTab } from "@/tour/steps";
 import { openWorkspaceTab, waitFor } from "@/tour/dom";
+import { useTwin } from "@/store/useTwin";
 
 export const LAST_VIEW_KEY = "energy-twin:last-view:v1";
 export type AppView = "portfolio" | "hotel";
@@ -50,11 +51,22 @@ export async function openTabWhenReady(tab: WorkspaceTab): Promise<boolean> {
 }
 
 /**
- * The top bar's Reports: the hotel's Invest tab, scrolled to the report buttons (Preview / Download PDF) when a plan exists; otherwise the
- * Invest tab itself, where "Find the best investments" makes one. Navigation only: nothing is computed or changed.
+ * The top bar's Reports: the hotel's Invest tab and the report preview. With no plan yet, it first runs the optimizer for the open hotel
+ * (the same "Find the best investments" action, at the hotel's budget and objective, on the scenario when "Optimize for this scenario" is
+ * on), because a report is always about a plan. Then it opens the preview; Download PDF is in the preview. An existing plan is never
+ * replaced.
  */
 export async function openReports(): Promise<void> {
   if (!(await openTabWhenReady("Invest"))) return;
-  const actions = await waitFor(() => Array.from(document.querySelectorAll('aside[aria-label="Workspace"] [data-testid="report-actions"]')), 1500);
-  actions[0]?.scrollIntoView({ block: "center", behavior: "smooth" });
+  const s = useTwin.getState();
+  if (!s.hotelPlan && !s.optimizing) await s.runHotelOptimizer();
+  else if (s.optimizing) {
+    // A run already started: wait for it (at most 10 s) rather than start another.
+    for (let i = 0; i < 100 && useTwin.getState().optimizing; i++) await new Promise((r) => setTimeout(r, 100));
+  }
+  const preview = await waitFor(() => Array.from(document.querySelectorAll('aside[aria-label="Workspace"] [data-testid="report-preview"]')).filter((b) => !(b as HTMLButtonElement).disabled), 5000);
+  const button = preview[0] as HTMLButtonElement | undefined;
+  if (!button) return;
+  button.scrollIntoView({ block: "center", behavior: "smooth" });
+  button.click();
 }

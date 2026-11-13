@@ -558,7 +558,7 @@ operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" br
       "Click to open · Explore hotel"; cost and intensity use blue → amber → red with the legend saying high = spends more / uses more per ft²;
       savings potential and priority use a green scale (high = a bigger opportunity), never red*
 - [x] 14D.14 [CC] Top bar — *done (minimal Lovable edit): Portfolio, Hotel analysis, Reports (opens the hotel's Invest tab, where the investment
-      results are, scrolled to Preview / Download PDF report when a plan exists — `openReports` in `src/app/landing.ts`), Tour, Sources, and Reset demo (secondary, returns
+      results are; it opens the report preview, running the optimizer first when the hotel has no plan yet — `openReports` in `src/app/landing.ts`), Tour, Sources, and Reset demo (secondary, returns
       to the portfolio)*
 - [x] 14D.15 [CC] Tour routes — *done (minimal): hotel steps use `/hotel`, the portfolio step `/`; the tour content will be reworked separately*
 - [x] 14D.16 [CC] Tests and browser check — *done: `src/test/portfolioWorkflow.test.tsx` (multi-city resolution, Chicago chain unchanged, city

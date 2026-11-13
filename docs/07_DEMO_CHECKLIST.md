@@ -72,8 +72,8 @@ close on money. Every act ends on a number the judge can check on screen.
 view (works without WebGL); the AI result card with Apply (works offline: the same engine tool runs from a keyword parser, see below);
 the allocation bar and the split twin.
 
-**Before every run:** press **Reset demo** (top bar); it returns to the portfolio homepage. The onboarding tour (quick 8 steps or full 18) starts by itself only on a browser's first visit, and once more on browsers that saw the earlier
-tour: run it (or skip it) once on the demo laptop beforehand so it does not open mid-demo. **Figures:** `src/test/demoScript.test.ts` walks this path through the app's store and
+**Before every run:** press **Reset demo** (top bar); it returns to the portfolio homepage. The onboarding tour (quick 8 steps or full 18) starts by itself on every page load, for everyone (demo setting): for the live demo, open the link
+with `?tour=off` (e.g. `/?tour=off`), or press Skip once at the start, so it does not open mid-demo. **Figures:** `src/test/demoScript.test.ts` walks this path through the app's store and
 fails if any bold figure above no longer matches the engine; print the current ones with
 `DEMO_FIGURES=1 npx vitest run src/test/demoScript.test.ts` (task 8.8).
 

@@ -4,9 +4,10 @@ import { CircleHelp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { currentWorkspaceTab, waitFor } from "./dom";
 import { TourOverlay } from "./TourOverlay";
-import { readTourOutcome, useTour } from "./useTour";
+import { useTour } from "./useTour";
 
-// Tried once per page load: the tour starts by itself only on a first visit (nothing saved yet), once the main view has loaded.
+// Tried once per page load: for the demo, the tour starts by itself on every page load (even after it was finished or skipped),
+// once the main view has loaded. Add ?tour=off to the link to stop it (for a presenter rehearsing).
 let autoStartTried = false;
 /** For tests. */
 export const resetTourAutoStart = () => {
@@ -16,7 +17,7 @@ export const resetTourAutoStart = () => {
 const loaded = () =>
   Array.from(document.querySelectorAll('[data-testid="kpi-cost"], section[aria-label="City map"]')).filter((e) => e.getBoundingClientRect().width > 0);
 
-/** "Take a tour" in the top bar, the first-visit start, and the tour itself (it lives here so every page that has the top bar has it). */
+/** "Take a tour" in the top bar, the start on every page load, and the tour itself (it lives here so every page that has the top bar has it). */
 export function TourButton({ autoStart = import.meta.env.MODE !== "test" }: { autoStart?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const active = useTour((s) => s.active);
@@ -25,12 +26,12 @@ export function TourButton({ autoStart = import.meta.env.MODE !== "test" }: { au
   useEffect(() => {
     if (!autoStart || autoStartTried || useTour.getState().active) return;
     if (pathname !== "/" && pathname !== "/portfolio" && pathname !== "/hotel") return;
-    if (readTourOutcome() !== null) {
+    if (new URLSearchParams(window.location.search).get("tour") === "off") {
       autoStartTried = true;
       return;
     }
     // Marked as tried only when the tour really starts: an effect that is set up, cancelled and set up again (React's development
-    // double run, or a remount while the page settles) must not use up the first-visit start.
+    // double run, or a remount while the page settles) must not use up the page-load start.
     const signal = { cancelled: false };
     let timer: ReturnType<typeof setTimeout> | undefined;
     void waitFor(loaded, 10_000, signal).then((found) => {

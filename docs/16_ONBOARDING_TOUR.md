@@ -51,8 +51,10 @@ no page errors (the only console error is the advisor function, unreachable from
 
 ## Behavior
 
-- **First visit:** the tour starts by itself once the main view (or the portfolio page) has loaded, after a short pause. It shows once: finishing
-  or skipping is saved in local storage (`energy-twin:tour:v2 (v1 before the 19-step tour; the new key shows it once to browsers that saw the earlier tour)`, `completed` or `skipped`), and a refresh does not start it again.
+- **Every page load (demo setting):** the tour starts by itself once the main view (or the portfolio page) has loaded, after a short pause,
+  on every page load, for every visitor, even if it was finished or skipped before (so everyone at the booth sees it first). It starts once per
+  load: moving between pages does not restart it. Finishing or skipping is still saved in local storage (`energy-twin:tour:v2`, `completed` or
+  `skipped`) but no longer stops the next start. Add `?tour=off` to the link to open without it (for a presenter's run).
 - **Replay:** the **Tour** button (help icon) in the top bar restarts it from step 1, on any page.
 - **Controls:** Next, Back, Skip tour (or the close button), keyboard → / ← / Escape. Progress shows as dots and "5 of 19".
 - **Navigation:** the tour opens the page and workspace tab each step needs, scrolls the highlighted part into view, and when it ends returns

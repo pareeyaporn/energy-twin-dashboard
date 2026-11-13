@@ -392,7 +392,7 @@ Display only: no calculation, assumption or data changes. Each task is one point
 
 ### 13I — Later (P2)
 - [x] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
-      optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 13 steps, portfolio first, with live figures, a time-lapse and a 10-year projection chart; Phase 14C) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
+      optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 19 steps, one story from the portfolio to the top-priority hotel, with live figures, a time-lapse and a 10-year projection chart; Phase 14C) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
 - [x] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
       their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model — *done: "More building types (coming later)" cards on the portfolio page, from `properties.json`*
 - [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Multi-city data done (November 2026, research pass 11): New York, Miami and Denver have sourced weather, solar, prices, grid subregion and ComStock intensity and end-use split, and utility incentives now apply only in their territory; multi-city hotels in the portfolio UI and map are next. Real utility data done (November 2026): the Utility Data Manager with spreadsheet, Excel/CSV upload and template, and calibration (14E, docs/19). Later: role-based access (accounts and a database)*
@@ -504,6 +504,12 @@ decision summary). Each part has its own heading below.
 - [x] 14C.4 [CC] Fix: the first-visit start could be lost to an effect that ran twice (React development mode, remounts) — *done*
 - [x] 14C.5 [CC] Fix: "Find my best investments" opened the homepage after the route change; now the hotel's Invest tab — *done*
 - [x] 14C.6 [CC] Browser check, desktop 1440×900 and phone 390×844, first visit to finish, no console errors — *done*
+
+- [x] 14C.7 [CC] One story in 19 steps: the portfolio optimizer, the top-priority hotel followed through the hotel steps (state restored
+      at the end), equipment, zones, build-your-own, the report (the PDF's sections and verdict) and the advisor (an example answer from
+      the model's numbers) — *done (November 2026); storage key v2 so it shows once to browsers that saw the earlier tour; docs/16*
+- [x] 14C.8 [CC] Page cleanup (product review): portfolio page decision first (optimizer moved up, 7-column table, detail in "Deeper
+      analysis", repeated charts and "Coming later" removed); hotel tab leads with the insights; slim KPI tiles — *done; docs/17*
 
 ### 14D — Portfolio workflow and multi-city (built November 2026; branch `portfolio/workflow-multicity`)
 

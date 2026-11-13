@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CatalogCard } from "./CatalogCard";
 import { PlanSummary } from "./PlanSummary";
+import { CustomPlanResults } from "@/report/ResultsSummary";
 
 /** Choose, create, duplicate, rename and delete custom plans. */
 function PlanPicker() {
@@ -102,7 +103,12 @@ export function PlanBuilder({ compact = false }: { compact?: boolean }) {
           Add upgrades below to start a plan, or use "Customize AI plan" on a recommended package.
         </p>
       ) : (
-        evaluation && <PlanSummary plan={evaluation} rate={rate} onRemove={(id) => removeItem(id as Parameters<typeof removeItem>[0])} />
+        evaluation && (
+          <>
+            <PlanSummary plan={evaluation} rate={rate} onRemove={(id) => removeItem(id as Parameters<typeof removeItem>[0])} />
+            {active && <CustomPlanResults planId={active.id} compact={compact} />}
+          </>
+        )
       )}
 
       {CATALOG_CATEGORIES.map((c) => {

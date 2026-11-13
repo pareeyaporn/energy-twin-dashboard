@@ -8,6 +8,7 @@ import { usd } from "@/twin/format";
 import { PortfolioCompare } from "./PortfolioCompare";
 import { PortfolioCustomPlan } from "./PortfolioCustomPlan";
 import { TotalsGrid } from "./TotalsGrid";
+import { PortfolioReportActions } from "@/report/ResultsSummary";
 
 const BUDGETS = [100_000, 250_000, 500_000, 750_000, 1_000_000];
 
@@ -87,6 +88,7 @@ function AiPortfolio({ onExplore }: { onExplore: (id: string) => void }) {
       {plan && (
         <div className="space-y-3" data-testid="portfolio-plan">
           <TotalsGrid totals={plan.totals} />
+          <PortfolioReportActions />
           <div className="table-scroll overflow-x-auto">
             <table className="w-full min-w-[720px] text-xs">
               <caption className="sr-only">Recommended package per hotel (estimates)</caption>

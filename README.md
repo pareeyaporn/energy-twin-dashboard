@@ -17,6 +17,12 @@ All P0 and P1 features are built, plus an interactive 3D twin, and run on a synt
 Numbers are **estimates**: most inputs are now sourced from primary documents (EIA, EPA eGRID, NOAA, PVWatts, IL-TRM, CBECS, ENERGY STAR);
 installed costs, solar $/W and incentive amounts are still labeled placeholders or unverified. See the status below.
 
+## Demo videos
+
+In [`demo-videos/`](demo-videos/): Rachel's story (about 3 min), the booth loop (about 3 min) and the full walkthrough (about 6 min),
+silent with captions, recorded from the app (synthetic demo data, modeled estimates). To add an AI voice-over, follow
+[`demo-videos/README.txt`](demo-videos/README.txt) (`make_voiceover.py`, your own OpenAI key, run on your laptop).
+
 ## Screenshots
 
 Synthetic demonstration data; every figure is a modeled estimate.

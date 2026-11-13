@@ -69,8 +69,17 @@ curve (day-weighted mean 1), capped at 100%.
 - **Central plant:** its multiplier is the load-weighted average of the zones it serves, so a guest-room setback also lowers what the plant delivers.
 - **Hot water:** the occupancy term scales with gallons per occupied room relative to 20.
 
-**Calibration.** With a monthly bill, the benchmark is scaled by `12 × bill / modeled annual cost`, bounded to 0.4 to 2.5. Outside that range the
-result is clamped and flagged estimated. Without a bill the result is flagged estimated. Scenarios reuse the same factor.
+**Calibration.** Two ways, both optional:
+- **Utility bills** (docs/19, preferred): with 12 bills per fuel the model is calibrated fuel by fuel with two bounded multipliers, one on
+  the weather-independent load kinds (base, occupancy, schedule) and one on the weather kind, fitted by least squares to the bills
+  (billing periods compared day by day with the typical year), each within 0.5–2.0. The weather multiplier is fitted only when the
+  weather part is at least 10% of the fuel and varies by at least 25% between bills; a fuel needs 12 bills over at least 330 days and a
+  CV(RMSE) after the fit of at most 30%, else it keeps the model. ASHRAE Guideline 14 NMBE and CV(RMSE) are reported before and after.
+  Used only when the user chooses the calibrated baseline. Not weather-normalized (normal-year weather is compared with the billing year).
+- **A single monthly bill** (`monthlyEnergyBill`): the benchmark is scaled by `12 × bill / modeled annual cost`, bounded to 0.4 to 2.5.
+  Outside that range the result is clamped and flagged estimated.
+
+Without either, the result is flagged estimated. Scenarios, stress tests and upgrade evaluations reuse the calibration.
 
 **Cost and carbon.** Cost = kWh × electricity price + therms × gas price (all-in average prices; no separate demand charges). Carbon = kWh × grid
 factor + therms × 5.31 kg (illustrative grid factors; not verified carbon accounting).

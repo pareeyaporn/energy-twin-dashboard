@@ -66,19 +66,20 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
   }
 
   const rateEntry = data.rates[state] ?? data.rates['default'];
-  // The hotel's own bills: their average rates stand in for the state averages unless a rate is entered.
+  // The hotel's own bills: their average rates stand in for the state averages only when asked (useBillRates) and no rate is entered.
   const utilityBills = normalizeBills(input.utilityBills);
-  if (input.utilityBills?.length && utilityBills.length === 0) notes.push('The utility bills had no usable month; benchmarks were used.');
+  if (input.utilityBills?.length && utilityBills.length === 0) notes.push('The utility bills had no usable bill; the model was not calibrated.');
   const fromBills = billRates(utilityBills);
   const elecFromBills = fromBills.elecPerKWh !== null && fromBills.elecPerKWh >= 0.01 && fromBills.elecPerKWh <= 2 ? fromBills.elecPerKWh : null;
   const gasFromBills = fromBills.gasPerTherm !== null && fromBills.gasPerTherm >= 0.05 && fromBills.gasPerTherm <= 20 ? fromBills.gasPerTherm : null;
   let electricityRate: number;
-  if (input.electricityRate === undefined && elecFromBills !== null) {
+  const useBillRates = input.useBillRates === true;
+  if (useBillRates && input.electricityRate === undefined && elecFromBills !== null) {
     electricityRate = elecFromBills;
     notes.push(`Electricity rate from your bills: $${elecFromBills.toFixed(4)} per kWh.`);
   } else electricityRate = num('electricityRate', input.electricityRate, rateEntry?.commercialElecPerKWh ?? 0.14, 0.01, 2);
   let gasRate: number;
-  if (input.gasRate === undefined && gasFromBills !== null) {
+  if (useBillRates && input.gasRate === undefined && gasFromBills !== null) {
     gasRate = gasFromBills;
     notes.push(`Gas rate from your bills: $${gasFromBills.toFixed(3)} per therm.`);
   } else gasRate = num('gasRate', input.gasRate, rateEntry?.commercialGasPerTherm ?? 1, 0.05, 20);
@@ -132,6 +133,7 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
     hvacType,
     monthlyEnergyBill,
     utilityBills,
+    useBillRates,
     electricityRate,
     gasRate,
     occupancy,

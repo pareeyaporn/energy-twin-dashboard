@@ -53,6 +53,8 @@ export interface HotelInput {
    * rate is entered, the bills' average rates replace the state averages. Takes precedence over `monthlyEnergyBill`.
    */
   utilityBills?: UtilityBillMonth[];
+  /** Use the average rates of the bills (cost / use) instead of the state averages, when the bills carry costs. Default false. */
+  useBillRates?: boolean;
   electricityRate?: number; // $/kWh
   /** EPA eGRID subregion acronym (for example RFCW); defaults from the city, then the state, then the U.S. rate. */
   gridSubregion?: string;
@@ -92,6 +94,7 @@ export interface HotelProfile {
   monthlyEnergyBill: number | null;
   /** Valid bill months (empty when none were given). */
   utilityBills: UtilityBillMonth[];
+  useBillRates: boolean;
   electricityRate: number;
   gasRate: number;
   occupancy: number;
@@ -193,37 +196,98 @@ export interface Calibration {
   factor: number;
   source: 'bill' | 'benchmark';
   clamped: boolean;
-  /** Monthly utility bills: separate factors for electricity and gas (each within the calibration range), and the fit. */
-  method?: 'monthly_bills';
-  elecFactor?: number;
-  gasFactor?: number;
-  fit?: BillFit;
+  /**
+   * Utility-bill calibration (docs/19): per fuel, a multiplier on the weather-independent load kinds (base, occupancy, schedule) and
+   * one on the weather-driven kind, fitted to the bills. 1 = the modeled value. Absent without bills.
+   */
+  method?: 'utility_bills';
+  fuelFactors?: { elec: FuelFactors; gas: FuelFactors };
+  /** The full comparison and fit (also when calibration was not possible, with the reason). */
+  report?: CalibrationReport;
 }
 
-/** One month of a utility bill. `month` is 0 (January) to 11. */
+export interface FuelFactors {
+  /** Multiplier on the weather-independent part (base, occupancy and schedule load kinds). */
+  base: number;
+  /** Multiplier on the weather-driven part (heating, cooling and fan energy that follows degree days). */
+  weather: number;
+}
+
+/**
+ * One utility bill: a calendar month (`month` 0–11) or a billing period (`start` inclusive and `end` exclusive, ISO dates
+ * YYYY-MM-DD; then `month` is the month the period mostly falls in). Use in kWh and therms; cost in $ (all-in, may be negative
+ * for an adjustment).
+ */
 export interface UtilityBillMonth {
   month: number;
+  start?: string;
+  end?: string;
   elecKWh?: number;
   gasTherms?: number;
-  /** Total charges for the month, $ (all-in). */
   elecCost?: number;
   gasCost?: number;
 }
 
-export interface FuelFit {
-  months: number;
+export type UtilityFuel = 'elec' | 'gas';
+
+export interface FitMetrics {
+  /** Bills compared. */
+  n: number;
+  /** Parameters fitted (0 for the original model). */
+  p: number;
   /** ASHRAE Guideline 14 normalized mean bias error, % (positive: the bills are higher than the model). */
   nmbePct: number;
-  /** Coefficient of variation of the root-mean-square error, %. */
+  /** ASHRAE Guideline 14 coefficient of variation of the root-mean-square error, %. */
   cvrmsePct: number;
-  /** 12 months, |NMBE| <= 5% and CV(RMSE) <= 15%. */
+  /** At least 12 bills, |NMBE| <= 5% and CV(RMSE) <= 15% (Guideline 14 monthly criteria). */
   meetsGuideline14: boolean;
-  pairs: { month: number; bill: number; model: number }[];
 }
 
-export interface BillFit {
-  elec: FuelFit | null;
-  gas: FuelFit | null;
+export interface BillComparison {
+  /** Index of the bill in the record list. */
+  index: number;
+  month: number;
+  start?: string;
+  end?: string;
+  days: number;
+  actual: number;
+  modeled: number;
+  calibrated: number;
+}
+
+export interface FuelCalibration {
+  fuel: UtilityFuel;
+  unit: 'kWh' | 'therms';
+  /** two_parameter: base and weather fitted; base_only: weather left as modeled; none: not calibrated (see reason). */
+  mode: 'two_parameter' | 'base_only' | 'none';
+  factors: FuelFactors;
+  /** A factor stopped at its bound. */
+  atBound: boolean;
+  /** Days of the year the bills cover (typical-year days; overlaps are not counted twice). */
+  coverageDays: number;
+  bills: number;
+  /** Share of the fuel's modeled use that follows the weather, over the billed days. */
+  weatherShare: number;
+  /** Totals over the billed days. */
+  actualTotal: number;
+  modeledTotal: number;
+  calibratedTotal: number;
+  before: FitMetrics | null;
+  after: FitMetrics | null;
+  /** The calibrated fuel replaces the modeled one in the baseline. */
+  usable: boolean;
+  /** Plain-language reason when not usable or when weather was not fitted. */
+  reason: string | null;
+  rows: BillComparison[];
+}
+
+export interface CalibrationReport {
+  elec: FuelCalibration;
+  gas: FuelCalibration;
+  /** At least one fuel calibrated. */
+  usable: boolean;
+  /** Always true in this version: bills are compared with normal-year weather (NOAA 1991-2020), not the billing year's weather. */
+  weatherNormalNotActual: true;
 }
 
 export interface EnergyResult {

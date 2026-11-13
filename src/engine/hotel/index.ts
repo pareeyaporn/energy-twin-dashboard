@@ -24,7 +24,29 @@ export {
 export type { StressTest, HvacSettings } from './scenarios';
 export { typicalDayProfile, simulatedMeter, roomOccupancyPattern, equipmentInventory, energyFlows, energyFlowsAt, typicalDayByZoneEndUse } from './twin';
 export type { HourPoint, MeterReading, RoomPoint, RoomState, EquipmentItem, FlowGraph, FlowNode, FlowLink, ZoneEndUseDay } from './twin';
-export { parseUtilityBillsCsv, normalizeBills, billRates, billFit, parseMonth, GUIDELINE_14_MONTHLY } from './bills';
+export {
+  parseUtilityBillsCsv,
+  normalizeBills,
+  billRates,
+  billTotals,
+  billDays,
+  coverageDays,
+  modeledParts,
+  fitMetrics,
+  fitFactors,
+  calibrateFuel,
+  calibrationReport,
+  parseMonth,
+  isoDay,
+  periodMonth,
+  GUIDELINE_14_MONTHLY,
+  CALIBRATION_RULES,
+} from './bills';
+export { parseCsvText, guessMapping, mappingComplete, tableToGrid, normalizeDate, emptyGridRow, ELEC_UNITS, GAS_UNITS } from './billsImport';
+export type { UtilityField, ElecUnit, GasUnit, ColumnMapping, UtilityGridRow } from './billsImport';
+export { validateGrid, recordsToGrid, VALIDATION_RULES } from './billsValidate';
+export type { GridField, GridMode, GridIssue, GridCheck } from './billsValidate';
+export { sampleUtilityBills, SAMPLE_YEAR, SAMPLE_SHIFT, SAMPLE_WOBBLE } from './billsSample';
 export {
   upgradeDef,
   upgradeLifetime,

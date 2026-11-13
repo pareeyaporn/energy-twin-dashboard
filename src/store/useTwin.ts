@@ -38,6 +38,8 @@ import type {
 import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, selectAllProperties, selectIsSynthetic, selectPortfolioItems, selectPortfolioSummary, withoutKeys } from "./hotelDerived";
 import { readStoredPlans, writeStoredPlans } from "./customPlans";
 import { readUserHotels, userProperty, writeUserHotels } from "./userHotels";
+import { inputForBaseline, readUtilityData, utilityKeyFor, withoutUtility as withoutUtilityInput, writeUtilityData } from "./utilityData";
+import type { UtilityBaseline, UtilitySet } from "./utilityData";
 import type { ChicagoAreaId } from "./userHotels";
 import type { CustomPlan } from "./customPlans";
 export type { CustomPlan } from "./customPlans";
@@ -265,6 +267,24 @@ export interface TwinState {
   addUserHotel: (input: HotelInput, areaId: ChicagoAreaId, meta?: { brand?: string; ownership?: Ownership }) => string;
   removeUserHotel: (id: string) => void;
 
+  /**
+   * Utility records per hotel (docs/19), keyed by `selectUtilityKey` (the portfolio property id; a preset maps to its property), kept
+   * in this browser's local storage. The calibrated baseline is used only when the user chooses it for that hotel.
+   */
+  utilityData: Record<string, UtilitySet>;
+  utilityHydrated: boolean;
+  /** A one-off message after the baseline changed (for example that plans were recomputed). */
+  utilityNotice: string | null;
+  /** Reads the records from local storage and applies a chosen calibrated baseline (call after mount, in the browser). */
+  hydrateUtilityData: () => void;
+  /** Saves a hotel's records. The hotel goes back to the modeled baseline until the user chooses the calibrated one again. */
+  saveUtilityData: (key: string, set: Omit<UtilitySet, "baseline">) => void;
+  /** Removes a hotel's records and restores its modeled baseline. */
+  removeUtilityData: (key: string) => void;
+  /** Chooses a hotel's baseline. "calibrated" needs saved records whose calibration succeeded; returns whether it was applied. */
+  setUtilityBaseline: (key: string, baseline: UtilityBaseline) => boolean;
+  clearUtilityNotice: () => void;
+
   /** Custom investment plans (kept in the browser's local storage; numbers are always recomputed by the engine). */
   customPlans: CustomPlan[];
   activeCustomPlanId: string | null;
@@ -407,6 +427,35 @@ function savedUserEdit(s: TwinState, hotelInput: HotelInput): Partial<TwinState>
   return { userHotels, portfolio: portfolioWith(userHotels, s.organizationId) };
 }
 
+/** The open hotel's utility key (see utilityKeyFor). */
+const openUtilityKey = (s: TwinState) => utilityKeyFor(s.activePropertyId, s.hotelPresetId, selectAllProperties(s));
+
+const sameUtility = (a: HotelInput, b: HotelInput) => a.utilityBills === b.utilityBills && !!a.useBillRates === !!b.useBillRates;
+
+/**
+ * Re-runs the open hotel on its chosen baseline when its utility data changed. Plans made on the other baseline are dropped (the same
+ * rule as any input change), and a notice says so.
+ */
+function utilityApplied(s: TwinState, data: Record<string, UtilitySet>, notice: string | null): Partial<TwinState> {
+  const hotelInput = inputForBaseline(s.hotelInput, data[openUtilityKey(s)]);
+  if (sameUtility(hotelInput, s.hotelInput)) return { utilityData: data, ...(notice ? { utilityNotice: notice } : {}) };
+  const { hotel, baseline } = recomputeHotel(hotelInput);
+  const hadPlan = s.hotelPlan !== null || s.portfolioPlan !== null;
+  return {
+    utilityData: data,
+    hotelInput,
+    hotel,
+    baseline,
+    scenarioResult: computeScenarioResult(hotel, effectiveScenario(s.scenario, s.activeStressTest)),
+    hotelPlan: null,
+    hotelPlanBaseline: null,
+    activeHotelPackageId: null,
+    portfolioPlan: null,
+    utilityNotice: [notice, hadPlan ? "Investment results were cleared because the baseline changed; run the optimizer again." : null].filter(Boolean).join(" ") || null,
+    ...savedUserEdit(s, hotelInput),
+  };
+}
+
 /** Saves the open property (if any) into `propertyStates`. */
 const savedStates = (s: TwinState) => (s.activePropertyId ? { ...s.propertyStates, [s.activePropertyId]: snapshotOf(s) } : s.propertyStates);
 
@@ -472,8 +521,9 @@ export const useTwin = create<TwinState>((set, get) => ({
   selectHotelPreset: (id) => {
     const preset = hotelData.presets.find((p) => p.id === id);
     if (!preset) return;
-    const hotelInput: HotelInput = { ...preset.input };
-    set((s) => ({
+    set((s) => {
+      const hotelInput: HotelInput = inputForBaseline({ ...preset.input }, s.utilityData[utilityKeyFor(null, id, selectAllProperties(s))]);
+      return {
       propertyStates: savedStates(s),
       activePropertyId: null,
       hotelInput,
@@ -485,7 +535,8 @@ export const useTwin = create<TwinState>((set, get) => ({
       hotelPlan: null,
       hotelPlanBaseline: null,
       activeHotelPackageId: null,
-    }));
+      };
+    });
   },
   setHotelBudget: (n) => get().setHotelInput({ budget: Math.max(0, n) }),
   setHotelObjective: (objective) => get().setHotelInput({ objective }),
@@ -602,20 +653,24 @@ export const useTwin = create<TwinState>((set, get) => ({
     }));
   },
   clearAdvisor: () => set({ advisorMessages: [], advisorBusy: false }),
-  resetHotel: () =>
+  resetHotel: () => {
     set((s) => ({
       ...initialHotelState(),
       optimizing: false,
       portfolio: portfolioWith(s.userHotels),
       portfolioStressScope: portfolioWith(s.userHotels).properties.map((p) => p.id),
       organizationId: hotelPortfolio.id,
-    })),
+    }));
+    // The hotel's own utility data stays; a chosen calibrated baseline applies again.
+    set((s) => utilityApplied(s, s.utilityData, null));
+  },
   demoResets: 0,
   resetDemo: () => {
     advisor.clearAdvisorCache();
-    set((s) => ({ ...initialHotelState(), optimizing: false, customPlans: [], activeCustomPlanId: null, nextPlanNumber: 1, customPlansHydrated: true, userHotels: [], nextUserHotelNumber: 1, userHotelsHydrated: true, demoResets: s.demoResets + 1 }));
+    set((s) => ({ ...initialHotelState(), optimizing: false, customPlans: [], activeCustomPlanId: null, nextPlanNumber: 1, customPlansHydrated: true, userHotels: [], nextUserHotelNumber: 1, userHotelsHydrated: true, utilityData: {}, utilityHydrated: true, utilityNotice: null, demoResets: s.demoResets + 1 }));
     writeStoredPlans([], 1, null);
     writeUserHotels([], 1);
+    writeUtilityData({});
   },
 
   openProperty: (id) =>
@@ -629,7 +684,7 @@ export const useTwin = create<TwinState>((set, get) => ({
       const visible = s.customPlans.filter((p) => !p.propertyId || p.propertyId === id);
       const activeCustomPlanId = visible.some((p) => p.id === s.activeCustomPlanId) ? s.activeCustomPlanId : (visible[visible.length - 1]?.id ?? null);
       if (saved) return { ...saved, propertyStates, activePropertyId: id, activeCustomPlanId };
-      const hotelInput: HotelInput = { ...property.input };
+      const hotelInput: HotelInput = inputForBaseline({ ...property.input }, s.utilityData[id]);
       return {
         propertyStates,
         activePropertyId: id,
@@ -694,6 +749,41 @@ export const useTwin = create<TwinState>((set, get) => ({
     set({ portfolioCustomPlanIds: ids });
     return created.map((p) => p.id);
   },
+  utilityData: {} as Record<string, UtilitySet>,
+  utilityHydrated: false,
+  utilityNotice: null as string | null,
+  hydrateUtilityData: () => {
+    if (get().utilityHydrated) return;
+    const data = readUtilityData();
+    set((s) => ({ utilityHydrated: true, ...utilityApplied(s, data, null) }));
+  },
+  saveUtilityData: (key, input) => {
+    const data = { ...get().utilityData, [key]: { ...input, baseline: "modeled" as UtilityBaseline } };
+    writeUtilityData(data);
+    const was = get().utilityData[key]?.baseline === "calibrated";
+    set((s) => utilityApplied(s, data, was ? "Data saved. The hotel is back on the modeled baseline until you choose the calibrated one again." : null));
+  },
+  removeUtilityData: (key) => {
+    const { [key]: _gone, ...data } = get().utilityData;
+    writeUtilityData(data);
+    set((s) => utilityApplied(s, data, "Utility data removed; the modeled baseline is restored."));
+  },
+  setUtilityBaseline: (key, baseline) => {
+    const current = get().utilityData[key];
+    if (!current) return baseline === "modeled";
+    if (baseline === "calibrated") {
+      const s = get();
+      const base = key === openUtilityKey(s) ? s.hotelInput : (s.propertyStates[key]?.hotelInput ?? selectAllProperties(s).find((p) => p.id === key)?.input);
+      if (!base) return false;
+      const report = calculateBaselineEnergy(resolveProfile({ ...withoutUtilityInput(base), utilityBills: current.records })).calibration.report;
+      if (!report?.usable) return false;
+    }
+    const data = { ...get().utilityData, [key]: { ...current, baseline } };
+    writeUtilityData(data);
+    set((s) => utilityApplied(s, data, baseline === "calibrated" ? "The calibrated baseline is now active." : "The original modeled baseline is now active."));
+    return true;
+  },
+  clearUtilityNotice: () => set({ utilityNotice: null }),
   userHotels: [] as UserHotel[],
   nextUserHotelNumber: 1,
   userHotelsHydrated: false,

@@ -395,7 +395,7 @@ Display only: no calculation, assumption or data changes. Each task is one point
       optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 15 steps with live figures, a time-lapse, the energy flow and a 10-year projection chart) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
 - [x] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
       their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model — *done: "More building types (coming later)" cards on the portfolio page, from `properties.json`*
-- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Multi-city data done (November 2026, research pass 11): New York, Miami and Denver have sourced weather, solar, prices, grid subregion and ComStock intensity and end-use split, and utility incentives now apply only in their territory; multi-city hotels in the portfolio UI and map are next. Then: real utility data (bill upload and calibration). Later: role-based access (accounts and a database)*
+- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Multi-city data done (November 2026, research pass 11): New York, Miami and Denver have sourced weather, solar, prices, grid subregion and ComStock intensity and end-use split, and utility incentives now apply only in their territory; multi-city hotels in the portfolio UI and map are next. Real utility data done (November 2026): the Utility Data Manager with spreadsheet, Excel/CSV upload and template, and calibration (14E, docs/19). Later: role-based access (accounts and a database)*
 - [x] 13.36 **P2** [CC] Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07) — *transitions done (marker colors fade between metrics; the twin's figures count up when a hotel opens); the demo script is the storyline owner's (docs/07)*
 
 Known limits: all five hotels share Chicago weather (O'Hare normals); property types differ through size, age, HVAC and occupancy only (the
@@ -468,6 +468,28 @@ decision summary). Each part has its own heading below.
 - [x] 14F.6 [CC] Sources panel lists the hotel model's sources (the home-era ResStock, RECS and Rewiring America entries removed) — *done
       (minimal edit in Lovable's `SourcesSheet.tsx`)*
 - [ ] 14F.7 [CC] ⓘ on the portfolio KPIs (intensity, savings potential, investment priority) after the portfolio-workflow merge
+## Phase 14 — Operator experience (November 2026)
+
+### 14E — Utility data and calibration (built November 2026; docs/19)
+
+- [x] 14.E1 [CC] Hotel tab "Utility data" section replaces "Monthly bill: estimated": status (modeled estimate / data provided / calibrated model), source, coverage, billed spending vs projection, Manage Utility Data and Compare & calibrate buttons — *minimal edit in HotelTab.tsx; `src/utility/UtilityDataSection.tsx`*
+- [x] 14.E2 [CC] Utility Data Manager dialog with three starts: Edit sample (default, synthetic), Upload Excel / CSV, Enter manually — *`src/utility/UtilityDataManager.tsx`*
+- [x] 14.E3 [CC] Spreadsheet editor: click to edit, arrow / Enter / Tab navigation, multi-cell paste from Excel, invalid cells highlighted, billing year, billing-periods view with dates and add / remove rows, undo (Ctrl+Z, 50 steps), Reset sample, Clear, Cancel with confirmation, Apply — *`SpreadsheetGrid.tsx`*
+- [x] 14.E4 [CC] Live summary: annual kWh, therms, electricity $, gas $, combined, average per bill, coverage, complete vs incomplete
+- [x] 14.E5 [CC] Download Excel template (.xlsx: Instructions, Monthly Utility Data with formats and validation, Example Data labeled synthetic) that uploads back unchanged — *exceljs, loaded on demand; round trip tested*
+- [x] 14.E6 [CC] Excel and CSV upload: column mapping step, units never assumed (kWh/MWh; therms/CCF/Mcf/MMBtu/Dth), review in the spreadsheet before saving
+- [x] 14.E7 [CC] Validation with errors (block Apply) and warnings: numbers, negative use, months, dates, duplicates, overlapping periods, long periods, zero use, negative cost, outliers, implied rates, incomplete history — *`billsValidate.ts`; thresholds in docs/15 §24*
+- [x] 14.E8 [CC] Labels: sample (synthetic), edited sample (synthetic unless marked real), user-entered, uploaded; calibrated model is a status
+- [x] 14.E9 [CC] Calibration: per fuel, bounded base and weather multipliers by least squares, base only when weather is not identifiable, billing periods prorated by day, ASHRAE Guideline 14 NMBE and CV(RMSE) before and after, modeled baseline kept when data are insufficient or the fit is poor — *replaces the single factor per fuel; `bills.ts`, `baseline.ts`*
+- [x] 14.E10 [CC] Review: monthly charts (bills, original model, calibrated model) per fuel and for spending, totals and % differences, factors, verdicts, reasons, method and limits
+- [x] 14.E11 [CC] Baseline choice (original modeled / calibrated), never switched silently; every result follows (twin, KPIs, scenarios, stress tests, optimizer, custom plans, portfolio, advisor context); stale plans cleared with a notice
+- [x] 14.E12 [CC] Per-hotel storage in local storage, independent per hotel; Remove data restores the modeled baseline; Reset demo clears it; nothing sent to the server or the advisor — *`src/store/utilityData.ts`*
+- [x] 14.E13 [CC] Twin header and portfolio card / table show the data and baseline status
+- [x] 14.E14 [CC] Tests: calibration, periods, metrics, units, validation, store, editor, xlsx round trip; browser check desktop and phone
+- [ ] 14.E15 [CC] PDF investment report: add data source, billing period, historical use, selected baseline and calibration metrics (when the report branch is merged)
+- [ ] 14.E16 [CC] Several meters per fuel with their own billing periods (advanced import with a meter column)
+- [ ] 14.E17 [CC] Weather normalization to the billing year's actual weather (needs daily historical weather per billing period)
+- [ ] 14.E18 [TEAM] Try the template with a real hotel's bills; check the bounds and thresholds against real data
 
 ## Phase 8 — Demo hardening (all)
 - [x] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

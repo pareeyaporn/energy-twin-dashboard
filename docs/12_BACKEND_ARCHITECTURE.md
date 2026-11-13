@@ -69,7 +69,9 @@ The UI keeps a short "testing combinations…" state for the animation. Target: 
 
 **AI advisor.**
 1. The client builds a **context object** from store results: baseline by zone, current scenario, the three packages, and a few
-   precomputed comparisons (for example solar first vs thermostats first).
+   precomputed comparisons (for example solar first vs thermostats first). `baseline.source` says whether the figures are the
+   "modeled estimate" or "calibrated to utility bills" (when the user chose the calibrated baseline, docs/19). The hotel's bill records
+   themselves are never sent; only the results computed from them.
 2. The client sends `{ question, context }` to the edge function.
 3. The function calls the LLM with the system instruction below and returns `{ text }`.
 4. The client **validates** the text (section 7). If it fails, times out (8 s) or errors, the client shows the deterministic

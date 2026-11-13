@@ -4,6 +4,7 @@ import type { PropertySummary } from "@/engine/hotel";
 import { percent, usd } from "@/twin/format";
 import { HVAC_LABEL } from "./metrics";
 import { OWNERSHIP_LABEL } from "@/store/userHotels";
+import { UtilityBadge } from "@/utility/UtilityBadge";
 
 type Col = {
   id: string;
@@ -71,6 +72,7 @@ export function PortfolioTable({ rows, onExplore, onRemove }: { rows: PropertySu
                 <td key={c.id} className={`p-2 ${c.numeric ? "num text-right" : ""} ${c.id === "name" ? "font-medium" : ""}`}>
                   {c.show(r)}
                   {c.id === "name" && !r.synthetic && <span className="ml-1.5 rounded-full border border-primary/40 px-1.5 text-[10px] font-normal text-primary">Your hotel</span>}
+                  {c.id === "name" && <UtilityBadge propertyId={r.id} />}
                 </td>
               ))}
               <td className="p-2 text-right">

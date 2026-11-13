@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useUtilityHydration } from "@/utility/UtilityDataSection";
 import { useNavigate } from "@tanstack/react-router";
 import { Building2 } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
@@ -26,6 +27,7 @@ export function PortfolioPage() {
   const setActivePlan = useTwin((s) => s.setActiveCustomPlan);
   const hydrate = useTwin((s) => s.hydrateCustomPlans);
   const hydrateHotels = useTwin((s) => s.hydrateUserHotels);
+  useUtilityHydration();
   const removeHotel = useTwin((s) => s.removeUserHotel);
   // Custom plans and the user's own hotels live in the browser's storage; read them after mount (the server renders without them).
   useEffect(() => {

@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
-// Browser stubs for jsdom; skipped in tests that run in the node environment (for example the PDF report test).
+// Browser stubs for jsdom; skipped in tests that run in the node environment (the PDF report and Excel round-trip tests).
 if (typeof window !== "undefined") {
   Object.defineProperty(window, "scrollTo", {
     writable: true,

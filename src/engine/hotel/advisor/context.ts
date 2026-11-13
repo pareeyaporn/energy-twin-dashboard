@@ -117,6 +117,8 @@ export interface AdvisorContext {
     annualCarbonTonnes: number;
     costPerRoom: number;
     estimated: boolean;
+    /** "calibrated to utility bills" when the user chose the calibrated baseline (no bill records are sent), else "modeled estimate". */
+    source: "modeled estimate" | "calibrated to utility bills";
     byCategory: { label: string; annualCost: number; sharePct: number }[];
     byZone: { label: string; annualCost: number; sharePct: number }[];
   };
@@ -444,6 +446,7 @@ export function buildAdvisorContext(input: AdvisorInput, question = ''): Advisor
       annualCarbonTonnes: r1(baseline.annual.carbonKg / 1000),
       costPerRoom: r0(bill / p.rooms),
       estimated: baseline.estimated,
+      source: baseline.calibration.method === "utility_bills" ? "calibrated to utility bills" : "modeled estimate",
       byCategory: CATEGORIES.map((c) => ({
         label: CATEGORY_LABEL[c],
         annualCost: r0(baseline.byCategory[c].cost),

@@ -258,4 +258,25 @@ and meaningful, not sourced values; they are in `INSIGHT_THRESHOLDS` (`src/engin
   not confirmed for 2026) are shown separately with what the net investment would be, and no figure includes them.
 - **The report's date** is the user's at the moment of the click (in the file name and on page 1); the engine has no clock.
 - **Synthetic label in reports** also applies to a sample hotel whose inputs were edited, because its building data are still the sample's.
+## 24. Utility data and calibration (November 2026)
+
+Team choices for the utility data feature (docs/19); the Guideline 14 criteria are reported, the rest are ours.
+
+- **Two multipliers per fuel, each 0.5–2.0** (weather-independent and weather-driven parts) rather than one factor on everything: few,
+  physically meaningful, and the monthly bills can identify them. The bounds cover the spread of hotel intensities around the climate
+  benchmark; a bill needing more usually means a wrong input (floor area, systems) or a missing meter, so we stop at the bound and say so.
+- **Weather fitted only when identifiable:** weather part at least 10% of the fuel and varying by at least 25% (coefficient of variation
+  of its daily rate) between bills; otherwise base only.
+- **When a fuel is calibrated:** 12 bills covering at least 330 days (Guideline 14 uses 12 months), and CV(RMSE) after the fit at most
+  30% (twice Guideline 14's 15%) and not worse than the original model. Otherwise the model is kept and the reason shown.
+- **The user chooses the baseline**; saving new records returns the hotel to the modeled baseline; plans made on the other baseline are
+  cleared with a notice.
+- **Validation thresholds:** outlier = use per day above 3× or below ⅓ of the fuel's median (6 bills or more); implied rate outside
+  $0.03–$0.60 per kWh or $0.20–$5.00 per therm; billing period over 62 days; all warnings, not errors. Negative cost is a warning
+  (credits), negative use an error.
+- **Units never assumed:** a use column without a unit in its header must get one from the user; gas volume converts at 1,037 Btu per
+  cubic foot (the EIA average already used for prices).
+- **Sample data:** derived from the hotel's own model with a documented shift (electricity ×1.06 / ×0.88, gas ×0.94 / ×1.12) and wobble,
+  labeled synthetic, never marked as real unless the user edits it and ticks "These are my hotel's real utility records".
+- **Storage:** browser only, per hotel; nothing goes to the server or the AI advisor except whether the baseline is calibrated.
 

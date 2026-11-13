@@ -215,7 +215,8 @@ for synthetic data unless a source is named.
 - **Market size (verified, Part 5):** US hotels and resorts spend about $5.2 billion a year on energy (EIA CBECS 2018), about $6.2 billion
   with motels and inns.
 - **Why now (verified, Part 5):** EIA links record electricity demand to commercial growth, largely data centers, and expects commercial
-  prices to keep rising; cities such as New York fine buildings, hotels included, for carbon (search excerpt).
+  electricity prices to rise from about 13.4 to 14.3 cents per kWh by 2027 and to about 16.6 cents by 2035 (nominal); cities such as New York
+  fine buildings, hotels included, for carbon (search excerpt).
 - **User evidence:** published, not interviews (Part 5): the industry association on operating costs, trade press on financing and
   franchise economics, a chief engineer's own payback decision. Say plainly that there were no interviews in 48 hours; name a pilot as next.
 
@@ -292,8 +293,13 @@ the original). Quote verified figures freely; quote search excerpts only with "r
    Energy Twin answers, with carbon in every plan (from EPA eGRID grid factors) and the price path built into every payback.
 
 **How to say it (20 seconds):** "We started from two trends. Data centers are pushing electricity demand to records, and EIA expects
-commercial prices to keep climbing. At the same time, cities like New York now fine buildings, hotels included, for their carbon. Hotels
+commercial electricity prices to rise from about 13.4 to 14.3 cents per kWh by 2027, and to about 16.6 cents by 2035. At the same time, cities like New York now fine buildings, hotels included, for their carbon. Hotels
 can't guess anymore. Energy Twin shows them what to fix, what it saves and what it avoids, before they spend."
+
+**About the price figures (if a judge asks):** EIA's prices are **nominal** (they include inflation). The short-term rise (13.37 → 14.26 cents,
+about 6.7% over 2025–2027, STEO November 2026) is faster than typical inflation; the long-term path (13.48 → 16.62 cents over 2025–2035,
+about 2.1% a year, AEO 2026 Counterfactual Baseline case) is roughly flat in real terms. Say "prices are expected to rise", with the
+figures, not "prices will soar".
 
 ### The market figure (verified, with one calculation)
 

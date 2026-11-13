@@ -46,7 +46,7 @@ the numbers (task 8.8) and update this script, never the other way round.**
 | 6:00–6:40 | **7. Scale and honesty** | Switch to the **300-room** preset (baseline **$374,741**), budget **$150,000**, **Find the best investments**; then close on the before/after strip (energy, cost, carbon) | "A 300-room downtown hotel: **insulation + LED + occupancy sensors**, **$132,578** (**$132,578** net, or **$88,309** if ComEd renews its 2025 lighting rates), **$30,323** a year, **4.4 years**. Estimates, with sources and ranges; not an audit and not live monitoring. *Simulate smarter. Spend better. Save energy.*" |
 | 6:40–7:00 | Buffer, or the chain | Optional if time allows: **Portfolio** in the top bar (or the breadcrumb): the map comes back as you left it; point at **Start here** | "Our **5** Chicago hotels spend **$1,561,819** a year; their best packages would save **$109,905**. Start with **Riverwalk Grand (100 of 100)**." Otherwise hand over to Q&A |
 
-**Before every run:** press **Reset demo** (top bar); it returns to the portfolio homepage. The onboarding tour (19 steps) starts by itself only on a browser's first visit, and once more on browsers that saw the earlier
+**Before every run:** press **Reset demo** (top bar); it returns to the portfolio homepage. The onboarding tour (quick 8 steps or full 18) starts by itself only on a browser's first visit, and once more on browsers that saw the earlier
 tour: run it (or skip it) once on the demo laptop beforehand so it does not open mid-demo. **Figures:** `src/test/demoScript.test.ts` walks this path through the app's store and
 fails if any bold figure above no longer matches the engine; print the current ones with
 `DEMO_FIGURES=1 npx vitest run src/test/demoScript.test.ts` (task 8.8).

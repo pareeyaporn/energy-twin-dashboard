@@ -506,6 +506,7 @@ decision summary). Each part has its own heading below.
 - [x] 14C.6 [CC] Browser check, desktop 1440×900 and phone 390×844, first visit to finish, no console errors — *done*
 
 - [x] 14C.7 [CC] One story in 19 steps: the portfolio optimizer, the top-priority hotel followed through the hotel steps (state restored
+- [x] 14C.9 [CC] Quick (8 steps) and full (18 steps) tours chosen on the welcome card; new page order (top opportunity, 3D map), briefing in the insights step, a carbon step on the Flow view, details and bills merged into the equipment step, stress tests kept on Scenario, plans merged into the report step, the advisor step shows a tool-computed what-if — *done (November 2026); checked in a browser on desktop and iPhone 13, no step skipped (docs/16)*
       at the end), equipment, zones, build-your-own, the report (the PDF's sections and verdict) and the advisor (an example answer from
       the model's numbers) — *done (November 2026); storage key v2 so it shows once to browsers that saw the earlier tour; docs/16*
 - [x] 14C.8 [CC] Page cleanup (product review): portfolio page decision first (optimizer moved up, 7-column table, detail in "Deeper

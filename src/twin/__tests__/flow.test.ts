@@ -30,9 +30,20 @@ describe('flow graph with fuel split', () => {
   });
 });
 
+describe('carbon flows', () => {
+  it('splits carbon by fuel, adds up to the annual carbon, and weighs gas more than its cost share', () => {
+    const g = energyFlows(result);
+    for (const l of g.links) expect(l.elecCarbonKg + l.gasCarbonKg).toBeCloseTo(l.carbonKg, 6);
+    const src = g.links.filter((l) => l.source === 'grid' || l.source === 'gas');
+    expect(sum(src.map((l) => l.carbonKg))).toBeCloseTo(result.annual.carbonKg, 3);
+    const gasShare = (k: 'carbonKg' | 'costUsd') => sum(src.filter((l) => l.source === 'gas').map((l) => l[k])) / sum(src.map((l) => l[k]));
+    expect(gasShare('carbonKg')).toBeGreaterThan(gasShare('costUsd'));
+  });
+});
+
 describe('Sankey layout', () => {
   const g = energyFlows(result);
-  for (const metric of ['cost', 'energy'] as const) {
+  for (const metric of ['cost', 'energy', 'carbon'] as const) {
     it(`conserves flow at every zone and fits the box (${metric})`, () => {
       const bands = flowBands(g, metric);
       const L = sankeyLayout(g, bands);

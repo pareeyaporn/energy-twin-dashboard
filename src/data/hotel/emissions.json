@@ -121,5 +121,43 @@
   },
   "gasKgCO2ePerTherm": 5.311,
   "source": "Electricity: EPA eGRID2023 Summary Tables (created March 27, 2025), Table 1, total output emission rate, CO2e, for all 27 subregions (lb/MWh divided by 2,204.62 to get kg/kWh); U.S. 770.884 lb/MWh = 0.3497 kg/kWh. The subregion comes from the city (Chicago: RFC West, RFCW, which serves ComEd), else a state default (a state can span several subregions: IL defaults to RFCW, but Ameren territory is SRMW), else the U.S. rate; users can set it directly. Gas: EPA GHG Emission Factors Hub 2025, Table 1: 53.06 kg CO2, 1 g CH4 and 0.1 g N2O per MMBtu, with AR5 GWPs = 5.311 kg CO2e per therm. Estimates; not verified carbon accounting. City subregions for New York (NYCW), Miami (FRCC) and Denver (RMPA): EPA Power Profiler ZIP Code Tool v14.3 with eGRID2023_rev2 data (Zip-subregion sheet: 10019 and 10036 NYCW, 33131 and 33139 FRCC, 80202 RMPA; 60601 RFCW as a check), retrieved November 2026. No state default is set for New York, Florida or Colorado because each state spans several subregions (upstate New York is NYUP, the Florida panhandle SRSO).",
-  "verified": true
+  "verified": true,
+  "refrigerants": {
+    "R-410A": {
+      "gwp": 1924,
+      "label": "R-410A",
+      "typicalUse": "Rooftop units, split systems, VRF, newer PTACs"
+    },
+    "R-407C": {
+      "gwp": 1624,
+      "label": "R-407C",
+      "typicalUse": "Older chillers and air conditioners (R-22 replacement)"
+    },
+    "R-134a": {
+      "gwp": 1300,
+      "label": "R-134a (HFC-134a)",
+      "typicalUse": "Centrifugal and screw chillers, small refrigerators"
+    },
+    "R-32": {
+      "gwp": 677,
+      "label": "R-32 (HFC-32)",
+      "typicalUse": "Newer split and packaged air conditioners"
+    },
+    "R-404A": {
+      "gwp": 3943,
+      "label": "R-404A",
+      "typicalUse": "Walk-in coolers and freezers, ice machines"
+    },
+    "R-507A": {
+      "gwp": 3985,
+      "label": "R-507A",
+      "typicalUse": "Walk-in freezers, commercial refrigeration"
+    },
+    "R-22": {
+      "gwp": null,
+      "label": "R-22 (HCFC-22)",
+      "typicalUse": "Older (pre-2010) air conditioners and chillers"
+    }
+  },
+  "refrigerantSource": "EPA GHG Emission Factors Hub 2025 (ghg-emission-factors-hub-2025.xlsx, retrieved November 2026): Table 11 (100-year GWP, IPCC AR5: HFC-32 677, HFC-134a 1,300) and Table 12 (blended refrigerants: R-404A 3,943, R-407C 1,624, R-410A 1,924, R-507A 3,985). Emissions use EPA's simplified material balance idea for small users: refrigerant added to top up a system equals what leaked, so kg CO2e = pounds recharged x 0.45359 kg per lb x GWP. R-22 (HCFC-22) is an ozone-depleting substance controlled under the Montreal Protocol and is not in the Hub's GWP tables or EPA's GHG inventory scope, so it is recorded but not counted. Entered by the operator; nothing is assumed when blank."
 }

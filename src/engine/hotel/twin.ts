@@ -1,6 +1,7 @@
 import { CATEGORIES, CATEGORY_OF, DAYS_IN_MONTH, END_USES, ZONE_IDS, ZONE_LABELS } from './constants';
 import { currentEquipment } from './equipment';
 import type { EquipmentItem } from './equipment';
+import type { RefrigerantLeak } from './refrigerant';
 import { hotelData } from './data';
 import type { Category, Conditions, EndUse, EnergyResult, HotelData, HotelProfile, ZoneId } from './types';
 
@@ -154,6 +155,12 @@ export interface FlowLink {
   gasKBtu: number;
   elecKWh: number;
   gasTherms: number;
+  /** Carbon of the link's electricity and gas (kg CO₂e, the result's emission factors); they sum to `carbonKg`. */
+  elecCarbonKg: number;
+  gasCarbonKg: number;
+  /** Carbon from refrigerant leaks the operator entered (no energy or cost); included in `carbonKg`. */
+  refrigerantCarbonKg: number;
+  carbonKg: number;
 }
 export interface FlowGraph {
   nodes: FlowNode[];
@@ -174,6 +181,8 @@ const CATEGORY_LABELS: Record<Category, string> = {
 interface FlowPart {
   zone: ZoneId;
   endUse: EndUse;
+  /** kg CO2e of refrigerant leaks (refrigerant parts carry no energy or cost). */
+  refrigerantKg?: number;
   elecKWh: number;
   gasTherms: number;
   elecCost: number;
@@ -183,44 +192,65 @@ interface FlowPart {
 const KBTU_PER_KWH = 3.412;
 const KBTU_PER_THERM = 100;
 
-function flowGraph(parts: FlowPart[], period: 'year' | 'hour'): FlowGraph {
+function flowGraph(parts: FlowPart[], period: 'year' | 'hour', ef: EnergyResult['emissionFactors']): FlowGraph {
   const nodes: FlowNode[] = [
     { id: 'grid', label: 'Grid electricity', kind: 'source' },
     { id: 'gas', label: 'Natural gas', kind: 'source' },
+    ...(parts.some((x) => (x.refrigerantKg ?? 0) > 0) ? [{ id: 'refrigerant', label: 'Refrigerant leaks', kind: 'source' as const }] : []),
     ...ZONE_IDS.map((z) => ({ id: `zone:${z}`, label: ZONE_LABELS[z], kind: 'zone' as const })),
     ...CATEGORIES.map((c) => ({ id: `category:${c}`, label: CATEGORY_LABELS[c], kind: 'category' as const })),
   ];
-  const link = (source: string, target: string, ps: FlowPart[], fuel: 'both' | 'elec' | 'gas'): FlowLink => {
-    const e = fuel !== 'gas';
-    const g = fuel !== 'elec';
+  const link = (source: string, target: string, ps: FlowPart[], fuel: 'both' | 'elec' | 'gas' | 'refrigerant'): FlowLink => {
+    const e = fuel === 'both' || fuel === 'elec';
+    const g = fuel === 'both' || fuel === 'gas';
+    const r = fuel === 'both' || fuel === 'refrigerant';
+    const refrigerantCarbonKg = r ? ps.reduce((s, x) => s + (x.refrigerantKg ?? 0), 0) : 0;
     const elecKWh = e ? ps.reduce((s, x) => s + x.elecKWh, 0) : 0;
     const gasTherms = g ? ps.reduce((s, x) => s + x.gasTherms, 0) : 0;
     const elecCostUsd = e ? ps.reduce((s, x) => s + x.elecCost, 0) : 0;
     const gasCostUsd = g ? ps.reduce((s, x) => s + x.gasCost, 0) : 0;
     const elecKBtu = elecKWh * KBTU_PER_KWH;
     const gasKBtu = gasTherms * KBTU_PER_THERM;
-    return { source, target, costUsd: elecCostUsd + gasCostUsd, siteKBtu: elecKBtu + gasKBtu, elecCostUsd, gasCostUsd, elecKBtu, gasKBtu, elecKWh, gasTherms };
+    const elecCarbonKg = elecKWh * ef.elecKgPerKWh;
+    const gasCarbonKg = gasTherms * ef.gasKgPerTherm;
+    return {
+      source, target, costUsd: elecCostUsd + gasCostUsd, siteKBtu: elecKBtu + gasKBtu, elecCostUsd, gasCostUsd, elecKBtu, gasKBtu, elecKWh, gasTherms,
+      elecCarbonKg, gasCarbonKg, refrigerantCarbonKg, carbonKg: elecCarbonKg + gasCarbonKg + refrigerantCarbonKg,
+    };
   };
   const links: FlowLink[] = [];
   for (const z of ZONE_IDS) {
     const zp = parts.filter((x) => x.zone === z);
     const el = link('grid', `zone:${z}`, zp, 'elec');
     const gl = link('gas', `zone:${z}`, zp, 'gas');
+    const rl = link('refrigerant', `zone:${z}`, zp, 'refrigerant');
     if (el.costUsd > 0) links.push(el);
     if (gl.costUsd > 0) links.push(gl);
+    if (rl.refrigerantCarbonKg > 0) links.push(rl);
     for (const cat of CATEGORIES) {
       const cl = link(`zone:${z}`, `category:${cat}`, zp.filter((x) => CATEGORY_OF[x.endUse] === cat), 'both');
-      if (cl.costUsd > 0) links.push(cl);
+      if (cl.costUsd > 0 || cl.refrigerantCarbonKg > 0) links.push(cl);
     }
   }
   return { nodes, links, period };
 }
 
-/** Grid and gas → zones → categories, with cost and site energy (split by fuel) on every link, for the year. Flows are conserved. */
-export function energyFlows(result: EnergyResult): FlowGraph {
+/** Refrigerant leaks as carbon-only flow parts (`scale` 1 for the year, 1/8760 for an hour: leaks are not modeled by hour). */
+function leakParts(leaks: readonly RefrigerantLeak[], scale: number): FlowPart[] {
+  return leaks
+    .filter((l) => l.carbonKg > 0)
+    .map((l) => ({ zone: l.zone, endUse: (l.category === 'kitchen' ? 'kitchen' : 'cooling') as EndUse, elecKWh: 0, gasTherms: 0, elecCost: 0, gasCost: 0, refrigerantKg: l.carbonKg * scale }));
+}
+
+/** Grid and gas (and entered refrigerant leaks) → zones → categories, with cost, site energy and carbon (split by fuel) on every link, for the year. Flows are conserved. */
+export function energyFlows(result: EnergyResult, leaks: readonly RefrigerantLeak[] = []): FlowGraph {
   return flowGraph(
-    result.cells.map((c) => ({ zone: c.zone, endUse: c.endUse, elecKWh: c.elecKWh, gasTherms: c.gasTherms, elecCost: c.elecCost, gasCost: c.gasCost })),
+    [
+      ...result.cells.map((c) => ({ zone: c.zone, endUse: c.endUse, elecKWh: c.elecKWh, gasTherms: c.gasTherms, elecCost: c.elecCost, gasCost: c.gasCost })),
+      ...leakParts(leaks, 1),
+    ],
     'year',
+    result.emissionFactors,
   );
 }
 
@@ -228,7 +258,7 @@ export function energyFlows(result: EnergyResult): FlowGraph {
  * The same flows for one hour of a typical day of `month`, computed exactly like the meter (`typicalDayProfile`): each cell's monthly
  * energy divided by the days and spread by its end use's hourly shape, priced at the flat rates. So the hour's flows add up to the meter.
  */
-export function energyFlowsAt(result: EnergyResult, month: number, hour: number, data: HotelData = hotelData): FlowGraph {
+export function energyFlowsAt(result: EnergyResult, month: number, hour: number, data: HotelData = hotelData, leaks: readonly RefrigerantLeak[] = []): FlowGraph {
   const days = DAYS_IN_MONTH[month] ?? 30;
   const h = clamp(Math.round(hour), 0, 23);
   const parts: FlowPart[] = [];
@@ -245,7 +275,8 @@ export function energyFlowsAt(result: EnergyResult, month: number, hour: number,
     const th = (c.gasTherms / days) * sh;
     parts.push({ zone: c.zone, endUse: c.endUse, elecKWh: kWh, gasTherms: th, elecCost: kWh * result.rates.elecPerKWh, gasCost: th * result.rates.gasPerTherm });
   }
-  return flowGraph(parts, 'hour');
+  parts.push(...leakParts(leaks, 1 / 8760));
+  return flowGraph(parts, 'hour', result.emissionFactors);
 }
 
 /** One zone and end use over a typical day: electricity (kW), gas (therms per hour) and cost per hour, 24 values each. */

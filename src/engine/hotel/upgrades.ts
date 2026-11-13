@@ -1,7 +1,8 @@
 import { calculateBaselineEnergy, simulate, sumCells } from './baseline';
+import { leverReference } from './equipment';
 import { applyScenario, comfortFlags } from './conditions';
 import { simulateEnergyScenario } from './scenarios';
-import { DAYS_IN_MONTH, KBTU_PER_KWH, KBTU_PER_THERM, LOAD_TYPES, UPGRADE_ORDER, isSolar } from './constants';
+import { DAYS_IN_MONTH, KBTU_PER_KWH, KBTU_PER_THERM, LOAD_TYPES, UPGRADE_ORDER, ZONE_IDS, isSolar } from './constants';
 import { hotelData } from './data';
 import { isResolved, resolveProfile } from './profile';
 import { climateLatitude, climateSolar, daylightShape, exportCreditPerKWh, solarYield } from './solar';
@@ -22,6 +23,7 @@ import type {
   UpgradeId,
   UpgradeOutcome,
   UpgradeSizing,
+  ZoneId,
 } from './types';
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
@@ -65,7 +67,9 @@ export function areasOf(p: HotelProfile, data: HotelData = hotelData) {
 export function solarSizeKw(p: HotelProfile, baselineElecKWh: number, data: HotelData = hotelData, id: UpgradeId = 'rooftop_solar'): number {
   const def = upgradeDef(id, data);
   const fraction = def.constants['roofFraction'] ?? 1;
-  const roofCap = (areasOf(p, data).roofSqft * constant(def, 'usableRoofShare') * fraction) / constant(def, 'sqftPerKw');
+  // Existing solar (current equipment, docs/20) already uses part of the roof.
+  const existing = p.equipmentLevers?.existingSolarKw ?? 0;
+  const roofCap = Math.max(0, (areasOf(p, data).roofSqft * constant(def, 'usableRoofShare')) / constant(def, 'sqftPerKw') - existing) * fraction;
   const yieldMid = solarYield(p, 'mid', data);
   const useCap = yieldMid > 0 ? (constant(def, 'maxShareOfElectricity') * baselineElecKWh) / yieldMid : 0;
   return Math.round(Math.max(0, Math.min(roofCap, useCap)) * 10) / 10;
@@ -84,6 +88,8 @@ function hourWeights(data: HotelData): Record<string, number[]> {
 export function eligibleUpgrades(p: HotelProfile, baselineElecKWh = 1, data: HotelData = hotelData): UpgradeId[] {
   return UPGRADE_ORDER.filter((id) => {
     if (id === 'smart_room_controls') return !p.smartRoomControls;
+    // Lighting that is already all LED in the zones the inventory describes has nothing left to retrofit (docs/20).
+    if (id === 'led_lighting') return !LED_ZONES.every((z) => (p.equipmentLevers?.ledShare?.[z] ?? 0) >= 0.999);
     if (isSolar(id)) return solarSizeKw(p, baselineElecKWh, data, id) > 0;
     return true;
   });
@@ -327,7 +333,15 @@ export function calculateUpgradeSavings(
       }
       case 'led_lighting': {
         const before = lightingBySpace(cells);
-        rescale(cells, (c) => c.endUse === 'lighting', 1 - param(def, 'lightingReduction', scenario) * cov(id), env);
+        // Where part of the lighting is already LED (current equipment), only the rest is retrofitted: with share s already LED at the
+        // mid reduction m, the zone uses (1 - s m) of the reference, and converting the rest at r leaves (1 - s m - (1 - s) r).
+        const r = param(def, 'lightingReduction', scenario);
+        const m = param(def, 'lightingReduction', 'mid');
+        for (const z of ZONE_IDS) {
+          const s = ctx.profile.equipmentLevers?.ledShare?.[z] ?? 0;
+          const k = s > 0 ? ((1 - s) * r) / (1 - s * m) : r;
+          rescale(cells, (c) => c.endUse === 'lighting' && c.zone === z, 1 - k * cov(id), env);
+        }
         lightingInteraction(cells, savedBetween(before, lightingBySpace(cells)), ctx, env);
         break;
       }
@@ -352,12 +366,14 @@ export function calculateUpgradeSavings(
       case 'hvac_upgrade': {
         const baseWeather = weatherKBtu(ctx.baseline.cells);
         hvacSizeFactor = baseWeather > 0 ? clamp(weatherKBtu(cells) / baseWeather, 0.6, 1) : 1;
-        rescale(cells, (c) => c.endUse === 'heating', 1 - param(def, 'heatingReduction', scenario), env);
-        rescale(cells, (c) => c.endUse === 'cooling', 1 - param(def, 'coolingReduction', scenario), env);
+        // Against equipment the operator entered (docs/20): the upgrade's reduction scales with the gap left to its target efficiency.
+        const g = efficiencyGaps(ctx.profile, def, d);
+        rescale(cells, (c) => c.endUse === 'heating', 1 - Math.min(0.9, param(def, 'heatingReduction', scenario) * g.heating), env);
+        rescale(cells, (c) => c.endUse === 'cooling', 1 - Math.min(0.9, param(def, 'coolingReduction', scenario) * g.cooling), env);
         break;
       }
       case 'water_heating':
-        rescale(cells, (c) => c.endUse === 'hotWater', 1 - param(def, 'hotWaterReduction', scenario), env);
+        rescale(cells, (c) => c.endUse === 'hotWater', 1 - Math.min(0.9, param(def, 'hotWaterReduction', scenario) * waterHeatingGap(ctx.profile, def, d)), env);
         break;
       case 'rooftop_solar_quarter':
       case 'rooftop_solar_half':
@@ -463,3 +479,42 @@ export function comfortFor(ids: readonly UpgradeId[], conditionFlags: ComfortFla
   return { score: clamp(score, 0, 1), notes };
 }
 
+
+/** Zones whose lighting the inventory describes (guest rooms, lobby, corridors). */
+const LED_ZONES: ZoneId[] = ['guest_rooms', 'lobby_common', 'hallways_shared'];
+
+/**
+ * How much of the HVAC upgrade's reduction is still available, from the efficiencies the operator entered (1 = the estimate's).
+ * The upgrade's mid reduction r defines its target: target = reference / (1 - r) (for example 0.80 / (1 - 0.13) = 0.92 for a
+ * condensing boiler). With an entered efficiency e the reduction left is 1 - e / target, as a multiple of r (0 when e is at or above
+ * the target, up to 3 for very poor equipment). Docs/20.
+ */
+export function efficiencyGaps(p: HotelProfile, def: UpgradeDef, data: HotelData = hotelData): { heating: number; cooling: number } {
+  const lev = p.equipmentLevers ?? {};
+  const ref = leverReference(p, data);
+  const gap = (entered: number | undefined, reference: number, r: number) => {
+    if (entered === undefined || r <= 0) return 1;
+    const target = reference / (1 - r);
+    return Math.max(0, Math.min(3, (1 - entered / target) / r));
+  };
+  return {
+    heating: gap(lev.heatingEfficiency, ref.heatingEfficiency, param(def, 'heatingReduction', 'mid')),
+    cooling: gap(lev.coolingCop, ref.coolingCop, param(def, 'coolingReduction', 'mid')),
+  };
+}
+
+/**
+ * The water-heating measure is part efficiency (0.80 to 0.90 thermal efficiency: 1 - 0.80 / 0.90 = 11%) and part low-flow fixtures.
+ * With an entered heater efficiency only the efficiency part changes, in proportion to the gap left to 0.90. Docs/20.
+ */
+export function waterHeatingGap(p: HotelProfile, def: UpgradeDef, data: HotelData = hotelData): number {
+  const e = p.equipmentLevers?.waterHeaterEfficiency;
+  if (e === undefined) return 1;
+  const L = data.equipment.levers;
+  const ref = L?.waterHeaterReferenceEfficiency ?? 0.8;
+  const up = L?.waterHeaterUpgradeEfficiency ?? 0.9;
+  const mid = param(def, 'hotWaterReduction', 'mid');
+  const effPart = mid > 0 ? Math.min(1, (1 - ref / up) / mid) : 0;
+  const gap = Math.max(0, Math.min(3, (1 - e / up) / (1 - ref / up)));
+  return effPart * gap + (1 - effPart);
+}

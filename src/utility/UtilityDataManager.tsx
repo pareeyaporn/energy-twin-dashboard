@@ -22,6 +22,7 @@ import { PROVENANCE_LABEL, withoutUtility } from "@/store/utilityData";
 import type { UtilityProvenance } from "@/store/utilityData";
 import { SpreadsheetGrid } from "./SpreadsheetGrid";
 import { CalibrationReview } from "./CalibrationReview";
+import { AiMappingSuggest } from "./AiMappingSuggest";
 
 type Source = "sample" | "upload" | "manual";
 type Step = "edit" | "map" | "review";
@@ -332,6 +333,7 @@ export function UtilityDataManager({ open, onOpenChange, initialStep = "edit" }:
                   </label>
                 ))}
               </div>
+              <AiMappingSuggest headers={upload.table[0]!} columns={upload.mapping.columns} labels={FIELD_LABEL} onApply={(columns) => setUpload({ ...upload, mapping: { ...upload.mapping, columns } })} />
               <div className="flex flex-wrap gap-4 text-xs">
                 {upload.mapping.columns.includes("elecUse") && (
                   <label>Electricity unit{" "}

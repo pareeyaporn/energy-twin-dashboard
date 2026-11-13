@@ -54,6 +54,8 @@ export interface ReportUpgradeLine {
 
 export interface HotelReportData {
   kind: "ai" | "custom";
+  /** Optional executive summary written by the AI from this report's figures, number-checked (docs/23). Absent on fallback. */
+  aiSummary?: string;
   title: string;
   planName: string;
   /** Utility records and calibration (null when the hotel has none). */
@@ -139,6 +141,8 @@ export interface HotelReportData {
 
 export interface PortfolioReportData {
   kind: "portfolio";
+  /** Optional executive summary written by the AI from this report's figures, number-checked (docs/23). Absent on fallback. */
+  aiSummary?: string;
   title: string;
   organization: string;
   city: string;

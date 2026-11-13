@@ -1,3 +1,4 @@
+import { AskAbout } from "@/advisor/AskAbout";
 import { useMemo, useState } from "react";
 import { ChevronDown, CircleCheck, CircleAlert, CircleX } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
@@ -205,6 +206,7 @@ export function AiPlanResults({ compact = false }: { compact?: boolean }) {
         <h2 className="text-sm font-semibold">Recommended investment plan</h2>
         <span className="text-[11px] text-muted-foreground">{d.planLabel.replace("AI recommended · ", "")}{active ? " (applied to the twin)" : ""}</span>
       </div>
+      <AskAbout question="Explain the recommended investment plan: why this package, and what are the risks?" label="Ask AI about this plan" />
       <p className="text-xs">{d.planName}</p>
       <ResultsSummary d={d} compact={compact} />
       <ReportActions getData={() => aiReportFromState(useTwin.getState())} label="Investment summary" compact={compact} />

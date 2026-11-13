@@ -585,6 +585,32 @@ operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" br
 - [ ] 14G.9 P2 [CC] Heat-pump water heaters and fuel switching; per-appliance demand; hourly solar self-consumption for existing arrays;
       multi-step undo; persisting card-edited schedules for sample hotels
 
+## Phase 15 — AI assistant (CC; built November 2026, docs/23)
+The rule stays: the AI never produces a number. It may ask the engine to compute one, and every number in its text must be in the context
+or in this answer's tool results.
+- [x] 15.1 [CC] Tool-using advisor: seven engine tools run in the browser (`src/engine/hotel/advisor/tools.ts`), at most two rounds, the
+      function returns `{ text }` or `{ toolCalls }` (`supabase/functions/advisor`), the number check covers the context plus the tool results,
+      a result card per tool; offline, a keyword parser calls the same tools and a template answers from them — *done*
+- [x] 15.2 [CC] Action buttons derived only from tool runs (apply a what-if, apply a package, make it my plan, preview the report, open a stress
+      test, open the portfolio plan); a plan applies only to the hotel it was computed for — *done (`src/advisor/actions.ts`)*
+- [x] 15.3 [CC] Follow-up questions from the AI, number-checked, topped up with deterministic ones — *done*
+- [x] 15.4 [CC] `<AskAbout question />` by the KPI cost, on each insight card, the recommended plan and the portfolio's Start here — *done*
+- [x] 15.5 [CC] Briefing at the top of the Hotel tab: three sentences, number-checked, cached per hotel context, template fallback, hidden for
+      the session on request — *done (`src/advisor/Briefing.tsx`)*
+- [x] 15.6 [CC] AI executive summary in the report preview and PDF, labeled, validated, at most 8 s, nothing extra on fallback — *done
+      (`src/report/aiSummary.ts`)*
+- [x] 15.7 [CC] "Suggest with AI" in the utility mapping step: headers and unit names only, privacy note, user confirms, guessMapping stays on
+      fallback — *done (`src/utility/AiMappingSuggest.tsx`)*
+- [x] 15.8 [CC] Portfolio tools and an "Ask about the portfolio" chat with suggested chain questions — *done (`src/advisor/PortfolioChat.tsx`)*
+- [x] 15.9 [CC] Tests (`advisorTools.test.ts`, `aiAssistant.test.tsx`, `advisorFunction.test.ts`) and a browser check on desktop and phone with
+      the function unreachable and mocked — *done*
+- [ ] 15.10 [team] Redeploy the advisor function (the tool protocol is new) and ask the live model each new question once: "What should I do with
+      $50,000?", "What if occupancy rises to 85%?", "Which hotel should we invest in first, and why?", "How would you split $250,000 across
+      the chain?"; check the cards and that answers are marked AI
+- [ ] 15.11 [team] Open the report preview once with the live model and read the executive summary; open the Hotel tab and read the briefing
+- [ ] 15.12 P2 [CC] A per-hotel `find_best_plan` for any portfolio hotel (chain questions such as "what would $50,000 buy at the second
+      hotel?"); streaming answers; units in the column-mapping suggestion
+
 ## Phase 8 — Demo hardening (all)
 - [x] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
       $50,000 budget, an advisor question **chosen after calibration from what the results actually show**, closing before/after with carbon — *done (November 2026): docs/07 brought up to date (10 packages fit at $50,000 on the scenario, not 14; the 300-room package and baseline; the act-6 question "Why not solar, and what should I do with $50,000?"; an optional portfolio line), with Reset demo and the tour noted before each run. The storyline owner may still reword it; keep the bold figures*

@@ -19,12 +19,14 @@ import {
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { Shimmer } from "@/components/ai-elements/shimmer";
+import { AdvisorMessageExtras } from "@/advisor/AdvisorMessageExtras";
 
 export function AdvisorPanel() {
-  const { messages, busy, ask, clear, synthetic } = useTwin(
+  const { messages, busy, step, ask, clear, synthetic } = useTwin(
     useShallow((s) => ({
       messages: s.advisorMessages,
       busy: s.advisorBusy,
+      step: s.advisorStep,
       ask: s.askAdvisor,
       clear: s.clearAdvisor,
       synthetic: selectIsSynthetic(s),
@@ -82,12 +84,13 @@ export function AdvisorPanel() {
                   {message.source === "ai" ? "Explains the computed results" : "Template answer"}
                 </p>
               )}
+              <AdvisorMessageExtras message={message} />
             </Message>
           ))}
           {busy && (
             <Message from="assistant">
               <MessageContent>
-                <Shimmer className="motion-reduce:animate-none">Thinking…</Shimmer>
+                <Shimmer className="motion-reduce:animate-none">{step ?? "Thinking…"}</Shimmer>
               </MessageContent>
             </Message>
           )}

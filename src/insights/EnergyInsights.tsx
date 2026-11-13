@@ -1,3 +1,4 @@
+import { AskAbout } from "@/advisor/AskAbout";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { AlertTriangle, ArrowRight, Building2, ChevronDown, Gauge, Lightbulb, PiggyBank, ShieldAlert, Wrench } from "lucide-react";
@@ -94,6 +95,7 @@ function InsightCard({ insight, onAction }: { insight: EnergyInsight; onAction: 
             <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="inline-flex items-center gap-0.5 text-[11px] text-muted-foreground hover:text-foreground">
               How was this calculated? <ChevronDown className={`size-3 transition-transform ${open ? "rotate-180" : ""}`} />
             </button>
+            <AskAbout question={`Explain this finding and what to do about it: ${insight.title}`} />
           </div>
           {open && <p className="mt-1.5 rounded-md bg-muted/40 p-2 text-[11px] leading-relaxed text-muted-foreground">{insight.method}</p>}
         </div>

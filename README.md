@@ -68,6 +68,7 @@ ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustra
 | Investment catalog and custom plans; stress tests | Built (Phases 11 and 12) |
 | Hotel portfolio, the homepage (`/`; the hotel dashboard is `/hotel`): synthetic Chicago chains and a multi-city organization (New York, Miami, Denver) on a MapLibre map (city markers when zoomed out; a per-city schematic offline), "Start here" and the investment priority explained, the view kept when you visit a hotel and come back, totals, comparison table, charts, one budget split across hotels, open any hotel in the twin; my portfolio (custom plan per hotel) vs the AI portfolio; portfolio stress tests | Built (Phase 13 P0 and P1) |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
+| AI assistant (`docs/23`): the AI calls engine tools (what-if, best plan, compare, stress test, portfolio split) and explains the results, with result cards, action buttons and follow-ups; Ask AI buttons; a Hotel tab briefing; an AI executive summary in the report; Suggest with AI for bill columns (headers only); a portfolio chat. Every number is checked against the engine's results | Built (Phase 15); tested with mocks, the live model to be checked after redeploying the function |
 | Investment results (summary, before/after, upgrade breakdown, savings contribution, plain-language reading) and the downloadable PDF investment report with preview, for AI plans, custom plans and the portfolio (`docs/18`) | Built (Phase 14B) |
 | Calculation transparency: "How was this calculated?" on major figures, data labels, financial assumptions (`docs/21`) | Built |
 | Onboarding tour (19 steps, one story: portfolio, map, ranking, one budget across the chain, then the top-priority hotel: data, insights, zones, time-lapse, equipment, what-ifs, stress tests, optimizer, 10-year payoff, build your own, PDF report, advisor; live figures; first visit and replay; `docs/16`) | Built |
@@ -113,6 +114,7 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | `src/three/` | 3D hotel scene (building, scenery, street, people, camera) |
 | `src/plans/` | Investment modes: AI recommended, Build your own (catalog), Compare |
 | `src/portfolio/` | Hotel portfolio page: city map, totals, comparison, charts, portfolio optimizer, priority explanation |
+| `src/advisor/` | The AI assistant's UI: result cards, actions, follow-ups, Ask AI buttons, the portfolio chat, the briefing (`docs/23`) |
 | `src/app/` | The homepage (portfolio), the hotel dashboard (`/hotel`) and the landing rules |
 | `src/tour/` | First-visit onboarding tour |
 | `src/insights/` | Opportunities & alerts cards (rules in `src/engine/hotel/insights.ts`) |

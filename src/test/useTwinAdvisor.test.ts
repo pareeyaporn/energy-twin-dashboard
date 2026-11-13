@@ -17,6 +17,7 @@ beforeEach(() => {
   get().resetHotel();
   get().clearAdvisor();
   advisor.clearAdvisorCache();
+  advisor.clearAgentCache();
   clearSavedAdvisorAnswers();
   advisor.setAdvisorConfig(null);
 });

@@ -85,12 +85,29 @@ The UI keeps a short "testing combinations…" state for the animation. Target: 
 ```jsonc
 // request
 { "question": "Why recommend smart thermostats over solar?",
-  "context": { /* hotel, baseline, scenario, every upgrade, occupancy example, plan, other budgets: all numbers precomputed */ } }
+  "context": { /* hotel, baseline, scenario, every upgrade, occupancy example, plan, other budgets: all numbers precomputed */ },
+  "mode": "answer",          // optional: "answer" (default) | "briefing" | "report_summary" | "map_columns"   (docs/23)
+  "scope": "hotel",          // optional: "hotel" | "portfolio" (informational; the context and tools decide)
+  "rounds": [                // answer mode only, at most 2: the tools the AI asked for and the browser's engine results
+    { "calls": [{ "id": "toolu_1", "name": "find_best_plan", "input": { "budget": 50000 } }],
+      "results": [{ "id": "toolu_1", "content": "{\"bestPackage\":{…}}" }] } ] }
 // response 200
-{ "text": "…" }
-// errors: 400 invalid input, 403 origin not allowed, 405 method, 413 too large, 429 rate limited (retry-after),
-//         502 model refused or failed, 503 not configured (no API key), 504 timeout
+{ "text": "…" }                                   // the answer (answer mode may end with a "FOLLOW_UPS: q1 | q2 | q3" line)
+{ "toolCalls": [{ "id", "name", "input" }] }      // answer mode only: run these with the engine, then call again with them in rounds
+// errors: 400 invalid input / invalid_mode / invalid_rounds, 403 origin not allowed, 405 method, 413 too large / rounds_too_large,
+//         429 rate limited (retry-after), 502 model refused or failed / unexpected_tool_use, 503 not configured (no API key), 504 timeout
 ```
+
+- **Tools (answer mode, built November 2026, docs/23):** the function sends the seven tool definitions in `tools.ts` (run_scenario,
+  find_best_plan, evaluate_upgrades, compare_upgrades, run_stress_test, portfolio_overview, portfolio_optimize) with `tool_choice: auto`, and
+  `none` once two rounds have run, so the third call must answer in text. A `tool_use` reply is returned as `{ toolCalls }`. The browser runs the tools with the engine and calls again
+  with `rounds`, which become `tool_use` / `tool_result` messages (results neutralized like the context). Round names must be known tools,
+  ids must match and results must be strings; all rounds together are limited to 40,000 characters. The system prompt adds: call a tool rather than estimate,
+  numbers in tool results count as context, end with a `FOLLOW_UPS:` line whose questions add no new numbers.
+- **Other modes** use their own short system prompts and no tools: `briefing` (three sentences on the open hotel), `report_summary` (one
+  paragraph for the report), `map_columns` (JSON `{ "mapping": { header: field } }` from spreadsheet headers only).
+- **Timeouts:** each call keeps the 7.5 s limit; the browser allows 8 s a call and 20 s an answer (two tool rounds plus the text), then
+  answers from the offline tools.
 
 - **Model call:** `claude-opus-5-5` by default (`ADVISOR_MODEL` overrides it), thinking left at the model's default, `effort: "low"` so a short explanation is quick, `max_tokens` 1024, no SDK retries, and a 7.5-second limit so the browser's 8-second budget holds (answers take about 3 s; `ADVISOR_TIMEOUT_MS` can shorten the limit, never lengthen it). For speed, set `ADVISOR_MODEL` to `claude-sonnet-5-5`.
   The server-side refusal fallback is on by default (`betas: ["server-side-fallback-2026-07-01"]`, `fallbacks: "default"`); `ADVISOR_REFUSAL_FALLBACK=off` turns it off. A refusal that survives becomes a 502 and the browser shows the template answer.
@@ -116,6 +133,9 @@ The UI keeps a short "testing combinations…" state for the animation. Target: 
 - **Fallback:** deterministic template answers for the demo questions (why HVAC is costly, how occupancy changes energy, solar or thermostats first,
   how to use a $30,000 budget), built from the same context.
 - **Output labeling:** AI text is shown as an explanation of the computed results, next to the numbers.
+- **Tool results count, nothing else (docs/23):** with tool use, the allowed numbers are the context plus the results of the tools that ran
+  for *this* answer, computed by the browser's engine. Follow-up questions, the briefing and the report summary pass the same check; action buttons
+  are built from the tool runs, never from the text. The column mapping sends headers only, never bill values.
 
 ## 8. Data layer
 - **Bundled JSON** in `src/data/hotel/`, imported at build time. Every value has `source` and `verified`; synthetic values say so.

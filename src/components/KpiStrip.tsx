@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { HowCalculated } from "@/explain/HowCalculated";
 import type { MetricId } from "@/explain/explanations";
+import { AskAbout } from "@/advisor/AskAbout";
 
 const number = (n: number) => Math.round(n).toLocaleString("en-US");
 
@@ -19,7 +20,7 @@ function Kpi({ id, label, icon, before, after, prefix = "", unit, how }: { id: s
     <section className="min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 sm:px-3" aria-label={`Annual ${label.toLowerCase()}`} data-testid={`kpi-${id}`}>
       <div className="flex items-center justify-between gap-1.5">
         <h2 className="flex min-w-0 items-center gap-1 text-[11px] font-medium text-muted-foreground sm:text-xs">{icon}{label}</h2>
-        <span className="flex shrink-0 items-center gap-0.5"><Badge variant="outline" className="border-primary/25 px-1.5 text-[9px] font-normal text-primary sm:px-2.5 sm:text-[10px]">Estimate</Badge><DefaultEstimate dot />{how && <HowCalculated metric={how} />}</span>
+        <span className="flex shrink-0 items-center gap-0.5"><Badge variant="outline" className="border-primary/25 px-1.5 text-[9px] font-normal text-primary sm:px-2.5 sm:text-[10px]">Estimate</Badge><DefaultEstimate dot />{how && <HowCalculated metric={how} />}{how === "annualCost" && <AskAbout question="Why is my energy cost this high, and what would lower it?" label="" />}</span>
       </div>
       <p className="num mt-1 flex flex-wrap items-baseline gap-x-1 text-xs sm:gap-x-1.5 sm:text-sm">
         {!same && <><span className="text-muted-foreground">{prefix}{number(before)}</span><span className="text-muted-foreground" aria-label="to">→</span></>}

@@ -394,10 +394,8 @@ Display only: no calculation, assumption or data changes. Each task is one point
 - [x] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
       optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 19 steps, one story from the portfolio to the top-priority hotel, with live figures, a time-lapse and a 10-year projection chart; Phase 14C) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
 - [x] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
-      their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model — *done: "More building types (coming later)" cards on the portfolio page, from `properties.json`*
-- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Multi-city data done (November 2026, research pass 11): New York, Miami and Denver have sourced weather, solar, prices, grid subregion and ComStock intensity and end-use split, and utility incentives now apply only in their territory; multi-city hotels in the portfolio UI and map are next. Real utility data done (November 2026): the Utility Data Manager with spreadsheet, Excel/CSV upload and template, and calibration (14E, docs/19). Later: role-based access (accounts and a database)*
-
-- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Multi-city data done (November 2026, research pass 11): New York, Miami and Denver have sourced weather, solar, prices, grid subregion and ComStock intensity and end-use split, and utility incentives now apply only in their territory; multi-city portfolio UI done (November 2026, 14D below): a national synthetic organization (Meridian Hotels & Resorts: New York, Miami, Denver), city markers and chips on the street map, a per-city schematic on the drawn map, a city filter, totals by city and a city choice in Add my hotel. Real utility data: the engine's monthly bill calibration is built (`src/engine/hotel/bills.ts`); its Utility Data Manager is a separate task. Later: role-based access (accounts and a database)*
+      their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model — *done, then removed from the page in the November 2026 cleanup (a roadmap item, for the slides); the list stays in `properties.json` (`futureBuildingTypes`)*
+- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *mostly done (November 2026): several organizations, brands, regions and ownership types with an organization switcher, filters and totals by group (13.38); multi-city data (research pass 11: New York, Miami, Denver) and the multi-city portfolio UI (14D: Meridian Hotels & Resorts, city markers and chips, a per-city schematic, a city filter, totals by city, a city choice in Add my hotel); utility incentives limited to their territory; real utility data through the Utility Data Manager and calibration (14E, docs/19). Left for later: role-based access (accounts and a database)*
 - [x] 13.36 **P2** [CC] Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07) — *transitions done (marker colors fade between metrics; the twin's figures count up when a hotel opens); the demo script is the storyline owner's (docs/07)*
 
 Known limits: the five Lakefront hotels share Chicago weather (O'Hare normals; the Meridian hotels use their own cities'); property types differ through size, age, HVAC and occupancy only (the
@@ -452,8 +450,8 @@ decision summary). Each part has its own heading below.
 - [x] 14B.10 [CC] Tests: figures equal the engine's for AI, custom and portfolio plans; honest readings; a real PDF is generated; state
       unchanged; browser check on desktop and phone — *done*
 - [ ] 14B.11 P2 [CC] Stress-test results and the advisor's explanation in the report; a monthly energy chart; brand fonts in the PDF
-- [ ] 14B.12 P2 [Store] Keep the "synthetic" label when a sample hotel's budget is edited (the app's badge disappears today; the report
-      already keeps the label)
+- [x] 14B.12 P2 [Store] Keep the "synthetic" label when a sample hotel's budget is edited (the app's badge disappears today; the report
+      already keeps the label) — *done (November 2026, approved store change): budget, objective and horizon edits keep `hotelPresetId`, so a sample stays labeled synthetic and keeps its utility data and equipment corrections; building edits still make it the user's hotel. Test in `src/test/useTwinHotel.test.ts`*
 
 
 ### 14F Calculation transparency (Improvement 6; `src/explain/`, docs/21)
@@ -558,7 +556,7 @@ operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" br
       "Click to open · Explore hotel"; cost and intensity use blue → amber → red with the legend saying high = spends more / uses more per ft²;
       savings potential and priority use a green scale (high = a bigger opportunity), never red*
 - [x] 14D.14 [CC] Top bar — *done (minimal Lovable edit): Portfolio, Hotel analysis, Reports (opens the hotel's Invest tab, where the investment
-      results are, scrolled to Preview / Download PDF report when a plan exists — `openReports` in `src/app/landing.ts`), Tour, Sources, and Reset demo (secondary, returns
+      results are; it opens the report preview, running the optimizer first when the hotel has no plan yet — `openReports` in `src/app/landing.ts`), Tour, Sources, and Reset demo (secondary, returns
       to the portfolio)*
 - [x] 14D.15 [CC] Tour routes — *done (minimal): hotel steps use `/hotel`, the portfolio step `/`; the tour content will be reworked separately*
 - [x] 14D.16 [CC] Tests and browser check — *done: `src/test/portfolioWorkflow.test.tsx` (multi-city resolution, Chicago chain unchanged, city

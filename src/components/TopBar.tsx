@@ -8,7 +8,7 @@ import { TourButton } from "@/tour/TourButton";
 import { forgetView, openReports } from "@/app/landing";
 
 // Navigation (Claude Code edit, November 2026, the portfolio-first homepage): Portfolio (/), Hotel analysis (/hotel), Reports (the hotel's
-// Invest tab, scrolled to the report buttons when a plan exists), Tour, Sources; Reset demo is secondary and returns to the portfolio.
+// report preview; runs the optimizer first when there is no plan yet), Tour, Sources; Reset demo is secondary and returns to the portfolio.
 export function TopBar() {
   const setSourcesOpen = useTwin((s) => s.setSourcesOpen);
   const resetDemo = useTwin((s) => s.resetDemo);

@@ -6,6 +6,8 @@ import {
   ZONE_LABELS,
   benchmarkComparison,
   optimizeInvestmentPortfolio,
+  upgradeCatalog,
+  advisor,
   optimizePortfolioBudget,
   prepareUpgradeContext,
   simulateEnergyScenario,
@@ -13,6 +15,7 @@ import {
 } from "@/engine/hotel";
 import type { EnergyResult, PortfolioResult, ResolvedProfile } from "@/engine/hotel";
 import type { TwinState } from "@/store/useTwin";
+import { buildHotelReport } from "@/report/data";
 import { selectEnergyInsights, selectPortfolioItems, selectPortfolioSummary } from "@/store/hotelDerived";
 
 export interface Insight {
@@ -174,6 +177,59 @@ export function insightFor(stepId: string, s: TwinState): Insight | null {
     default:
       return null;
   }
+}
+
+/** What the tour's report card shows: the PDF's own sections and the plan's one-line reading, for the best package (read-only, cached run). */
+export interface ReportOutline {
+  plan: string;
+  headline: string;
+  verdict: "attractive" | "marginal" | "unattractive";
+  sections: string[];
+}
+
+/** The hotel report's page sections, in order (as in src/report/pdf/ReportDocument.tsx). */
+export const REPORT_SECTIONS = [
+  "Executive summary",
+  "Property overview",
+  "Current energy performance",
+  "Before and after the upgrades",
+  "Investment analysis",
+  "Assumptions and methodology",
+  "Risks and limitations",
+];
+
+export function reportOutline(s: TwinState): ReportOutline | null {
+  const r = bestPackage(s.hotel, s.baseline, s.hotelDiscountRate);
+  const w = r.objectiveWinner;
+  if (!w) return null;
+  const ctx = prepareUpgradeContext(s.hotel, undefined, s.baseline);
+  const d = buildHotelReport({
+    kind: "ai",
+    hotel: s.hotel,
+    baseline: s.baseline,
+    evaluation: w.evaluation,
+    planLabel: `AI recommended · ${w.roleLabel}`,
+    budget: r.budget,
+    discountRate: s.hotelDiscountRate,
+    catalog: upgradeCatalog(ctx).items,
+    synthetic: true,
+  });
+  return { plan: w.evaluation.name, headline: d.interpretation.headline, verdict: d.interpretation.verdict, sections: REPORT_SECTIONS };
+}
+
+/** The advisor card: an example question and the template answer built from the model's own numbers (no network, nothing stored). */
+export const ADVISOR_EXAMPLE_QUESTION = "Why not solar, and what should I do with my budget?";
+export function advisorExample(s: TwinState): { question: string; answer: string } | null {
+  const plan = bestPackage(s.hotel, s.baseline, s.hotelDiscountRate);
+  const question = ADVISOR_EXAMPLE_QUESTION;
+  const ctx = advisor.buildAdvisorContext({ hotel: s.hotel, baseline: s.baseline, scenario: {}, scenarioResult: null, plan, syntheticDemo: true }, question);
+  const text = advisor.fallbackAnswer(advisor.parseQuestion(question), ctx);
+  const sentences = text.split(/(?<=[.!?])\s+(?=[A-Z])/);
+  // Answer the question asked: the top choice for the budget, then why solar is or is not in it.
+  const top = sentences.find((x) => /top choice is/.test(x)) ?? sentences[0] ?? "";
+  const solar = sentences.find((x) => /solar/i.test(x) && x !== top);
+  const answer = [top, solar].filter(Boolean).join(" ");
+  return answer ? { question, answer } : null;
 }
 
 /** The open portfolio's top-priority hotel (highest investment priority among the hotels shown), or null. */

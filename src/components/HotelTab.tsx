@@ -27,7 +27,9 @@ export function HotelTab() {
   ];
   return (
     <div className="space-y-5 p-5">
-      <HomePanel presetOnly />
+      {/* Claude Code edit (November 2026, page cleanup): what deserves attention comes first; the sample-hotel picker moves down
+          (hotels are chosen from the portfolio; the demo script still uses it for the 300-room sample). */}
+      <EnergyInsights />
       <dl className="space-y-2 rounded-lg border border-border bg-card p-4 text-sm" aria-label="Hotel summary">
         <div className="mb-2"><DefaultEstimateNotice fields={rows.map((row) => row[2])} /></div>
         {rows.map(([label, value, field]) => (
@@ -35,8 +37,8 @@ export function HotelTab() {
         ))}
       </dl>
       <UtilityDataSection />
-      <EnergyInsights />
       <BenchmarkCard />
+      <HomePanel presetOnly />
       <Collapsible open={editing} onOpenChange={setEditing}>
         <CollapsibleTrigger asChild>
           <Button variant="outline" className="w-full justify-between">Edit details<ChevronDown className={`h-4 w-4 transition-transform ${editing ? "rotate-180" : ""}`} /></Button>

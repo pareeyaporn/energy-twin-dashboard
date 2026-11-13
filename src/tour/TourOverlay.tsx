@@ -6,7 +6,8 @@ import { useTwin } from "@/store/useTwin";
 import { Button } from "@/components/ui/button";
 import { TOUR_STEPS, bodyOf } from "./steps";
 import { openWorkspaceTab, waitFor } from "./dom";
-import { finishSummary, formatInsight, insightFor, projectionSeries, topPriorityId } from "./insights";
+import { advisorExample, finishSummary, formatInsight, insightFor, projectionSeries, reportOutline, topPriorityId } from "./insights";
+import type { ReportOutline } from "./insights";
 import type { Insight, ProjectionSeries } from "./insights";
 import { ProjectionPreview } from "./ProjectionPreview";
 import { placeCard, unionBox } from "./layout";
@@ -77,6 +78,8 @@ export function TourOverlay() {
   const [insight, setInsight] = useState<Insight | null>(null);
   const [summary, setSummary] = useState<ReturnType<typeof finishSummary>>([]);
   const [projection, setProjection] = useState<ProjectionSeries[]>([]);
+  const [outline, setOutline] = useState<ReportOutline | null>(null);
+  const [example, setExample] = useState<{ question: string; answer: string } | null>(null);
   const [viewport, setViewport] = useState(() => (typeof window === "undefined" ? { w: 1280, h: 800 } : { w: window.innerWidth, h: window.innerHeight }));
   const [cardSize, setCardSize] = useState({ width: 360, height: 220 });
   // Animate only the move from one step to the next; afterwards the spotlight follows scrolling exactly.
@@ -92,6 +95,8 @@ export function TourOverlay() {
     setBox(null);
     setInsight(null);
     setProjection([]);
+    setOutline(null);
+    setExample(null);
     // The hotel steps follow the portfolio's top-priority hotel (the one step 4 names); the user's own state comes back at the end.
     if (step.focus) {
       const top = topPriorityId(useTwin.getState());
@@ -137,6 +142,8 @@ export function TourOverlay() {
           if (step.insight) setInsight(insightFor(step.id, s));
           if (step.id === "finish") setSummary(finishSummary(s));
           if (step.id === "projections") setProjection(projectionSeries(s));
+          if (step.id === "report") setOutline(reportOutline(s));
+          if (step.id === "advisor") setExample(advisorExample(s));
         } catch {
           setInsight(null);
           setProjection([]);
@@ -317,6 +324,25 @@ export function TourOverlay() {
         <p id="tour-body" className="mt-2 leading-relaxed text-muted-foreground">{body}</p>
         {insight && <InsightBlock key={step.id} insight={insight} reduce={reduce} hero={hero} />}
         {projection.length > 0 && <ProjectionPreview key={`chart-${step.id}`} series={projection} reduce={reduce} />}
+        {outline && (
+          <div className="mt-3 rounded-xl border border-primary/25 bg-primary/5 p-2.5 text-[11px]" data-testid="tour-report-outline">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium text-foreground">PDF report · {outline.plan}</span>
+              <span className="shrink-0 rounded-full border border-primary/30 px-1.5 text-[10px] text-primary">Estimate</span>
+            </div>
+            <p className={`mt-1 ${outline.verdict === "unattractive" ? "text-heat" : "text-savings"}`}>{outline.headline}</p>
+            <ol className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-0.5 text-muted-foreground">
+              {outline.sections.map((x, i) => <li key={x}>{i + 1}. {x}</li>)}
+            </ol>
+          </div>
+        )}
+        {example && (
+          <div className="mt-3 space-y-1.5 rounded-xl border border-primary/25 bg-primary/5 p-2.5 text-[11px]" data-testid="tour-advisor-example">
+            <p className="ml-auto w-fit max-w-[90%] rounded-lg bg-primary/20 px-2 py-1 text-foreground">{example.question}</p>
+            <p className="max-w-[95%] rounded-lg border border-glass-border bg-background/50 px-2 py-1 text-foreground/90">{example.answer}</p>
+            <p className="text-[10px] text-muted-foreground">Example answer built from the model's numbers. In the app, the AI writes the answer and the app checks every number in it.</p>
+          </div>
+        )}
         {last && summary.length > 0 && (
           <dl className="mt-4 grid grid-cols-3 gap-2" data-testid="tour-summary">
             {summary.map((x) => (
@@ -333,12 +359,12 @@ export function TourOverlay() {
         )}
         <div className="mt-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <div className="flex gap-1" aria-hidden>
+            <div className="flex gap-[3px]" aria-hidden>
               {TOUR_STEPS.map((s, i) => (
-                <span key={s.id} className={`h-1.5 rounded-full ${i === index ? "w-4 bg-primary" : i < index ? "w-1.5 bg-primary/50" : "w-1.5 bg-muted-foreground/40"}`} style={{ transition: reduce ? "none" : "width 200ms ease" }} />
+                <span key={s.id} className={`h-1.5 rounded-full ${i === index ? "w-3 bg-primary" : i < index ? "w-1 bg-primary/50" : "w-1 bg-muted-foreground/40"}`} style={{ transition: reduce ? "none" : "width 200ms ease" }} />
               ))}
             </div>
-            <span className="text-[11px] text-muted-foreground" aria-live="polite" data-testid="tour-progress">{index + 1} of {total}</span>
+            <span className="whitespace-nowrap text-[11px] text-muted-foreground" aria-live="polite" data-testid="tour-progress">{index + 1} of {total}</span>
           </div>
           <div className="flex items-center gap-1.5">
             {!first && !last && <Button size="sm" variant="ghost" onClick={back} aria-label="Back"><ArrowLeft /> Back</Button>}

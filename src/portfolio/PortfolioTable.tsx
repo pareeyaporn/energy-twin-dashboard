@@ -16,12 +16,6 @@ type Col = {
 
 const COLS: Col[] = [
   { id: "name", label: "Property", value: (r) => r.name, show: (r) => r.name },
-  { id: "location", label: "Location", value: (r) => `${r.city} ${r.neighborhood}`, show: (r) => `${r.neighborhood}, ${r.city}` },
-  { id: "brand", label: "Brand · ownership", value: (r) => r.brand ?? "", show: (r) => [r.brand, r.ownership ? OWNERSHIP_LABEL[r.ownership] : undefined].filter(Boolean).join(" · ") || "—" },
-  { id: "rooms", label: "Rooms", value: (r) => r.rooms, show: (r) => String(r.rooms), numeric: true },
-  { id: "area", label: "Floor area", value: (r) => r.floorAreaSqft, show: (r) => `${Math.round(r.floorAreaSqft).toLocaleString("en-US")} ft²`, numeric: true },
-  { id: "hvac", label: "HVAC", value: (r) => r.hvacType, show: (r) => HVAC_LABEL[r.hvacType] ?? r.hvacType },
-  { id: "occ", label: "Occupancy", value: (r) => r.occupancy, show: (r) => percent(r.occupancy), numeric: true },
   { id: "cost", label: "Energy cost / yr", value: (r) => r.annual.cost, show: (r) => usd(r.annual.cost), numeric: true },
   { id: "eui", label: "Intensity (kBtu/ft²)", value: (r) => r.siteEui, show: (r) => r.siteEui.toFixed(1), numeric: true },
   { id: "pot", label: "Savings potential / yr", value: (r) => r.potential?.annualSavings ?? 0, show: (r) => (r.potential ? usd(r.potential.annualSavings) : "—"), numeric: true },
@@ -48,7 +42,7 @@ export function PortfolioTable({ rows, onExplore, onRemove, onWhy }: { rows: Pro
   });
   return (
     <div className="table-scroll overflow-x-auto rounded-xl border border-glass-border">
-      <table className="sticky-first-column w-full min-w-[1080px] text-xs" data-testid="portfolio-table">
+      <table className="sticky-first-column w-full min-w-[720px] text-xs" data-testid="portfolio-table">
         <caption className="sr-only">Portfolio comparison (synthetic demonstration properties, modeled estimates)</caption>
         <thead>
           <tr className="border-b border-border text-muted-foreground">

@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useTwin } from "@/store/useTwin";
 import { selectEnergyInsights, selectPortfolioSummary } from "@/store/hotelDerived";
 import { TOUR_STEPS, bodyOf } from "@/tour/steps";
-import { finishSummary, insightFor, projectionSeries } from "@/tour/insights";
+import { REPORT_SECTIONS, advisorExample, finishSummary, insightFor, projectionSeries, reportOutline, topPriorityId } from "@/tour/insights";
 import { overlaps, placeCard } from "@/tour/layout";
 import { TOUR_STORAGE_KEY, readTourOutcome, useTour } from "@/tour/useTour";
 import { TourButton, resetTourAutoStart } from "@/tour/TourButton";
@@ -118,6 +118,53 @@ describe("tour views", () => {
     fireEvent.click(screen.getByTestId("take-tour"));
     act(() => useTour.getState().end("completed", "optimize"));
     expect(useTour.getState().restore).toEqual({ path: "/hotel", tab: "Invest", then: "optimize" });
+  });
+});
+
+describe("one story, one hotel (the top priority), and nothing changed afterwards", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    useTwin.getState().resetDemo();
+    useTour.setState({ active: false, index: 0, direction: 1, origin: null, restore: null });
+  });
+
+  it("the hotel steps open the top-priority hotel; the tour puts the user's own state back at the end", () => {
+    const s0 = useTwin.getState();
+    const top = topPriorityId(s0)!;
+    const sum = selectPortfolioSummary(s0);
+    expect(top).toBe([...sum.properties].sort((a, b) => b.priorityScore - a.priorityScore)[0]!.id);
+    const before = { input: s0.hotelInput, active: s0.activePropertyId, preset: s0.hotelPresetId, states: s0.propertyStates, baseline: s0.baseline };
+    useTour.getState().start({ path: "/", tab: null });
+    useTour.getState().focusHotel(top);
+    expect(useTwin.getState().activePropertyId).toBe(top);
+    expect(insightFor("explore", useTwin.getState())!.label).toContain(useTwin.getState().hotel.profile.name);
+    useTour.getState().end("completed");
+    const s1 = useTwin.getState();
+    expect({ input: s1.hotelInput, active: s1.activePropertyId, preset: s1.hotelPresetId, states: s1.propertyStates, baseline: s1.baseline }).toEqual(before);
+    expect(s1.hotelInput).toBe(before.input);
+  });
+
+  it("Find my best investments keeps the hotel the tour showed (the user asked to act on it)", () => {
+    const top = topPriorityId(useTwin.getState())!;
+    useTour.getState().start({ path: "/", tab: null });
+    useTour.getState().focusHotel(top);
+    useTour.getState().end("completed", "optimize");
+    expect(useTwin.getState().activePropertyId).toBe(top);
+  });
+
+  it("the portfolio optimizer, report and advisor cards come from the engine", () => {
+    const s = useTwin.getState();
+    const opt = insightFor("portfolio-optimizer", s)!;
+    expect(opt.value).toBeGreaterThan(0);
+    expect(opt.label).toMatch(/\$500,000/);
+    const o = reportOutline(s)!;
+    expect(o.sections).toEqual(REPORT_SECTIONS);
+    expect(o.headline.length).toBeGreaterThan(10);
+    const ex = advisorExample(s)!;
+    expect(ex.answer).toMatch(/\$/);
+    expect(ex.answer).toMatch(/top choice is/);
+    expect(ex.answer).toMatch(/solar/i);
+    expect(useTwin.getState().hotelPlan).toBeNull(); // nothing was run or stored
   });
 });
 

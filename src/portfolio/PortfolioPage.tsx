@@ -8,6 +8,7 @@ import { useTwin } from "@/store/useTwin";
 import { selectPortfolioSummary } from "@/store/hotelDerived";
 import { usd } from "@/twin/format";
 import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { openTabWhenReady } from "@/app/landing";
 import { CityMap } from "./CityMap";
 import { PortfolioCharts } from "./PortfolioCharts";
@@ -27,8 +28,8 @@ const compact = (n: number, unit: string) =>
 
 
 /**
- * The homepage: the hotel portfolio on one page. Which hotel deserves attention first, the map, totals, comparison, charts, the
- * shared-budget optimizer and the stress tests. Numbers come from the store (the engine). Leaving for a hotel keeps the page's state
+ * The homepage, decision first: the totals, which hotel deserves attention first, the map, one budget across the chain and the
+ * comparison; totals by group, the fuel split, the stress tests and the definitions sit in a closed "Deeper analysis" section. Numbers come from the store (the engine). Leaving for a hotel keeps the page's state
  * (organization, filters, map metric, selected hotel, list, table sort, scroll), so coming back shows the same view.
  */
 export function PortfolioPage() {
@@ -45,6 +46,7 @@ export function PortfolioPage() {
   const setView = useTwin((s) => s.setPortfolioView);
   const [why, setWhy] = useState<{ open: boolean; id: string | null }>({ open: false, id: null });
   const [moreKpis, setMoreKpis] = useState(false);
+  const [deeper, setDeeper] = useState(false);
   // Custom plans and the user's own hotels live in the browser's storage; read them after mount (the server renders without them).
   useEffect(() => {
     hydrate();
@@ -106,11 +108,11 @@ export function PortfolioPage() {
     <div className="mx-auto max-w-7xl space-y-5 p-3 md:p-6" data-testid="portfolio-page">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
-          <nav aria-label="Breadcrumb" className="text-xs text-muted-foreground">Portfolio · {org.name}</nav>
           <h1 className="flex items-center gap-2 text-xl font-semibold md:text-2xl"><Building2 className="size-5 text-primary" />Your Hotel Portfolio</h1>
           <p className="text-sm text-muted-foreground">Monitor energy performance, identify opportunities, and prioritize investments across your properties.</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            <span className="text-primary">See the savings before you spend.</span> · {org.name} · {org.properties.length} hotels in {where} ·{" "}
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            <span className="text-primary">See the savings before you spend.</span>
+            <span>{org.properties.length} hotels in {where}</span>
             <span className="rounded-full border border-glass-border px-1.5 py-0.5" data-testid="portfolio-synthetic">{synthetic}</span>
           </p>
         </div>
@@ -156,37 +158,38 @@ export function PortfolioPage() {
 
       <CityMap rows={summary.properties} onExplore={explore} reduce={reduce} onWhy={(id) => setWhy({ open: true, id })} />
 
+      <div data-anchor={OPTIMIZER_ANCHOR} className="scroll-mt-4">
+        <PortfolioOptimizer onExplore={openPlan} onEdit={editPlan} />
+      </div>
+
       <section aria-label="Property comparison" className="space-y-2">
         <h2 className="text-base font-semibold">Compare the hotels</h2>
         <PortfolioTable rows={summary.properties} onExplore={explore} onRemove={removeHotel} onWhy={() => setWhy({ open: true, id: null })} />
       </section>
 
-      <PortfolioGroups rows={summary.properties} />
-
-      <PortfolioCharts rows={summary.properties} />
-
-      <div data-anchor={OPTIMIZER_ANCHOR} className="scroll-mt-4">
-        <PortfolioOptimizer onExplore={openPlan} onEdit={editPlan} />
-      </div>
-
-      <PortfolioStress />
-
-      <section aria-label="Coming later" className="space-y-2">
-        <h2 className="text-base font-semibold">More building types (coming later)</h2>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {org.futureBuildingTypes.map((b) => (
-            <div key={b.id} className="rounded-xl border border-dashed border-glass-border p-3 text-xs">
-              <div className="font-medium">{b.label}</div>
-              <p className="text-muted-foreground">{b.note} Not simulated yet.</p>
+      {/* Detail for a closer look, closed by default so the page leads with the decision. */}
+      <Collapsible open={deeper} onOpenChange={setDeeper} asChild>
+        <section aria-label="Deeper analysis" className="space-y-4 rounded-xl border border-glass-border p-3" data-testid="portfolio-deeper">
+          <CollapsibleTrigger asChild>
+            <button type="button" className="flex w-full items-center justify-between gap-2 text-left" data-testid="portfolio-deeper-toggle">
+              <span>
+                <span className="block text-base font-semibold">Deeper analysis</span>
+                <span className="block text-xs text-muted-foreground">Totals by brand, region, ownership or city · electricity vs gas · portfolio stress tests · definitions</span>
+              </span>
+              <ChevronDown className={`size-4 shrink-0 transition-transform ${deeper ? "rotate-180" : ""}`} />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-5">
+            <PortfolioGroups rows={summary.properties} />
+            <PortfolioCharts rows={summary.properties} />
+            <PortfolioStress />
+            <div className="space-y-1 text-[11px] text-muted-foreground" aria-label="Definitions and assumptions">
+              {summary.definitions.map((d) => <p key={d}>{d}</p>)}
+              <p>{org.note}</p>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section aria-label="Definitions and assumptions" className="space-y-1 text-[11px] text-muted-foreground">
-        {summary.definitions.map((d) => <p key={d}>{d}</p>)}
-        <p>{org.note}</p>
-      </section>
+          </CollapsibleContent>
+        </section>
+      </Collapsible>
 
       <PriorityExplainer rows={summary.properties} open={why.open} focusId={why.id} onOpenChange={(open) => setWhy((w) => ({ ...w, open }))} />
     </div>

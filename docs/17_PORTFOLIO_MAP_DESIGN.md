@@ -176,6 +176,26 @@ An organization can have hotels in several cities (the synthetic Meridian Hotels
 - Marker tooltip: name; area, city and rooms; the metric's value; energy cost, intensity, savings and priority; "Click to open · Explore hotel".
   The card's button reads **Explore hotel**.
 
+## Page structure after the cleanup (November 2026)
+
+Decision first, detail on demand (about 1.9 screens at 1440 × 900, was 3.3):
+
+1. Header: title, subtitle, one line (tagline, hotels and cities, synthetic label); **Optimize portfolio** and **Add my hotel**.
+2. Organization and filters.
+3. KPI cards (energy cost, savings potential, carbon, properties) and the compact strip (electricity, gas, total energy, intensity, rooms,
+   budget).
+4. **Start here** (the top priority and why).
+5. The map with the ranked list.
+6. **Portfolio investments** (one budget across the chain), moved up from the bottom: it is the chain's main action.
+7. **Compare the hotels**: seven columns (hotel, energy cost, intensity, savings potential, investment required, payback, priority); location,
+   brand, rooms, floor area, HVAC and occupancy are on the hotel card and the hotel page.
+8. **Deeper analysis** (closed by default): totals by brand, region, ownership or city; electricity vs natural gas; portfolio stress tests;
+   definitions and assumptions.
+
+Removed: the cost, intensity and savings bar charts (the same figures as the map, the list and the table) and "More building types (coming
+later)" (a roadmap item, for the slides). On the hotel dashboard: Opportunities & alerts come first in the Hotel tab, the KPI tiles are slim,
+and the sample-hotel picker moved below the benchmark (the demo script still uses it for the 300-room sample).
+
 ## Files
 
 Added for multi-city and the workflow: `cities.ts` (grouping), `CityCluster.tsx`, `MultiCityFallback.tsx`, `priority.ts`, `PriorityExplainer.tsx`, `StartHere.tsx`, `HotelInPortfolio.tsx`, `anchors.ts`; `src/app/` (homepage, hotel dashboard, landing rules).

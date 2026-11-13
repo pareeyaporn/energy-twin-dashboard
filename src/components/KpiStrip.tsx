@@ -16,17 +16,17 @@ function Kpi({ id, label, icon, before, after, prefix = "", unit, how }: { id: s
   const same = Math.round(before) === Math.round(after);
   const pct = before ? (delta / before) * 100 : 0;
   return (
-    <section className="min-h-28 min-w-0 rounded-lg border border-border bg-card px-2 py-2 sm:min-h-32 sm:px-3" aria-label={`Annual ${label.toLowerCase()}`} data-testid={`kpi-${id}`}>
+    <section className="min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 sm:px-3" aria-label={`Annual ${label.toLowerCase()}`} data-testid={`kpi-${id}`}>
       <div className="flex items-center justify-between gap-1.5">
         <h2 className="flex min-w-0 items-center gap-1 text-[11px] font-medium text-muted-foreground sm:text-xs">{icon}{label}</h2>
         <span className="flex shrink-0 items-center gap-0.5"><Badge variant="outline" className="border-primary/25 px-1.5 text-[9px] font-normal text-primary sm:px-2.5 sm:text-[10px]">Estimate</Badge><DefaultEstimate dot />{how && <HowCalculated metric={how} />}</span>
       </div>
-      <p className="num mt-2 flex flex-wrap items-baseline gap-x-1 text-xs sm:mt-1 sm:gap-x-1.5 sm:text-sm">
+      <p className="num mt-1 flex flex-wrap items-baseline gap-x-1 text-xs sm:gap-x-1.5 sm:text-sm">
         {!same && <><span className="text-muted-foreground">{prefix}{number(before)}</span><span className="text-muted-foreground" aria-label="to">→</span></>}
         <span className="text-sm font-semibold sm:text-base"><AnimatedNumber value={after} prefix={prefix} /></span>
         <span className="text-[10px] text-muted-foreground">{unit} / yr</span>
       </p>
-      <div className="min-h-4">{!same && <p className={cn("num text-xs", delta < 0 ? "text-savings" : "text-heat")}>{delta < 0 ? "−" : "+"}{prefix}{number(Math.abs(delta))} ({pct > 0 ? "+" : ""}{pct.toFixed(1)}%)</p>}</div>
+      <div>{!same && <p className={cn("num text-xs", delta < 0 ? "text-savings" : "text-heat")}>{delta < 0 ? "−" : "+"}{prefix}{number(Math.abs(delta))} ({pct > 0 ? "+" : ""}{pct.toFixed(1)}%)</p>}</div>
     </section>
   );
 }

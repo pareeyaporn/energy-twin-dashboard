@@ -44,11 +44,13 @@ describe("Portfolio page", () => {
 
   it("sorts the comparison table", () => {
     render(<PortfolioPage />);
-    fireEvent.click(screen.getByTestId("sort-rooms"));
+    // The table keeps the decision columns (cost, intensity, savings, investment, payback, priority); sort by energy cost.
+    fireEvent.click(screen.getByTestId("sort-cost"));
     const first = () => within(screen.getAllByTestId("portfolio-row")[0]!).getAllByRole("cell")[0]!.textContent;
-    expect(first()).toBe("Lakefront Convention Hotel");
-    fireEvent.click(screen.getByTestId("sort-rooms"));
-    expect(first()).toBe("Wells Street Hotel");
+    const firstTwice = first();
+    fireEvent.click(screen.getByTestId("sort-cost"));
+    expect([firstTwice, first()].sort()).toEqual(["Lakefront Convention Hotel", "Wells Street Hotel"]);
+    expect(screen.queryByTestId("sort-rooms")).toBeNull();
   });
 
   it("hovering a marker shows a tooltip, clicking it opens its card, and Explore hotel opens that hotel", () => {
@@ -139,6 +141,9 @@ describe("Portfolio page, P1", () => {
 
   it("runs a portfolio stress test for a selection of hotels", () => {
     render(<PortfolioPage />);
+    // The portfolio stress tests sit in "Deeper analysis", closed by default.
+    expect(screen.queryByTestId("pstress-heat_wave")).toBeNull();
+    fireEvent.click(screen.getByTestId("portfolio-deeper-toggle"));
     fireEvent.click(screen.getByTestId("pstress-heat_wave"));
     expect(screen.getByTestId("portfolio-stress-report")).toBeTruthy();
     expect(screen.getAllByTestId("pstress-row")).toHaveLength(5);

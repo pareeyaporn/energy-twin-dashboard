@@ -14,7 +14,10 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 - [x] All data placeholders replaced and `"verified": true`, or clearly labeled "estimated" or "synthetic" on screen — *done (November 2026) by labeling: the remaining placeholders cannot be replaced from published sources (docs/08); every screen that shows them was checked and labeled. Audit table in docs/08, "On-screen labels"*
 - [x] The demo hotel's results sanity-checked against the ENERGY STAR hotel median (63.0) and CBECS lodging (85.7): 86.5 kBtu/ft², 37% above
       the median (cold climate, restaurant). Shown in the app as context (benchmark card, LV15); noted for Q&A
-- [ ] 3D view loads on the demo laptop and projector (WebGL); "reduce effects" and the 2D switch tested as a fallback
+- [ ] 3D view loads on the demo laptop and projector (WebGL); "reduce effects" and the 2D switch tested as a fallback — *fallbacks checked
+      (November 2026, browser sweep): no WebGL and blocked map tiles both show the drawn map with no errors; reduced motion; 1024 × 768,
+      1280, 1440, 1920, iPad and iPhone 13 with no overflow; corrupt and old-format saved data; reload, back button and Reset demo. The real
+      laptop and projector check is the team's*
 - [x] Dollar, kWh and carbon figures in the pitch script match what the app shows (checked by `src/test/demoScript.test.ts`, November 2026)
 - [x] `npm run build` passes; no console errors on the demo path — *checked November 2026: the whole 7-act path walked in a browser (1440 × 900) in 70 s with no page or console errors (only the blocked advisor host on the test machine); every figure on screen matched the script*
 - [ ] Published Lovable URL works in an incognito window — *team: the lovable.app hosts are not reachable from the build machine*

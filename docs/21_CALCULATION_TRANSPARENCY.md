@@ -11,7 +11,9 @@ describe the implementation in `src/engine/hotel` (docs/13). **If the engine cha
 | --- | --- |
 | KPI strip (twin header) | Annual energy cost, annual energy use, carbon |
 | Recommended investment plan (`src/report/ResultsSummary.tsx`) | Recommended investment (installed cost), estimated annual savings, payback, NPV (5 and 10 years), carbon avoided |
-| Energy insight cards (`src/insights/`) | Each card's own "How was this calculated?" (docs/13 §14) |
+| Energy insight cards (`src/insights/`) | Each card's own "How was this calculated?", now an ⓘ beside the title that opens the rest of the card's text and the method inline (docs/13 §14) |
+| Hotel step overview (`src/components/HotelTab.tsx`) | Annual energy cost (today's baseline), energy intensity |
+| Hotel health (`HotelHealthCard`) | The caveat in the card; sources, values and the climate/amenity/type note behind "View benchmarks & sources" |
 | Sources panel (top bar → Sources) | Financial assumptions list, data labels, the model's main sources |
 | Portfolio homepage KPIs | Annual energy cost, savings potential, carbon, energy intensity (portfolio-level: the sums over the hotels shown); investment priority has its own "Why this ranking?" explainer |
 

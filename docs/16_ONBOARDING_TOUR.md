@@ -44,6 +44,11 @@ Measured in a browser (first visit to the finish card, clicking Next as each car
 a phone (390 × 844), no console errors. The twin goes Zones → time-lapse → Equipment and keeps the Equipment view for the remaining steps (switching
 back to the 3D zones view would rebuild the scene); the user's own view comes back at the end.
 
+**Sidebar redesign (November 2026, docs/10 "Hotel sidebar layout").** The steps and their wording are unchanged. Step 7 highlights the
+utility data section when it is open, otherwise the "Hotel profile & data" section (`[data-testid="profile-data"]`, collapsed by default),
+then the workspace panel. Step 8 still highlights `[data-testid="energy-insights"]` (now titled "Top opportunities", showing the top 2).
+The tab names the tour reads ("1Hotel" → "Hotel") are unchanged.
+
 Step 18 is unchanged by the AI assistant (Phase 15, `docs/23`): it still shows the template answer computed in the browser and sends nothing.
 The live Ask tab now also shows the engine's result cards, action buttons and follow-up questions under an answer. The Hotel tab opens with a
 three-sentence briefing above Opportunities & alerts; step 8 still points at the insights.

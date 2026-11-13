@@ -44,6 +44,10 @@ Measured in a browser (first visit to the finish card, clicking Next as each car
 a phone (390 × 844), no console errors. The twin goes Zones → time-lapse → Equipment and keeps the Equipment view for the remaining steps (switching
 back to the 3D zones view would rebuild the scene); the user's own view comes back at the end.
 
+Step 18 is unchanged by the AI assistant (Phase 15, `docs/23`): it still shows the template answer computed in the browser and sends nothing.
+The live Ask tab now also shows the engine's result cards, action buttons and follow-up questions under an answer. The Hotel tab opens with a
+three-sentence briefing above Opportunities & alerts; step 8 still points at the insights.
+
 ## Behavior
 
 - **First visit:** the tour starts by itself once the main view (or the portfolio page) has loaded, after a short pause. It shows once: finishing

@@ -31,6 +31,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 - `docs/17_PORTFOLIO_MAP_DESIGN.md` — the portfolio city map's design: colors, basemap restyle, markers, overlap handling, card, list, toolbar, legend, mobile, fallback
 - `docs/18_INVESTMENT_REPORT.md` — the investment results and the PDF report: every figure, its engine source, wording and attribution rules
 - `docs/21_CALCULATION_TRANSPARENCY.md` — "How was this calculated?": every explanation, data labels, financial assumptions, limits
+- `docs/23_AI_ADVISOR.md` — the AI assistant: engine tools the AI may call, the protocol, action buttons, follow-ups, briefing, report summary, column mapping, guardrails, privacy
 - `docs/19_UTILITY_DATA.md` — utility data: the Utility Data Manager, Excel template and upload, validation, calibration method and metrics, baseline choice, privacy, limits
 - `docs/20_EQUIPMENT_INVENTORY.md` — the editable equipment inventory: audit, data model, simulation levers, current vs proposed, validation, persistence
 - `docs/04_3D_SPEC.md` — the 3D hotel twin (what drives each visual); `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md` — prompts and status
@@ -69,6 +70,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 | `src/portfolio/` | Claude Code | Hotel portfolio page, the homepage: city map (MapLibre, drawn fallback, multi-city), totals, comparison, charts, portfolio optimizer, priority explanation |
 | `src/insights/` | Claude Code | Opportunities & alerts cards. Rules in `src/engine/hotel/insights.ts` (docs/13 §14) |
 | `src/scenario/` | Claude Code | Simulation impact summary (today vs the what-if), placed by `ScenarioSimulator` (minimal hook) |
+| `src/advisor/` | Claude Code | The AI assistant's UI (docs/23): result cards, action buttons, follow-ups (`AdvisorMessageExtras`), `AskAbout`, the portfolio chat, the Hotel tab briefing. Placed by `AdvisorPanel`, `KpiStrip`, `HotelTab` (minimal hooks), `src/insights`, `src/report`, `src/portfolio` |
 | `src/explain/` | Claude Code | "How was this calculated?" explanations, data labels, financial assumptions (docs/21). Placed by `KpiStrip`, `SourcesSheet` (minimal hooks) and `src/report` |
 | `src/report/` | Claude Code | Investment results and the PDF report (`@react-pdf/renderer`, lazy-loaded). Placed by `BudgetOptimizer` (one line), `PlanBuilder` and the portfolio optimizer. See `docs/18` |
 | `src/app/` | Claude Code | The homepage (`/`, the portfolio), the hotel dashboard (`/hotel`, moved from `src/routes/index.tsx`) and the landing rules |
@@ -114,6 +116,8 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
   If the numbers change, the visuals change.
 - Components never hard-code costs or savings. They read from the store.
 - The advisor receives precomputed results; the browser rejects any answer containing a number not in them. See `docs/12`.
+  It may ask the engine for more (a what-if, a plan for a budget, a stress test, the portfolio split): the browser runs those tools and the
+  check then allows the context plus those results only (`docs/23`).
 
 ## Store contract (summary — the full list for UI work is the cheat sheet at the top of `docs/06`)
 
@@ -123,7 +127,7 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 `planBeforeStress`, the current equipment (`equipmentByProperty`, `setEquipment`, `undoEquipment`, `resetEquipment`; docs/20), twin controls (`selectedZone`, `twinLayer`, time with modes
 `seasons` / `day` / `year`, `compareMode`)
 the portfolio (`portfolio`, `organizations` / `organizationId`, `portfolioFilter` (brand, region, ownership, city), `portfolioView` (map metric, selected hotel, list, table sort, camera, scroll: view state kept across a hotel visit), `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioCustomPlanIds`, the portfolio stress test, `userHotels` from Add my hotel) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
-`applyHotelPackage`, `askAdvisor`, `openProperty`, `runPortfolioOptimizer`, `saveUtilityData`, `setUtilityBaseline` and `removeUtilityData`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
+`applyHotelPackage`, `askAdvisor`, `openProperty`, `runPortfolioOptimizer`, `saveUtilityData`, `setUtilityBaseline`, `removeUtilityData`, and the advisor's `adoptHotelPlan` / `adoptPortfolioPlan` (applied only from tool results, on click; `advisorStep` shows the tool running; docs/23). Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
 `selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, `selectCatalog`, `selectCustomPlanEvaluation`,
 `selectPlanExplanation`, `selectStressReport`, `selectPortfolioSummary`, `selectPortfolioCustomEvaluation`, `selectPortfolioStressReport`, `selectVisibleCustomPlans`, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).
 

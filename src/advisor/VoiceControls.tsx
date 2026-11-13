@@ -4,10 +4,12 @@ import { useTwin } from "@/store/useTwin";
 import { Button } from "@/components/ui/button";
 import { canSpeak, micErrorText, normalizeSpokenQuestion, pickVoice, readSpeakAnswers, recognitionCtor, textForSpeech, writeSpeakAnswers } from "./voice";
 import type { SpeechRecognitionLike } from "./voice";
+import { fetchSpeech } from "./ttsClient";
 
 /**
  * Voice for the Ask tab (docs/23 §10): a mic button (tap, speak, it sends when you stop; the words appear in the box as you talk) and a
- * speaker toggle that reads each new answer aloud after the number check (the text on screen, reworded for the ear). Hidden parts when
+ * speaker toggle that reads each new answer aloud after the number check (the text on screen, reworded for the ear), in a human voice
+ * (OpenAI text-to-speech via the tts function) with the browser's voice as the fallback. Hidden parts when
  * the browser lacks them; typing always works. Nothing is sent anywhere new: the recognition is the browser's own.
  */
 export function VoiceControls({ disabled, onTranscript }: { disabled?: boolean; onTranscript: (text: string, final: boolean) => void }) {
@@ -23,17 +25,23 @@ export function VoiceControls({ disabled, onTranscript }: { disabled?: boolean; 
   // Answers already on screen when the panel opens are not read out; only new ones.
   const lastSpoken = useRef<string | null>(messages.at(-1)?.id ?? null);
 
+  const audio = useRef<HTMLAudioElement | null>(null);
+  const pending = useRef<AbortController | null>(null);
   const stopSpeaking = () => {
+    pending.current?.abort();
+    pending.current = null;
+    if (audio.current) {
+      audio.current.pause();
+      audio.current = null;
+    }
     if (speakable) window.speechSynthesis.cancel();
     setSpeaking(false);
   };
 
-  useEffect(() => {
-    const last = messages.at(-1);
-    if (!last || last.id === lastSpoken.current) return;
-    lastSpoken.current = last.id;
-    if (last.role !== "advisor" || !speakOn || !speakable || !last.text) return;
-    const u = new window.SpeechSynthesisUtterance(textForSpeech(last.text));
+  /** The browser's own voice (offline fallback). */
+  const speakWithBrowser = (text: string) => {
+    if (!speakable) return setSpeaking(false);
+    const u = new window.SpeechSynthesisUtterance(text);
     const voice = pickVoice(window.speechSynthesis.getVoices());
     if (voice) u.voice = voice;
     u.lang = voice?.lang ?? "en-US";
@@ -42,13 +50,56 @@ export function VoiceControls({ disabled, onTranscript }: { disabled?: boolean; 
     u.onerror = () => setSpeaking(false);
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(u);
+  };
+
+  /** A human voice (OpenAI text-to-speech through the tts function) when available, else the browser's voice. */
+  const speak = async (text: string) => {
+    stopSpeaking();
     setSpeaking(true);
-  }, [messages, speakOn, speakable]);
+    const ctrl = new AbortController();
+    pending.current = ctrl;
+    const blob = await fetchSpeech(text, { signal: ctrl.signal });
+    if (ctrl.signal.aborted) return;
+    pending.current = null;
+    if (blob && typeof Audio !== "undefined" && typeof URL.createObjectURL === "function") {
+      const url = URL.createObjectURL(blob);
+      const a = new Audio(url);
+      audio.current = a;
+      const end = () => {
+        URL.revokeObjectURL(url);
+        if (audio.current === a) audio.current = null;
+        setSpeaking(false);
+      };
+      a.onended = end;
+      a.onerror = () => {
+        end();
+        speakWithBrowser(text);
+      };
+      try {
+        await a.play();
+        return;
+      } catch {
+        end();
+      }
+    }
+    speakWithBrowser(text);
+  };
+
+  useEffect(() => {
+    const last = messages.at(-1);
+    if (!last || last.id === lastSpoken.current) return;
+    lastSpoken.current = last.id;
+    if (last.role !== "advisor" || !speakOn || !last.text) return;
+    void speak(textForSpeech(last.text));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, speakOn]);
 
   // Stop listening and speaking when the panel goes away (tab switch, page change).
   useEffect(
     () => () => {
       rec.current?.abort();
+      pending.current?.abort();
+      audio.current?.pause();
       if (canSpeak()) window.speechSynthesis.cancel();
     },
     [],
@@ -98,7 +149,8 @@ export function VoiceControls({ disabled, onTranscript }: { disabled?: boolean; 
     if (!on) stopSpeaking();
   };
 
-  if (!Rec && !speakable) return null;
+  const canPlay = speakable || typeof Audio !== "undefined";
+  if (!Rec && !canPlay) return null;
   return (
     <div className="flex min-w-0 flex-1 items-center gap-1" data-testid="voice-controls">
       {Rec ? (
@@ -117,7 +169,7 @@ export function VoiceControls({ disabled, onTranscript }: { disabled?: boolean; 
           {listening ? <MicOff /> : <Mic />}
         </Button>
       ) : null}
-      {speakable && (
+      {canPlay && (
         <Button
           type="button"
           size="icon"

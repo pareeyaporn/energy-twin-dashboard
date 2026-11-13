@@ -201,3 +201,12 @@ The advisor context has a `portfolio` section (the hotel chain's totals, each ho
 portfolio optimizer's plan once it has run). Questions such as "Which hotel should we invest in first?" are recognized as portfolio questions;
 the template answer uses only that section, and the number check covers it like the rest of the context. The function's system prompt names the
 section; Lovable Cloud redeploys the function when `supabase/functions/advisor` changes on `main`.
+
+## Voice function (`supabase/functions/tts`, November 2026)
+
+POST `{ text }` → `audio/mpeg`. Turns an answer the browser has already number-checked into speech with OpenAI's text-to-speech API
+(`https://api.openai.com/v1/audio/speech`). Secret: `OPENAI_API_KEY` (Lovable Cloud). Optional: `OPENAI_TTS_MODEL` (default
+`gpt-4o-mini-tts`), `OPENAI_TTS_VOICE` (default `nova`), `ALLOWED_ORIGINS`, `TTS_RATE_PER_MINUTE` (default 20). Limits: 1,500 characters,
+9 s to OpenAI; errors 400, 403, 405, 413, 429, 502, 503 (no key), 504. Never logs the text. The browser falls back to its own voice on any
+error (docs/23 §10). Logic in `core.ts` (tested in `src/test/ttsVoice.test.ts`), wiring in `index.ts`.
+

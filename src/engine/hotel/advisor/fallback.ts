@@ -24,7 +24,7 @@ function limitation(c: AdvisorContext, portfolio = false): string[] {
   if (portfolio && c.portfolio?.syntheticDemo && own.length === 0) out.push('The hotels are a synthetic demonstration chain, so the figures illustrate the method rather than real properties.');
   else if (portfolio && own.length) out.push(`The sample hotels are synthetic; ${own.join(', ')} ${own.length === 1 ? 'uses' : 'use'} your own inputs, with defaults where you left a field blank.`);
   else if (c.hotel.syntheticDemo) out.push('This hotel is a synthetic demo, so the figures illustrate the method rather than a real property.');
-  out.push('These are planning estimates from synthetic and public data, shown as ranges, not an engineering audit or a guarantee of savings.');
+  out.push('Keep in mind these are planning estimates from synthetic and public data, shown as ranges, not an engineering audit or a guarantee of savings.');
   return out;
 }
 

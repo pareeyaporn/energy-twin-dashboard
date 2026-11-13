@@ -262,3 +262,21 @@ make package cards full width. Check that no text overflows at 375 px.
 
 Display formatting only. Don't modify src/engine, src/data, src/twin, src/three, src/store or supabase.
 ```
+
+## LV16 — Turn on the advisor's human voice (OpenAI text-to-speech)
+
+Paste into Lovable after the `advisor/human-voice` branch is merged into `main`. Add the key itself in Lovable Cloud's secrets screen when
+Lovable asks for it (never paste a key into the chat or into code).
+
+```
+Please set up the backend for the advisor's voice. The code is already in the repo; don't change any files.
+
+1. Add a Lovable Cloud secret named OPENAI_API_KEY. Ask me for the value through the secure secrets form — don't put it in code or chat.
+2. Deploy the existing edge function in supabase/functions/tts (it calls OpenAI's text-to-speech and returns audio/mpeg). Optional
+   secrets it reads: OPENAI_TTS_MODEL (default gpt-4o-mini-tts) and OPENAI_TTS_VOICE (default nova); leave them unset.
+3. Also redeploy the existing edge function in supabase/functions/advisor (its prompt changed).
+4. Don't modify src/engine, src/data, src/twin, src/store, src/advisor or supabase/functions code.
+5. When done, tell me the deployed function URLs so I can test: in the Ask tab, turn on the speaker button and ask
+   "What if occupancy rises to 85%?" — the answer should be read in a natural voice.
+```
+

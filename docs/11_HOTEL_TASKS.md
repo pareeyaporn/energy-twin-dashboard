@@ -486,6 +486,7 @@ decision summary). Each part has its own heading below.
 - [x] 14.E13 [CC] Twin header and portfolio card / table show the data and baseline status
 - [x] 14.E14 [CC] Tests: calibration, periods, metrics, units, validation, store, editor, xlsx round trip; browser check desktop and phone
 - [x] 14.E15 [CC] PDF investment report: add data source, billing period, historical use, selected baseline and calibration metrics — *done (November 2026): "Utility data and baseline" in the hotel report (preview and PDF): source and synthetic label, billing period, actual vs modeled vs calibrated per fuel, NMBE / CV(RMSE) before and after, the baseline the report used, limits; `utilityForReport` in `src/report/fromStore.ts`; tests in `src/report/__tests__/reportUtility.test.ts` and the PDF test*
+- [x] 14.E16 [CC] Linked use and cost in the spreadsheet: typing kWh or therms updates the cost at the month's rate, and the other way round — *done (November 2026): "Keep use and cost in step" checkbox (on for sample and manual entry, off for uploads), rate captured at focus, paste not linked; `src/utility/linkedCells.ts`; tests in `src/test/linkedCells.test.ts` and `UtilityDataManager.test.tsx` (docs/19 §2)*
 - [ ] 14.E16 [CC] Several meters per fuel with their own billing periods (advanced import with a meter column)
 - [ ] 14.E17 [CC] Weather normalization to the billing year's actual weather (needs daily historical weather per billing period)
 - [ ] 14.E18 [TEAM] Try the template with a real hotel's bills; check the bounds and thresholds against real data

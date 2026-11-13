@@ -99,4 +99,21 @@ describe("Utility Data Manager", () => {
     fireEvent.click(screen.getByTestId("add-row"));
     expect(screen.getAllByTestId("utility-row")).toHaveLength(13);
   });
+  it("keeps use and cost in step when linked, and not when the toggle is off", () => {
+    render(<UtilityDataSection />);
+    fireEvent.click(screen.getByTestId("manage-utility"));
+    const kwh = screen.getByTestId("cell-0-elecKWh") as HTMLInputElement;
+    const cost = () => Number((screen.getByTestId("cell-0-elecCost") as HTMLInputElement).value);
+    const k0 = Number(kwh.value);
+    const c0 = cost();
+    expect((screen.getByTestId("toggle-linked") as HTMLInputElement).checked).toBe(true);
+    fireEvent.focus(kwh);
+    fireEvent.change(kwh, { target: { value: String(k0 * 2) } });
+    expect(cost()).toBeCloseTo(c0 * 2, 0);
+    fireEvent.click(screen.getByTestId("toggle-linked"));
+    const c1 = cost();
+    fireEvent.focus(kwh);
+    fireEvent.change(kwh, { target: { value: String(k0) } });
+    expect(cost()).toBe(c1);
+  });
 });

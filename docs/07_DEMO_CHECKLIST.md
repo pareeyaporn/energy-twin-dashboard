@@ -64,6 +64,73 @@ skip the projection), act 6 (2:30–2:55), then the one-line close "Estimates, n
 **Fallbacks:** no WebGL or a slow laptop → 2D button (the script works in 2D; skip act 3's 3D moments). Advisor slow or offline → the saved
 answer (task 8.2) appears at once, or the template answer within 8 s. Wrong state → the **Reset demo** button (task 8.7).
 
+## Advisor questions to ask (tested)
+
+Use these in rehearsal and when a judge asks "can I try it?". Each question below was run through the engine tools on the synthetic
+Lakeshore Inn (100 rooms, Chicago) and the Lakefront Hotel Group portfolio in November 2026; the figures are what the engine computed
+then. **The script follows the engine:** if a figure changes, re-run and update this table, never the other way round.
+
+What was tested: the tool selection and the template answer (the offline path, `planToolCalls` → `runTool` → `toolAnswer`, branch
+`ai/advisor-agent`). **Not yet tested with the live model** (this environment cannot reach the function). Once the advisor function is
+redeployed (docs/23, tasks 15.10–15.11), ask each question once on the demo laptop so the answer is saved (task 8.2).
+
+Where to ask: hotel questions in the **Ask** tab of the hotel; portfolio questions in **Ask about the portfolio** on the portfolio page.
+
+### 1. What-ifs (operations)
+
+| Ask | Tool the engine runs | Answer (engine figures) |
+| --- | --- | --- |
+| *"What if occupancy rises to 85%?"* | `run_scenario` occupancy 85% | $120,178 → $133,047 a year (+$12,869, +10.7%); driver: occupancy and guest activity. Button: **Apply this what-if** |
+| *"What if electricity prices go up 20%?"* | `run_scenario` electricity +20% | $120,178 → $139,796 (+$19,618, +16.3%) |
+| *"What if we turn on smart room controls?"* | `run_scenario` smart controls on | $120,178 → $118,488 (−$1,690, −1.4%) |
+| *"What if we set the cooling setpoint to 76°F?"* | `run_scenario` cooling 76 °F | $120,178 → $119,348 (−$830, −0.7%) |
+
+### 2. Investment plans (budget)
+
+| Ask | Tool | Answer |
+| --- | --- | --- |
+| *"What should I do with $50,000?"* | `find_best_plan` $50,000 | 512 combinations tested, 14 fit; best: LED lighting + common-area occupancy sensors, $38,940 after counted incentives, about $9,022 a year, payback about 4.3 years, 10-year NPV $26,200. Buttons: **Apply this package**, **Make this my plan**, **Preview report** |
+| *"What is the best plan for $25,000?"* | `find_best_plan` $25,000 | 3 fit; best: occupancy sensors, $5,940, about $2,113 a year, payback about 2.8 years |
+
+### 3. Comparing upgrades
+
+| Ask | Tool | Answer |
+| --- | --- | --- |
+| *"Compare LED lighting and solar"* | `compare_upgrades` | LED: $33,000, about $7,826 a year, payback about 4.2 years, NPV $23,494. Solar (quarter roof): $45,540, about $2,161 a year, payback about 21 years, NPV −$30,097 (half roof also shown) |
+| *"Is LED lighting better than smart room controls?"* | `compare_upgrades` | LED as above; smart controls: $20,375, about $1,690 a year, payback about 12.1 years, NPV −$7,896 |
+
+### 4. Stress tests (risk)
+
+| Ask | Tool | Answer |
+| --- | --- | --- |
+| *"What happens in a heat wave?"* | `run_stress_test` heat wave | July 10 °F hotter: $120,178 → $126,767 (+$6,589, +5.5%), one-off. Button: **Open this stress test** |
+| *"How does a conference surge affect our bill?"* | `run_stress_test` conference surge | September occupancy +25 points: +$1,058 (+0.9%), one-off |
+| *"What happens in the off-season?"* | `run_stress_test` low occupancy | January–March occupancy −20 points: −$2,538 (−2.1%) |
+| *"What if we have a cold snap?"* | `run_stress_test` cold snap | January 12 °F colder: +$649 (+0.5%) |
+
+### 5. The portfolio (chain questions)
+
+| Ask | Tool | Answer |
+| --- | --- | --- |
+| *"Which hotel should we invest in first, and why?"* | `portfolio_overview` | 5 hotels, about $1,561,819 a year on energy, about $109,905 a year of savings potential; Riverwalk Grand first (100 of 100), about $28,480 a year |
+| *"How would you split $250,000 across the chain?"* | `portfolio_optimize` $250,000 | About $64,900 a year for $248,326 after counted incentives, payback about 3.8 years; funds Lakeshore Inn, Riverwalk Grand and O'Hare Gateway. Button: **Open the portfolio plan** |
+| *"Which hotels get nothing if we split $100,000?"* | `portfolio_optimize` $100,000 | About $31,831 a year for $98,506, payback about 3.1 years; funds three hotels (the offline answer lists who is funded, not who is left out; the live AI should name the others) |
+
+### 6. Why questions (explanations; best with the live AI)
+
+| Ask | What happens |
+| --- | --- |
+| *"Why not solar, and what should I do with $50,000?"* | The act-6 demo question: runs `find_best_plan`; the answer explains why solar pays back slowly here |
+| *"Why is HVAC my biggest cost?"* | No tool needed: the AI explains the zone and end-use figures already on screen. Offline: template answer |
+| *"What are the risks?"* | The AI may run stress tests; offline: template answer |
+
+**Avoid in the demo** (found in testing):
+- Asking for an objective in words ("…with the **fastest payback**"): the offline parser keeps the budget but not the objective, so it ranks
+  balanced. Set the objective in the Invest tab instead, or check the live AI's answer in rehearsal.
+- A plan for another hotel from the hotel's Ask tab ("what would $50,000 buy at Riverwalk Grand?"): open that hotel first (P2 in docs/23).
+- Expecting big savings from smart room controls or setpoints alone: the engine computes about 1–1.5% here; the larger savings are
+  LED and sensors. Let the numbers lead.
+
 ## Q&A prep
 
 | Question | Answer owner | Short answer |

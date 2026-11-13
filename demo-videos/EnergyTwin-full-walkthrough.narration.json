@@ -1,0 +1,222 @@
+[
+ {
+  "start": 2.08,
+  "caption": "Energy Twin",
+  "text": "This is Energy Twin, a digital twin for existing hotels. See the savings before you spend."
+ },
+ {
+  "start": 5.79,
+  "caption": "A guided tour for first-time users",
+  "text": "First-time users get a guided tour: a quick one in eight steps, or the full one."
+ },
+ {
+  "start": 18.99,
+  "caption": "1 · A city-scale twin",
+  "text": "Chapter one: a city-scale twin."
+ },
+ {
+  "start": 21.72,
+  "caption": "Your whole hotel portfolio at a glance",
+  "text": "The homepage shows the whole portfolio: energy spend, savings potential and carbon across five Chicago hotels."
+ },
+ {
+  "start": 26.87,
+  "caption": "Start with the top opportunity, not the biggest bill",
+  "text": "It tells the chain where to start. Not the biggest bill, but the best ten-year return per dollar invested."
+ },
+ {
+  "start": 37.75,
+  "caption": "Chicago in 3D, every hotel on it",
+  "text": "Every hotel sits on a 3D map of Chicago, built from OpenStreetMap buildings, and colored by the metric you choose."
+ },
+ {
+  "start": 47.42,
+  "caption": "Click a hotel: the camera flies in among the towers",
+  "text": "Click a hotel, and the camera flies in among the towers."
+ },
+ {
+  "start": 55.66,
+  "caption": "Optional data columns: height proportional to the selected metric",
+  "text": "Optional data columns raise each hotel's metric above the city. They're data, not building heights."
+ },
+ {
+  "start": 62.23,
+  "caption": "2 · One budget, the whole chain",
+  "text": "Chapter two: one budget for the whole chain."
+ },
+ {
+  "start": 64.94,
+  "caption": "Split one budget across the chain",
+  "text": "The portfolio optimizer tests every hotel's options and funds the best mix within one budget."
+ },
+ {
+  "start": 72.47,
+  "caption": "Every dollar on this bar is a package the engine evaluated",
+  "text": "Every dollar on this bar is a package the engine evaluated. Placeholder costs are named, and it's all labeled as a projection."
+ },
+ {
+  "start": 79.92,
+  "caption": "Ask about the whole chain",
+  "text": "You can also ask the AI about the whole chain. It asks the engine to rank the hotels or split a budget."
+ },
+ {
+  "start": 88.27,
+  "caption": "3 · Fly into the building",
+  "text": "Chapter three: fly into the building."
+ },
+ {
+  "start": 92.77,
+  "caption": "Its digital twin: the building, its energy, its costs",
+  "text": "Here's the hotel's digital twin: the building, its energy and its costs."
+ },
+ {
+  "start": 97.58,
+  "caption": "The hotel at a glance: a short briefing and the top opportunities",
+  "text": "The sidebar gives a short briefing and the top opportunities, each with one next step."
+ },
+ {
+  "start": 122.28,
+  "caption": "Hotel health against ENERGY STAR and CBECS",
+  "text": "Hotel health compares it with ENERGY STAR and national survey data, as context, not a rating."
+ },
+ {
+  "start": 130.22,
+  "caption": "Each zone colored by what it costs",
+  "text": "Each zone is colored by what it costs."
+ },
+ {
+  "start": 140.57,
+  "caption": "A living building: a January night…",
+  "text": "It's a living building. On a January night, the heating runs and lit windows are guests in their rooms…"
+ },
+ {
+  "start": 149.62,
+  "caption": "…and a July afternoon",
+  "text": "…and on a July afternoon, cooling peaks. The hourly readout follows the model."
+ },
+ {
+  "start": 174.15,
+  "caption": "Press play: night, morning, summer, winter",
+  "text": "Press play, and the whole year runs: night and morning, winter and summer."
+ },
+ {
+  "start": 202.14,
+  "caption": "Explode the floors to see inside",
+  "text": "Explode the floors to see inside: lit rooms, rooms set back by smart controls, and the plant."
+ },
+ {
+  "start": 213.75,
+  "caption": "Room by room: who is in, who is out, what each floor uses",
+  "text": "Room by room, you can see who is in, who is out, and what each floor uses."
+ },
+ {
+  "start": 218.54,
+  "caption": "The equipment you actually have",
+  "text": "Correct the equipment the hotel actually has, and the baseline follows. A correction is never counted as a saving."
+ },
+ {
+  "start": 223.96,
+  "caption": "Where the money goes: grid and gas → zones → uses",
+  "text": "The flow view follows the money from the grid and the gas line to every zone and use."
+ },
+ {
+  "start": 228.01,
+  "caption": "Switch to carbon: gas is cheap per unit but carbon-heavy",
+  "text": "Switch it to carbon: gas is cheap per unit but carbon-heavy, so heating and hot water grow."
+ },
+ {
+  "start": 237.47,
+  "caption": "Stress-test the hotel: a heat wave, a cold snap, price rises",
+  "text": "Stress tests show what a heat wave, a cold snap or a price rise would add to the bill."
+ },
+ {
+  "start": 246.11,
+  "caption": "4 · Ask the AI to test a decision",
+  "text": "Chapter four: ask the AI to test a decision."
+ },
+ {
+  "start": 255.67,
+  "caption": "Ask in plain English, by typing or with the mic",
+  "text": "Ask in plain English, by typing or with the mic."
+ },
+ {
+  "start": 262.23,
+  "caption": "The engine computes the what-if; the AI explains it",
+  "text": "The AI doesn't guess. It asks the engine to run the what-if, and every number it quotes is checked against the model."
+ },
+ {
+  "start": 266.84,
+  "caption": "One click puts it on the twin",
+  "text": "One click puts the result on the twin."
+ },
+ {
+  "start": 279.82,
+  "caption": "Now test a fix: turn on smart room controls",
+  "text": "Now test a fix: smart room controls set back empty rooms automatically. See what that saves before buying anything."
+ },
+ {
+  "start": 284.5,
+  "caption": "5 · What should she buy?",
+  "text": "Chapter five: what should she buy?"
+ },
+ {
+  "start": 291.72,
+  "caption": "Find the best investments for a $150,000 budget",
+  "text": "The optimizer tests every upgrade combination within the budget, with comfort limits and confirmed incentives counted."
+ },
+ {
+  "start": 303.46,
+  "caption": "The top package: cost, yearly savings, payback, 10-year value, carbon",
+  "text": "Here's the top package, with its cost, yearly savings, payback, ten-year value and carbon."
+ },
+ {
+  "start": 311.71,
+  "caption": "The 10-year projection: what you pay, what it saves as prices rise, when it pays back",
+  "text": "The ten-year projection shows what you pay, what it saves as prices rise, and when it pays back."
+ },
+ {
+  "start": 320.77,
+  "caption": "Why not solar? It pays back far more slowly here",
+  "text": "Why not solar? On the same assumptions, it pays back far more slowly here."
+ },
+ {
+  "start": 329.4,
+  "caption": "Or build your own plan and compare it with the recommendation",
+  "text": "Or build your own plan, and compare it side by side with the recommendation."
+ },
+ {
+  "start": 339.08,
+  "caption": "Applied: before and after on the twin and the KPI strip",
+  "text": "Apply the package, and the twin and the KPI strip show before and after."
+ },
+ {
+  "start": 343.35,
+  "caption": "6 · Hand it to the owner",
+  "text": "Chapter six: hand it to the owner."
+ },
+ {
+  "start": 345.93,
+  "caption": "One click: a PDF report for the owner and the bank",
+  "text": "One click creates a PDF report for the owner and the bank, with every assumption listed and every estimate labeled."
+ },
+ {
+  "start": 360.45,
+  "caption": "How was this calculated? Every figure explains its sources",
+  "text": "Every key figure explains how it was calculated, and where the data comes from."
+ },
+ {
+  "start": 368.93,
+  "caption": "Load 12 months of bills to calibrate the model to the real building",
+  "text": "And loading twelve months of utility bills calibrates the model to the real building."
+ },
+ {
+  "start": 379.31,
+  "caption": "Back to the chain: the map is as she left it",
+  "text": "Back to the chain: the map is right where she left it."
+ },
+ {
+  "start": 383.32,
+  "caption": "Simulate smarter. Spend better. Save energy.",
+  "text": "Energy Twin. Simulate smarter. Spend better. Save energy."
+ }
+]

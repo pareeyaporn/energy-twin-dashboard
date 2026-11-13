@@ -4,6 +4,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useTwin } from "@/store/useTwin";
 import { DefaultEstimate, DefaultEstimateNotice } from "./DefaultEstimate";
 import { BenchmarkCard } from "./BenchmarkCard";
+import { EnergyInsights } from "@/insights/EnergyInsights";
 import { HomePanel } from "./HomePanel";
 import { HotelProfileForm, hvacOptions } from "./HotelProfileForm";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ export function HotelTab() {
           <div key={label} className="flex justify-between gap-3"><dt className="text-muted-foreground">{label}</dt><dd className="num flex min-w-0 items-center justify-end gap-1 break-words text-right font-medium"><span>{value}</span><DefaultEstimate field={field} dot /></dd></div>
         ))}
       </dl>
+      <EnergyInsights />
       <BenchmarkCard />
       <Collapsible open={editing} onOpenChange={setEditing}>
         <CollapsibleTrigger asChild>

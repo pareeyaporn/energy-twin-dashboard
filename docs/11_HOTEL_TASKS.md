@@ -401,6 +401,29 @@ Display only: no calculation, assumption or data changes. Each task is one point
 Known limits: all five hotels share Chicago weather (O'Hare normals); property types differ through size, age, HVAC and occupancy only (the
 model has no ballroom, pool or 24/7 food-service drivers); heat-pump water heaters are not modeled, so the optimizer cannot pick them.
 
+## Phase 14 — Operator experience (CC; November 2026)
+
+Turning results into decisions for hotel operators: Understand costs → Identify problems → Simulate changes → Evaluate solutions → Optimize
+investments → Make decisions.
+
+### 14A — Insights and simulation results
+- [x] 14.1 [CC] Engine rules for 3–5 prioritized energy insights from existing outputs (cost driver, intensity vs portfolio and ENERGY STAR,
+      occupancy sensitivity, price, weather and equipment exposure, the best eligible upgrade) — *done: `src/engine/hotel/insights.ts`; rules,
+      thresholds and data in docs/13 §14, decisions in docs/15 §22; tests in `src/engine/hotel/__tests__/insights.test.ts`*
+- [x] 14.2 [CC] "Opportunities & alerts" cards in the Hotel tab: title, explanation, figure, category, priority, action, "How was this
+      calculated?" — *done: `src/insights/EnergyInsights.tsx` (one-line hook in Lovable's `HotelTab`); follows the open hotel; desktop and phone*
+- [x] 14.3 [CC] Insight actions open the feature they name — *done: HVAC → twin Equipment view; stress exposures → that stress test (applied,
+      scrolled to); occupancy → the Scenario tab with the same +10-point what-if; intensity → the portfolio comparison; investment → Invest and
+      the optimizer (on click only). Tested in `src/test/insights.test.tsx` and in a browser*
+- [x] 14.4 [CC] Simulation impact summary whenever a what-if or stress test is active: electricity, gas, cost and carbon, today vs the scenario,
+      change and %, with Reset — *done: `impactSummary` (`src/engine/hotel/impact.ts`), `src/scenario/ScenarioImpact.tsx` in the Scenario tab
+      and page (minimal hook in Lovable's `ScenarioSimulator`)*
+- [x] 14.5 [CC] Stress-test results: baseline vs stressed energy, cost and carbon with %, the selected plan under the stress and cost avoided, a
+      small chart, exact assumptions, and an action to the investments — *done in `src/twin/parts/StressTests.tsx` (reuses `stressTestReport`)*
+- [x] 14.6 [CC] Classify each stress test (temporary event / operational scenario / persistent financial assumption) and keep temporary events
+      out of long-term returns — *done: `stressKind`; the engine already kept temporary events out of payback, NPV and the recommendation; the
+      panel's "per year" wording for temporary events is fixed ("in the year it happens (one-off, not annualized)"). Table in docs/13 §14*
+
 ## Phase 8 — Demo hardening (all)
 - [x] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
       $50,000 budget, an advisor question **chosen after calibration from what the results actually show**, closing before/after with carbon — *done (November 2026): docs/07 brought up to date (10 packages fit at $50,000 on the scenario, not 14; the 300-room package and baseline; the act-6 question "Why not solar, and what should I do with $50,000?"; an optional portfolio line), with Reset demo and the tour noted before each run. The storyline owner may still reword it; keep the bold figures*

@@ -64,6 +64,7 @@ ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustra
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
 | Onboarding tour (15 steps with live figures, a time-lapse and the energy flow; first visit and replay; `docs/16`) | Built |
 | Add my hotel (saved in the browser, on the map, its own twin) | Built |
+| Opportunities & alerts (3–5 insights from the engine with working actions), simulation impact summary, clearer stress results (kind, one-off vs yearly, carbon, %, chart) | Built (Phase 14A; rules in `docs/13` §14) |
 | Organizations, brands, regions, ownership; switcher, filters, totals by group | Built (two synthetic organizations, Chicago only) |
 | Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |
 
@@ -104,6 +105,8 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | `src/plans/` | Investment modes: AI recommended, Build your own (catalog), Compare |
 | `src/portfolio/` | Hotel portfolio page: city map, totals, comparison, charts, portfolio optimizer |
 | `src/tour/` | First-visit onboarding tour |
+| `src/insights/` | Opportunities & alerts cards (rules in `src/engine/hotel/insights.ts`) |
+| `src/scenario/` | Simulation impact summary |
 | `supabase/functions/` | Backend function: the AI advisor |
 | `docs/` | Specs and plans |
 

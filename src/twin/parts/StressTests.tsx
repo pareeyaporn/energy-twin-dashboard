@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { RotateCcw } from "lucide-react";
-import { STRESS_CATEGORIES, STRESS_TESTS } from "@/engine/hotel";
+import { ArrowRight, RotateCcw } from "lucide-react";
+import { STRESS_CATEGORIES, STRESS_KIND_LABEL, STRESS_TESTS, stressKind, stressPeriodText } from "@/engine/hotel";
+import { openWorkspaceTab } from "@/tour/dom";
 import { useTwin } from "@/store/useTwin";
 import { computeStressRecommendation, selectStressReport } from "@/store/hotelDerived";
 import type { StressPlanChoice } from "@/store/hotelDerived";
@@ -10,6 +11,25 @@ const kwh = (n: number) => `${Math.round(n).toLocaleString("en-US")} kWh`;
 const therms = (n: number) => `${Math.round(n).toLocaleString("en-US")} therms`;
 const signed = (n: number, unit: string) => `${n >= 0 ? "+" : "−"}${Math.round(Math.abs(n)).toLocaleString("en-US")} ${unit}`;
 const yrs = (n: number | null) => (n === null ? "No payback" : `${n.toFixed(1)} yr`);
+const pctOf = (delta: number, base: number) => (Math.abs(base) > 1e-9 ? `${delta > 0 ? "+" : delta < 0 ? "−" : ""}${Math.abs((delta / base) * 100).toFixed(1)}%` : "—");
+
+/** Three costs on one scale: the normal year, the stress, and the stress with the plan (bars only draw the engine's figures). */
+function CostBars({ rows }: { rows: { label: string; value: number; tone: string }[] }) {
+  const max = Math.max(...rows.map((r) => r.value), 1);
+  return (
+    <div className="mt-2 space-y-1" role="img" aria-label={rows.map((r) => `${r.label} ${usd(r.value)}`).join(", ")} data-testid="stress-bars">
+      {rows.map((r) => (
+        <div key={r.label} className="flex items-center gap-2 text-[10px]">
+          <span className="w-24 shrink-0 text-muted-foreground">{r.label}</span>
+          <span className="h-2 flex-1 overflow-hidden rounded-full bg-muted/40">
+            <span className={`block h-full rounded-full ${r.tone}`} style={{ width: `${(r.value / max) * 100}%` }} />
+          </span>
+          <span className="num w-16 shrink-0 text-right">{usd(r.value)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 /**
  * Stress tests: pick an event (weather, operations or financial). The twin shows the hotel under it; this panel states the exact
@@ -71,11 +91,11 @@ export function StressTests() {
       {current && (
         <div className="mt-3 space-y-3 border-t border-glass-border pt-3">
           <div className="text-xs text-muted-foreground" data-testid="stress-description">
-            <span className={`mr-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${current.duration === "temporary" ? "bg-heat/15 text-heat" : "bg-primary/15 text-primary"}`}>
-              {current.duration === "temporary" ? "Temporary event" : "Persistent change"}
+            <span className={`mr-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${current.duration === "temporary" ? "bg-heat/15 text-heat" : "bg-primary/15 text-primary"}`} data-testid="stress-kind">
+              {STRESS_KIND_LABEL[stressKind(current)]}{stressKind(current) === "operational_scenario" ? ` · ${current.duration}` : ""}
             </span>
             {current.description}
-            {result && <span className="ml-1 font-medium text-foreground">Estimated change: {signedUsd(result.delta.cost)} per year.</span>}
+            {result && <span className="ml-1 font-medium text-foreground">Estimated change: {signedUsd(result.delta.cost)} {stressPeriodText(current)}.</span>}
           </div>
           <table className="w-full text-xs" aria-label="Assumptions changed">
             <thead>
@@ -92,14 +112,18 @@ export function StressTests() {
             <div className="grid gap-3 lg:grid-cols-2">
               <div className="rounded-lg border border-glass-border/70 bg-background/40 p-2.5" data-testid="stress-compare">
                 <h4 className="mb-1.5 text-xs font-medium">The hotel: normal year vs this stress (no new upgrades)</h4>
-                <table className="w-full text-xs tabular-nums">
+                <div className="table-scroll overflow-x-auto">
+                <table className="w-full min-w-[300px] text-xs tabular-nums">
                   <thead><tr className="text-muted-foreground"><th className="text-left font-normal" /><th className="text-right font-normal">Normal</th><th className="text-right font-normal">Stress</th><th className="text-right font-normal">Change</th></tr></thead>
                   <tbody>
-                    <tr><td>Electricity</td><td className="text-right">{kwh(report.normal.elecKWh)}</td><td className="text-right">{kwh(report.stressed.elecKWh)}</td><td className="text-right">{signed(report.delta.elecKWh, "kWh")}</td></tr>
-                    <tr><td>Natural gas</td><td className="text-right">{therms(report.normal.gasTherms)}</td><td className="text-right">{therms(report.stressed.gasTherms)}</td><td className="text-right">{signed(report.delta.gasTherms, "therms")}</td></tr>
-                    <tr className="font-medium"><td>Energy cost / yr</td><td className="text-right">{usd(report.normal.cost)}</td><td className="text-right">{usd(report.stressed.cost)}</td><td className={`text-right ${report.delta.cost > 0 ? "text-heat" : "text-savings"}`}>{signedUsd(report.delta.cost)}</td></tr>
+                    <tr><td>Electricity</td><td className="text-right">{kwh(report.normal.elecKWh)}</td><td className="text-right">{kwh(report.stressed.elecKWh)}</td><td className="text-right">{signed(report.delta.elecKWh, "kWh")} <span className="text-[10px] opacity-80">({pctOf(report.delta.elecKWh, report.normal.elecKWh)})</span></td></tr>
+                    <tr><td>Natural gas</td><td className="text-right">{therms(report.normal.gasTherms)}</td><td className="text-right">{therms(report.stressed.gasTherms)}</td><td className="text-right">{signed(report.delta.gasTherms, "therms")} <span className="text-[10px] opacity-80">({pctOf(report.delta.gasTherms, report.normal.gasTherms)})</span></td></tr>
+                    <tr><td>Carbon</td><td className="text-right">{Math.round(report.normal.carbonKg / 1000).toLocaleString("en-US")} t</td><td className="text-right">{Math.round(report.stressed.carbonKg / 1000).toLocaleString("en-US")} t</td><td className="text-right">{report.delta.carbonKg >= 0 ? "+" : "−"}{(Math.abs(report.delta.carbonKg) / 1000).toFixed(1)} t <span className="text-[10px] opacity-80">({pctOf(report.delta.carbonKg, report.normal.carbonKg)})</span></td></tr>
+                    <tr className="font-medium" data-testid="stress-cost-row"><td>Energy cost</td><td className="text-right">{usd(report.normal.cost)}</td><td className="text-right">{usd(report.stressed.cost)}</td><td className={`text-right ${report.delta.cost > 0 ? "text-heat" : "text-savings"}`}>{signedUsd(report.delta.cost)} <span className="text-[10px] opacity-80">({pctOf(report.delta.cost, report.normal.cost)})</span></td></tr>
                   </tbody>
                 </table>
+                </div>
+                <p className="mt-1 text-[10px] text-muted-foreground">Whole year, the same 12 months in both columns{current.duration === "temporary" ? "; the change is the total for the one event" : ""}.</p>
               </div>
 
               <div className="rounded-lg border border-glass-border/70 bg-background/40 p-2.5" data-testid="stress-plan">
@@ -144,6 +168,13 @@ export function StressTests() {
                       {current.duration === "temporary" ? " in the year it happens" : " per year"}
                       {report.plan.shareOfIncreaseAbsorbed !== null && report.plan.extraAvoided > 0 && ` (${Math.round(report.plan.shareOfIncreaseAbsorbed * 100)}% of the stress's extra cost)`}.
                     </p>
+                    <CostBars
+                      rows={[
+                        { label: "Normal year", value: report.normal.cost, tone: "bg-muted-foreground/60" },
+                        { label: "Stress", value: report.stressed.cost, tone: "bg-heat" },
+                        { label: "Stress with plan", value: report.plan.costWithPlanStressed, tone: "bg-savings" },
+                      ]}
+                    />
                   </>
                 ) : (
                   <p className="text-[11px] text-muted-foreground">No plan selected. Run "Find the best investments" or build a plan in the Invest step.</p>
@@ -163,7 +194,12 @@ export function StressTests() {
               <p className="text-xs text-muted-foreground">Checking whether the recommendation changes…</p>
             ) : null)}
           {report?.notes.map((n) => <p key={n} className="text-[11px] text-muted-foreground">{n}</p>)}
-          <p className="text-[10px] text-muted-foreground">Modeled estimates. Magnitudes are illustrative what-ifs, not forecasts.</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[10px] text-muted-foreground">Modeled estimates. Magnitudes are illustrative what-ifs, not forecasts.</p>
+            <button type="button" onClick={() => openWorkspaceTab("Invest")} className="inline-flex items-center gap-1 rounded-md border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20" data-testid="stress-invest">
+              {current.duration === "persistent" ? "Find investments for this change" : "See investments"} <ArrowRight className="size-3" />
+            </button>
+          </div>
         </div>
       )}
     </section>

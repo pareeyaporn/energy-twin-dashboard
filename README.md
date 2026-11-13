@@ -1,6 +1,11 @@
 # Energy Twin
 
-**Simulate smarter. Spend better. Save energy.**
+**Energy Twin: Simulate Smarter. Spend Better. Save Energy.**
+
+What if hotel owners could see the impact of energy upgrades before spending a dollar? Energy Twin turns existing hotels into AI-powered
+virtual testing grounds. Operators can visualize energy flows, simulate changing conditions, and stress-test decisions across one property
+or an entire portfolio. Our optimizer finds the best upgrade combinations within a budget, revealing projected savings, payback, and carbon
+impact. **Stop guessing. Start simulating. Invest with confidence.**
 
 Energy Twin is an AI-powered operational digital twin for **existing commercial buildings, starting with hotels**. It helps owners
 and operators see where a building spends energy, test operating decisions before changing anything, and choose the energy

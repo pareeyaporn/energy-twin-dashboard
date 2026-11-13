@@ -48,47 +48,55 @@ const workspacePanel = () => visible('aside[aria-label="Workspace"] [role="tabpa
 export const TOUR_STEPS: TourStep[] = [
   {
     id: "welcome",
-    title: "Meet your hotel's digital twin",
+    title: "Welcome to Energy Twin",
     body: (s) =>
-      `Energy Twin shows where your energy money goes, lets you test changes before you make them, and finds the upgrades that pay back. ${
-        s.hotelPresetId !== null || s.portfolio.properties.find((p) => p.id === s.activePropertyId)?.synthetic
-          ? `This is ${s.hotel.profile.name}, a sample hotel with synthetic data.`
-          : `This is ${s.hotel.profile.name}, built from your inputs.`
+      `Energy Twin helps hotel operators understand energy costs and find smarter investments: see the savings before you spend. ${
+        s.portfolio.synthetic ? `${s.portfolio.name} is a sample chain with synthetic data.` : `This is ${s.portfolio.name}.`
       }`,
-    route: "/hotel",
-    tab: "Hotel",
+    route: "/",
     hero: true,
+    insight: true,
+  },
+  {
+    id: "portfolio-kpis",
+    title: "Your whole portfolio at a glance",
+    body: "Energy spending, carbon and the savings the best upgrades could bring, across every hotel. Switch organization or filter by brand, region, ownership or city.",
+    route: "/",
+    target: () => all(visible('[data-testid="portfolio-kpis"]')),
+    insight: true,
+  },
+  {
+    id: "portfolio",
+    title: "Compare your hotels on the map",
+    body: "Color the hotels by energy cost, efficiency, savings potential or investment priority to see where to focus.",
+    route: "/",
+    target: () => all(visible('section[aria-label="City map"]')),
+    insight: true,
+  },
+  {
+    id: "ranking",
+    title: "Which hotel first?",
+    body: "Hotels ranked by investment priority: the best 10-year return per dollar invested, not simply the biggest bill. Open any hotel to analyze it.",
+    route: "/",
+    target: () => all(visible('[data-testid="portfolio-table"]')),
     insight: true,
   },
   {
     id: "profile",
     title: "Make it your hotel",
-    body: "Change rooms, systems, occupancy or bills under Edit details, or add your own hotels with Add my hotel on the Portfolio page. Every number recalculates for your building.",
+    body: "Each hotel opens with its profile. Edit the details, or load 12 months of utility bills to calibrate the model to your building.",
     route: "/hotel",
     tab: "Hotel",
-    target: () => all(workspacePanel()),
+    target: () => all(visible('[data-testid="utility-section"]') ?? workspacePanel()),
     insight: true,
   },
   {
-    id: "costs",
-    title: "What you spend, at a glance",
-    body: "Yearly energy cost, energy use and carbon, all modeled from the building, its systems, occupancy, local weather and prices.",
+    id: "insights",
+    title: "What deserves your attention",
+    body: "Energy Twin reads the results for you: the biggest cost drivers, risks and opportunities, each with a next step.",
     route: "/hotel",
     tab: "Hotel",
-    target: () => all(visible('[data-testid="kpi-cost"]')?.parentElement),
-    insight: true,
-  },
-  {
-    id: "twin",
-    title: "See where the energy goes",
-    body: "Explore the hotel by zone, room by room, system by system or as an energy flow. Colors show where the money goes.",
-    route: "/hotel",
-    tab: "Hotel",
-    target: () => {
-      const t = twin();
-      return all(t?.querySelector("header"), t?.querySelector('[aria-label="Twin layer"]')?.parentElement);
-    },
-    view: { twinLayer: "zones" },
+    target: () => all(visible('[data-testid="energy-insights"]')),
     insight: true,
   },
   {
@@ -102,30 +110,9 @@ export const TOUR_STEPS: TourStep[] = [
     insight: true,
   },
   {
-    id: "flow",
-    title: "Follow every dollar",
-    body: "From the electricity and gas meters to the systems that use them, zone by zone, hour by hour.",
-    route: "/hotel",
-    tab: "Hotel",
-    target: () => all(document.getElementById("twin-panel")),
-    view: { twinLayer: "flow" },
-    insight: true,
-  },
-  {
-    id: "compare",
-    title: "Before and after, on the building",
-    body: "Apply any investment package, then switch between Before, After and Split to see the change on the building and in every number.",
-    route: "/hotel",
-    tab: "Hotel",
-    target: () => {
-      const t = twin();
-      return all(t?.querySelector('[role="group"][aria-label="Compare"]'), t?.querySelector('[data-testid="twin-cost"]')?.parentElement);
-    },
-  },
-  {
     id: "drivers",
     title: "Test a decision before you make it",
-    body: "Change occupancy, room temperatures, schedules or energy prices and watch the cost move. Nothing changes in your real hotel.",
+    body: "Change occupancy, room temperatures, schedules or energy prices and see the cost, energy and carbon change. Nothing changes in your real hotel.",
     route: "/hotel",
     tab: "Scenario",
     target: () => all(visible('aside[aria-label="Workspace"] [aria-label="Scenario controls"]') ?? workspacePanel()),
@@ -143,7 +130,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: "optimizer",
     title: "Find the best investments",
-    body: "Enter a budget and Energy Twin tests every combination of upgrades, with installed cost, utility incentives and guest comfort counted.",
+    body: "Enter a budget and Energy Twin tests every combination of upgrades, with installed cost, confirmed incentives and guest comfort counted.",
     route: "/hotel",
     tab: "Invest",
     target: () => {
@@ -157,40 +144,24 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: "projections",
     title: "See each investment's 10-year payoff",
-    body: "Every package comes with a year-by-year projection: what you pay upfront after confirmed incentives, what it saves each year as prices rise, when it pays back and what it is worth after 10 years, with a low-to-high range and a discounted view.",
+    body: "Every package comes with a year-by-year projection: what you pay upfront, what it saves as prices rise, when it pays back and what it is worth after 10 years.",
     route: "/hotel",
     tab: "Invest",
     target: () => all(visible('aside[aria-label="Workspace"] section[aria-label="Investment packages"]') ?? workspacePanel()),
     insight: true,
   },
   {
-    id: "plans",
-    title: "Build your own plan and compare",
-    body: "Pick upgrades yourself, then put your plan next to the recommendation: upfront cost, savings, payback, 10-year value and carbon.",
+    id: "report",
+    title: "Compare, decide, share",
+    body: "Compare the AI plan with your own, read what the numbers mean, and download a PDF report for your owners or finance team. Every figure says how it was calculated.",
     route: "/hotel",
     tab: "Invest",
-    target: () => all(visible('[role="tablist"][aria-label="Investment mode"]')),
-  },
-  {
-    id: "advisor",
-    title: "Ask in plain English",
-    body: "Ask why heating costs so much or how to spend your budget. The AI explains the model's results, and every number it quotes is checked against them.",
-    route: "/hotel",
-    tab: "Ask",
-    target: () => all(workspacePanel()),
-  },
-  {
-    id: "portfolio",
-    title: "One view for the whole chain",
-    body: "Every hotel on the map, colored by cost, efficiency or savings potential. Find the ones to fix first, split one budget across all of them, and stress-test the chain.",
-    route: "/",
-    target: () => all(visible('section[aria-label="City map"]')),
-    insight: true,
+    target: () => all(visible('[data-testid="report-actions"]') ?? visible('[role="tablist"][aria-label="Investment mode"]') ?? workspacePanel()),
   },
   {
     id: "finish",
     title: "You're ready to explore!",
-    body: "See where your hotel spends energy, test what could change, and discover investments that lower your operating costs. Replay this tour any time from the top bar.",
+    body: "Start from the portfolio, open a hotel, test what could change and find the investments that pay back. Ask the advisor anything in the Ask tab, and replay this tour from the top bar.",
     route: "/hotel",
     hero: true,
   },

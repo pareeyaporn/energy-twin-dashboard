@@ -69,7 +69,7 @@ ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustra
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
 | Investment results (summary, before/after, upgrade breakdown, savings contribution, plain-language reading) and the downloadable PDF investment report with preview, for AI plans, custom plans and the portfolio (`docs/18`) | Built (Phase 14B) |
 | Calculation transparency: "How was this calculated?" on major figures, data labels, financial assumptions (`docs/21`) | Built |
-| Onboarding tour (15 steps with live figures, a time-lapse and the energy flow; first visit and replay; `docs/16`) | Built |
+| Onboarding tour (13 steps, portfolio first: portfolio, map, ranking, a hotel, insights, time-lapse, what-ifs, stress tests, optimizer, 10-year payoff, report; live figures; first visit and replay; `docs/16`) | Built |
 | Add my hotel (saved in the browser, on the map, its own twin) | Built |
 | Opportunities & alerts (3–5 insights from the engine with working actions), simulation impact summary, clearer stress results (kind, one-off vs yearly, carbon, %, chart) | Built (Phase 14A; rules in `docs/13` §14) |
 | Organizations, brands, regions, ownership; switcher, filters, totals by group | Built (two synthetic organizations, Chicago only) |

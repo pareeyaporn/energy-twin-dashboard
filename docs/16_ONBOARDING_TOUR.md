@@ -1,7 +1,7 @@
 # 16 — Onboarding tour (`src/tour/`)
 
 A guided tour for first-time users: hotel operators, general managers, owners and asset managers. It tells the open hotel's own story in
-15 short steps (about a minute): what it spends, how efficient it is, where the energy goes, how it changes through the year, what drives
+13 short steps (under a minute): what it spends, how efficient it is, where the energy goes, how it changes through the year, what drives
 the cost, what could go wrong, what to invest in, what each investment returns over 10 years, how to compare plans, how to ask the advisor, and how to manage several hotels. It points
 only at features that are built.
 
@@ -11,32 +11,36 @@ finish cards are full-screen, the **10-year payoff of each recommended package d
 
 ## The steps
 
+Portfolio first (November 2026): the tour follows the product's journey, **Portfolio → Identify the opportunity → Explore a hotel → Simulate →
+Invest → Report**. Steps 1–4 are on the portfolio homepage (`/`), steps 5–13 on the hotel dashboard (`/hotel`, the hotel that is open).
+
 | # | Step | Page and tab | Highlights | What it says | Live figure (from the engine) |
 | --- | --- | --- | --- | --- | --- |
-| 1 | **Meet your hotel's digital twin** | Main page, Hotel tab | (full-screen card) | Energy Twin shows where your energy money goes, lets you test changes before you make them, and finds the upgrades that pay back. This is [hotel], a sample hotel with synthetic data (or: built from your inputs). | Yearly energy cost; per room and CO₂ |
-| 2 | **Make it your hotel** | Main page, Hotel tab | The hotel profile and peer comparison | Change rooms, systems, occupancy or bills under Edit details, or add your own hotels with Add my hotel on the Portfolio page. Every number recalculates for your building. | Energy per ft² and the gap to the ENERGY STAR hotel median |
-| 3 | **What you spend, at a glance** | Main page, Hotel tab | Cost, energy and carbon tiles | Yearly energy cost, energy use and carbon, all modeled from the building, its systems, occupancy, local weather and prices. | Share of the bill of the largest use (for example heating, cooling and ventilation) |
-| 4 | **See where the energy goes** | Main page, Hotel tab | The twin and its Zones / Rooms / Equipment / Flow views | Explore the hotel by zone, room by room, system by system or as an energy flow. Colors show where the money goes. | The costliest zone and its yearly cost |
-| 5 | **Watch a year go by** | Main page, Hotel tab | The building (time-lapse playing) | Snow in January, cooling on July afternoons, guests checking in and out: the building and its meter follow every hour of every month. | The costliest month (and the cheapest) |
-| 6 | **Follow every dollar** | Main page, Hotel tab | The energy-flow diagram (animated) | From the electricity and gas meters to the systems that use them, zone by zone, hour by hour. | Electricity's share of the bill; the gas cost |
-| 7 | **Before and after, on the building** | Main page, Hotel tab | Before / After / Split and the cost | Apply any investment package, then switch between Before, After and Split to see the change on the building and in every number. | — |
-| 8 | **Test a decision before you make it** | Main page, **Scenario** tab | The scenario controls | Change occupancy, room temperatures, schedules or energy prices and watch the cost move. Nothing changes in your real hotel. | Cost change if occupancy moves 25 points |
-| 9 | **Prepare for the unexpected** | Main page, Hotel tab | The stress tests | Heat waves, cold snaps, conference surges, worn equipment, price rises: see what each would add to your bill, and how a plan protects you. | The costliest of the 8 shocks and what it adds |
-| 10 | **Find the best investments** | Main page, **Invest** tab | Budget and "Find the best investments" | Enter a budget and Energy Twin tests every combination of upgrades, with installed cost, utility incentives and guest comfort counted. | What the best package within the hotel's budget saves, its payback, combinations tested |
-| 11 | **See each investment's 10-year payoff** | Main page, Invest tab | The investment packages (or the Invest panel if none has been run yet) | Every package comes with a year-by-year projection: what you pay upfront after confirmed incentives, what it saves each year as prices rise, when it pays back and what it is worth after 10 years, with a low-to-high range and a discounted view. | The best 10-year net benefit among the recommended packages, its upfront cost and payback, **plus a chart drawing each package's cumulative net benefit from year 0 to year 10** (each line crosses $0 at payback) |
-| 12 | **Build your own plan and compare** | Main page, Invest tab | AI recommended / Build your own / Compare | Pick upgrades yourself, then put your plan next to the recommendation: upfront cost, savings, payback, 10-year value and carbon. | — |
-| 13 | **Ask in plain English** | Main page, **Ask** tab | The advisor | Ask why heating costs so much or how to spend your budget. The AI explains the model's results, and every number it quotes is checked against them. | — |
-| 14 | **One view for the whole chain** | **Portfolio** page | The city map | Every hotel on the map, colored by cost, efficiency or savings potential. Find the ones to fix first, split one budget across all of them, and stress-test the chain. | The chain's savings potential; the top-priority hotel |
-| 15 | **You're ready to explore!** | Main page | (full-screen card) | See where your hotel spends energy, test what could change, and discover investments that lower your operating costs. Replay this tour any time from the top bar. | Summary: energy spend, what the best package saves, payback. Buttons: **Find my best investments**, **Start exploring** |
+| 1 | **Welcome to Energy Twin** | Portfolio | (full-screen card) | Energy Twin helps hotel operators understand energy costs and find smarter investments: see the savings before you spend. [Chain] is a sample chain with synthetic data. | The portfolio's yearly energy cost; rooms and CO₂ |
+| 2 | **Your whole portfolio at a glance** | Portfolio | The portfolio KPI cards | Energy spending, carbon and the savings the best upgrades could bring, across every hotel. Switch organization or filter by brand, region, ownership or city. | Savings potential and the investment it needs |
+| 3 | **Compare your hotels on the map** | Portfolio | The city map | Color the hotels by energy cost, efficiency, savings potential or investment priority to see where to focus. | The least efficient hotel (kBtu/ft²) and the most efficient |
+| 4 | **Which hotel first?** | Portfolio | The ranked hotel table | Hotels ranked by investment priority: the best 10-year return per dollar invested, not simply the biggest bill. Open any hotel to analyze it. | The top-priority hotel's savings; why the biggest spender ranks lower (only when its score is lower) |
+| 5 | **Make it your hotel** | Hotel, Hotel tab | Utility data (or the profile) | Each hotel opens with its profile. Edit the details, or load 12 months of utility bills to calibrate the model to your building. | Energy per ft² and the gap to the ENERGY STAR median |
+| 6 | **What deserves your attention** | Hotel, Hotel tab | Opportunities & alerts | Energy Twin reads the results for you: the biggest cost drivers, risks and opportunities, each with a next step. | The first insight's figure and how many there are |
+| 7 | **Watch a year go by** | Hotel, Hotel tab | The building (time-lapse playing) | Snow in January, cooling on July afternoons, guests checking in and out: the building and its meter follow every hour of every month. | The costliest month (and the cheapest) |
+| 8 | **Test a decision before you make it** | Hotel, **Scenario** tab | The scenario controls | Change occupancy, room temperatures, schedules or energy prices and see the cost, energy and carbon change. Nothing changes in your real hotel. | Cost change if occupancy moves 25 points |
+| 9 | **Prepare for the unexpected** | Hotel, Hotel tab | The stress tests | Heat waves, cold snaps, conference surges, worn equipment, price rises: see what each would add to your bill, and how a plan protects you. | The costliest of the 8 shocks and what it adds |
+| 10 | **Find the best investments** | Hotel, **Invest** tab | Budget and "Find the best investments" | Enter a budget and Energy Twin tests every combination of upgrades, with installed cost, confirmed incentives and guest comfort counted. | What the best package within the budget saves, its payback, combinations tested |
+| 11 | **See each investment's 10-year payoff** | Hotel, Invest tab | The packages (or the Invest panel) | Every package comes with a year-by-year projection: what you pay upfront, what it saves as prices rise, when it pays back and what it is worth after 10 years. | Best 10-year net benefit, **plus a chart of each package's cumulative net benefit, year 0 to 10** |
+| 12 | **Compare, decide, share** | Hotel, Invest tab | The report buttons (after a run) or AI plan / Build your own / Compare | Compare the AI plan with your own, read what the numbers mean, and download a PDF report for your owners or finance team. Every figure says how it was calculated. | — |
+| 13 | **You're ready to explore!** | Hotel | (full-screen card) | Start from the portfolio, open a hotel, test what could change and find the investments that pay back. Ask the advisor anything in the Ask tab, and replay this tour from the top bar. | Summary: energy spend, what the best package saves, payback. Buttons: **Find my best investments** (opens the hotel's Invest tab and runs the optimizer), **Start exploring** |
 
-The wording lives in `src/tour/steps.ts` and the figures in `src/tour/insights.ts`; change them there and update this table.
+Removed from the earlier 15-step version (their features are still in the app): "What you spend, at a glance" (the KPI strip; its figures now
+have "How was this calculated?"), "See where the energy goes" (the twin layers), "Follow every dollar" (the energy-flow view, heavy on
+software rendering), "Before and after", "Build your own plan and compare" (folded into step 12) and "Ask in plain English" (named in step 13).
+Timing measured in a browser: about 33 s on desktop and 18 s on a phone clicking Next after each card appears.
 
 ## Behavior
 
 - **First visit:** the tour starts by itself once the main view (or the portfolio page) has loaded, after a short pause. It shows once: finishing
   or skipping is saved in local storage (`energy-twin:tour:v1`, `completed` or `skipped`), and a refresh does not start it again.
 - **Replay:** the **Tour** button (help icon) in the top bar restarts it from step 1, on any page.
-- **Controls:** Next, Back, Skip tour (or the close button), keyboard → / ← / Escape. Progress shows as dots and "5 of 15".
+- **Controls:** Next, Back, Skip tour (or the close button), keyboard → / ← / Escape. Progress shows as dots and "5 of 13".
 - **Navigation:** the tour opens the page and workspace tab each step needs, scrolls the highlighted part into view, and when it ends returns
   to the page and tab the user started from.
 - **Live figures:** computed when a step opens, for the hotel that is open (the sample, a portfolio hotel, or the user's own), on today's
@@ -75,3 +79,12 @@ The hotel steps now point at `/hotel` (the hotel dashboard) and the portfolio st
 `/portfolio` and `/hotel`. The tour therefore starts on the portfolio for a new visitor and moves to the hotel for the hotel steps. The step
 content is unchanged here and will be reworked for the portfolio-first journey separately.
 
+
+## Changes (November 2026, portfolio-first)
+
+- The tour starts on the portfolio homepage and opens the hotel for steps 5–13; "Find my best investments" now opens the hotel's Invest tab
+  (`/hotel`), not the homepage.
+- First-visit start fixed: the "already tried" mark is set only when the tour really starts, so React's development double run or a remount
+  while the page settles no longer prevents the first-visit tour.
+- New live figures (`src/tour/insights.ts`): `welcome` (portfolio cost), `portfolio-kpis` (savings potential), `portfolio` (efficiency spread),
+  `ranking` (top priority and why the biggest spender is not first, only when its score is lower), `insights` (the first insight).

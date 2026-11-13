@@ -96,7 +96,7 @@ export const useTour = create<TourState>((set, get) => ({
     writeTourOutcome(outcome);
     const origin = get().origin;
     if (origin) applyView(origin.view);
-    const restore = then === "optimize" ? { path: "/", tab: "Invest" as const, then } : origin ? { path: origin.path, tab: origin.tab } : null;
+    const restore = then === "optimize" ? { path: "/hotel", tab: "Invest" as const, then } : origin ? { path: origin.path, tab: origin.tab } : null;
     set({ active: false, index: 0, restore, origin: null });
   },
   clearRestore: () => set({ restore: null }),

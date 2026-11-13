@@ -57,6 +57,17 @@ function Table({ head, rows, right = [] }: { head: string[]; rows: (string | num
     </div>
   );
 }
+export const AI_SUMMARY_LABEL = "Summary written by AI from the figures in this report";
+function AiSummary({ text }: { text?: string | undefined }) {
+  if (!text) return null;
+  return (
+    <div className="mt-3 rounded-sm border border-slate-300 bg-white p-3" data-testid="report-ai-summary">
+      <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Executive summary</p>
+      <p className="mt-1 text-slate-800">{text}</p>
+      <p className="mt-1 text-[10px] italic text-slate-500">{AI_SUMMARY_LABEL}. Modeled estimates, not a guarantee.</p>
+    </div>
+  );
+}
 function Verdict({ v }: { v: HotelReportData["interpretation"] }) {
   const c = v.verdict === "attractive" ? "border-emerald-600 text-emerald-700" : v.verdict === "marginal" ? "border-amber-600 text-amber-700" : "border-red-600 text-red-700";
   return (
@@ -111,6 +122,7 @@ function HotelPreview({ d }: { d: HotelReportData }) {
             <Kpi label="Carbon avoided" value={`${num(d.environment.carbonKgAvoided / 1000, 1)} t CO2e`} note={`${pct(d.environment.carbonPct)} of emissions a year`} />
             <Kpi label="Budget left" value={usd(d.investment.remainingBudget)} note={`of ${usd(d.budget)}`} tone={d.investment.overBudget ? "bad" : undefined} />
           </div>
+          <AiSummary text={d.aiSummary} />
           <Verdict v={d.interpretation} />
           <H2>Property overview</H2>
           <Table head={["Item", "Value"]} rows={[["Location", d.hotel.location || "-"], ["Rooms", num(d.hotel.rooms)], ["Floor area", `${num(d.hotel.floorAreaSqft)} ft²`], ["Year built", String(d.hotel.yearBuilt)], ["Heating and cooling", d.hotel.hvac], ["Average occupancy", `${d.hotel.occupancyPct}%`]]} />
@@ -237,6 +249,7 @@ function PortfolioPreview({ d }: { d: PortfolioReportData }) {
             <Kpi label="Carbon avoided" value={`${num(t.carbonAvoidedKg / 1000, 1)} t CO2e`} note="a year" />
             <Kpi label="Portfolio energy spend" value={usd(d.current.cost)} />
           </div>
+          <AiSummary text={d.aiSummary} />
           <Verdict v={d.interpretation} />
           <H2>Investment by property</H2>
           <Table head={["Hotel", "Package", "Net investment", "Saves / yr", "Payback", "NPV 10 yr"]} right={[2, 3, 4, 5]} rows={[...d.allocations.map((a) => [a.name, a.packageName ?? "Nothing within budget", usd(a.netInvestment), usd(a.annualSavings), a.paybackYears === null ? "-" : `${a.paybackYears.toFixed(1)} yr`, usd(a.npv10)]), ["Portfolio", "", usd(t.netInvestment), usd(t.annualSavings), yrs(t.paybackYears), usd(t.npv10)]]} />

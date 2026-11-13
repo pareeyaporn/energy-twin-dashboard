@@ -65,12 +65,12 @@ export function ToolResultCard({ run }: { run: advisor.ToolRun }) {
     const best = r.bestPackage as R | null;
     body = best ? (
       <>
-        <Row k={`${s(best.role)} · ${usd(n(r.budget))} budget`} v={s(best.name)} />
+        <div className="mb-1"><span className="text-muted-foreground">{s(best.role)} · {usd(n(r.budget))} budget:</span> <span className="font-medium">{s(best.name)}</span></div>
         <Money f={best} />
         <Row k="Combinations tested" v={n(r.combinationsTested).toLocaleString("en-US")} />
       </>
     ) : (
-      <p className="text-muted-foreground">{s(r.emptyReason) || "No package fits this budget."}</p>
+      <div className="text-muted-foreground">{s(r.emptyReason) || "No package fits this budget."}</div>
     );
   } else if (run.name === "evaluate_upgrades") {
     body = (
@@ -142,7 +142,7 @@ export function AdvisorMessageExtras({ message }: { message: AdvisorMessage }) {
   return (
     <div className="mt-1 w-full max-w-full space-y-2" data-testid="advisor-extras">
       {runs.length > 0 && (
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2">
           {runs.map((r) => <ToolResultCard key={r.id} run={r} />)}
         </div>
       )}

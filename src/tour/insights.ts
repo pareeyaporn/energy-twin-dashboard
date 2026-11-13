@@ -6,13 +6,14 @@ import {
   ZONE_LABELS,
   benchmarkComparison,
   optimizeInvestmentPortfolio,
+  optimizePortfolioBudget,
   prepareUpgradeContext,
   simulateEnergyScenario,
   simulateOccupancyChange,
 } from "@/engine/hotel";
 import type { EnergyResult, PortfolioResult, ResolvedProfile } from "@/engine/hotel";
 import type { TwinState } from "@/store/useTwin";
-import { selectEnergyInsights, selectPortfolioSummary } from "@/store/hotelDerived";
+import { selectEnergyInsights, selectPortfolioItems, selectPortfolioSummary } from "@/store/hotelDerived";
 
 export interface Insight {
   value: number;
@@ -80,6 +81,21 @@ export function insightFor(stepId: string, s: TwinState): Insight | null {
         label: `a year saved at ${top.name}, the top priority (${top.priorityScore} of 100)`,
         ...(spender && spender.name !== top.name && spender.priorityScore < top.priorityScore ? { note: `${spender.name} spends the most, but returns less per dollar invested (${spender.priorityScore} of 100).` } : spender?.name === top.name ? { note: "It also has the largest energy bill." } : {}),
       };
+    }
+    case "portfolio-optimizer": {
+      const plan = tourPortfolioPlan(s);
+      const funded = plan.allocations.filter((x: { evaluation: unknown }) => x.evaluation).length;
+      if (plan.totals.annualSavings <= 0) return null;
+      return {
+        value: plan.totals.annualSavings,
+        format: "usd",
+        label: `a year saved by splitting ${usd(plan.budget)} across the hotels`,
+        note: `${funded} of ${plan.allocations.length} hotels get a package${plan.totals.paybackYears !== null ? `; paid back in ${plan.totals.paybackYears.toFixed(1)} years` : ""}.`,
+      };
+    }
+    case "explore": {
+      const row = selectPortfolioSummary(s).properties.find((r) => r.id === s.activePropertyId);
+      return { value: a.cost, format: "usd", label: `a year on energy at ${p.name}`, ...(row ? { note: `Investment priority ${row.priorityScore} of 100; ${p.rooms} rooms in ${p.city}.` } : {}) };
     }
     case "insights": {
       const first = selectEnergyInsights(s)[0];
@@ -158,6 +174,28 @@ export function insightFor(stepId: string, s: TwinState): Insight | null {
     default:
       return null;
   }
+}
+
+/** The open portfolio's top-priority hotel (highest investment priority among the hotels shown), or null. */
+export function topPriorityId(s: TwinState): string | null {
+  const rows = selectPortfolioSummary(s).properties;
+  const top = [...rows].sort((x, y) => y.priorityScore - x.priorityScore || x.name.localeCompare(y.name))[0];
+  return top && top.priorityScore > 0 ? top.id : null;
+}
+
+const portfolioPlanCache = new WeakMap<object, Map<string, ReturnType<typeof optimizePortfolioBudget>>>();
+/** The portfolio optimizer at the page's budget and objective, for the tour (read-only, cached per portfolio items). */
+function tourPortfolioPlan(s: TwinState) {
+  const items = selectPortfolioItems(s);
+  const byKey = portfolioPlanCache.get(items) ?? new Map();
+  portfolioPlanCache.set(items, byKey);
+  const key = `${s.portfolioBudget}|${s.portfolioObjective}|${s.hotelDiscountRate}`;
+  let plan = byKey.get(key);
+  if (!plan) {
+    plan = optimizePortfolioBudget(items, { budget: s.portfolioBudget, objective: s.portfolioObjective, discountRate: s.hotelDiscountRate });
+    byKey.set(key, plan);
+  }
+  return plan;
 }
 
 /** One recommended package's 10-year projection for the tour's chart (all figures from the engine, mid case). */

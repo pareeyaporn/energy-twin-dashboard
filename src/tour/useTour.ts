@@ -1,11 +1,13 @@
 // Tour state, kept in its own small store (not the app's) so it survives moving between pages. It reads and restores the twin's view
-// settings (time playback, layer, compare mode) and never touches hotel data.
+// settings (time playback, layer, compare mode). To tell one story, the hotel steps may open the portfolio's top-priority hotel; the app's
+// state is copied when the tour starts and put back exactly when it ends, so the user's own hotel, what-if and plans are unchanged.
 import { create } from "zustand";
 import { useTwin } from "@/store/useTwin";
 import { TOUR_STEPS } from "./steps";
 import type { TourView, WorkspaceTab } from "./steps";
 
-export const TOUR_STORAGE_KEY = "energy-twin:tour:v1";
+// v2 (November 2026): the portfolio-first tour shows once to browsers that finished or skipped the earlier one.
+export const TOUR_STORAGE_KEY = "energy-twin:tour:v2";
 export type TourOutcome = "completed" | "skipped";
 
 export function readTourOutcome(): TourOutcome | null {
@@ -44,6 +46,17 @@ export interface TourOrigin {
   path: string;
   tab: WorkspaceTab | null;
   view: TourView;
+  /** The app's state (data, not actions) when the tour started; put back at the end if the tour opened another hotel. */
+  snapshot: Record<string, unknown>;
+  /** True once the tour has opened a hotel for its story. */
+  focused: boolean;
+}
+
+/** A copy of the app's state fields (not its actions), taken by reference: restoring it puts back exactly what was there. */
+function snapshotApp(): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(useTwin.getState())) if (typeof v !== "function") out[k] = v;
+  return out;
 }
 
 export interface TourState {
@@ -60,7 +73,14 @@ export interface TourState {
   back: () => void;
   /** Move past a step that cannot be shown (its target is missing). */
   skipStep: () => void;
-  /** Ends the tour. `then: "optimize"` (the finish card's main button) opens Invest and runs the optimizer, at the user's request. */
+  /**
+   * Opens a hotel for the story (the portfolio's top priority) if it is not the open one; the app's state is restored when the tour ends.
+   */
+  focusHotel: (propertyId: string) => void;
+  /**
+   * Ends the tour. `then: "optimize"` (the finish card's main button) opens Invest and runs the optimizer, at the user's request, on the
+   * hotel the tour showed; otherwise the app's state from the start of the tour comes back.
+   */
   end: (outcome: TourOutcome, then?: "optimize") => void;
   clearRestore: () => void;
 }
@@ -73,7 +93,16 @@ export const useTour = create<TourState>((set, get) => ({
   direction: 1,
   origin: null,
   restore: null,
-  start: (origin) => set({ active: true, index: 0, direction: 1, origin: { ...origin, view: currentView() }, restore: null }),
+  start: (origin) => set({ active: true, index: 0, direction: 1, origin: { ...origin, view: currentView(), snapshot: snapshotApp(), focused: false }, restore: null }),
+  focusHotel: (propertyId) => {
+    const s = get();
+    if (!s.active || !s.origin) return;
+    const app = useTwin.getState();
+    if (app.activePropertyId === propertyId) return;
+    if (!app.portfolio.properties.some((p) => p.id === propertyId)) return;
+    if (!s.origin.focused) set({ origin: { ...s.origin, focused: true } });
+    app.openProperty(propertyId);
+  },
   next: () => {
     const s = get();
     if (!s.active) return;
@@ -95,6 +124,9 @@ export const useTour = create<TourState>((set, get) => ({
   end: (outcome, then) => {
     writeTourOutcome(outcome);
     const origin = get().origin;
+    // Put the user's own hotel, what-if and plans back (the tour only opened a hotel to tell its story); keep the shown hotel when the
+    // user asked to find its best investments.
+    if (origin?.focused && then !== "optimize") useTwin.setState(origin.snapshot as Partial<ReturnType<typeof useTwin.getState>>);
     if (origin) applyView(origin.view);
     const restore = then === "optimize" ? { path: "/hotel", tab: "Invest" as const, then } : origin ? { path: origin.path, tab: origin.tab } : null;
     set({ active: false, index: 0, restore, origin: null });

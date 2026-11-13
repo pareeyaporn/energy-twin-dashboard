@@ -50,11 +50,11 @@ describe("tour card placement", () => {
 });
 
 describe("tour steps", () => {
-  it("are 13 short steps, portfolio first, ending with a clear action", () => {
-    expect(TOUR_STEPS).toHaveLength(13);
-    expect(TOUR_STEPS.slice(0, 4).every((x) => x.route === "/")).toBe(true);
-    expect(TOUR_STEPS.slice(4).every((x) => x.route === "/hotel")).toBe(true);
-    expect(TOUR_STEPS.map((x) => x.id)).toEqual(expect.arrayContaining(["insights", "profile", "report", "projections", "optimizer"]));
+  it("are 19 short steps: the portfolio first, then one hotel, ending with a clear action", () => {
+    expect(TOUR_STEPS).toHaveLength(19);
+    expect(TOUR_STEPS.slice(0, 5).every((x) => x.route === "/")).toBe(true);
+    expect(TOUR_STEPS.slice(5).every((x) => x.route === "/hotel" && x.focus)).toBe(true);
+    expect(TOUR_STEPS.map((x) => x.id)).toEqual(expect.arrayContaining(["portfolio-optimizer", "explore", "equipment", "insights", "profile", "plans", "report", "advisor", "projections", "optimizer"]));
     expect(TOUR_STEPS[0]!.id).toBe("welcome");
     expect(TOUR_STEPS.at(-1)!.title).toBe("You're ready to explore!");
     for (const s of TOUR_STEPS) {
@@ -168,7 +168,7 @@ describe("tour flow", () => {
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
     expect(await screen.findByText("Welcome to Energy Twin")).toBeTruthy();
-    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 13");
+    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 19");
     expect((await screen.findByTestId("tour-insight")).textContent).toMatch(/a year on energy across/);
     fireEvent.click(screen.getByTestId("tour-next"));
     expect(useTour.getState().index).toBe(1);

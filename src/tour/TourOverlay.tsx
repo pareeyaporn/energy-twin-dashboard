@@ -6,7 +6,7 @@ import { useTwin } from "@/store/useTwin";
 import { Button } from "@/components/ui/button";
 import { TOUR_STEPS, bodyOf } from "./steps";
 import { openWorkspaceTab, waitFor } from "./dom";
-import { finishSummary, formatInsight, insightFor, projectionSeries } from "./insights";
+import { finishSummary, formatInsight, insightFor, projectionSeries, topPriorityId } from "./insights";
 import type { Insight, ProjectionSeries } from "./insights";
 import { ProjectionPreview } from "./ProjectionPreview";
 import { placeCard, unionBox } from "./layout";
@@ -92,6 +92,11 @@ export function TourOverlay() {
     setBox(null);
     setInsight(null);
     setProjection([]);
+    // The hotel steps follow the portfolio's top-priority hotel (the one step 4 names); the user's own state comes back at the end.
+    if (step.focus) {
+      const top = topPriorityId(useTwin.getState());
+      if (top) useTour.getState().focusHotel(top);
+    }
     if (pathname !== step.route) {
       void navigate({ to: step.route });
       // If the page does not open, move on rather than wait forever.

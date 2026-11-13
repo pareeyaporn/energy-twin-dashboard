@@ -114,7 +114,7 @@ export const TOUR_STEPS: TourStep[] = [
     route: "/hotel",
     tab: "Hotel",
     focus: true,
-    target: () => all(visible('[data-testid="utility-section"]') ?? workspacePanel()),
+    target: () => all(visible('[data-testid="utility-section"]') ?? visible('[data-testid="profile-data"]') ?? workspacePanel()),
     insight: true,
   },
   {

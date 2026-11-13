@@ -28,6 +28,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 - `docs/13_HOTEL_ENGINE_SPEC.md` — equations, assumptions, the financial breakdown and the demo figures
 - `docs/08_DATA_TODO.md` — data status and research still to find; `docs/14_RESEARCH_LOG.md` — every sourced value; `docs/15_PRODUCT_DECISIONS.md` — team decisions (not facts)
 - `docs/16_ONBOARDING_TOUR.md` — the onboarding tour: every step, its wording and behavior
+- `docs/18_INVESTMENT_REPORT.md` — the investment results and the PDF report: every figure, its engine source, wording and attribution rules
 - `docs/04_3D_SPEC.md` — the 3D hotel twin (what drives each visual); `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md` — prompts and status
 - Removed (in git history): the home-era specs `docs/02`, `docs/03` and `docs/09`, the superseded offices-and-retail plan.
 
@@ -62,6 +63,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 | `src/twin/` | Claude Code | The clickable 2D hotel diagram (`<HotelTwin />`). Lovable only places it |
 | `src/plans/` | Claude Code | Investment modes: AI plan, Build your own (catalog), Compare. Placed by `BudgetOptimizer` (minimal hook) |
 | `src/portfolio/` | Claude Code | Hotel portfolio page: city map (MapLibre, drawn fallback), totals, comparison, charts, portfolio optimizer. Route `src/routes/portfolio.tsx` |
+| `src/report/` | Claude Code | Investment results and the PDF report (`@react-pdf/renderer`, lazy-loaded). Placed by `BudgetOptimizer` (one line), `PlanBuilder` and the portfolio optimizer. See `docs/18` |
 | `src/tour/` | Claude Code | First-visit onboarding tour (spotlight steps, replay from the top bar). Steps and behavior in `docs/16` |
 | `src/three/` | Claude Code | The 3D hotel twin (built, Phase 9). Loaded by `src/twin/parts/View3D.tsx`; Lovable places only `<HotelTwin />` |
 | `supabase/functions/` | Claude Code | Backend functions (AI advisor). Keys are read only here |
@@ -76,6 +78,7 @@ If a task needs a change in a Lovable-owned file, make the **smallest possible**
 - Map: `maplibre-gl` (lazy-loaded, free Carto dark basemap, no key; drawn fallback)
 - 3D: `three`, `@react-three/fiber`, `@react-three/drei` (used, lazy-loaded, 2D fallback); `@react-three/postprocessing`, `@react-spring/three` installed but unused
 - Charts: `recharts`
+- PDF: `@react-pdf/renderer` (lazy-loaded; the investment report in `src/report/`)
 - Tests: `vitest`
 - Backend: Lovable Cloud (Supabase edge functions, Deno)
 

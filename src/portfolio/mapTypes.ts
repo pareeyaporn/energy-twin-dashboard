@@ -34,10 +34,14 @@ export function overlayPadding(width: number): { top: number; bottom: number; le
   return { top: 50, bottom: 110, left: 30, right: 30 };
 }
 
-/** Room to leave when showing all hotels: the list on the right (desktop) and the legend at the bottom left. */
-export function fitPadding(width: number): { top: number; bottom: number; left: number; right: number } {
-  if (width >= 1024) return { top: 70, bottom: 120, left: 90, right: 330 };
-  if (width >= 640) return { top: 60, bottom: 120, left: 60, right: 60 };
+/**
+ * Room to leave when showing all hotels: the list on the right (desktop) and the legend at the bottom left; with a hotel's card open
+ * (over the map from 640 px), its 300 px on the left too, so no hotel hides under it.
+ */
+export function fitPadding(width: number, cardOpen = false): { top: number; bottom: number; left: number; right: number } {
+  const card = cardOpen && width >= 640 ? 330 : 0;
+  if (width >= 1024) return { top: 70, bottom: 120, left: Math.max(90, card), right: 330 };
+  if (width >= 640) return { top: 60, bottom: 120, left: Math.max(60, card), right: 60 };
   return { top: 50, bottom: 120, left: 30, right: 30 };
 }
 

@@ -2,6 +2,20 @@ import { Building2 } from "lucide-react";
 import { usd } from "@/twin/format";
 import type { PropertySummary } from "@/engine/hotel";
 
+/** The markers' keyframes (a slow glow pulse, the selected hotel's beam shimmer), added to the page once. */
+const MARKER_CSS = `
+@keyframes et-marker-pulse { 0%, 100% { opacity: .35; transform: translate(-50%, -50%) scale(.9); } 50% { opacity: .75; transform: translate(-50%, -50%) scale(1.15); } }
+@keyframes et-marker-beam { 0%, 100% { opacity: .55; } 50% { opacity: .9; } }
+@media (prefers-reduced-motion: reduce) { .et-marker-anim { animation: none !important; } }
+`;
+function ensureMarkerCss() {
+  if (typeof document === "undefined" || document.getElementById("et-marker-css")) return;
+  const el = document.createElement("style");
+  el.id = "et-marker-css";
+  el.textContent = MARKER_CSS;
+  document.head.appendChild(el);
+}
+
 /**
  * One hotel on the map (street map and drawn map alike). Drawn at the hotel's position; when it has to move aside so close hotels stay
  * selectable (`dx`, `dy`), a dot and a thin line keep pointing at the true location. Colored by the selected metric; a tooltip shows the
@@ -20,6 +34,7 @@ export function HotelMarker({
   onHover,
   onSelect,
   reduce,
+  beam = false,
 }: {
   row: PropertySummary;
   color: string;
@@ -33,7 +48,10 @@ export function HotelMarker({
   onHover: (id: string | null) => void;
   onSelect: (id: string) => void;
   reduce: boolean;
+  /** 3D street map: a soft light beam rises from the selected hotel. */
+  beam?: boolean;
 }) {
+  if (!reduce) ensureMarkerCss();
   const moved = Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5;
   const tipId = `marker-tip-${row.id}`;
   const ease = reduce ? undefined : "transform 260ms cubic-bezier(.2,.8,.2,1)";
@@ -46,8 +64,35 @@ export function HotelMarker({
         </svg>
       )}
       <div className="absolute left-0 top-0" style={{ transform: `translate(${dx}px, ${dy}px)`, transition: ease }}>
+        {/* A soft halo in the metric color that breathes slowly (none with reduced effects or reduced motion). */}
+        {!reduce && (
+          <span
+            aria-hidden
+            className="et-marker-anim absolute left-0 top-0 size-12 rounded-full"
+            style={{
+              background: `radial-gradient(circle, color-mix(in oklab, ${color} ${selected ? 55 : 35}%, transparent) 0%, transparent 70%)`,
+              transform: "translate(-50%, -50%)",
+              animation: `et-marker-pulse ${selected ? 2.4 : 3.6}s ease-in-out infinite`,
+              transition: "background 450ms ease",
+            }}
+            data-testid={`marker-pulse-${row.id}`}
+          />
+        )}
+        {selected && beam && (
+          <span
+            aria-hidden
+            className={`${reduce ? "" : "et-marker-anim "}absolute bottom-3 left-0 h-24 w-[3px] -translate-x-1/2 rounded-full`}
+            style={{
+              background: `linear-gradient(to top, color-mix(in oklab, ${color} 85%, white), color-mix(in oklab, ${color} 40%, transparent) 55%, transparent)`,
+              boxShadow: `0 0 10px 2px color-mix(in oklab, ${color} 35%, transparent)`,
+              opacity: reduce ? 0.7 : undefined,
+              animation: reduce ? undefined : "et-marker-beam 2.4s ease-in-out infinite",
+            }}
+            data-testid={`marker-beam-${row.id}`}
+          />
+        )}
         {selected && !reduce && (
-          <span aria-hidden className="absolute -left-6 -top-6 size-12 animate-ping rounded-full border border-primary/60 [animation-duration:2.2s]" />
+          <span aria-hidden className="et-marker-anim absolute -left-6 -top-6 size-12 animate-ping rounded-full border border-primary/60 [animation-duration:2.2s]" />
         )}
         <button
           type="button"

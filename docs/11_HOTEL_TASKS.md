@@ -611,7 +611,27 @@ Display only: no engine, data, ranking, optimizer or store change.
       table's scroll container) — *done (`PortfolioTable.tsx`)*
 - [x] 14H.8 [CC] Tests (`src/test/portfolioRedesign.test.tsx`) and a browser check at 1440×900, 1280×800, 768×1024 and iPhone 13, tour included — *done*
 - [ ] 14H.9 P2 [CC] KPI cards 2 × 2 on narrow phones; a keyboard-only way to read the allocation of an unfunded hotel; merge with the 3D map
-      branch (`portfolio/map-3d`)
+      branch (`portfolio/map-3d`) — *done: merged, see 14I*
+
+### 14I 3D portfolio map (`src/portfolio/camera3d.ts`, `buildings3d.ts`; branch `portfolio/map-3d`; design in docs/17 "3D mode")
+- [x] 14I.1 **P1** [CC] Real 3D buildings from the basemap's own tiles (Carto dark-matter, Protomaps schema, OpenStreetMap footprints and
+      heights; no key, no extra source) in navy with soft light — *done: height `render_height` → `height` → floors × 3 m → a 6 m block drawn
+      dimmer; attribution and the note under the map say heights are approximate*
+- [x] 14I.2 **P1** [CC] Camera: tilted default (pitch 55°, bearing −25° in one city) framing every hotel with a pitch-aware fit
+      (`fitPitchedCamera`); rotate and tilt in 3D; Show all hotels flies back; a picked hotel flies to zoom 15; card-aware fit padding — *done*
+- [x] 14I.3 **P1** [CC] 2D / 3D toggle (local storage, 3D by default) and the fallback chain: no buildings → flat street map; no WebGL, tiles
+      failing or a lost WebGL context → the drawn map — *done; filters, metrics, ranking, selection sync, overlap fan-out, view kept across a
+      hotel visit and the tour's map step unchanged (no store change)*
+- [x] 14I.4 **P2** [CC] Animated markers (slow halo pulse, selected: brighter halo, ring and a light beam in 3D), card fade-in, calm with
+      Reduce effects or `prefers-reduced-motion` — *done*
+- [x] 14I.5 **P3** [CC] Optional data columns (off by default), heights strictly proportional to the store's values, scale in the legend;
+      faint sky and fog — *done*
+- [x] 14I.6 [CC] Tests and browser check — *done: `src/test/portfolioMap3d.test.tsx`; Playwright at 1440 × 900, iPhone 13 and with reduced
+      motion (all five hotels in view and at their coordinates, filters, ranking, selection sync, Explore hotel, 2D/3D, Show all hotels, columns,
+      no page errors)*
+- [ ] 14I.7 **P2** [CC] Later — *a skyline-first establishing view when the hotels' extent forces a low zoom (today the all-hotels view of
+      Chicago sits near zoom 11, where the tiles carry few buildings); building hover; the hotel's own footprint highlighted (needs a matched
+      OSM building id per hotel, not assumed)*
 
 ## Phase 15 — AI assistant (CC; built November 2026, docs/23)
 The rule stays: the AI never produces a number. It may ask the engine to compute one, and every number in its text must be in the context

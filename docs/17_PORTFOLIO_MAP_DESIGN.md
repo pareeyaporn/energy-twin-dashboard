@@ -7,7 +7,7 @@ through the store (`selectPortfolioSummary`); the map changes no calculation, as
 ## Layout
 
 ```
-┌ Metric toolbar (segmented) ───────────────────────────┐  [Show all hotels]  Use the simplified map
+┌ Metric toolbar (segmented) ───────────────────────────┐  [2D|3D] [Columns] [Show all hotels]  Use the simplified map
 ┌ Map (rounded 2xl, navy, soft inner vignette) ──────────────────────────────────────────┐
 │ ┌ Hotel card (on select) ┐                                   ┌ Hotels · 5 (collapsible) ┐│
 │ │                        │      markers on the map           │ 1 ● O'Hare …   97.9      ││
@@ -62,7 +62,7 @@ walks every layer and repaints by type and id, so the rules survive small upstre
   → major or minor road color.
 - `symbol`: **hidden**: points of interest, house numbers, road names and shields, one-way arrows, transit, rail, aeroway and all water
   labels (the app draws its own Lake Michigan label offshore, south of downtown, clear of the list). Other labels (places) → muted color and halo.
-- Rotation and pitch are off (a flat plan view); zoom buttons sit bottom right.
+- In **2D** rotation and pitch are off (a flat plan view); zoom buttons sit bottom right. In **3D** see "3D mode" below.
 
 ## Markers (`HotelMarker.tsx`, both maps)
 
@@ -139,7 +139,9 @@ under the map).
 
 ## Reduce effects and accessibility
 
-- **Reduce effects** (the app's setting): no glow or ping ring, no fades, jumps instead of flights, no marker-offset animation.
+- **Reduce effects** (the app's setting) **or the system's reduced-motion preference** (`prefers-reduced-motion`, both since the 3D map):
+  no glow, pulse or ping ring, no fades (the card appears without sliding), jumps instead of flights (also for 2D ⇄ 3D and Show all hotels),
+  no marker-offset animation, the data columns change height at once. The selected hotel's beam stays, still.
 - Markers and list rows are buttons: Tab order, Enter or Space to select, focus rings in cyan; each marker's label reads the hotel,
   neighborhood, metric value, rank and "Your hotel" where it applies; the tooltip is linked to the focused marker; the card is a labeled
   group; Escape closes it; the legend's gradient is decorative (values are in text); the screen-reader list of hotels with an Explore
@@ -196,6 +198,82 @@ Removed: the cost, intensity and savings bar charts (the same figures as the map
 later)" (a roadmap item, for the slides). On the hotel dashboard: Opportunities & alerts come first in the Hotel tab, the KPI tiles are slim,
 and the sample-hotel picker moved below the benchmark (the demo script still uses it for the 300-room sample).
 
+## 3D mode (November 2026; `camera3d.ts`, `buildings3d.ts`)
+
+The street map has a **2D / 3D** toggle (a small segmented control next to Show all hotels, only when the street map is in use). 3D is the
+default; the choice is a view preference kept in local storage (`energy-twin:map-mode`), not in the store. 2D is exactly the earlier flat map.
+
+### Buildings: data source and heights
+
+- **Source:** the basemap's own vector tiles. Carto's free dark-matter style (no key, no account; `basemaps.cartocdn.com`) now serves the
+  Protomaps schema (`carto.streets/v2`); its `buildings` source layer carries OpenStreetMap footprints and, for many of them, a `height` (from the
+  OSM `height` tag or the number of floors, as processed by the tile producer). Checked on 13 November 2026 on a z15 downtown Chicago tile:
+  933 footprints, 380 with a height (5 to 527 m). No second building source is added. OpenFreeMap (OpenMapTiles schema) was evaluated as an
+  alternative but its host is blocked from the build sandbox, and the current basemap already has heights.
+- **Height used, in order** (`HEIGHT_EXPR`): `render_height` (OpenMapTiles, should the style change schema) → `height` → floors × 3 m
+  (`building:levels` or `levels`) → **6 m** (`FALLBACK_HEIGHT_M`, about two floors). The base is `render_min_height` or `min_height`, else 0.
+  Nothing is invented per building: a footprint without height data is a uniform low block drawn in a **dimmer navy** (`#0b1627`), so it does not
+  read as a measured height. Heights are approximate (OSM), never presented as exact.
+- **Zoom:** the tiles carry buildings from z11 (merged, generalized blocks with rounded heights at z11–12) and individual footprints from z13.
+  The extrusions rise in between zoom 10.5 and 11.5. At the "all hotels" view of the Chicago demo (zoom about 10.5–11, set by O'Hare being
+  20 km from downtown) the city reads as a tilted plan with few, low blocks; the skyline rises as you zoom in, and a hotel picked in 3D is flown
+  to zoom 15, where every tower stands.
+- **Styling:** `fill-extrusion` under the labels, navy by height (`#0e1c33` low → `#13243f` 60 m → `#192f52` 150 m → `#223d68` 320 m+),
+  92% opacity, vertical gradient; a soft cool light from the north-west (intensity 0.32) and a faint navy sky / fog where the tilt reaches the
+  horizon. The flat building fills are hidden in 3D and come back in 2D.
+- **Attribution:** "3D buildings: OSM heights, approximate" next to © OpenStreetMap contributors © CARTO (compact, behind the ⓘ button), and the
+  note under the map: "3D buildings: OpenStreetMap footprints and heights from the basemap's tiles (approximate; buildings without height data
+  are drawn low, in a dimmer navy)".
+
+### Camera
+
+- **Default 3D view:** pitch 55°, bearing −25° (looking north-north-west: downtown in front, the lake on the right, O'Hare further back) when the
+  hotels are in one city; north up when they span more than 2° (several cities). Every hotel is framed with the same padding as the flat fit
+  (`fitPadding`). MapLibre's `fitBounds` ignores pitch, so `fitPitchedCamera` solves the tilted fit on MapLibre's perspective model (512 px
+  tiles, 36.87° field of view), iterating zoom and center, then checks every hotel lands inside the padded view (tests and the browser check
+  confirm). Maximum zoom 15 for a fit.
+- **Gestures (3D only):** right-drag or Ctrl-drag to rotate and tilt, two fingers on touch, Shift + arrows on the keyboard; the zoom control
+  gains a compass that also shows the tilt (click it to face north). Maximum pitch 70°. In 2D rotation stays off.
+- **Show all hotels:** flies (900 ms) back to the default 3D framing (2D: the flat fit). With a hotel's card open (≥ 640 px) the fit also keeps
+  clear of the card (left padding 330 px), in both modes.
+- **Selecting a hotel** (marker or list): highlights it, flies to zoom ≥ 15 in 3D (≥ 13 in 2D), padded clear of the card and list, keeping the
+  user's heading and at least 40° of tilt; jumps with reduced motion.
+- **2D ⇄ 3D:** to 3D, the default framing (or, with a hotel open, the tilt and heading around it); to 2D, eases to pitch 0, north up.
+- **Return from a hotel:** the store keeps the center and zoom (`portfolioView.camera`, unchanged); the tilt and heading are remembered in memory
+  for the same visit (`rememberAngles`), used only while the store still has a camera (Reset demo or a filter change brings the default view).
+
+### Markers in 3D
+
+Markers are HTML, aligned to the viewport (`pitchAlignment` and `rotationAlignment` "viewport"), so they stay upright, readable and clickable
+at any tilt and heading. The fan-out (`spread.ts`) is recomputed on every move (zoom, rotation and tilt change screen distances).
+
+- **Rest:** a soft radial halo in the metric color that breathes slowly (3.6 s; a compositor-only opacity and scale animation).
+- **Selected:** a brighter, faster halo (2.4 s), the existing expanding ring, and in 3D a thin **light beam** rising about 96 px from the
+  marker in the metric color, shimmering gently.
+- Metric changes fade the color as before (450 ms); the card fades and slides in (300 ms).
+
+### Data columns (optional, off by default)
+
+**Columns** (3D only) draws one square column per hotel at its **true** location, colored like its marker, height **strictly proportional** to
+the map's metric for that hotel (`columnHeights`: the highest hotel gets the full height, zero stays on the ground; values from the store). The
+common scale follows the zoom (the tallest column is about 140 px high on screen, quantized to half zoom levels) so the columns stay legible;
+the ratios between hotels never change. They ease (500 ms) between metrics. The legend adds "Columns: height proportional to the value, from
+0; tallest = [the highest value]", and the note says they are not building heights.
+
+### Fallback chain
+
+1. WebGL and the tiles: 3D street map (or 2D if chosen).
+2. The style loads but has no building layer, or the extrusion layer cannot be added: the flat street map; the 3D segment is disabled with a
+   note ("3D buildings are not available from the basemap right now").
+3. No WebGL, the style or tiles fail within 8 s, or the WebGL context is lost: the drawn map (`MapFallback.tsx` / `MultiCityFallback.tsx`),
+   unchanged. "Use the simplified map" still switches to it by hand.
+
+### Performance
+
+Five HTML markers and one extrusion layer from tiles the basemap already loads (no extra network requests). In the sandbox's software WebGL
+(SwiftShader) the median frame during a fly-to was 16.7 ms with occasional long frames while new tiles were processed; hardware GPUs do much
+better. The column tween updates five features per frame for 0.5 s.
+
 ## Page structure after the redesign (November 2026, docs/11 14H)
 
 The story: understand the portfolio → discover opportunities → explore hotels → optimize investments. Same features and figures; sections
@@ -210,7 +288,7 @@ are spaced evenly (48–64 px), headings larger, cyan only for primary actions, 
    in the title and the accessible label. The secondary totals follow as one strip with separators.
 2. **Top investment opportunity** (`StartHere.tsx`): the ranking's first hotel (`startHere`), its best package's annual savings, net investment
    and simple payback, one sentence; Explore this hotel, Why this hotel? (the reason, the contrast and the package, then the full ranking), Ask AI.
-3. **Explore your hotels**: a page heading and subtitle above `<CityMap/>`, which is unchanged.
+3. **Explore your hotels**: a page heading and subtitle above `<CityMap/>` (unchanged by the redesign; its 3D mode is described above, docs/11 14I).
 4. **Plan your portfolio investments** (`PortfolioOptimizer.tsx`, section label "Portfolio investments" for the tour): one toolbar (budget,
    presets, objective, run), tabs Recommended plan / My plan / Compare plans. Results: plan KPIs from the plan's totals; the allocation bar
    (`AllocationBar.tsx`, `allocation.ts`), one segment per funded hotel at its package's **gross** installed cost (what the budget is checked
@@ -231,5 +309,8 @@ Added for multi-city and the workflow: `cities.ts` (grouping), `CityCluster.tsx`
 
 `CityMap.tsx` (state, layout, toolbar, ranking) · `MapLibreView.tsx` (street map, restyle, React markers through portals, fly and fit) ·
 `MapFallback.tsx` (drawn map) · `HotelMarker.tsx` · `spread.ts` · `PropertyCard.tsx` · `PropertyList.tsx` · `MapLegend.tsx` ·
+`camera3d.ts` (tilted fit, projection model, columns' scale, 2D/3D preference) · `buildings3d.ts` (extrusions, light, columns layer) ·
 `mapTypes.ts` (shared props, paddings) · `metrics.ts` (metric labels, units and meanings; formatting and color only). Tests:
-`src/test/PortfolioPage.test.tsx` (tooltip and card, ranking per metric, list hover and selection, Escape, collapse, the spreading rule).
+`src/test/PortfolioPage.test.tsx` (tooltip and card, ranking per metric, list hover and selection, Escape, collapse, the spreading rule),
+`src/test/portfolioMap3d.test.tsx` (tilted fit of all hotels at three sizes, projection round trip, card-aware padding, heading rule, column
+proportionality and scale, height fallback order, mode preference, remembered angles, reduced-motion markers, legend, drawn fallback).

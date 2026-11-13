@@ -4,9 +4,9 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { HotelInput, HvacType } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
-import { CHICAGO_AREAS, OWNERSHIP_LABEL } from "@/store/userHotels";
+import { HOTEL_AREAS, HOTEL_CITIES, OWNERSHIP_LABEL, cityInfo } from "@/store/userHotels";
 import type { Ownership } from "@/engine/hotel";
-import type { ChicagoAreaId } from "@/store/userHotels";
+import type { ChicagoAreaId, HotelCity } from "@/store/userHotels";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -18,8 +18,8 @@ const HVAC_OPTIONS: { value: HvacType; label: string }[] = [
   { value: "rtu", label: "Rooftop units (gas heat)" },
 ];
 
-type Draft = { name: string; area: ChicagoAreaId; rooms: string; floors: string; floorArea: string; yearBuilt: string; hvac: HvacType; occupancy: string; bill: string; budget: string; brand?: string; ownership?: Ownership };
-const EMPTY: Draft = { name: "", area: "loop", rooms: "", floors: "", floorArea: "", yearBuilt: "", hvac: "central_plant", occupancy: "", bill: "", budget: "", brand: "", ownership: "owned" };
+type Draft = { name: string; city?: HotelCity; area: ChicagoAreaId; rooms: string; floors: string; floorArea: string; yearBuilt: string; hvac: HvacType; occupancy: string; bill: string; budget: string; brand?: string; ownership?: Ownership };
+const EMPTY: Draft = { name: "", city: "Chicago", area: "loop", rooms: "", floors: "", floorArea: "", yearBuilt: "", hvac: "central_plant", occupancy: "", bill: "", budget: "", brand: "", ownership: "owned" };
 
 const num = (s: string) => (s.trim() === "" ? undefined : Number(s.replace(/[$,\s%]/g, "")));
 
@@ -72,6 +72,13 @@ export function AddHotelDialog({ trigger }: { trigger?: React.ReactNode }) {
   const hydrate = useTwin((s) => s.hydrateUserHotels);
   const navigate = useNavigate();
   const set = (k: keyof Draft) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setD((x) => ({ ...x, [k]: e.target.value }));
+  const city = d.city ?? "Chicago";
+  const areas = HOTEL_AREAS.filter((a) => a.city === city);
+  // A new city: the first of its areas.
+  const setCity = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const c = e.target.value as HotelCity;
+    setD((x) => ({ ...x, city: c, area: (HOTEL_AREAS.find((a) => a.city === c)?.id ?? "loop") as ChicagoAreaId }));
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +91,7 @@ export function AddHotelDialog({ trigger }: { trigger?: React.ReactNode }) {
     setOpen(false);
     setD(EMPTY);
     toast(`${r.input.name ?? "Your hotel"} added: here is its digital twin`);
-    void navigate({ to: "/" });
+    void navigate({ to: "/hotel" });
   };
 
   return (
@@ -107,11 +114,17 @@ export function AddHotelDialog({ trigger }: { trigger?: React.ReactNode }) {
         <form onSubmit={submit} className="space-y-3" noValidate>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field id="mh-name" label="Hotel name"><input id="mh-name" className={inputCls} value={d.name} onChange={set("name")} placeholder="My hotel" maxLength={80} /></Field>
-            <Field id="mh-area" label="Location (Chicago)" hint="Chicago weather and Illinois rates are used.">
-              <select id="mh-area" className={inputCls} value={d.area} onChange={set("area")}>
-                {CHICAGO_AREAS.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+            <Field id="mh-city" label="City">
+              <select id="mh-city" className={inputCls} value={city} onChange={setCity} data-testid="add-hotel-city">
+                {HOTEL_CITIES.map((c) => <option key={c.city} value={c.city}>{c.city}, {c.state}</option>)}
               </select>
             </Field>
+            <Field id="mh-area" label="Area" hint="Approximate location, for the map only.">
+              <select id="mh-area" className={inputCls} value={d.area} onChange={set("area")}>
+                {areas.map((a) => <option key={a.id} value={a.id}>{a.label}</option>)}
+              </select>
+            </Field>
+            <p className="text-[11px] text-muted-foreground sm:col-span-2" data-testid="add-hotel-city-note">{cityInfo(city).note}</p>
             <Field id="mh-rooms" label="Guest rooms *"><input id="mh-rooms" className={inputCls} inputMode="numeric" value={d.rooms} onChange={set("rooms")} placeholder="for example 150" required /></Field>
             <Field id="mh-hvac" label="Heating and cooling">
               <select id="mh-hvac" className={inputCls} value={d.hvac} onChange={set("hvac")}>

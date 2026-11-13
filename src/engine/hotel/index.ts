@@ -25,6 +25,42 @@ export type { StressTest, HvacSettings } from './scenarios';
 export { typicalDayProfile, simulatedMeter, roomOccupancyPattern, equipmentInventory, energyFlows, energyFlowsAt, typicalDayByZoneEndUse } from './twin';
 export type { HourPoint, MeterReading, RoomPoint, RoomState, EquipmentItem, FlowGraph, FlowNode, FlowLink, ZoneEndUseDay } from './twin';
 export {
+  parseUtilityBillsCsv,
+  normalizeBills,
+  billRates,
+  billTotals,
+  billDays,
+  coverageDays,
+  modeledParts,
+  fitMetrics,
+  fitFactors,
+  calibrateFuel,
+  calibrationReport,
+  parseMonth,
+  isoDay,
+  periodMonth,
+  GUIDELINE_14_MONTHLY,
+  CALIBRATION_RULES,
+} from './bills';
+export { parseCsvText, guessMapping, mappingComplete, tableToGrid, normalizeDate, emptyGridRow, ELEC_UNITS, GAS_UNITS } from './billsImport';
+export type { UtilityField, ElecUnit, GasUnit, ColumnMapping, UtilityGridRow } from './billsImport';
+export { validateGrid, recordsToGrid, VALIDATION_RULES } from './billsValidate';
+export type { GridField, GridMode, GridIssue, GridCheck } from './billsValidate';
+export { sampleUtilityBills, SAMPLE_YEAR, SAMPLE_SHIFT, SAMPLE_WOBBLE } from './billsSample';
+export {
+  currentEquipment,
+  estimatedInventory,
+  equipmentLevers,
+  equipmentTemplates,
+  validateEquipment,
+  replacementUpgrade,
+  usableRoofKw,
+  leverReference,
+  formatEfficiency,
+  enteredPlantCapacity,
+} from './equipment';
+export type { LeverValue, EquipmentRole, EquipmentProblem } from './equipment';
+export {
   upgradeDef,
   upgradeLifetime,
   orderUpgrades,
@@ -43,6 +79,9 @@ export { upgradeCost, packageCost } from './costs';
 export {
   calculateFinancialMetrics,
   DEFAULT_FINANCE,
+  ANALYSIS_YEAR,
+  incentiveStatus,
+  programYearOf,
   BENEFIT_YEARS,
   PROJECTION_YEARS,
   financialBreakdown,
@@ -104,3 +143,7 @@ export {
 export type { PreparedProperty, PropertySummary, PortfolioSummary, PortfolioAllocation, PortfolioPlan, PortfolioTotals } from './portfolio';
 export { evaluatePortfolioCustomPlan, portfolioStressReport } from './portfolioPlans';
 export type { PortfolioCustomRow, PortfolioCustomEvaluation, PortfolioStressRow, PortfolioStressReport } from './portfolioPlans';
+export { energyInsights, INSIGHT_THRESHOLDS, INSIGHT_CATEGORY_LABEL } from './insights';
+export type { EnergyInsight, InsightAction, InsightCategory, InsightInput } from './insights';
+export { impactSummary, stressKind, stressPeriodText, STRESS_KIND_LABEL } from './impact';
+export type { ImpactLine, StressKind } from './impact';

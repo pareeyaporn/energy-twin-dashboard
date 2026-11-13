@@ -28,6 +28,11 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 - `docs/13_HOTEL_ENGINE_SPEC.md` — equations, assumptions, the financial breakdown and the demo figures
 - `docs/08_DATA_TODO.md` — data status and research still to find; `docs/14_RESEARCH_LOG.md` — every sourced value; `docs/15_PRODUCT_DECISIONS.md` — team decisions (not facts)
 - `docs/16_ONBOARDING_TOUR.md` — the onboarding tour: every step, its wording and behavior
+- `docs/17_PORTFOLIO_MAP_DESIGN.md` — the portfolio city map's design: colors, basemap restyle, markers, overlap handling, card, list, toolbar, legend, mobile, fallback
+- `docs/18_INVESTMENT_REPORT.md` — the investment results and the PDF report: every figure, its engine source, wording and attribution rules
+- `docs/21_CALCULATION_TRANSPARENCY.md` — "How was this calculated?": every explanation, data labels, financial assumptions, limits
+- `docs/19_UTILITY_DATA.md` — utility data: the Utility Data Manager, Excel template and upload, validation, calibration method and metrics, baseline choice, privacy, limits
+- `docs/20_EQUIPMENT_INVENTORY.md` — the editable equipment inventory: audit, data model, simulation levers, current vs proposed, validation, persistence
 - `docs/04_3D_SPEC.md` — the 3D hotel twin (what drives each visual); `docs/05_CLAUDE_CODE_PROMPTS.md`, `docs/06_LOVABLE_PROMPTS.md` — prompts and status
 - Removed (in git history): the home-era specs `docs/02`, `docs/03` and `docs/09`, the superseded offices-and-retail plan.
 
@@ -61,8 +66,14 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 | `src/data/` | Claude Code | JSON only. Every value carries a source; `hotel/` is the data set (three home-era files remain only because the store imports them) |
 | `src/twin/` | Claude Code | The clickable 2D hotel diagram (`<HotelTwin />`). Lovable only places it |
 | `src/plans/` | Claude Code | Investment modes: AI plan, Build your own (catalog), Compare. Placed by `BudgetOptimizer` (minimal hook) |
-| `src/portfolio/` | Claude Code | Hotel portfolio page: city map (MapLibre, drawn fallback), totals, comparison, charts, portfolio optimizer. Route `src/routes/portfolio.tsx` |
+| `src/portfolio/` | Claude Code | Hotel portfolio page, the homepage: city map (MapLibre, drawn fallback, multi-city), totals, comparison, charts, portfolio optimizer, priority explanation |
+| `src/insights/` | Claude Code | Opportunities & alerts cards. Rules in `src/engine/hotel/insights.ts` (docs/13 §14) |
+| `src/scenario/` | Claude Code | Simulation impact summary (today vs the what-if), placed by `ScenarioSimulator` (minimal hook) |
+| `src/explain/` | Claude Code | "How was this calculated?" explanations, data labels, financial assumptions (docs/21). Placed by `KpiStrip`, `SourcesSheet` (minimal hooks) and `src/report` |
+| `src/report/` | Claude Code | Investment results and the PDF report (`@react-pdf/renderer`, lazy-loaded). Placed by `BudgetOptimizer` (one line), `PlanBuilder` and the portfolio optimizer. See `docs/18` |
+| `src/app/` | Claude Code | The homepage (`/`, the portfolio), the hotel dashboard (`/hotel`, moved from `src/routes/index.tsx`) and the landing rules |
 | `src/tour/` | Claude Code | First-visit onboarding tour (spotlight steps, replay from the top bar). Steps and behavior in `docs/16` |
+| `src/utility/` | Claude Code | Utility data: the Hotel tab section, the Utility Data Manager (spreadsheet, Excel/CSV, template), calibration review. `docs/19` |
 | `src/three/` | Claude Code | The 3D hotel twin (built, Phase 9). Loaded by `src/twin/parts/View3D.tsx`; Lovable places only `<HotelTwin />` |
 | `supabase/functions/` | Claude Code | Backend functions (AI advisor). Keys are read only here |
 | `docs/` | Anyone | Specs and plans |
@@ -76,6 +87,7 @@ If a task needs a change in a Lovable-owned file, make the **smallest possible**
 - Map: `maplibre-gl` (lazy-loaded, free Carto dark basemap, no key; drawn fallback)
 - 3D: `three`, `@react-three/fiber`, `@react-three/drei` (used, lazy-loaded, 2D fallback); `@react-three/postprocessing`, `@react-spring/three` installed but unused
 - Charts: `recharts`
+- PDF: `@react-pdf/renderer` (lazy-loaded; the investment report in `src/report/`)
 - Tests: `vitest`
 - Backend: Lovable Cloud (Supabase edge functions, Deno)
 
@@ -108,10 +120,10 @@ store results ──▶ supabase/functions/advisor ──▶ AI text (explanatio
 `useTwin` holds the hotel state: `hotelInput` / `hotel` (resolved profile with `defaulted` and `notes`), `baseline`, `scenario`,
 `activeStressTest`, `scenarioResult`, `optimizeOnScenario` (follows the scenario automatically), `hotelPlan`, `optimizing`,
 `optimizerCombinations`, `activeHotelPackageId`, `savedScenarios`, `hotelDiscountRate`, `customPlans` / `activeCustomPlanId` (local storage),
-`planBeforeStress`, twin controls (`selectedZone`, `twinLayer`, time with modes
+`planBeforeStress`, the current equipment (`equipmentByProperty`, `setEquipment`, `undoEquipment`, `resetEquipment`; docs/20), twin controls (`selectedZone`, `twinLayer`, time with modes
 `seasons` / `day` / `year`, `compareMode`)
-the portfolio (`portfolio`, `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioCustomPlanIds`, the portfolio stress test, `userHotels` from Add my hotel) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
-`applyHotelPackage`, `askAdvisor`, `openProperty` and `runPortfolioOptimizer`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
+the portfolio (`portfolio`, `organizations` / `organizationId`, `portfolioFilter` (brand, region, ownership, city), `portfolioView` (map metric, selected hotel, list, table sort, camera, scroll: view state kept across a hotel visit), `activePropertyId`, `propertyStates`, `portfolioBudget`, `portfolioObjective`, `portfolioPlan`, `portfolioCustomPlanIds`, the portfolio stress test, `userHotels` from Add my hotel) and advisor messages, with actions such as `setHotelInput`, `setScenario`, `applyStressTest`, `runHotelOptimizer`,
+`applyHotelPackage`, `askAdvisor`, `openProperty`, `runPortfolioOptimizer`, `saveUtilityData`, `setUtilityBaseline` and `removeUtilityData`. Derived values live in `src/store/hotelDerived.ts` (`selectDisplayed`, `selectCompare`,
 `selectUpgradeComparison`, `selectUpgradeBaseline`, `selectHourState` for the 3D readout, `selectCatalog`, `selectCustomPlanEvaluation`,
 `selectPlanExplanation`, `selectStressReport`, `selectPortfolioSummary`, `selectPortfolioCustomEvaluation`, `selectPortfolioStressReport`, `selectVisibleCustomPlans`, …). Some home-era fields remain in the store for compatibility (they read `presetHomes.json`, `mockPackages.json`, `mockParts.json`).
 

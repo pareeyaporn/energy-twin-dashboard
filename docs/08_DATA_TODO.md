@@ -14,7 +14,8 @@ The home-era data files were removed, except `presetHomes.json`, `mockPackages.j
 
 | Data | State | Source |
 | --- | --- | --- |
-| Electricity and gas prices (`rates.json`) | **Sourced, primary** | EIA Electric Power Monthly Table 5.6.B (IL, YTD Aug 2026); EIA natural gas prices (IL 2025) |
+| Electricity and gas prices (`rates.json`) | **Sourced, primary** | EIA Electric Power Monthly Table 5.6.B (IL, NY, FL, CO; YTD Aug 2026); EIA natural gas prices (2025) |
+| Other cities: New York, Miami, Denver (`weather.json`, `rates.json`, `emissions.json`, `defaults.json`) | **Sourced, primary** (pass 11) | NOAA 1991-2020 normals, PVWatts v8, EIA prices, EPA Power Profiler ZIP tool (eGRID2023), NLR ComStock 2025 R3 by climate zone. Hourly shapes, seasonal occupancy, age factor and TRM savings still Chicago/Illinois-based |
 | Price growth (`defaults.json` → `finance`) | **Sourced, primary** | EIA AEO2026 Tables 8 and 3: electricity 2.12%, gas 4.09% a year (nominal, 2025–2035) |
 | End-use split and fuel mix (`defaults.json`) | **Sourced, primary** (national lodging) | EIA CBECS 2018 Tables E1 and E5 |
 | Grid and gas emission factors (`emissions.json`) | **Sourced, primary** | EPA eGRID2023 (RFCW 0.4155, U.S. 0.3497 kg CO2e/kWh); EPA GHG Emission Factors Hub 2025 (5.311 kg/therm) |
@@ -27,7 +28,7 @@ The home-era data files were removed, except `presetHomes.json`, `mockPackages.j
 | Hotel sizes (presets) | **Checked, primary** | Choose Chicago hotel supply list (median 232 rooms) |
 | LED savings range and life; EMS, insulation, condensing-boiler savings | Partly sourced (excerpts, plus TRM rules) | PNNL/GSA, Crowe 2020, NREL ComStock, IL-TRM 4.5.4 |
 | Export credit for solar | Basis known, **no $ value** (so $0) | 220 ILCS 5/16-107.5(n): avoided cost of supply |
-| Incentives (`incentives.json`) | **ComEd amounts applied** (LED, sensors, guest room energy management; 90% cap); HVAC equipment, EMS, gas, Illinois Shines, 48E listed only | ComEd worksheets 2025 lighting, 2026 HVAC (team-provided) |
+| Incentives (`incentives.json`) | **ComEd amounts applied** (Illinois hotels only, `states`) (LED, sensors, guest room energy management; 90% cap); HVAC equipment, EMS, gas, Illinois Shines, 48E listed only | ComEd worksheets 2025 lighting, 2026 HVAC (team-provided) |
 | Installed costs | **Sourced:** smart controls, insulation, water heating (IL-TRM), solar $/W (LBNL). **Placeholders:** LED, sensors, EMS, HVAC equipment | IL-TRM v14.0; LBNL 2025 Data Update |
 | Weather (`weather.json` temperatures) | **Sourced, primary** | NOAA 1991–2020 normals, Chicago O'Hare |
 | Hot water per room | **Checked, primary** | IL-TRM 4.3.2 / ASHRAE: 14 gal per hotel room per day (default consistent) |
@@ -57,7 +58,7 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
   median gross installed prices for non-residential PV by size ($3.70 up to 10 kW … $1.70 over 1,000 kW), transcribed by the team (the PDF host
   is not reachable from the build session). The ±15% low/high band is a placeholder. Editable per hotel (`solarCostPerW`). Still to do:
   Illinois- or Chicago-specific prices and the percentiles, if wanted.
-- [x] **A4. Incentive amounts** — *mostly done (November 2026), from ComEd's own worksheets: LED $0.75 per watt reduced and occupancy sensors $0.25 per watt controlled (2025 Indoor Lighting worksheet; confirm 2026), guest room energy management $75 per ton with gas heat / $100 with electric or heat-pump heat (2026 HVAC worksheet); 90% of cost cap. Listed, not applied: HVAC equipment (rated-efficiency based), energy management (EMS worksheet not provided), Peoples Gas, Illinois Shines, federal 48E.* Originally: (only with a source; until then shown as unverified and $0). ComEd: the 2026 Standard Incentives Application — *Pass 10 (November 2026): a May 2026 secondary source states the same $0.75 per W reduced and $0.25 per W controlled; the primary 2026 worksheet is on a blocked host. Kept, with the note.*
+- [x] **A4. Incentive amounts** — *mostly done (November 2026), from ComEd's own worksheets: LED $0.75 per watt reduced and occupancy sensors $0.25 per watt controlled (2025 Indoor Lighting worksheet; confirm 2026), guest room energy management $75 per ton with gas heat / $100 with electric or heat-pump heat (2026 HVAC worksheet); 90% of cost cap. Listed, not applied: HVAC equipment (rated-efficiency based), energy management (EMS worksheet not provided), Peoples Gas, Illinois Shines, federal 48E.* Originally: (only with a source; until then shown as unverified and $0). ComEd: the 2026 Standard Incentives Application — *Pass 10 (November 2026): a May 2026 secondary source states the same $0.75 per W reduced and $0.25 per W controlled; the primary 2026 worksheet is on a blocked host. Kept, with the note.* — *Program-year rule (November 2026): the 2025 lighting rates are no longer counted for the 2026 analysis; shown separately as illustrative until the 2026 lighting worksheet confirms them (docs/15 §21). To do: get ComEd's 2026 Indoor Lighting Incentives Worksheet.*
   rules are recorded; the measure amounts are in worksheets on `azure-na-assets.contentstack.com` (allow it, or download the worksheets by hand).
   Also: ComEd business rebates for LED, controls and HVAC (`www.comed.com` is reachable); Peoples Gas
   rebates; Illinois Shines REC payments; federal Section 48E status for new solar (needs `www.irs.gov`). Enter as `value`, `applied: true`,
@@ -94,7 +95,7 @@ hotel with a restaurant, but on the high side; the default EUI input stays a pla
 - [x] Demo hotel energy intensity against CBECS 2018 lodging (see above).
 - [x] Against the ENERGY STAR national median for hotels (63.0 kBtu/ft² site): the demo hotel is 45% above it (see the benchmark note).
       Now computed by `benchmarkComparison` and shown in the app (LV15) as context; the model is not tuned toward it.
-- [x] Package savings as a share of the bill against published hotel case studies (DOE Better Buildings, utilities). — *Pass 10 (November 2026): six published hotel cases compared in docs/14 (pass 10): whole-building and lighting results agree; guest-room controls read low in the model (reported, not tuned).*
+- [x] Package savings as a share of the bill against published hotel case studies (DOE Better Buildings, utilities). — *Pass 10 (November 2026): six published hotel cases compared in docs/14 (pass 10): whole-building and lighting results agree; guest-room controls sit inside the IL-TRM range and below out-of-state field studies (reported, not tuned).*
 - [x] After A1–A3, re-run the optimizer and write the demo question from what the results say — *done (research pass 9): the $50,000 pick stays LED + occupancy sensors; the suggested question is in docs/07. Note for task 8.2: the offline template answer to it does not mention solar.*
 
 ## Network hosts

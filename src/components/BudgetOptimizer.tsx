@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { DiscountRateControl, NpvEstimate } from "@/components/DiscountRateControl";
 import { ProjectionSparkline, ProjectionToggle } from "@/components/Projection";
+import { AiPlanResults } from "@/report/ResultsSummary";
 import { FinancialLines, UpgradeComparison, fmtEnergy } from "@/components/FinancialLines";
 import { CustomizeButton, InvestModes, WhyThisPlan } from "@/plans/InvestModes";
 
@@ -155,6 +156,7 @@ export function BudgetOptimizer({ compact = false, workspace = false }: { compac
         {plan.scenario && <Badge variant="secondary" className="text-primary">Measured against the current scenario</Badge>}
       </div>
       <WhyThisPlan />
+      <AiPlanResults compact={compact} />
       {workspace && cards.length > 0 ? <><section aria-label="Investment packages" className="space-y-3">{cards.map((pkg) => <CompactInvestmentCard key={`${pkg.role}-${pkg.evaluation.id}`} pkg={pkg} winner={pkg.evaluation.id === winner?.evaluation.id} objective={objectiveLabel} />)}</section><Button asChild variant="link" className="h-auto px-0"><Link to="/optimizer">Compare in detail<ArrowRight /></Link></Button></> : cards.length === 0 ? <section aria-label="No investments found" className="space-y-3 border-l-2 border-heat pl-4"><h2 className="font-semibold">No suitable package</h2><p className="text-sm text-muted-foreground">{plan.emptyReason}</p>{plan.cheapestUseful && <p className="text-sm">Lowest-cost useful investment: {plan.cheapestUseful.label} · <span className="num">{money(plan.cheapestUseful.cost)}</span></p>}</section> : <>
         <section aria-label="Investment packages" className={cn("grid items-start gap-4", !compact && "lg:grid-cols-3")}>{cards.map((pkg) => <InvestmentCard key={`${pkg.role}-${pkg.evaluation.id}`} pkg={pkg} winner={pkg.evaluation.id === winner?.evaluation.id} objective={objectiveLabel} />)}</section>
         {winner && !cards.some((pkg) => pkg.evaluation.id === winner.evaluation.id) && <section aria-label="Objective winner" className="space-y-3 border-t border-primary/30 pt-4"><h2 className="font-semibold">Objective winner · {winner.roleLabel}</h2><InvestmentCard pkg={winner} winner objective={objectiveLabel} /></section>}

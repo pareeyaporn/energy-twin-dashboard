@@ -24,15 +24,23 @@ export function TourButton({ autoStart = import.meta.env.MODE !== "test" }: { au
 
   useEffect(() => {
     if (!autoStart || autoStartTried || useTour.getState().active) return;
-    if (pathname !== "/" && pathname !== "/portfolio") return;
-    autoStartTried = true;
-    if (readTourOutcome() !== null) return;
+    if (pathname !== "/" && pathname !== "/portfolio" && pathname !== "/hotel") return;
+    if (readTourOutcome() !== null) {
+      autoStartTried = true;
+      return;
+    }
+    // Marked as tried only when the tour really starts: an effect that is set up, cancelled and set up again (React's development
+    // double run, or a remount while the page settles) must not use up the first-visit start.
     const signal = { cancelled: false };
     let timer: ReturnType<typeof setTimeout> | undefined;
     void waitFor(loaded, 10_000, signal).then((found) => {
       if (signal.cancelled || !found.length || useTour.getState().active) return;
       // A short pause after the interface appears, so the first step does not flash in over a half-drawn page.
-      timer = setTimeout(() => start({ path: pathname, tab: currentWorkspaceTab() }), 700);
+      timer = setTimeout(() => {
+        if (signal.cancelled || autoStartTried || useTour.getState().active) return;
+        autoStartTried = true;
+        start({ path: pathname, tab: currentWorkspaceTab() });
+      }, 700);
     });
     return () => {
       signal.cancelled = true;

@@ -104,7 +104,7 @@ describe("HotelTwin layers", () => {
     expect(screen.queryByRole("group", { name: /Hotel cross-section/ })).toBeNull();
 
     fireEvent.click(tab("Equipment"));
-    expect(screen.getAllByText("estimate").length).toBeGreaterThan(5);
+    expect(screen.getAllByText("estimated").length).toBeGreaterThan(5);
     expect(screen.getAllByText(/Schedule:/).length).toBeGreaterThan(5);
 
     fireEvent.click(tab("Flow"));
@@ -120,7 +120,7 @@ describe("HotelTwin layers", () => {
     render(<HotelTwin />);
     fireEvent.click(zoneButton(/Hot water:/));
     fireEvent.click(screen.getByRole("tab", { name: "Equipment" }));
-    expect(screen.getByText(/Water heaters/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Water heaters/).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Elevators/)).toBeNull();
   });
 
@@ -215,7 +215,7 @@ describe("HotelTwin stress tests and comparison", () => {
     fireEvent.click(screen.getByRole("button", { name: "Heat wave" }));
     expect(get().activeStressTest).toBe("heat_wave");
     expect(screen.getByTestId("stress-description")).toHaveTextContent(/July runs 10 F hotter/);
-    expect(screen.getByTestId("stress-description")).toHaveTextContent(/Estimated change: \+\$[\d,]+ per year/);
+    expect(screen.getByTestId("stress-description")).toHaveTextContent(/Estimated change: \+\$[\d,]+ in the year it happens \(one-off, not annualized\)/);
     expect(screen.getByTestId("twin-kind")).toHaveTextContent("What-if");
     expect(screen.getByTestId("twin-delta")).toHaveTextContent(/per year vs before/);
     fireEvent.click(screen.getByRole("button", { name: "Heat wave" }));

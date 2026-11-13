@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { advisorAnswerStore } from "./advisorAnswers";
 import {
   DEFAULT_FINANCE,
   PORTFOLIO_DEFAULTS,
@@ -17,6 +18,7 @@ import {
   resolveProfile,
 } from "@/engine/hotel";
 import type {
+  EquipmentOverride,
   EnergyResult,
   HotelInput,
   Objective,
@@ -37,6 +39,10 @@ import type {
 import { computeScenarioResult, effectiveScenario, mergeInput, selectPlanContext, selectAllProperties, selectIsSynthetic, selectPortfolioItems, selectPortfolioSummary, withoutKeys } from "./hotelDerived";
 import { readStoredPlans, writeStoredPlans } from "./customPlans";
 import { readUserHotels, userProperty, writeUserHotels } from "./userHotels";
+import { inputForBaseline, readUtilityData, utilityKeyFor, withoutUtility as withoutUtilityInput, writeUtilityData } from "./utilityData";
+import type { UtilityBaseline, UtilitySet } from "./utilityData";
+import { readEquipment, withEquipment, writeEquipment } from "./equipmentStorage";
+import type { EquipmentByProperty } from "./equipmentStorage";
 import type { ChicagoAreaId } from "./userHotels";
 import type { CustomPlan } from "./customPlans";
 export type { CustomPlan } from "./customPlans";
@@ -125,8 +131,33 @@ export interface PortfolioFilter {
   brand: string | null;
   region: string | null;
   ownership: Ownership | null;
+  /** A city (multi-city organizations); optional so older code that sets the other three keeps working. */
+  city?: string | null;
 }
-const NO_FILTER: PortfolioFilter = { brand: null, region: null, ownership: null };
+const NO_FILTER: PortfolioFilter = { brand: null, region: null, ownership: null, city: null };
+
+/** What the portfolio map colors and ranks the hotels by. */
+export type PortfolioMapMetric = "cost" | "eui" | "potential" | "priority";
+
+/**
+ * How the portfolio page looked when the user left it for a hotel, so coming back shows the same map: the metric, the selected hotel
+ * (its card), whether the hotel list is open, a city to focus, and the scroll position. View only: no figure depends on it.
+ */
+export interface PortfolioView {
+  metric: PortfolioMapMetric;
+  selectedId: string | null;
+  listOpen: boolean;
+  /** Fly to this city when the page opens (a breadcrumb city link); null shows every hotel. */
+  focusCity: string | null;
+  scrollY: number;
+  /** Scroll to this section when the page opens (for example the portfolio optimizer, from a hotel's Invest tab). */
+  anchor: string | null;
+  /** The comparison table's sort column and direction. */
+  tableSort: { id: string; dir: 1 | -1 };
+  /** The street map's camera when the user left (restored on return); null fits all hotels. */
+  camera: { lng: number; lat: number; zoom: number } | null;
+}
+export const DEFAULT_PORTFOLIO_VIEW: PortfolioView = { metric: "eui", selectedId: null, listOpen: true, focusCity: null, scrollY: 0, anchor: null, tableSort: { id: "prio", dir: -1 }, camera: null };
 
 export interface TwinState {
   presets: PresetHome[];
@@ -216,6 +247,20 @@ export interface TwinState {
    * twin controls, the portfolio, and the custom plans saved in this browser. Keeps the reduce-effects preference.
    */
   resetDemo: () => void;
+  // ---- Current equipment (Phase 14G, docs/20). Corrections to the open hotel's estimated equipment, saved per property. ----
+  /** Saved equipment corrections by property (local storage, `energy-twin:equipment:v1`). */
+  equipmentByProperty: EquipmentByProperty;
+  equipmentHydrated: boolean;
+  /** The open hotel's previous equipment list, for one-step undo (null when there is nothing to undo). */
+  equipmentUndo: { key: string | null; previous: { list: EquipmentOverride[]; settings: EquipmentSettings } } | null;
+  /** True when the last equipment change cleared an existing investment plan (the baseline changed; run the optimizer again). */
+  equipmentClearedPlan: boolean;
+  /** Replaces the open hotel's equipment corrections (validated by the engine); recalculates the baseline. Not an investment. */
+  setEquipment: (next: EquipmentOverride[], settings?: EquipmentSettings) => void;
+  undoEquipment: () => void;
+  /** Back to the estimated (sample) equipment for the open hotel. */
+  resetEquipment: () => void;
+  hydrateEquipment: () => void;
   /** Counts "Reset demo" clicks, so view-only state outside the store (the 3D camera, explode, energy view) can reset too. */
   demoResets: number;
 
@@ -251,6 +296,8 @@ export interface TwinState {
   organizations: PortfolioOrganization[];
   organizationId: string;
   portfolioFilter: PortfolioFilter;
+  portfolioView: PortfolioView;
+  setPortfolioView: (patch: Partial<PortfolioView>) => void;
   /** Switches the portfolio to another organization (clears the filter and the portfolio plan; the open hotel stays open). */
   setOrganization: (id: string) => void;
   setPortfolioFilter: (patch: Partial<PortfolioFilter>) => void;
@@ -263,6 +310,24 @@ export interface TwinState {
   /** Adds a hotel from the user's inputs (blank fields use defaults); returns its id. It does not open it. */
   addUserHotel: (input: HotelInput, areaId: ChicagoAreaId, meta?: { brand?: string; ownership?: Ownership }) => string;
   removeUserHotel: (id: string) => void;
+
+  /**
+   * Utility records per hotel (docs/19), keyed by `selectUtilityKey` (the portfolio property id; a preset maps to its property), kept
+   * in this browser's local storage. The calibrated baseline is used only when the user chooses it for that hotel.
+   */
+  utilityData: Record<string, UtilitySet>;
+  utilityHydrated: boolean;
+  /** A one-off message after the baseline changed (for example that plans were recomputed). */
+  utilityNotice: string | null;
+  /** Reads the records from local storage and applies a chosen calibrated baseline (call after mount, in the browser). */
+  hydrateUtilityData: () => void;
+  /** Saves a hotel's records. The hotel goes back to the modeled baseline until the user chooses the calibrated one again. */
+  saveUtilityData: (key: string, set: Omit<UtilitySet, "baseline">) => void;
+  /** Removes a hotel's records and restores its modeled baseline. */
+  removeUtilityData: (key: string) => void;
+  /** Chooses a hotel's baseline. "calibrated" needs saved records whose calibration succeeded; returns whether it was applied. */
+  setUtilityBaseline: (key: string, baseline: UtilityBaseline) => boolean;
+  clearUtilityNotice: () => void;
 
   /** Custom investment plans (kept in the browser's local storage; numbers are always recomputed by the engine). */
   customPlans: CustomPlan[];
@@ -364,6 +429,7 @@ function initialHotelState() {
     organizations: hotelOrganizations,
     organizationId: hotelPortfolio.id,
     portfolioFilter: NO_FILTER,
+    portfolioView: DEFAULT_PORTFOLIO_VIEW,
     activePropertyId: null as string | null,
     propertyStates: {} as Record<string, PropertySnapshot>,
     portfolioBudget: PORTFOLIO_DEFAULTS.budget,
@@ -404,6 +470,88 @@ function savedUserEdit(s: TwinState, hotelInput: HotelInput): Partial<TwinState>
   const userHotels = s.userHotels.map((h) => (h.id === s.activePropertyId ? { ...h, input: hotelInput } : h));
   writeUserHotels(userHotels, s.nextUserHotelNumber);
   return { userHotels, portfolio: portfolioWith(userHotels, s.organizationId) };
+}
+
+/** The open hotel's utility key (see utilityKeyFor). */
+const openUtilityKey = (s: TwinState) => utilityKeyFor(s.activePropertyId, s.hotelPresetId, selectAllProperties(s));
+
+const sameUtility = (a: HotelInput, b: HotelInput) => a.utilityBills === b.utilityBills && !!a.useBillRates === !!b.useBillRates;
+
+/**
+ * Re-runs the open hotel on its chosen baseline when its utility data changed. Plans made on the other baseline are dropped (the same
+ * rule as any input change), and a notice says so.
+ */
+function utilityApplied(s: TwinState, data: Record<string, UtilitySet>, notice: string | null): Partial<TwinState> {
+  const hotelInput = inputForBaseline(s.hotelInput, data[openUtilityKey(s)]);
+  if (sameUtility(hotelInput, s.hotelInput)) return { utilityData: data, ...(notice ? { utilityNotice: notice } : {}) };
+  const { hotel, baseline } = recomputeHotel(hotelInput);
+  const hadPlan = s.hotelPlan !== null || s.portfolioPlan !== null;
+  return {
+    utilityData: data,
+    hotelInput,
+    hotel,
+    baseline,
+    scenarioResult: computeScenarioResult(hotel, effectiveScenario(s.scenario, s.activeStressTest)),
+    hotelPlan: null,
+    hotelPlanBaseline: null,
+    activeHotelPackageId: null,
+    portfolioPlan: null,
+    utilityNotice: [notice, hadPlan ? "Investment results were cleared because the baseline changed; run the optimizer again." : null].filter(Boolean).join(" ") || null,
+    ...savedUserEdit(s, hotelInput),
+  };
+}
+
+/** The key a hotel's equipment is saved under: its portfolio property, or the sample preset it was opened from. */
+export function equipmentKey(s: Pick<TwinState, "activePropertyId" | "hotelPresetId" | "portfolio">): string | null {
+  if (s.activePropertyId) return s.activePropertyId;
+  if (!s.hotelPresetId) return null;
+  return s.portfolio.properties.find((p) => p.presetId === s.hotelPresetId)?.id ?? `preset:${s.hotelPresetId}`;
+}
+
+/** The open hotel with a new equipment list: the baseline is recalculated (a correction, not a saving); results that used it are cleared. */
+/** Hotel settings an equipment card edits directly (schedules, smart room controls): the existing inputs, not a second copy. */
+export type EquipmentSettings = Partial<Pick<HotelInput, "lightingHoursPerDay" | "commonAreaHvacHours" | "smartRoomControls">>;
+const SETTING_KEYS = ["lightingHoursPerDay", "commonAreaHvacHours", "smartRoomControls"] as const;
+
+function withHotelEquipment(s: TwinState, next: EquipmentOverride[], settings: EquipmentSettings = {}): Partial<TwinState> {
+  const { equipment: _old, ...rest } = s.hotelInput;
+  const patched: HotelInput = { ...rest };
+  for (const k of SETTING_KEYS) {
+    if (!(k in settings)) continue;
+    const v = settings[k];
+    if (v === undefined) delete patched[k];
+    else (patched as Record<string, unknown>)[k] = v;
+  }
+  const hotelInput: HotelInput = next.length ? { ...patched, equipment: next } : patched;
+  const { hotel, baseline } = recomputeHotel(hotelInput);
+  return {
+    hotelInput,
+    hotel,
+    baseline,
+    scenarioResult: computeScenarioResult(hotel, effectiveScenario(s.scenario, s.activeStressTest)),
+    hotelPlan: null,
+    hotelPlanBaseline: null,
+    activeHotelPackageId: null,
+    ...(s.activePropertyId ? { portfolioPlan: null } : {}),
+    ...savedUserEdit(s, hotelInput),
+  };
+}
+
+function applyEquipmentChange(s: TwinState, next: EquipmentOverride[], settings: EquipmentSettings = {}): Partial<TwinState> {
+  const key = equipmentKey(s);
+  const byProperty = { ...s.equipmentByProperty };
+  if (key) {
+    if (next.length) byProperty[key] = next;
+    else delete byProperty[key];
+    writeEquipment(byProperty);
+  }
+  return {
+    ...withHotelEquipment(s, next, settings),
+    equipmentByProperty: byProperty,
+    // Undo restores the list and the settings this change touched.
+    equipmentUndo: { key, previous: { list: s.hotelInput.equipment ?? [], settings: Object.fromEntries(Object.keys(settings).map((k) => [k, s.hotelInput[k as keyof EquipmentSettings]])) as EquipmentSettings } },
+    equipmentClearedPlan: s.hotelPlan !== null,
+  };
 }
 
 /** Saves the open property (if any) into `propertyStates`. */
@@ -471,8 +619,9 @@ export const useTwin = create<TwinState>((set, get) => ({
   selectHotelPreset: (id) => {
     const preset = hotelData.presets.find((p) => p.id === id);
     if (!preset) return;
-    const hotelInput: HotelInput = { ...preset.input };
-    set((s) => ({
+    set((s) => {
+      const hotelInput: HotelInput = inputForBaseline({ ...preset.input }, s.utilityData[utilityKeyFor(null, id, selectAllProperties(s))]);
+      return {
       propertyStates: savedStates(s),
       activePropertyId: null,
       hotelInput,
@@ -484,7 +633,8 @@ export const useTwin = create<TwinState>((set, get) => ({
       hotelPlan: null,
       hotelPlanBaseline: null,
       activeHotelPackageId: null,
-    }));
+      };
+    });
   },
   setHotelBudget: (n) => get().setHotelInput({ budget: Math.max(0, n) }),
   setHotelObjective: (objective) => get().setHotelInput({ objective }),
@@ -590,7 +740,8 @@ export const useTwin = create<TwinState>((set, get) => ({
       },
       q,
     );
-    const answer = await advisor.askAdvisor(q, context, advisor.getAdvisorConfig());
+    // Validated AI answers are also kept in local storage, so a rehearsed demo question answers the same way at once (task 8.2).
+    const answer = await advisor.askAdvisor(q, context, { ...advisor.getAdvisorConfig(), store: advisorAnswerStore });
     set((st) => ({
       advisorBusy: false,
       advisorMessages: [
@@ -600,20 +751,65 @@ export const useTwin = create<TwinState>((set, get) => ({
     }));
   },
   clearAdvisor: () => set({ advisorMessages: [], advisorBusy: false }),
-  resetHotel: () =>
+  resetHotel: () => {
     set((s) => ({
       ...initialHotelState(),
       optimizing: false,
       portfolio: portfolioWith(s.userHotels),
       portfolioStressScope: portfolioWith(s.userHotels).properties.map((p) => p.id),
       organizationId: hotelPortfolio.id,
-    })),
+    }));
+    // The hotel's own utility data stays; a chosen calibrated baseline applies again.
+    set((s) => utilityApplied(s, s.utilityData, null));
+  },
+  equipmentByProperty: {} as EquipmentByProperty,
+  equipmentHydrated: false,
+  equipmentUndo: null,
+  equipmentClearedPlan: false,
+  setEquipment: (next, settings) => set((s) => applyEquipmentChange(s, next, settings)),
+  undoEquipment: () =>
+    set((s) => {
+      const u = s.equipmentUndo;
+      if (!u || u.key !== equipmentKey(s)) return {};
+      return { ...applyEquipmentChange(s, u.previous.list, u.previous.settings), equipmentUndo: null };
+    }),
+  resetEquipment: () => set((s) => applyEquipmentChange(s, [])),
+  hydrateEquipment: () => {
+    if (get().equipmentHydrated) return;
+    const byProperty = readEquipment();
+    set((s) => {
+      const key = equipmentKey(s);
+      const saved = key ? byProperty[key] : undefined;
+      if (!saved?.length || s.hotelInput.equipment?.length) return { equipmentByProperty: byProperty, equipmentHydrated: true };
+      return { ...withHotelEquipment(s, saved), equipmentByProperty: byProperty, equipmentHydrated: true };
+    });
+  },
   demoResets: 0,
   resetDemo: () => {
+    writeEquipment({});
     advisor.clearAdvisorCache();
-    set((s) => ({ ...initialHotelState(), optimizing: false, customPlans: [], activeCustomPlanId: null, nextPlanNumber: 1, customPlansHydrated: true, userHotels: [], nextUserHotelNumber: 1, userHotelsHydrated: true, demoResets: s.demoResets + 1 }));
+    set((s) => ({
+      ...initialHotelState(),
+      optimizing: false,
+      customPlans: [],
+      activeCustomPlanId: null,
+      nextPlanNumber: 1,
+      customPlansHydrated: true,
+      userHotels: [],
+      nextUserHotelNumber: 1,
+      userHotelsHydrated: true,
+      utilityData: {},
+      utilityHydrated: true,
+      utilityNotice: null,
+      equipmentByProperty: {},
+      equipmentHydrated: true,
+      equipmentUndo: null,
+      equipmentClearedPlan: false,
+      demoResets: s.demoResets + 1,
+    }));
     writeStoredPlans([], 1, null);
     writeUserHotels([], 1);
+    writeUtilityData({});
   },
 
   openProperty: (id) =>
@@ -626,8 +822,9 @@ export const useTwin = create<TwinState>((set, get) => ({
       // Keep the active custom plan only if it belongs to the newly opened hotel (or to no hotel).
       const visible = s.customPlans.filter((p) => !p.propertyId || p.propertyId === id);
       const activeCustomPlanId = visible.some((p) => p.id === s.activeCustomPlanId) ? s.activeCustomPlanId : (visible[visible.length - 1]?.id ?? null);
-      if (saved) return { ...saved, propertyStates, activePropertyId: id, activeCustomPlanId };
-      const hotelInput: HotelInput = { ...property.input };
+      if (saved) return { ...saved, propertyStates, activePropertyId: id, activeCustomPlanId, equipmentUndo: null, equipmentClearedPlan: false };
+      // The property comes with its saved equipment corrections (docs/20) and, if chosen, its calibrated utility baseline (docs/19).
+      const hotelInput: HotelInput = inputForBaseline({ ...withEquipment(property, s.equipmentByProperty[id]) }, s.utilityData[id]);
       return {
         propertyStates,
         activePropertyId: id,
@@ -647,6 +844,8 @@ export const useTwin = create<TwinState>((set, get) => ({
         nextScenarioNumber: 1,
         advisorMessages: [],
         selectedZone: null,
+        equipmentUndo: null,
+        equipmentClearedPlan: false,
       };
     }),
   setPortfolioBudget: (n) => set({ portfolioBudget: Number.isFinite(n) ? Math.max(0, Math.min(50_000_000, n)) : PORTFOLIO_DEFAULTS.budget, portfolioPlan: null }),
@@ -692,6 +891,41 @@ export const useTwin = create<TwinState>((set, get) => ({
     set({ portfolioCustomPlanIds: ids });
     return created.map((p) => p.id);
   },
+  utilityData: {} as Record<string, UtilitySet>,
+  utilityHydrated: false,
+  utilityNotice: null as string | null,
+  hydrateUtilityData: () => {
+    if (get().utilityHydrated) return;
+    const data = readUtilityData();
+    set((s) => ({ utilityHydrated: true, ...utilityApplied(s, data, null) }));
+  },
+  saveUtilityData: (key, input) => {
+    const data = { ...get().utilityData, [key]: { ...input, baseline: "modeled" as UtilityBaseline } };
+    writeUtilityData(data);
+    const was = get().utilityData[key]?.baseline === "calibrated";
+    set((s) => utilityApplied(s, data, was ? "Data saved. The hotel is back on the modeled baseline until you choose the calibrated one again." : null));
+  },
+  removeUtilityData: (key) => {
+    const { [key]: _gone, ...data } = get().utilityData;
+    writeUtilityData(data);
+    set((s) => utilityApplied(s, data, "Utility data removed; the modeled baseline is restored."));
+  },
+  setUtilityBaseline: (key, baseline) => {
+    const current = get().utilityData[key];
+    if (!current) return baseline === "modeled";
+    if (baseline === "calibrated") {
+      const s = get();
+      const base = key === openUtilityKey(s) ? s.hotelInput : (s.propertyStates[key]?.hotelInput ?? selectAllProperties(s).find((p) => p.id === key)?.input);
+      if (!base) return false;
+      const report = calculateBaselineEnergy(resolveProfile({ ...withoutUtilityInput(base), utilityBills: current.records })).calibration.report;
+      if (!report?.usable) return false;
+    }
+    const data = { ...get().utilityData, [key]: { ...current, baseline } };
+    writeUtilityData(data);
+    set((s) => utilityApplied(s, data, baseline === "calibrated" ? "The calibrated baseline is now active." : "The original modeled baseline is now active."));
+    return true;
+  },
+  clearUtilityNotice: () => set({ utilityNotice: null }),
   userHotels: [] as UserHotel[],
   nextUserHotelNumber: 1,
   userHotelsHydrated: false,
@@ -740,9 +974,19 @@ export const useTwin = create<TwinState>((set, get) => ({
     set((s) => {
       if (id === s.organizationId || !s.organizations.some((o) => o.id === id)) return {};
       const portfolio = portfolioWith(s.userHotels, id);
-      return { organizationId: id, portfolio, portfolioFilter: NO_FILTER, portfolioPlan: null, portfolioStressScope: portfolio.properties.map((p) => p.id) };
+      return {
+        organizationId: id,
+        portfolio,
+        portfolioFilter: NO_FILTER,
+        // Another organization: keep the metric and the list, drop the selected hotel and any city focus.
+        portfolioView: { ...s.portfolioView, selectedId: null, focusCity: null, scrollY: 0, anchor: null, camera: null },
+        portfolioPlan: null,
+        portfolioStressScope: portfolio.properties.map((p) => p.id),
+      };
     }),
-  setPortfolioFilter: (patch) => set((s) => ({ portfolioFilter: { ...s.portfolioFilter, ...patch }, portfolioPlan: null })),
+  // Other hotels shown: the saved camera no longer frames them.
+  setPortfolioFilter: (patch) => set((s) => ({ portfolioFilter: { ...s.portfolioFilter, ...patch }, portfolioPlan: null, portfolioView: { ...s.portfolioView, camera: null } })),
+  setPortfolioView: (patch) => set((s) => ({ portfolioView: { ...s.portfolioView, ...patch } })),
   setPortfolioStressTest: (portfolioStressTestId) => set({ portfolioStressTestId }),
   setPortfolioStressScope: (ids) => set((s) => ({ portfolioStressScope: s.portfolio.properties.map((p) => p.id).filter((id) => ids.includes(id)) })),
   setPortfolioStressPlan: (portfolioStressPlan) => set({ portfolioStressPlan }),

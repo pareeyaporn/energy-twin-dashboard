@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import type { Ownership } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
 import { OWNERSHIP_LABEL } from "@/store/userHotels";
+import { propertyCity } from "@/store/hotelDerived";
 
 const selectCls = "rounded-md border border-input bg-background px-2 py-1 text-xs";
 
@@ -20,9 +21,10 @@ export function PortfolioFilters({ shown }: { shown: number }) {
       brands: uniq(properties.map((p) => p.brand)),
       regions: uniq(properties.map((p) => p.region)),
       ownership: uniq(properties.map((p) => p.ownership)) as Ownership[],
+      cities: uniq(properties.map(propertyCity)),
     };
   }, [properties]);
-  const active = !!(filter.brand || filter.region || filter.ownership);
+  const active = !!(filter.brand || filter.region || filter.ownership || filter.city);
 
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-xl border border-glass-border p-3" role="group" aria-label="Organization and filters" data-testid="portfolio-filters">
@@ -32,6 +34,15 @@ export function PortfolioFilters({ shown }: { shown: number }) {
           {organizations.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
         </select>
       </label>
+      {options.cities.length > 1 && (
+        <label className="text-xs">
+          <span className="mb-1 block text-muted-foreground">City</span>
+          <select className={selectCls} value={filter.city ?? ""} onChange={(e) => setFilter({ city: e.target.value || null })} data-testid="filter-city">
+            <option value="">All cities</option>
+            {options.cities.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </label>
+      )}
       <label className="text-xs">
         <span className="mb-1 block text-muted-foreground">Brand</span>
         <select className={selectCls} value={filter.brand ?? ""} onChange={(e) => setFilter({ brand: e.target.value || null })} data-testid="filter-brand">
@@ -54,7 +65,7 @@ export function PortfolioFilters({ shown }: { shown: number }) {
         </select>
       </label>
       {active && (
-        <button type="button" className="inline-flex items-center gap-1 text-xs text-primary hover:underline" onClick={() => setFilter({ brand: null, region: null, ownership: null })} data-testid="filter-clear">
+        <button type="button" className="inline-flex items-center gap-1 text-xs text-primary hover:underline" onClick={() => setFilter({ brand: null, region: null, ownership: null, city: null })} data-testid="filter-clear">
           <X className="size-3" /> Clear filters
         </button>
       )}

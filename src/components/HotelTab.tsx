@@ -4,6 +4,8 @@ import { useShallow } from "zustand/react/shallow";
 import { useTwin } from "@/store/useTwin";
 import { DefaultEstimate, DefaultEstimateNotice } from "./DefaultEstimate";
 import { BenchmarkCard } from "./BenchmarkCard";
+import { EnergyInsights } from "@/insights/EnergyInsights";
+import { UtilityDataSection } from "@/utility/UtilityDataSection";
 import { HomePanel } from "./HomePanel";
 import { HotelProfileForm, hvacOptions } from "./HotelProfileForm";
 import { Button } from "@/components/ui/button";
@@ -21,7 +23,7 @@ export function HotelTab() {
     ["Rooms", number(p.rooms), "rooms"],
     ["Floor area", `${number(p.floorAreaSqft)} ft²`, "floorAreaSqft"],
     ["HVAC type", hvacOptions.find((o) => o.value === p.hvacType)?.label ?? p.hvacType, "hvacType"],
-    ["Monthly bill", p.monthlyEnergyBill === null ? "estimated" : `$${number(p.monthlyEnergyBill)}`, "monthlyEnergyBill"],
+    ...(p.monthlyEnergyBill === null ? [] : [["Monthly bill", `$${number(p.monthlyEnergyBill)}`, "monthlyEnergyBill"] as [string, string, string]]),
   ];
   return (
     <div className="space-y-5 p-5">
@@ -32,6 +34,8 @@ export function HotelTab() {
           <div key={label} className="flex justify-between gap-3"><dt className="text-muted-foreground">{label}</dt><dd className="num flex min-w-0 items-center justify-end gap-1 break-words text-right font-medium"><span>{value}</span><DefaultEstimate field={field} dot /></dd></div>
         ))}
       </dl>
+      <UtilityDataSection />
+      <EnergyInsights />
       <BenchmarkCard />
       <Collapsible open={editing} onOpenChange={setEditing}>
         <CollapsibleTrigger asChild>

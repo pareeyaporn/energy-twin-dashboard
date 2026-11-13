@@ -111,12 +111,15 @@
   },
   "usKgCO2ePerKWh": 0.3497,
   "cityToSubregion": {
-    "chicago,il": "RFCW"
+    "chicago,il": "RFCW",
+    "new york,ny": "NYCW",
+    "miami,fl": "FRCC",
+    "denver,co": "RMPA"
   },
   "stateDefaultSubregion": {
     "IL": "RFCW"
   },
   "gasKgCO2ePerTherm": 5.311,
-  "source": "Electricity: EPA eGRID2023 Summary Tables (created March 27, 2025), Table 1, total output emission rate, CO2e, for all 27 subregions (lb/MWh divided by 2,204.62 to get kg/kWh); U.S. 770.884 lb/MWh = 0.3497 kg/kWh. The subregion comes from the city (Chicago: RFC West, RFCW, which serves ComEd), else a state default (a state can span several subregions: IL defaults to RFCW, but Ameren territory is SRMW), else the U.S. rate; users can set it directly. Gas: EPA GHG Emission Factors Hub 2025, Table 1: 53.06 kg CO2, 1 g CH4 and 0.1 g N2O per MMBtu, with AR5 GWPs = 5.311 kg CO2e per therm. Estimates; not verified carbon accounting.",
+  "source": "Electricity: EPA eGRID2023 Summary Tables (created March 27, 2025), Table 1, total output emission rate, CO2e, for all 27 subregions (lb/MWh divided by 2,204.62 to get kg/kWh); U.S. 770.884 lb/MWh = 0.3497 kg/kWh. The subregion comes from the city (Chicago: RFC West, RFCW, which serves ComEd), else a state default (a state can span several subregions: IL defaults to RFCW, but Ameren territory is SRMW), else the U.S. rate; users can set it directly. Gas: EPA GHG Emission Factors Hub 2025, Table 1: 53.06 kg CO2, 1 g CH4 and 0.1 g N2O per MMBtu, with AR5 GWPs = 5.311 kg CO2e per therm. Estimates; not verified carbon accounting. City subregions for New York (NYCW), Miami (FRCC) and Denver (RMPA): EPA Power Profiler ZIP Code Tool v14.3 with eGRID2023_rev2 data (Zip-subregion sheet: 10019 and 10036 NYCW, 33131 and 33139 FRCC, 80202 RMPA; 60601 RFCW as a check), retrieved November 2026. No state default is set for New York, Florida or Colorado because each state spans several subregions (upstate New York is NYUP, the Florida panhandle SRSO).",
   "verified": true
 }

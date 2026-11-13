@@ -149,5 +149,152 @@
         }
       }
     ]
+  },
+  {
+    "id": "meridian-hotels",
+    "name": "Meridian Hotels & Resorts",
+    "city": "New York, Miami and Denver",
+    "synthetic": true,
+    "note": "Synthetic multi-city organization, to show a portfolio across climates. The four hotels, their names, brands, locations and inputs are invented (documented assumptions); every value the input leaves out is a default the profile flags. Each hotel uses its own city's NOAA normals, PVWatts solar output, EIA state prices, eGRID subregion and ComStock climate-zone intensity (research pass 11, docs/14). No utility incentives have been researched outside Illinois, so none apply; upgrade savings parameters, hourly load shapes and the age factor are still calibrated to Chicago and Illinois (docs/13).",
+    "futureBuildingTypes": [
+      {
+        "id": "resort",
+        "label": "Resorts",
+        "note": "Need pool, spa and outdoor-amenity energy drivers."
+      },
+      {
+        "id": "casino",
+        "label": "Casinos",
+        "note": "Need 24-hour gaming-floor lighting, ventilation and equipment loads."
+      },
+      {
+        "id": "convention_center",
+        "label": "Convention centers",
+        "note": "Need event-driven occupancy and exhibit-hall ventilation."
+      },
+      {
+        "id": "entertainment_venue",
+        "label": "Entertainment venues",
+        "note": "Need show schedules, stage lighting and crowd ventilation."
+      }
+    ],
+    "properties": [
+      {
+        "id": "midtown-tower",
+        "organizationId": "meridian-hotels",
+        "brand": "Meridian",
+        "region": "Northeast",
+        "ownership": "managed",
+        "neighborhood": "Midtown Manhattan",
+        "segment": "Full-service high-rise hotel",
+        "buildingType": "hotel",
+        "lat": 40.759,
+        "lng": -73.9845,
+        "synthetic": true,
+        "note": "Synthetic. A 1980s Midtown high-rise with a central plant; occupancy 82% is an assumption; floor area defaulted.",
+        "input": {
+          "name": "Midtown Tower Hotel",
+          "city": "New York",
+          "state": "NY",
+          "country": "US",
+          "rooms": 420,
+          "floors": 32,
+          "yearBuilt": 1987,
+          "operatingHours": 24,
+          "hvacType": "central_plant",
+          "occupancy": 0.82,
+          "budget": 200000,
+          "horizonYears": 5,
+          "objective": "balanced"
+        }
+      },
+      {
+        "id": "brickell-bay",
+        "organizationId": "meridian-hotels",
+        "brand": "Meridian Suites",
+        "region": "Southeast",
+        "ownership": "owned",
+        "neighborhood": "Brickell",
+        "segment": "Upscale suites tower",
+        "buildingType": "hotel",
+        "lat": 25.7617,
+        "lng": -80.1918,
+        "synthetic": true,
+        "note": "Synthetic. A 2000s suites tower with a central plant in a cooling-dominated climate; occupancy 76% is an assumption; floor area defaulted.",
+        "input": {
+          "name": "Brickell Bay Suites",
+          "city": "Miami",
+          "state": "FL",
+          "country": "US",
+          "rooms": 240,
+          "floors": 18,
+          "yearBuilt": 2006,
+          "operatingHours": 24,
+          "hvacType": "central_plant",
+          "occupancy": 0.76,
+          "budget": 100000,
+          "horizonYears": 5,
+          "objective": "balanced"
+        }
+      },
+      {
+        "id": "south-beach-inn",
+        "organizationId": "meridian-hotels",
+        "brand": "Meridian Select",
+        "region": "Southeast",
+        "ownership": "franchised",
+        "neighborhood": "Miami Beach",
+        "segment": "Low-rise beach inn",
+        "buildingType": "hotel",
+        "lat": 25.7826,
+        "lng": -80.1341,
+        "synthetic": true,
+        "note": "Synthetic. A low-rise beach inn with packaged terminal units (PTAC, electric resistance heat); occupancy 78% is an assumption; floor area defaulted.",
+        "input": {
+          "name": "South Beach Inn",
+          "city": "Miami",
+          "state": "FL",
+          "country": "US",
+          "rooms": 90,
+          "floors": 4,
+          "yearBuilt": 1995,
+          "operatingHours": 24,
+          "hvacType": "ptac",
+          "occupancy": 0.78,
+          "budget": 40000,
+          "horizonYears": 5,
+          "objective": "balanced"
+        }
+      },
+      {
+        "id": "lodo-union-station",
+        "organizationId": "meridian-hotels",
+        "brand": "Meridian",
+        "region": "Mountain West",
+        "ownership": "leased",
+        "neighborhood": "LoDo",
+        "segment": "Boutique hotel near Union Station",
+        "buildingType": "hotel",
+        "lat": 39.7527,
+        "lng": -104.9997,
+        "synthetic": true,
+        "note": "Synthetic. A newer boutique hotel with variable refrigerant flow (VRF) heat pumps; occupancy 72% is an assumption; floor area defaulted.",
+        "input": {
+          "name": "LoDo Union Station Hotel",
+          "city": "Denver",
+          "state": "CO",
+          "country": "US",
+          "rooms": 160,
+          "floors": 9,
+          "yearBuilt": 2014,
+          "operatingHours": 24,
+          "hvacType": "vrf",
+          "occupancy": 0.72,
+          "budget": 75000,
+          "horizonYears": 5,
+          "objective": "balanced"
+        }
+      }
+    ]
   }
 ]

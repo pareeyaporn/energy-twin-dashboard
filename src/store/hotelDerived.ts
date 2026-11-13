@@ -1,4 +1,5 @@
 // Hotel state helpers and selectors for the Energy Twin store. Pure functions that call the engine (src/engine/hotel);
+import { withEquipment } from "./equipmentStorage";
 // no math lives here. Selectors are memoized on their inputs so components can call them on every render.
 import {
   STRESS_TESTS,
@@ -32,7 +33,15 @@ import {
   portfolioSummary,
   evaluatePortfolioCustomPlan,
   portfolioStressReport,
+  energyInsights,
+  impactSummary,
+  calculateBaselineEnergy,
+  prepareUpgradeContext,
+  resolveProfile,
 } from "@/engine/hotel";
+import { inputForBaseline, utilityKeyFor, withoutUtility } from "./utilityData";
+import type { UtilitySet } from "./utilityData";
+import type { CalibrationReport, UtilityBillMonth } from "@/engine/hotel";
 import type {
   UpgradeComparisonRow,
   Conditions,
@@ -54,6 +63,8 @@ import type {
   StressTest,
   Totals,
   ZoneId,
+  EnergyInsight,
+  ImpactLine,
 } from "@/engine/hotel";
 import type { TwinState } from "./useTwin";
 
@@ -333,16 +344,39 @@ export const selectVisibleCustomPlans = (s: TwinState) => visiblePlansOf(s.custo
 
 // ---- Hotel portfolio (Phase 13) ----
 
+/** A property's city as its profile resolves it (the input's city; the engine's default city when the input leaves it out). */
+export const propertyCity = (p: PortfolioProperty): string => p.input.city?.trim() || hotelData.defaults.profileDefaults.city;
+
 let lastItems: { property: PortfolioProperty; input: HotelInput }[] = [];
+/** A hotel that is not open uses its chosen baseline too (stable objects, so the portfolio is not recomputed for nothing). */
+const utilityInputCache = new Map<string, { base: HotelInput; set: UtilitySet | undefined; out: HotelInput }>();
+function withUtilityCached(id: string, base: HotelInput, set: UtilitySet | undefined): HotelInput {
+  if (!set || set.baseline !== "calibrated") return base;
+  const hit = utilityInputCache.get(id);
+  if (hit && hit.base === base && hit.set === set) return hit.out;
+  const out = inputForBaseline(base, set);
+  utilityInputCache.set(id, { base, set, out });
+  return out;
+}
 /** Each property with its current input: the open one's live input, the others' saved or original input. Stable while unchanged. */
 export function selectPortfolioItems(s: TwinState): { property: PortfolioProperty; input: HotelInput }[] {
   const f = s.portfolioFilter;
   const shown = s.portfolio.properties.filter(
-    (p) => (!f.brand || p.brand === f.brand) && (!f.region || p.region === f.region) && (!f.ownership || p.ownership === f.ownership),
+    (p) =>
+      (!f.brand || p.brand === f.brand) &&
+      (!f.region || p.region === f.region) &&
+      (!f.ownership || p.ownership === f.ownership) &&
+      (!f.city || propertyCity(p) === f.city),
   );
   const next = shown.map((property) => ({
     property,
-    input: property.id === s.activePropertyId ? s.hotelInput : (s.propertyStates[property.id]?.hotelInput ?? property.input),
+    // Unopened hotels carry their saved equipment corrections (docs/20) and their chosen utility baseline (docs/19), so portfolio totals
+    // match each hotel's own view. Both helpers are cached, so the input stays the same object while nothing changes.
+    input:
+      property.id === s.activePropertyId
+        ? s.hotelInput
+        : (s.propertyStates[property.id]?.hotelInput ??
+          withUtilityCached(property.id, withEquipment(property, s.equipmentByProperty?.[property.id]), s.utilityData[property.id])),
   }));
   const same = next.length === lastItems.length && next.every((x, i) => x.property === lastItems[i]!.property && x.input === lastItems[i]!.input);
   if (!same) lastItems = next;
@@ -514,3 +548,77 @@ export const selectPortfolioStressReport = (s: TwinState): PortfolioStressReport
     selectPortfolioCustomEvaluation(s),
     s.hotelDiscountRate,
   );
+
+// ---- Energy insights and scenario impact (Phase 14A) ----
+
+const peerEui = new WeakMap<HotelInput, number>();
+/** Modeled site energy intensity of a portfolio hotel (baseline only, cached per input; no optimizer run). */
+function euiOf(input: HotelInput): number {
+  const hit = peerEui.get(input);
+  if (hit !== undefined) return hit;
+  const r = resolveProfile(input);
+  const b = calculateBaselineEnergy(r);
+  const v = r.profile.floorAreaSqft > 0 ? b.annual.siteKBtu / r.profile.floorAreaSqft : 0;
+  peerEui.set(input, v);
+  return v;
+}
+
+const insightsOf = memoLast(
+  (hotel: ResolvedProfile, baseline: EnergyResult, discountRate: number, peers: { name: string; siteEui: number }[], portfolioName: string): EnergyInsight[] => {
+    const comparison = compareUpgrades(prepareUpgradeContext(hotel, undefined, baseline), { assumptions: { discountRate } });
+    return energyInsights({ hotel, baseline, comparison, peers, portfolioName });
+  },
+);
+let lastPeers: { name: string; siteEui: number }[] = [];
+/** The other hotels in the open portfolio (all of them, whatever the filter), with their modeled intensity. */
+function selectInsightPeers(s: TwinState): { name: string; siteEui: number }[] {
+  const own = s.activePropertyId ?? s.portfolio.properties.find((p) => p.presetId && p.presetId === s.hotelPresetId)?.id ?? null;
+  const next = s.portfolio.properties
+    .filter((p) => p.id !== own)
+    .map((p) => ({ name: p.input.name ?? p.id, siteEui: euiOf(s.propertyStates[p.id]?.hotelInput ?? p.input) }));
+  const same = next.length === lastPeers.length && next.every((x, i) => x.name === lastPeers[i]!.name && x.siteEui === lastPeers[i]!.siteEui);
+  if (!same) lastPeers = next;
+  return lastPeers;
+}
+/** 3 to 5 prioritized findings for the open hotel, from its baseline (not the what-if), the upgrade comparison and scenario runs. */
+export const selectEnergyInsights = (s: TwinState): EnergyInsight[] =>
+  insightsOf(s.hotel, s.baseline, s.hotelDiscountRate, selectInsightPeers(s), s.portfolio.name);
+
+const impactOf = memoLast((before: Totals, after: Totals) => impactSummary(before, after));
+/** Reference (baseline) vs the active what-if or stress test; null when none is active. */
+export const selectScenarioImpact = (s: TwinState): ImpactLine[] | null =>
+  s.scenarioResult ? impactOf(s.scenarioResult.before.annual, s.scenarioResult.after.annual) : null;
+// ---- Utility data and calibration (docs/19) ----
+
+/** The open hotel's utility key (its portfolio property id; a preset maps to its property). */
+export const selectUtilityKey = (s: TwinState): string => utilityKeyFor(s.activePropertyId, s.hotelPresetId, selectAllProperties(s));
+export const selectUtilitySet = (s: TwinState): UtilitySet | undefined => s.utilityData[selectUtilityKey(s)];
+
+export interface UtilityAnalysis {
+  /** The hotel on the original modeled baseline (no records). */
+  modeled: EnergyResult;
+  /** The hotel calibrated to the records (equals `modeled` when calibration was not possible). */
+  calibrated: EnergyResult;
+  report: CalibrationReport;
+}
+
+const utilityAnalysisOf = memoLast((input: HotelInput, records: readonly UtilityBillMonth[] | null, useBillRates: boolean): UtilityAnalysis | null => {
+  if (!records || !records.length) return null;
+  const clean = withoutUtility(input);
+  const modeled = calculateBaselineEnergy(resolveProfile(clean));
+  const calibrated = calculateBaselineEnergy(resolveProfile({ ...clean, utilityBills: [...records], ...(useBillRates ? { useBillRates: true } : {}) }));
+  return { modeled, calibrated, report: calibrated.calibration.report! };
+});
+/** Modeled, actual and calibrated values for the open hotel's saved records (or for draft records from the editor). */
+export const selectUtilityAnalysis = (s: TwinState, draft?: { records: readonly UtilityBillMonth[]; useBillRates: boolean } | null): UtilityAnalysis | null => {
+  const set = selectUtilitySet(s);
+  return draft ? utilityAnalysisOf(s.hotelInput, draft.records, draft.useBillRates) : utilityAnalysisOf(s.hotelInput, set?.records ?? null, set?.useBillRates ?? false);
+};
+
+export type UtilityStatus = "modeled" | "provided" | "calibrated";
+/** Modeled estimate (no records), user-provided data (records, modeled baseline), or calibrated model (chosen and applied). */
+export const selectUtilityStatus = (s: TwinState): UtilityStatus => {
+  const set = selectUtilitySet(s);
+  if (!set) return "modeled";
+  return set.baseline === "calibrated" && s.baseline.calibration.method === "utility_bills" ? "calibrated" : "provided";
+};

@@ -20,7 +20,22 @@ export interface AdvisorConfig {
   headers: Record<string, string>;
   fetchFn?: typeof fetch;
   timeoutMs?: number;
+  /**
+   * Optional lasting store for AI answers (the browser's local storage in the app), so a rehearsal fixes the demo's answers: the same
+   * question on the same results returns the same text at once, even after a reload or offline. Every stored answer is checked against
+   * the context again before it is used.
+   */
+  store?: AdvisorAnswerStore;
 }
+
+export interface AdvisorAnswerStore {
+  read(key: string): string | null;
+  write(key: string, text: string): void;
+}
+
+/** The cache key: the question (case and spacing ignored) and a hash of every number and label the answer may use. */
+export const advisorCacheKey = (question: string, context: AdvisorContext) =>
+  `${question.trim().toLowerCase().replace(/\s+/g, ' ')}|${hash(JSON.stringify(context))}`;
 
 const cache = new Map<string, AdvisorAnswer>();
 export const clearAdvisorCache = () => cache.clear();
@@ -46,9 +61,15 @@ export async function askAdvisor(question: string, context: AdvisorContext, conf
     ...(unmatched ? { unmatched } : {}),
   });
 
-  const key = `${question.trim().toLowerCase()}|${hash(JSON.stringify(context))}`;
+  const key = advisorCacheKey(question, context);
   const hit = cache.get(key);
   if (hit) return hit;
+  const stored = config.store?.read(key);
+  if (stored && validateAdvisorText(stored, context).ok) {
+    const answer: AdvisorAnswer = { text: stored, source: 'ai' };
+    cache.set(key, answer);
+    return answer;
+  }
 
   if (!config.endpoint) return fallback('not_configured');
   const doFetch = config.fetchFn ?? fetch;
@@ -78,6 +99,11 @@ export async function askAdvisor(question: string, context: AdvisorContext, conf
     if (!check.ok) return fallback('rejected', check.unmatched);
     const answer: AdvisorAnswer = { text, source: 'ai' };
     cache.set(key, answer);
+    try {
+      config.store?.write(key, text);
+    } catch {
+      /* storage full or blocked: the answer still shows */
+    }
     return answer;
   } catch (e) {
     if (controller.signal.aborted) return fallback('timeout');

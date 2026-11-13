@@ -12,7 +12,7 @@ import {
 } from "@/engine/hotel";
 import type { EnergyResult, PortfolioResult, ResolvedProfile } from "@/engine/hotel";
 import type { TwinState } from "@/store/useTwin";
-import { selectPortfolioSummary } from "@/store/hotelDerived";
+import { selectEnergyInsights, selectPortfolioSummary } from "@/store/hotelDerived";
 
 export interface Insight {
   value: number;
@@ -58,8 +58,34 @@ export function insightFor(stepId: string, s: TwinState): Insight | null {
   const p = s.hotel.profile;
   const a = s.baseline.annual;
   switch (stepId) {
-    case "welcome":
-      return { value: a.cost, format: "usd", label: `a year on energy at ${p.name}`, note: `About ${usd(a.cost / p.rooms)} per room and ${Math.round(a.carbonKg / 1000).toLocaleString("en-US")} t of CO₂ a year.` };
+    case "welcome": {
+      // The portfolio-first welcome: the chain's yearly energy cost (sum of each hotel's modeled baseline).
+      const t = selectPortfolioSummary(s).totals;
+      if (t.properties === 0) return null;
+      return { value: t.cost, format: "usd", label: `a year on energy across ${t.properties} hotel${t.properties === 1 ? "" : "s"}`, note: `${t.rooms.toLocaleString("en-US")} rooms and ${Math.round(t.carbonKg / 1000).toLocaleString("en-US")} t of CO₂ a year.` };
+    }
+    case "portfolio-kpis": {
+      const t = selectPortfolioSummary(s).totals;
+      if (t.properties === 0) return null;
+      return { value: t.savingsPotential, format: "usd", label: "a year of savings potential across the portfolio", note: `For ${usd(t.investmentRequired)} of investment after counted incentives, each hotel within its own budget.` };
+    }
+    case "ranking": {
+      const sum = selectPortfolioSummary(s);
+      const top = [...sum.properties].sort((x, y) => y.priorityScore - x.priorityScore)[0];
+      const spender = [...sum.properties].sort((x, y) => y.annual.cost - x.annual.cost)[0];
+      if (!top || !top.potential) return null;
+      return {
+        value: top.potential.annualSavings,
+        format: "usd",
+        label: `a year saved at ${top.name}, the top priority (${top.priorityScore} of 100)`,
+        ...(spender && spender.name !== top.name && spender.priorityScore < top.priorityScore ? { note: `${spender.name} spends the most, but returns less per dollar invested (${spender.priorityScore} of 100).` } : spender?.name === top.name ? { note: "It also has the largest energy bill." } : {}),
+      };
+    }
+    case "insights": {
+      const first = selectEnergyInsights(s)[0];
+      if (!first) return null;
+      return { value: first.metric.value, format: first.metric.format, label: `${first.title.charAt(0).toLowerCase()}${first.title.slice(1)}`, note: `${selectEnergyInsights(s).length} findings for ${p.name}, most actionable first.` };
+    }
     case "profile": {
       const b = benchmarkComparison(s.baseline, p.floorAreaSqft);
       const star = b.peers.find((x) => x.id.startsWith("energy_star")) ?? b.peers[0];
@@ -110,19 +136,58 @@ export function insightFor(stepId: string, s: TwinState): Insight | null {
         note: `${w.evaluation.name}${pay !== null ? `, paying back in ${pay.toFixed(1)} years` : ""}. ${r.combinationsTested.toLocaleString("en-US")} combinations tested.`,
       };
     }
-    case "portfolio": {
-      const sum = selectPortfolioSummary(s);
-      const top = [...sum.properties].sort((x, y) => y.priorityScore - x.priorityScore)[0];
+    case "projections": {
+      const series = projectionSeries(s);
+      const best = [...series].sort((x, y) => y.net10 - x.net10)[0];
+      if (!best) return null;
       return {
-        value: sum.totals.savingsPotential,
+        value: best.net10,
         format: "usd",
-        label: `a year of savings potential across ${sum.totals.properties} hotels`,
-        ...(top ? { note: `Top priority: ${top.name} (${top.priorityScore} of 100).` } : {}),
+        label: `net over 10 years from the ${best.role.toLowerCase()} package`,
+        note: `${best.name}: ${usd(best.netInvestment)} upfront after counted incentives${best.paybackYears !== null ? `, paid back in ${best.paybackYears.toFixed(1)} years` : ""}.`,
       };
+    }
+    case "portfolio": {
+      // The map: the spread in efficiency between the hotels (site energy per ft², from each hotel's baseline).
+      const rows = [...selectPortfolioSummary(s).properties].sort((x, y) => y.siteEui - x.siteEui);
+      const hi = rows[0];
+      const lo = rows[rows.length - 1];
+      if (!hi || !lo) return null;
+      return { value: hi.siteEui, format: "kbtu", label: `at ${hi.name}, the least efficient hotel shown`, ...(rows.length > 1 ? { note: `${lo.name} uses ${lo.siteEui.toFixed(1)} kBtu/ft², the least.` } : {}) };
     }
     default:
       return null;
   }
+}
+
+/** One recommended package's 10-year projection for the tour's chart (all figures from the engine, mid case). */
+export interface ProjectionSeries {
+  role: string;
+  name: string;
+  netInvestment: number;
+  /** Year 0 (minus the net investment) to year 10: savings to date minus the net investment. */
+  cumulative: number[];
+  net10: number;
+  paybackYears: number | null;
+}
+
+/** The 10-year projections of the packages the optimizer recommends for the open hotel at its own budget (read-only, cached). */
+export function projectionSeries(s: TwinState): ProjectionSeries[] {
+  const r = bestPackage(s.hotel, s.baseline, s.hotelDiscountRate);
+  return r.packages
+    .filter((p) => (p.evaluation.financials.projection ?? []).length > 0)
+    .slice(0, 3)
+    .map((p) => {
+      const f = p.evaluation.financials;
+      return {
+        role: p.roleLabel,
+        name: p.evaluation.name,
+        netInvestment: f.netInvestment.mid,
+        cumulative: [-f.netInvestment.mid, ...(f.projection ?? []).map((y) => y.cumulativeNet.mid)],
+        net10: f.netBenefit10.mid,
+        paybackYears: f.simplePaybackYears,
+      };
+    });
 }
 
 /** The finish card's summary: what the hotel spends, what the best package saves and how fast it pays back. */

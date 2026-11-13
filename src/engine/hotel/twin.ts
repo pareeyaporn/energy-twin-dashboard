@@ -1,4 +1,6 @@
 import { CATEGORIES, CATEGORY_OF, DAYS_IN_MONTH, END_USES, ZONE_IDS, ZONE_LABELS } from './constants';
+import { currentEquipment } from './equipment';
+import type { EquipmentItem } from './equipment';
 import { hotelData } from './data';
 import type { Category, Conditions, EndUse, EnergyResult, HotelData, HotelProfile, ZoneId } from './types';
 
@@ -125,65 +127,14 @@ export function roomOccupancyPattern(
   });
 }
 
-export interface EquipmentItem {
-  id: string;
-  zone: ZoneId;
-  label: string;
-  count: number;
-  ratedKW?: number;
-  ratedKBtuH?: number;
-  ratedTons?: number;
-  fuel: 'electric' | 'gas';
-  schedule: string;
-  efficiency: string;
-  source: string;
-  estimated: true;
-}
+export type { EquipmentItem } from './equipment';
 
-/** Major equipment per zone with rule-of-thumb sizing from the profile. Every item is an estimate. */
+/**
+ * The hotel's current equipment: the estimated inventory from rules of thumb with the operator's corrections applied (docs/20).
+ * Every estimated item is labeled so; entered fields are listed in `userEntered`.
+ */
 export function equipmentInventory(p: HotelProfile, data: HotelData = hotelData): EquipmentItem[] {
-  const e = data.equipment;
-  const src = e.source;
-  const publicSqft = p.floorAreaSqft * e.publicAreaShareOfFloorArea;
-  const corridorSqft = p.floorAreaSqft * e.corridorShareOfFloorArea;
-  const unit = e.inRoomUnit[p.hvacType];
-  const items: EquipmentItem[] = [
-    { id: 'room-hvac', zone: 'guest_rooms', label: unit.label, count: p.rooms, ratedKW: unit.ratedKW, fuel: 'electric', schedule: 'On demand; follows room occupancy and setpoints', efficiency: unit.efficiency, source: src, estimated: true },
-    { id: 'room-lighting', zone: 'guest_rooms', label: 'Guest-room lighting', count: p.rooms, ratedKW: e.guestRoomLightingKW, fuel: 'electric', schedule: 'Follows guest presence', efficiency: 'Lamp type unknown (assumed)', source: src, estimated: true },
-    { id: 'room-plug', zone: 'guest_rooms', label: 'TVs and minibars', count: p.rooms, ratedKW: e.guestRoomPlugKW, fuel: 'electric', schedule: 'Minibar 24/7; TV follows presence', efficiency: 'Not specified', source: src, estimated: true },
-    { id: 'lobby-lighting', zone: 'lobby_common', label: 'Lobby and public-area lighting', count: 1, ratedKW: (publicSqft * e.lightingWPerSqft) / 1000, fuel: 'electric', schedule: `${p.lightingHoursPerDay} h per day`, efficiency: 'Lamp type unknown (assumed)', source: src, estimated: true },
-    { id: 'lobby-hvac', zone: 'lobby_common', label: 'Public-area air handling', count: 1, ratedKW: publicSqft * 0.0015, fuel: 'electric', schedule: `${p.commonAreaHvacHours} h per day`, efficiency: 'Constant-volume fans (assumed)', source: src, estimated: true },
-    { id: 'kitchen-range', zone: 'kitchen_restaurant', label: 'Gas ranges and fryers', count: 1, ratedKBtuH: p.rooms * e.kitchen.rangeKBtuHPerRoom, fuel: 'gas', schedule: 'Breakfast, lunch and dinner service', efficiency: 'Standard commercial (assumed)', source: src, estimated: true },
-    { id: 'kitchen-hoods', zone: 'kitchen_restaurant', label: 'Exhaust hoods', count: e.kitchen.hoods, ratedKW: e.kitchen.hoodKW, fuel: 'electric', schedule: 'During cooking hours', efficiency: 'Constant speed (assumed)', source: src, estimated: true },
-    { id: 'kitchen-cold', zone: 'kitchen_restaurant', label: 'Walk-in refrigeration', count: e.kitchen.refrigeration, ratedKW: e.kitchen.refrigerationKW, fuel: 'electric', schedule: '24/7', efficiency: 'Not specified', source: src, estimated: true },
-    { id: 'corridor-lighting', zone: 'hallways_shared', label: 'Corridor lighting', count: 1, ratedKW: (corridorSqft * e.lightingWPerSqft) / 1000, fuel: 'electric', schedule: `${p.lightingHoursPerDay} h per day`, efficiency: 'Lamp type unknown (assumed)', source: src, estimated: true },
-    { id: 'elevators', zone: 'hallways_shared', label: 'Elevators', count: Math.max(1, Math.ceil(p.floors / e.elevators.perFloors)), ratedKW: e.elevators.ratedKW, fuel: 'electric', schedule: 'On demand', efficiency: 'Not specified', source: src, estimated: true },
-    { id: 'laundry', zone: 'hallways_shared', label: 'Laundry dryers', count: 1, ratedKBtuH: e.laundry.dryerKBtuH, fuel: 'gas', schedule: 'Daytime', efficiency: 'Not specified', source: src, estimated: true },
-    { id: 'dhw-heater', zone: 'hot_water', label: 'Water heaters', count: 1, ratedKBtuH: p.rooms * e.hotWater.heaterKBtuHPerRoom, fuel: 'gas', schedule: '24/7, peaks morning and evening', efficiency: 'Thermal efficiency about 0.80 (assumed)', source: src, estimated: true },
-    { id: 'dhw-storage', zone: 'hot_water', label: 'Storage tanks (gallons)', count: Math.round(p.rooms * e.hotWater.storageGalPerRoom), fuel: 'gas', schedule: '24/7', efficiency: 'Standby losses assumed', source: src, estimated: true },
-    { id: 'dhw-recirc', zone: 'hot_water', label: 'Recirculation pumps', count: e.hotWater.recircPumps, ratedKW: e.hotWater.recircPumpKW, fuel: 'electric', schedule: '24/7', efficiency: 'Constant speed (assumed)', source: src, estimated: true },
-  ];
-
-  const central = e.central;
-  switch (p.hvacType) {
-    case 'ptac':
-    case 'pthp':
-      items.push({ id: 'central-plant', zone: 'central_hvac', label: central[p.hvacType].label, count: 1, ratedTons: publicSqft * central[p.hvacType].tonsPerPublicSqft, fuel: 'electric', schedule: `${p.commonAreaHvacHours} h per day`, efficiency: central[p.hvacType].efficiency, source: src, estimated: true });
-      break;
-    case 'vrf':
-      items.push({ id: 'central-plant', zone: 'central_hvac', label: central.vrf.label, count: 1, ratedTons: p.rooms * central.vrf.tonsPerRoom, fuel: 'electric', schedule: 'On demand', efficiency: central.vrf.efficiency, source: src, estimated: true });
-      break;
-    case 'central_plant':
-      items.push(
-        { id: 'boilers', zone: 'central_hvac', label: 'Gas boilers', count: 2, ratedKBtuH: p.floorAreaSqft * central.central_plant.boilerKBtuHPerSqft, fuel: 'gas', schedule: 'Heating season', efficiency: central.central_plant.efficiency, source: src, estimated: true },
-        { id: 'chiller', zone: 'central_hvac', label: 'Chiller', count: 1, ratedTons: p.floorAreaSqft * central.central_plant.tonsPerSqft, fuel: 'electric', schedule: 'Cooling season', efficiency: central.central_plant.efficiency, source: src, estimated: true },
-      );
-      break;
-    case 'rtu':
-      items.push({ id: 'central-plant', zone: 'central_hvac', label: central.rtu.label, count: 1, ratedTons: p.floorAreaSqft * central.rtu.tonsPerSqft, fuel: 'electric', schedule: 'On demand', efficiency: central.rtu.efficiency, source: src, estimated: true });
-      break;
-  }
-  return items;
+  return currentEquipment(p, data);
 }
 
 export interface FlowNode {

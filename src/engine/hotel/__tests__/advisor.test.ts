@@ -297,6 +297,34 @@ describe('askAdvisor', () => {
     expect(JSON.parse(init.body as string)).toEqual({ question: q, context: JSON.parse(JSON.stringify(ctx)) });
   });
 
+  it('keeps validated AI answers in a lasting store and replays them without the network (task 8.2)', async () => {
+    const saved = new Map<string, string>();
+    const store = { read: (k: string) => saved.get(k) ?? null, write: (k: string, t: string) => void saved.set(k, t) };
+    const fetchFn = vi.fn(async () => ok(goodText));
+    await askAdvisor(q, ctx, config(fetchFn as unknown as typeof fetch, { store }));
+    expect(saved.size).toBe(1);
+    clearAdvisorCache(); // a reload: the in-memory cache is gone
+    const offline = vi.fn(async () => {
+      throw new Error('offline');
+    });
+    const again = await askAdvisor(`  ${q.toUpperCase()} `, ctx, config(offline as unknown as typeof fetch, { store }));
+    expect(again).toEqual({ text: goodText, source: 'ai' });
+    expect(offline).not.toHaveBeenCalled();
+    // A stored answer whose numbers are not in the results is ignored.
+    saved.set([...saved.keys()][0]!, 'Solar saves $999,999 a year.');
+    clearAdvisorCache();
+    expect((await askAdvisor(q, ctx, config(offline as unknown as typeof fetch, { store }))).source).toBe('fallback');
+  });
+
+  it('the budget answer also explains an upgrade the question names that the plan leaves out ("why not solar?")', () => {
+    const question = 'Why not solar, and what should I do with $50,000?';
+    const c = ctxFor(question);
+    const text = fallbackAnswer(parseQuestion(question), c);
+    expect(text).toMatch(/Rooftop solar \(full usable roof\) would cost about/);
+    expect(text).toMatch(/not in the top choice because it costs more than the \$50,000 budget/);
+    expect(validateAdvisorText(text, c).ok).toBe(true);
+  });
+
   it('caches AI answers per question and context', async () => {
     const fetchFn = vi.fn(async () => ok(goodText));
     const cfg = config(fetchFn as unknown as typeof fetch);

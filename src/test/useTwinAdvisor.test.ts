@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { advisor } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
+import { clearSavedAdvisorAnswers } from "@/store/advisorAnswers";
 
 const get = () => useTwin.getState();
 const ENDPOINT = "https://example.test/functions/v1/advisor";
@@ -16,6 +17,7 @@ beforeEach(() => {
   get().resetHotel();
   get().clearAdvisor();
   advisor.clearAdvisorCache();
+  clearSavedAdvisorAnswers();
   advisor.setAdvisorConfig(null);
 });
 afterEach(() => {

@@ -5,6 +5,6 @@ export type { AdvisorContext, AdvisorInput, AdvisorPackage, AdvisorPlan, Advisor
 export { validateAdvisorText, extractNumbers, collectNumbers } from './validate';
 export type { Validation } from './validate';
 export { fallbackAnswer } from './fallback';
-export { askAdvisor, clearAdvisorCache } from './ask';
+export { askAdvisor, clearAdvisorCache, advisorCacheKey } from './ask';
 export type { AdvisorAnswer, AdvisorConfig, AdvisorSource, FallbackReason } from './ask';
 export { advisorConfigFromEnv, getAdvisorConfig, setAdvisorConfig } from './config';

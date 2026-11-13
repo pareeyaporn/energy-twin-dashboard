@@ -43,7 +43,9 @@
       "label": "Gas boilers and chiller",
       "boilerKBtuHPerSqft": 0.03,
       "tonsPerSqft": 0.0025,
-      "efficiency": "Boiler AFUE about 0.80, chiller COP about 4.5 (assumed)"
+      "efficiency": "Boiler AFUE about 0.80, chiller COP about 4.5 (assumed)",
+      "boilerEfficiency": "Thermal efficiency about 0.80 (typical existing stock, assumed)",
+      "chillerEfficiency": "COP about 4.5 (assumed)"
     },
     "rtu": {
       "label": "Rooftop units",
@@ -77,9 +79,274 @@
     "heaterKBtuHPerRoom": 6,
     "storageGalPerRoom": 6,
     "recircPumps": 2,
-    "recircPumpKW": 0.75
+    "recircPumpKW": 0.75,
+    "heaterUnitKBtuH": 200
   },
   "source": "PLACEHOLDER, synthetic rule-of-thumb sizing for display and scaling only. Every item is an estimate. Guest-room cooling 0.75 ton per room: ASSUMPTION (midpoint of the 0.75-1.0 ton range used for the smart-controls calibration; the IL-TRM gives no default), used only for per-ton incentives.",
   "verified": false,
-  "guestRoomCoolingTonsPerRoom": 0.75
+  "guestRoomCoolingTonsPerRoom": 0.75,
+  "publicAirHandlingKWPerSqft": 0.0015,
+  "levers": {
+    "coolingCopReference": {
+      "ptac": 2.93,
+      "pthp": 2.93,
+      "rtu": 2.93,
+      "vrf": 3.0,
+      "central_plant": 4.5
+    },
+    "waterHeaterReferenceEfficiency": 0.8,
+    "waterHeaterUpgradeEfficiency": 0.9,
+    "bounds": {
+      "thermal": [
+        0.5,
+        0.99
+      ],
+      "heatPumpCop": [
+        1.5,
+        5.0
+      ],
+      "chillerCop": [
+        2.0,
+        8.0
+      ],
+      "dxCop": [
+        2.0,
+        5.0
+      ],
+      "ledShare": [
+        0,
+        1
+      ],
+      "quantity": [
+        0,
+        10000
+      ],
+      "capacity": [
+        0,
+        1000000
+      ],
+      "ageYears": [
+        0,
+        100
+      ]
+    },
+    "source": "Reference values the inventory edits are measured against: the same placeholder assumptions the equipment cards already showed (boiler and furnace thermal efficiency 0.80, the heating reference in defaults.heatingSystems; chiller COP 4.5; packaged DX cooling EER about 10, that is COP 10 / 3.412 = 2.93; VRF COP 3.0; gas water heater thermal efficiency 0.80). Upgrade targets are the upgrades' own: a condensing boiler at about 0.92 (hvac_upgrade source) and a 0.90 thermal-efficiency water heater (IL-TRM v14.0 4.3.1, water_heating source). Bounds are validation limits (product decision, docs/15), not data. Cooling reference values are PLACEHOLDERS; they only matter when an operator enters the actual COP or EER."
+  },
+  "templates": [
+    {
+      "id": "gas_boiler",
+      "category": "hvac",
+      "label": "Gas boiler",
+      "zone": "central_hvac",
+      "fuel": "gas",
+      "capacityUnit": "kBtu/h",
+      "efficiencyKind": "thermal",
+      "defaultEfficiency": 0.8,
+      "lever": "heatingEfficiency",
+      "defaultCapacity": 800,
+      "defaultSchedule": "Heating season"
+    },
+    {
+      "id": "condensing_boiler",
+      "category": "hvac",
+      "label": "Condensing gas boiler",
+      "zone": "central_hvac",
+      "fuel": "gas",
+      "capacityUnit": "kBtu/h",
+      "efficiencyKind": "thermal",
+      "defaultEfficiency": 0.92,
+      "lever": "heatingEfficiency",
+      "defaultCapacity": 800,
+      "defaultSchedule": "Heating season"
+    },
+    {
+      "id": "chiller",
+      "category": "hvac",
+      "label": "Electric chiller",
+      "zone": "central_hvac",
+      "fuel": "electric",
+      "capacityUnit": "tons",
+      "efficiencyKind": "chillerCop",
+      "defaultEfficiency": 4.5,
+      "lever": "coolingCop",
+      "defaultCapacity": 100,
+      "defaultSchedule": "Cooling season"
+    },
+    {
+      "id": "rooftop_unit",
+      "category": "hvac",
+      "label": "Rooftop unit (packaged DX)",
+      "zone": "central_hvac",
+      "fuel": "electric",
+      "capacityUnit": "tons",
+      "efficiencyKind": "dxCop",
+      "defaultEfficiency": 2.93,
+      "lever": "coolingCop",
+      "defaultCapacity": 20,
+      "defaultSchedule": "On demand"
+    },
+    {
+      "id": "air_handler",
+      "category": "hvac",
+      "label": "Air-handling unit",
+      "zone": "lobby_common",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "defaultSchedule": "Common-area HVAC hours",
+      "note": "Fan power is informational: ventilation energy follows the zone's modeled hours, not the fan count."
+    },
+    {
+      "id": "fan_coil",
+      "category": "hvac",
+      "label": "Fan-coil unit",
+      "zone": "guest_rooms",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "defaultCapacity": 0.2,
+      "defaultSchedule": "On demand",
+      "note": "Informational: guest-room HVAC follows the modeled zone loads."
+    },
+    {
+      "id": "exhaust_fan",
+      "category": "hvac",
+      "label": "Exhaust fan or hood",
+      "zone": "kitchen_restaurant",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "defaultCapacity": 3,
+      "defaultSchedule": "During cooking hours"
+    },
+    {
+      "id": "gas_water_heater",
+      "category": "water",
+      "label": "Gas water heater",
+      "zone": "hot_water",
+      "fuel": "gas",
+      "capacityUnit": "kBtu/h",
+      "efficiencyKind": "thermal",
+      "defaultEfficiency": 0.8,
+      "lever": "waterHeaterEfficiency",
+      "defaultCapacity": 200,
+      "defaultSchedule": "24/7"
+    },
+    {
+      "id": "heat_pump_water_heater",
+      "category": "water",
+      "label": "Heat-pump water heater",
+      "zone": "hot_water",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "efficiencyKind": "heatPumpCop",
+      "defaultEfficiency": 3.0,
+      "defaultCapacity": 5,
+      "defaultSchedule": "24/7",
+      "note": "Not modeled: a heat-pump water heater changes the fuel, which the model does not simulate yet. Informational only."
+    },
+    {
+      "id": "storage_tank",
+      "category": "water",
+      "label": "Hot-water storage tank",
+      "zone": "hot_water",
+      "fuel": "gas",
+      "capacityUnit": "gal",
+      "defaultCapacity": 200,
+      "defaultSchedule": "24/7"
+    },
+    {
+      "id": "recirc_pump",
+      "category": "water",
+      "label": "Recirculation pump",
+      "zone": "hot_water",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "defaultCapacity": 0.75,
+      "defaultSchedule": "24/7"
+    },
+    {
+      "id": "lighting_area",
+      "category": "lighting",
+      "label": "Lighting (area)",
+      "zone": "lobby_common",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "efficiencyKind": "ledShare",
+      "defaultEfficiency": 0,
+      "defaultCapacity": 5,
+      "defaultSchedule": "Lighting hours",
+      "note": "Added lighting is informational; set the LED share on the zone's lighting card to change the model."
+    },
+    {
+      "id": "walk_in_refrigeration",
+      "category": "kitchen",
+      "label": "Walk-in refrigeration",
+      "zone": "kitchen_restaurant",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "defaultCapacity": 3,
+      "defaultSchedule": "24/7"
+    },
+    {
+      "id": "gas_range",
+      "category": "kitchen",
+      "label": "Gas range or fryer",
+      "zone": "kitchen_restaurant",
+      "fuel": "gas",
+      "capacityUnit": "kBtu/h",
+      "defaultCapacity": 150,
+      "defaultSchedule": "Meal service"
+    },
+    {
+      "id": "dishwasher",
+      "category": "kitchen",
+      "label": "Commercial dishwasher",
+      "zone": "kitchen_restaurant",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "defaultCapacity": 10,
+      "defaultSchedule": "Meal service"
+    },
+    {
+      "id": "gas_dryer",
+      "category": "laundry",
+      "label": "Gas dryer",
+      "zone": "hallways_shared",
+      "fuel": "gas",
+      "capacityUnit": "kBtu/h",
+      "defaultCapacity": 300,
+      "defaultSchedule": "Daytime"
+    },
+    {
+      "id": "washer",
+      "category": "laundry",
+      "label": "Commercial washer",
+      "zone": "hallways_shared",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "defaultCapacity": 5,
+      "defaultSchedule": "Daytime"
+    },
+    {
+      "id": "elevator",
+      "category": "other",
+      "label": "Elevator",
+      "zone": "hallways_shared",
+      "fuel": "electric",
+      "capacityUnit": "kW",
+      "defaultCapacity": 15,
+      "defaultSchedule": "On demand"
+    },
+    {
+      "id": "solar_pv",
+      "category": "renewables",
+      "label": "Rooftop solar (existing)",
+      "zone": "central_hvac",
+      "fuel": "solar",
+      "capacityUnit": "kW DC",
+      "lever": "existingSolarKw",
+      "defaultCapacity": 50,
+      "defaultSchedule": "Daylight",
+      "note": "Existing solar lowers purchased electricity using the location's PVWatts yield, netted month by month."
+    }
+  ],
+  "templatesSource": "Template defaults are placeholders for a new entry (the operator replaces them with the nameplate); they are not used in any calculation unless the template has a lever and the operator enters the value. PLACEHOLDER."
 }

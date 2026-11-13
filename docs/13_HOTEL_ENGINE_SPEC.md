@@ -69,8 +69,17 @@ curve (day-weighted mean 1), capped at 100%.
 - **Central plant:** its multiplier is the load-weighted average of the zones it serves, so a guest-room setback also lowers what the plant delivers.
 - **Hot water:** the occupancy term scales with gallons per occupied room relative to 20.
 
-**Calibration.** With a monthly bill, the benchmark is scaled by `12 × bill / modeled annual cost`, bounded to 0.4 to 2.5. Outside that range the
-result is clamped and flagged estimated. Without a bill the result is flagged estimated. Scenarios reuse the same factor.
+**Calibration.** Two ways, both optional:
+- **Utility bills** (docs/19, preferred): with 12 bills per fuel the model is calibrated fuel by fuel with two bounded multipliers, one on
+  the weather-independent load kinds (base, occupancy, schedule) and one on the weather kind, fitted by least squares to the bills
+  (billing periods compared day by day with the typical year), each within 0.5–2.0. The weather multiplier is fitted only when the
+  weather part is at least 10% of the fuel and varies by at least 25% between bills; a fuel needs 12 bills over at least 330 days and a
+  CV(RMSE) after the fit of at most 30%, else it keeps the model. ASHRAE Guideline 14 NMBE and CV(RMSE) are reported before and after.
+  Used only when the user chooses the calibrated baseline. Not weather-normalized (normal-year weather is compared with the billing year).
+- **A single monthly bill** (`monthlyEnergyBill`): the benchmark is scaled by `12 × bill / modeled annual cost`, bounded to 0.4 to 2.5.
+  Outside that range the result is clamped and flagged estimated.
+
+Without either, the result is flagged estimated. Scenarios, stress tests and upgrade evaluations reuse the calibration.
 
 **Cost and carbon.** Cost = kWh × electricity price + therms × gas price (all-in average prices; no separate demand charges). Carbon = kWh × grid
 factor + therms × 5.31 kg (illustrative grid factors; not verified carbon accounting).
@@ -199,19 +208,26 @@ Price growth EIA AEO2026 (electricity 2.12%, gas 4.09% a year). Solar: PVWatts C
 | Rooftop solar (55 kW at $2.9/W) | $159,500 | 68,211 | 0 | $8,614 | 18.5 y | −$115,021 | −$66,846 | 28.3 |
 | High-efficiency HVAC equipment | $109,918 | 22,231 | 1,367 | $4,393 | 25.0 y | −$86,734 | −$60,220 | 16.5 |
 
-At $50,000 the optimizer picks LED lighting plus occupancy sensors ($38,940 gross, $14,756 verified ComEd incentives, $24,184 net, $9,022 a year,
-2.7 years). Net cost and payback use the net investment; the budget is compared with the gross cost (docs/15).
+At $50,000 the optimizer picks LED lighting plus occupancy sensors ($38,940 gross and net, $9,022 a year, 4.3 years). ComEd's lighting
+incentives are 2025 rates, so under the program-year rule (docs/15 §21) they are not counted for the 2026 analysis; shown separately, "if
+ComEd renews the 2025 rate" they would give $14,756, $24,184 net and 2.7 years. Net cost and payback use the net investment; the budget is
+compared with the gross cost (docs/15).
 
 **Smart room controls calibration.** IL-TRM v14.0 4.4.8 (Chicago hotel, central hot-water fan coils, gas heat) implies about 6,900–14,700 kWh and
 225–650 therms a year for 100 rooms at 0.75–1.0 ton per room. The setback alone gave 4,903 kWh; with smart controls the simulation now also cuts
-guest-room fan energy 17% while rooms are empty (`defaults.smartControlFan`), giving about 10,800 kWh and 209 therms. **Insulation** scales its
+guest-room fan energy 17% while rooms are empty (`defaults.smartControlFan`). Re-checked in November 2026 (after research pass 10): the mid
+case saves 10,179 kWh and 280 therms a year, **136 kWh and 3.7 therms per ton at 0.75 ton per room, inside the IL-TRM ranges (92–147 kWh,
+3.0–6.5 therms)**; low (95 kWh, 2.2 therms) and high (177 kWh, 5.2 therms) sit around them. Field studies report more (18–25% of guest-room
+HVAC, against about 6% of guest-room HVAC cost here) for reasons that do not apply to this hotel: see docs/14 pass 10. Known artifact: guest-room
+heating alone shows a small increase (about $39 a year) because the recovery charge exceeds that cell's setback saving; the total is still in
+the IL-TRM range. **Insulation** scales its
 weather-load reduction by 5 / floors above 5 floors. **Second preset:** `demo-chicago-300` (300 rooms, 20 floors, defaults for floor area and
 occupancy, then 69.2% occupancy from STR via Choose Chicago); at $150,000 the optimizer's maximum-savings package is roof insulation, LED lighting and occupancy sensors ($132,578 gross,
-$88,309 net after $44,269 of ComEd incentives, $30,323 a year, 2.9 years; baseline about $374,700 a year). Energy management dropped out when
+$132,578 net (no counted incentives; $88,309 if ComEd renews its 2025 lighting rates), $30,323 a year, 4.4 years; baseline about $374,700 a year). Energy management dropped out when
 its cost was sourced (research pass 10: NREL, about $2.53 per ft² instead of a $0.47 per ft² placeholder). Log: `docs/14`.
 
 ### Limits of this version
-- **Smart room controls pay back slowly (21 years)** because their modeled savings are small (see section 7) and setback recovery is counted. That is a calibration question, not a product conclusion.
+- **Smart room controls pay back slowly (about 12 years: $20,375 net after ComEd's incentive, $1,690 a year)**. Their savings match the Illinois TRM's deemed savings for a Chicago hotel (section 7), so this reflects the local, regulator-reviewed figure; field studies elsewhere report more (docs/14 pass 10).
 - **Solar costs more than a $50,000 budget** at the modeled size, so it only appears with a larger budget. A smaller array option is not modeled.
 - **No HVAC alternatives** (for example a heat pump) and no heat-pump water heater, so there are no mutually exclusive options yet.
 - All savings, costs, lifetimes and interaction factors are placeholders until Phase 7.
@@ -321,7 +337,8 @@ Question intent is keyword-based and deterministic. The context holds about 20 K
 ## 13. Hotel portfolio (`src/engine/hotel/portfolio.ts`, Phase 13)
 
 Every per-property figure is the single-hotel engine's (baseline, savings with interactions, costs, incentives, financial breakdown); the portfolio
-only adds and chooses.
+only adds and chooses. The city map that shows these figures (display only: colors, ranking by the chosen metric, card, list) is described in
+docs/17.
 
 - `portfolioSummary(items)`: per property the baseline, site energy intensity, savings potential, investment required and priority score
   (definitions in docs/15 §16); totals are sums.
@@ -348,16 +365,18 @@ Floor area is defaulted except for Lakeshore Inn (55,000 ft²).
 
 | Property | Energy cost / yr | Intensity (kBtu/ft²) | Savings potential / yr | Investment required | Priority |
 | --- | --- | --- | --- | --- | --- |
-| Lakeshore Inn | $120,178 | 86.5 | $9,022 (LED + sensors) | $24,184 | 92 |
-| Riverwalk Grand | $374,741 | 90.5 | $28,480 (LED + sensors) | $72,551 | 100 |
-| O'Hare Gateway Hotel | $370,102 | 97.9 | $16,626 (LED + sensors) | $53,204 | 70 |
-| Lakefront Convention Hotel | $591,679 | 89.1 | $44,781 (LED + sensors) | $116,082 | 97 |
-| Wells Street Hotel | $105,119 | 88.2 | $8,888 (insulation + LED + sensors) | $28,217 | 71 |
-| **Portfolio** (1,172 rooms) | **$1,561,819** | — | **$107,796** | $294,239 | — |
+| Lakeshore Inn | $120,178 | 86.5 | $9,022 (LED + sensors) | $38,940 | 89 |
+| Riverwalk Grand | $374,741 | 90.5 | $28,480 (LED + sensors) | $116,820 | 100 |
+| O'Hare Gateway Hotel | $370,102 | 97.9 | $18,735 (insulation + sensors + water heating) | $85,957 | 82 |
+| Lakefront Convention Hotel | $591,679 | 89.1 | $44,781 (LED + sensors) | $186,912 | 96 |
+| Wells Street Hotel | $105,119 | 88.2 | $8,888 (LED + water heating) | $38,160 | 95 |
+| **Portfolio** (1,172 rooms) | **$1,561,819** | — | **$109,905** | $466,789 | — |
 
-Portfolio optimizer at **$500,000, balanced**: $495,389 gross, $169,973 incentives, $325,416 net; **$114,489 a year** (7.3% of the chain's energy
-cost), payback **2.8 years**, 10-year NPV $504,341, 316 t CO2 a year. LED + sensors at Lakeshore Inn, Riverwalk Grand and the convention hotel;
-insulation + LED + sensors at O'Hare Gateway; LED + water heating at Wells Street. 2,560 combinations tested (512 per hotel).
+(November 2026, after the program-year rule: investments no longer subtract ComEd's 2025 lighting incentives.)
+
+Portfolio optimizer at **$500,000, balanced**: $491,066 gross and net (no counted incentives); **$113,686 a year** (7.3% of the chain's energy
+cost), payback **4.3 years**, 10-year NPV $336,417, 330 t CO2 a year. LED + sensors at Riverwalk Grand and the convention hotel; LED + sensors +
+water heating at Lakeshore Inn and Wells Street; insulation + sensors + water heating at O'Hare Gateway. 2,560 combinations tested (512 per hotel).
 
 ### My portfolio and stress tests (`portfolioPlans.ts`, Phase 13 P1)
 
@@ -375,10 +394,107 @@ Downtown, owned). Inputs are assumptions; floor areas are defaulted. Brands, reg
 
 ### Limits
 
-All five hotels share Chicago weather. Hotel types differ only through size, age, HVAC, occupancy and guest hours: the model has no ballroom,
+All five hotels share Chicago weather. **Multi-city (pass 11):** the engine also resolves New York, Miami and Denver (city and state on the hotel
+input) to their own NOAA normals, PVWatts solar, EIA prices, eGRID subregion and ComStock intensity and end-use split; any other city falls back
+to Chicago weather with a note. Utility incentives carry a territory (`states`), so ComEd, Peoples Gas and Illinois Shines apply only in Illinois.
+Hourly shapes, the seasonal occupancy default, the age factor and the TRM-based savings remain Chicago/Illinois values in every city. Hotel types differ only through size, age, HVAC, occupancy and guest hours: the model has no ballroom,
 exhibit-hall, pool or round-the-clock restaurant drivers. Heat-pump water heaters are not modeled. Priority scores are relative to this portfolio.
 
 ---
+
+## 14. Energy insights, simulation impact and stress-test kinds (Phase 14A, November 2026)
+
+Three small pure modules turn results the engine already computes into answers an operator can act on. **No calculation was added or
+changed**: every figure below is the baseline, `compareUpgrades`, `simulateEnergyScenario` / `simulateOccupancyChange` or `benchmarkComparison`.
+
+### Energy insights (`src/engine/hotel/insights.ts`, `energyInsights`)
+
+Input: the open hotel's resolved profile and **baseline** (the insights describe the hotel as it runs today, not the active what-if), the
+single-upgrade comparison measured against that baseline, and the modeled site energy intensity of the other hotels in the open portfolio
+(baseline only, no optimizer run; all hotels of the organization, whatever the filter). Output: at most **5** cards, each with an id, a title,
+one or two sentences, a figure (`usd`, `pct` or `kbtu`), a category, a priority ("High priority" or "Worth a look"), an action and a "How was this
+calculated?" line. A card whose data is missing is left out (no upgrades → no investment card; no peers → intensity only against ENERGY STAR;
+a zero bill → no cards). Store: `selectEnergyInsights` (memoized on the hotel, baseline, discount rate, peers and portfolio name).
+
+| Card | Rule (shown when…) | Figure | Data | Category | High priority when | Action |
+| --- | --- | --- | --- | --- | --- | --- |
+| Investment opportunity | at least one eligible single upgrade has an installed cost within the budget, a simple payback within its expected life and a positive 10-year net benefit | yearly savings of the one with the largest 10-year net benefit | `compareUpgrades` against the baseline (the same rows as Compare all upgrades) | Investment opportunity | its savings are ≥ 5% of the bill | **Find the best investments**: opens Invest and runs the optimizer (only on click) |
+| Biggest cost driver | the largest end-use category is ≥ **25%** of the modeled bill | its share of the bill (and $ a year in the text) | `baseline.byCategory` (CBECS 2018 shares scaled to the hotel) | Cost reduction | share ≥ 1/3 | HVAC → **See the HVAC equipment** (twin Equipment view); otherwise **Explore upgrades** (Invest) |
+| Energy intensity | site EUI ≥ **10%** above the median of the other hotels in the portfolio, or ≥ 10% above the ENERGY STAR hotel median | site EUI (kBtu/ft² a year) | baseline site energy ÷ floor area; peers' baselines; `benchmarkComparison` | Operational efficiency | gap ≥ 25% | against peers → **Compare properties** (portfolio page, comparison table); against ENERGY STAR only → **Explore upgrades** |
+| Occupancy sensitivity | +10 occupancy points moves the bill ≥ **2%** | $ a year added | `simulateOccupancyChange(profile → profile + 10 points)` | Operational efficiency | ≥ 5% of the bill | **Run an occupancy simulation**: opens the Scenario tab with that same what-if (Reset undoes it) |
+| Price exposure | a sustained 20% electricity or gas rise (the larger) adds ≥ **3%** | $ a year added | `simulateEnergyScenario` with the `price_up_20` / `gas_up_20` stress tests | Energy resilience | ≥ 5% of the bill | **Run the price stress test** (applies it; Reset to baseline undoes it) |
+| Weather exposure | the costlier of the heat wave and cold snap adds ≥ **1%** of the year's bill | $ added once, in the year it happens (not annualized) | `simulateEnergyScenario` with `heat_wave` / `cold_snap` | Energy resilience | ≥ 5% of the bill | **Run the … test** (applies it) |
+| Equipment condition | 10% worn heating and cooling equipment adds ≥ **1%** | $ a year added | `simulateEnergyScenario` with `hvac_decline` | Equipment performance | ≥ 5% of the bill | **Run the equipment stress test** (applies it) |
+
+**Selection and order.** Energy resilience shows **one** card: the larger dollar figure of the price and weather exposures. The rest keep a
+fixed order, most actionable first: investment, cost driver, intensity, occupancy, resilience, equipment; the first five are shown.
+Thresholds and the order are product decisions (docs/15 §22), not sourced values; they live in `INSIGHT_THRESHOLDS`.
+
+**Demo hotel (100 rooms, today's data):** 4 upgrades fit and pay back (best: LED lighting, $7,826 a year); HVAC 36% of the bill; 86.5
+kBtu/ft², 37% above the ENERGY STAR median (it is not above the median of the other Lakefront hotels, so the card compares with ENERGY STAR
+and points to upgrades rather than to the portfolio); +10 occupancy points add $5,147 a year (Worth
+a look); electricity +20% adds $19,618 a year. The equipment card ($3,059 a year) is the sixth and is not shown.
+
+### Simulation impact (`src/engine/hotel/impact.ts`, `impactSummary`)
+
+For electricity (kWh), natural gas (therms), energy cost ($) and carbon (kg CO₂e): `before` = the reference simulation (`scenarioResult.before`,
+the hotel today), `after` = the what-if or stress test (`scenarioResult.after`), `delta = after − before` and `pct = delta ÷ before` (none when
+the reference is zero). Both are whole-year totals over the same 12 months, so they are comparable; a temporary event's delta is the total for the
+one event. Store: `selectScenarioImpact` (null when no what-if or stress test is active). UI: "Simulation impact" at the top of the Scenario tab
+and the scenario page, with Reset (clears the what-if and the stress test).
+
+### Stress tests: exact definitions and how to read them (`STRESS_TESTS`, `stressKind`)
+
+| Test | Exactly what the simulation changes | Period | Kind (`stressKind`) | Duration | Changes payback / NPV / recommendation? | 100-room demo: cost change |
+| --- | --- | --- | --- | --- | --- | --- |
+| Heat wave | July's mean temperature +10 °F vs the NOAA normal (monthly resolution, so the whole of July) | July only | Temporary event | temporary | No | +$6,589 (5.5%) in that year |
+| Cold snap | January's mean temperature −12 °F (the whole of January) | January only | Temporary event | temporary | No | +$649 (0.5%) in that year |
+| Low solar production | solar output −15% vs the PVWatts typical year (plans with solar only) | one year | Temporary event | temporary | No | $0 (the hotel has no solar) |
+| Conference surge | occupancy +25 points in September | September only | Operational scenario | temporary | No | +$1,058 (0.9%) in that year |
+| Low occupancy (off-season) | occupancy −20 points January–March | one season | Operational scenario | temporary | No | −$2,538 (−2.1%) in that year |
+| HVAC efficiency decline | heating and cooling energy +10% for the same load (illustrative) | every year until fixed | Operational scenario | persistent | Yes | +$3,059 a year (2.5%) |
+| Electricity +20% | electricity price +20% | every year from now | Persistent financial assumption | persistent | Yes | +$19,618 a year (16.3%) |
+| Natural gas +20% | gas price +20% | every year from now | Persistent financial assumption | persistent | Yes | +$4,418 a year (3.7%) |
+
+The weather tests are temporary events and the price tests persistent financial assumptions; occupancy and equipment tests are operational
+scenarios, temporary or persistent as defined. Only persistent tests change payback, NPV and the recommended package (`stressTestReport`,
+and the store switches the optimizer only for them); temporary events are never annualized, because how often they recur is not modeled. The
+stress panel now states the period of the cost change ("in the year it happens (one-off, not annualized)" or "per year, every year until it
+changes"; it used to say "per year" for every test), adds carbon and percentage changes, and draws normal / stress / stress-with-plan bars from
+`StressReport` (cost avoided = the plan's savings under the stress minus its normal savings). The cold snap costs much less than the heat wave
+because the extra heating is gas ($0.929 a therm, about $9.3 per MMBtu) while the extra cooling is electric ($0.1405 a kWh, about $41.2 per
+MMBtu), and only one month changes in each.
+
+### Investment priority, exactly (as implemented in `portfolioSummary`)
+
+1. A hotel's candidates are the single-hotel optimizer's eligible upgrade combinations for its own systems (equipment compatibility is decided
+   there: for example, smart room controls are not offered to a hotel that has them).
+2. Its **best package** is the candidate with the highest 10-year NPV among those whose gross installed cost fits the hotel's own budget and whose
+   10-year NPV is positive. None: no savings potential and a score of 0.
+3. **Return per dollar** = that package's 10-year NPV ÷ its net investment (installed cost minus incentives counted in the base case).
+4. **Score** = round(return per dollar ÷ the highest return per dollar among the hotels shown × 100). The best hotel scores 100; scores are
+   relative to the hotels shown, so filters change them.
+
+Energy spending, floor area and intensity are not inputs: a large hotel can spend the most and still rank lower (in the Chicago chain, Lakefront
+Convention Hotel spends the most, $591,679 a year, while Riverwalk Grand ranks first). The UI restates these steps (`src/portfolio/priority.ts`)
+and a test checks its scores equal the engine's.
+
+### Multi-city portfolios
+
+`PropertySummary` carries the hotel's resolved `city` and `state` (labels). A hotel's city and state pick its weather (NOAA normals), solar output
+(PVWatts), prices (EIA), grid factor (eGRID) and intensity and end-use split (ComStock), research pass 11; incentives apply only in their
+territory (`states`). Still Chicago- or Illinois-based for every city: the upgrade savings parameters (IL-TRM), hourly load shapes, the seasonal
+occupancy default and the age factor. Synthetic national organization: Meridian Hotels & Resorts (4 hotels, 910 rooms, about $1.57 million a year,
+savings potential about $113,000 a year; no incentives apply outside Illinois). Its top priority is Midtown Tower Hotel (New York), whose best
+package returns about 2.04 dollars of 10-year NPV per dollar.
+## 15. Current equipment levers (Phase 14G, November 2026)
+
+The operator's equipment corrections (`HotelInput.equipment`, validated by `validateEquipment`) set `profile.equipmentLevers`, which the
+simulation uses in place of reference values: heating site energy × `0.80 / e_h`; cooling electricity × `COP_ref / COP`; a zone's lighting
+× `(1 − s × 0.45)` for LED share s; the gas part of hot water × `0.80 / e_w`; existing solar netted from purchased electricity month by
+month (PVWatts mid yield). Upgrades measure against the corrected baseline without double counting (LED converts only the rest; the HVAC
+and water-heating reductions scale with the gap left to their targets; solar is limited to the roof left). Without corrections every
+result is unchanged. Full description, audit and limits: docs/20.
 
 ## Appendix A — Store contract (task 1.10): approved and built
 

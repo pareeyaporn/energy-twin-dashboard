@@ -6,8 +6,9 @@ import { useTwin } from "@/store/useTwin";
 import { Button } from "@/components/ui/button";
 import { TOUR_STEPS, bodyOf } from "./steps";
 import { openWorkspaceTab, waitFor } from "./dom";
-import { finishSummary, formatInsight, insightFor } from "./insights";
-import type { Insight } from "./insights";
+import { finishSummary, formatInsight, insightFor, projectionSeries } from "./insights";
+import type { Insight, ProjectionSeries } from "./insights";
+import { ProjectionPreview } from "./ProjectionPreview";
 import { placeCard, unionBox } from "./layout";
 import type { Box } from "./layout";
 import { applyView, currentView, useTour } from "./useTour";
@@ -75,6 +76,7 @@ export function TourOverlay() {
   const [box, setBox] = useState<Box | null>(null);
   const [insight, setInsight] = useState<Insight | null>(null);
   const [summary, setSummary] = useState<ReturnType<typeof finishSummary>>([]);
+  const [projection, setProjection] = useState<ProjectionSeries[]>([]);
   const [viewport, setViewport] = useState(() => (typeof window === "undefined" ? { w: 1280, h: 800 } : { w: window.innerWidth, h: window.innerHeight }));
   const [cardSize, setCardSize] = useState({ width: 360, height: 220 });
   // Animate only the move from one step to the next; afterwards the spotlight follows scrolling exactly.
@@ -89,6 +91,7 @@ export function TourOverlay() {
     setTargets(null);
     setBox(null);
     setInsight(null);
+    setProjection([]);
     if (pathname !== step.route) {
       void navigate({ to: step.route });
       // If the page does not open, move on rather than wait forever.
@@ -101,7 +104,7 @@ export function TourOverlay() {
     const origin = useTour.getState().origin;
     // Each step shows the user's own view plus its own settings. The twin layer stays as the last step left it (switching back to the 3D
     // view mid-tour would rebuild the 3D scene); the user's layer comes back when the tour ends.
-    if (origin) applyView({ ...origin.view, twinLayer: currentView().twinLayer, ...(step.route === "/" ? step.view : {}) });
+    if (origin) applyView({ ...origin.view, twinLayer: currentView().twinLayer, ...(step.route === "/hotel" ? step.view : {}) });
     void (async () => {
       if (step.tab) {
         await waitFor(workspaceTabsReady, TOUR_TIMING.waitMs, signal);
@@ -128,8 +131,10 @@ export function TourOverlay() {
           const s = useTwin.getState();
           if (step.insight) setInsight(insightFor(step.id, s));
           if (step.id === "finish") setSummary(finishSummary(s));
+          if (step.id === "projections") setProjection(projectionSeries(s));
         } catch {
           setInsight(null);
+          setProjection([]);
         }
       }, 30);
     })();
@@ -306,6 +311,7 @@ export function TourOverlay() {
         </div>
         <p id="tour-body" className="mt-2 leading-relaxed text-muted-foreground">{body}</p>
         {insight && <InsightBlock key={step.id} insight={insight} reduce={reduce} hero={hero} />}
+        {projection.length > 0 && <ProjectionPreview key={`chart-${step.id}`} series={projection} reduce={reduce} />}
         {last && summary.length > 0 && (
           <dl className="mt-4 grid grid-cols-3 gap-2" data-testid="tour-summary">
             {summary.map((x) => (

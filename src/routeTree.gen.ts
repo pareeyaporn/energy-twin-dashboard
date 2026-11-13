@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HotelRouteImport } from './routes/hotel'
 import { Route as OptimizerRouteImport } from './routes/optimizer'
 import { Route as OverviewRouteImport } from './routes/overview'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
@@ -18,6 +19,11 @@ import { Route as ScenarioRouteImport } from './routes/scenario'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HotelRoute = HotelRouteImport.update({
+  id: '/hotel',
+  path: '/hotel',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OptimizerRoute = OptimizerRouteImport.update({
@@ -43,6 +49,7 @@ const ScenarioRoute = ScenarioRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/hotel': typeof HotelRoute
   '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
   '/portfolio': typeof PortfolioRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/hotel': typeof HotelRoute
   '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
   '/portfolio': typeof PortfolioRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/hotel': typeof HotelRoute
   '/optimizer': typeof OptimizerRoute
   '/overview': typeof OverviewRoute
   '/portfolio': typeof PortfolioRoute
@@ -65,14 +74,23 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/optimizer' | '/overview' | '/portfolio' | '/scenario'
+  fullPaths:
+    '/' | '/hotel' | '/optimizer' | '/overview' | '/portfolio' | '/scenario'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/optimizer' | '/overview' | '/portfolio' | '/scenario'
-  id: '__root__' | '/' | '/optimizer' | '/overview' | '/portfolio' | '/scenario'
+  to: '/' | '/hotel' | '/optimizer' | '/overview' | '/portfolio' | '/scenario'
+  id:
+    | '__root__'
+    | '/'
+    | '/hotel'
+    | '/optimizer'
+    | '/overview'
+    | '/portfolio'
+    | '/scenario'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HotelRoute: typeof HotelRoute
   OptimizerRoute: typeof OptimizerRoute
   OverviewRoute: typeof OverviewRoute
   PortfolioRoute: typeof PortfolioRoute
@@ -86,6 +104,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hotel': {
+      id: '/hotel'
+      path: '/hotel'
+      fullPath: '/hotel'
+      preLoaderRoute: typeof HotelRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/optimizer': {
@@ -121,6 +146,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HotelRoute: HotelRoute,
   OptimizerRoute: OptimizerRoute,
   OverviewRoute: OverviewRoute,
   PortfolioRoute: PortfolioRoute,

@@ -271,7 +271,7 @@ build P0 and the portfolio optimizer first.
 - 13.1–13.4 five synthetic Chicago properties (`properties.json`), types, labels, documented assumptions
 - 13.5–13.7 portfolio aggregation in the engine (totals, savings potential, investment required, priority score) and its tests
 - 13.13–13.17 store: active property, `openProperty`, save and restore per property, custom plans per property, selectors, tests
-- 13.18–13.21 MapLibre city map with markers, hover cards, color-by metric, legend, offline fallback, accessibility
+- 13.18–13.21 MapLibre city map with markers, hover cards, color-by metric, legend, offline fallback, accessibility (redesigned in 13.39–13.48, docs/17)
 - 13.22–13.28 `/portfolio` page and top-bar link, KPI strip, comparison table, charts, breadcrumb, optimizer panel, tests
 
 P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress tests). P2: 13.33–13.36 (onboarding, venue types, organizations).
@@ -361,26 +361,235 @@ P1 later: 13.29–13.32 (custom portfolio plan, AI vs custom, portfolio stress t
       franchised, leased); an organization switcher and filters on the Portfolio page (map, table, totals, charts, optimizer and stress tests
       follow the filter); totals by brand, region or ownership; Add my hotel asks for brand and ownership and joins the selected organization
 
+### 13K — City map redesign: a hotel-chain command center (built November 2026; design in docs/17)
+Display only: no calculation, assumption or data changes. Each task is one point of the design brief.
+- [x] 13.39 **P1** [CC] Map styling: dark navy theme, muted roads, quiet labels, a clearly blue Lake Michigan, less noise — *done: Carto
+      dark-matter repainted after load by layer rules (`restyleBasemap`): navy land, blue lake, muted roads, POI, road-name and water labels
+      hidden, own "Lake Michigan" label; the drawn fallback uses the same palette*
+- [x] 13.40 **P1** [CC] Hotel markers: building tiles with a subtle glow, clean borders, hover and selection effects; metric colors and exact
+      coordinates kept — *done: `HotelMarker` (32 px tile, metric-colored border and icon, rank chip, glow, scale on hover and selection, ping
+      ring when selected, a dot marks the user's own hotels)*
+- [x] 13.41 **P1** [CC] Hotel card on click: name, rooms, annual energy cost, energy intensity, savings potential, Explore digital twin — *done:
+      four stat tiles (the selected metric's outlined), rank, occupancy, annual energy, priority, the data label; hover now shows a tooltip*
+- [x] 13.42 **P1** [CC] Property list: collapsible, ranked by the map's metric; hover highlights the marker, click focuses the map — *done:
+      `PropertyList` (rank, color dot, value bar, neighborhood, value); click selects and flies to the hotel*
+- [x] 13.43 **P1** [CC] Metric controls as one segmented toolbar (energy cost, energy intensity, savings potential, investment priority) —
+      *done: icons, short labels on phones*
+- [x] 13.44 **P1** [CC] Legend: metric, value range, units, color gradient — *done: unit in words, lowest / middle / highest values, what a
+      high value means; compact on phones*
+- [x] 13.45 **P1** [CC] Interactions: smooth selection, fly-to, hover tooltips, every overlapping downtown hotel selectable — *done: fly-to
+      padded clear of the card and list, Show all hotels, refit on filter changes, click the map or Escape to close; close markers fan out
+      (`spread.ts`, 34 px rule) with a leader line to the true location*
+- [x] 13.46 **P1** [CC] Visual hierarchy: the map as the focal point, consistent spacing, rounded corners, restrained shadows, subtle cyan —
+      *done: 540 px map with a soft shadow and faint cyan ring, navy glass panels, cyan only for the active and selected states*
+- [x] 13.47 **P1** [CC] Responsive desktop and mobile — *done: list over the map on desktop and below it on smaller screens; card over the map
+      from 640 px and below it on phones; checked at 1440 × 900 and 390 × 844, street map and drawn map*
+- [x] 13.48 **P1** [CC] Preserve functionality: organization switcher, brand / region / ownership filters, portfolio calculations, hotel
+      selection, map metrics, navigation — *done: unchanged store and engine; tests updated (hover → tooltip, click → card) and added (ranking,
+      list hover and selection, Escape, collapse, spreading)*
+- [ ] 13.49 **P2** [CC] Later: marker clustering with counts if a portfolio grows past about 30 hotels (the fan-out suits small groups);
+      a pan-and-zoom gesture on the drawn fallback map (today it fits and flies only); keyboard arrow navigation between markers
+
 ### 13I — Later (P2)
 - [x] 13.33 **P2** [CC] Onboarding tour (new: the app has none yet): welcome, portfolio, map, a hotel's twin, simulations, investments, portfolio
-      optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 14 steps with live figures, a time-lapse and the energy flow) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
+      optimizer, AI vs custom; skip and reopen — *done (November 2026): a guided tour (now 13 steps, portfolio first, with live figures, a time-lapse and a 10-year projection chart; Phase 14C) for hotel operators in `src/tour/`, first visit and replay from the top bar; steps and behavior in docs/16*
 - [x] 13.34 **P2** [CC] Future building types shown as "coming later" cards (resorts, casinos, convention centers, entertainment venues): they need
       their own energy drivers (pools, spas, gaming floors, event spaces) and are not simulated with the hotel model — *done: "More building types (coming later)" cards on the portfolio page, from `properties.json`*
-- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Still later: multi-city portfolios (needs sourced weather, prices and grid data per city), real utility data (bill upload and calibration), role-based access (accounts and a database)*
+- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Multi-city data done (November 2026, research pass 11): New York, Miami and Denver have sourced weather, solar, prices, grid subregion and ComStock intensity and end-use split, and utility incentives now apply only in their territory; multi-city hotels in the portfolio UI and map are next. Real utility data done (November 2026): the Utility Data Manager with spreadsheet, Excel/CSV upload and template, and calibration (14E, docs/19). Later: role-based access (accounts and a database)*
+
+- [ ] 13.35 **P2** [CC] Multiple organizations and brands, regions, ownership types, role-based access; multi-city portfolios; real utility data — *partly done (November 2026): several organizations, brands, regions and ownership types, with an organization switcher, filters and totals by group (below, 13.38). Multi-city data done (November 2026, research pass 11): New York, Miami and Denver have sourced weather, solar, prices, grid subregion and ComStock intensity and end-use split, and utility incentives now apply only in their territory; multi-city portfolio UI done (November 2026, 14D below): a national synthetic organization (Meridian Hotels & Resorts: New York, Miami, Denver), city markers and chips on the street map, a per-city schematic on the drawn map, a city filter, totals by city and a city choice in Add my hotel. Real utility data: the engine's monthly bill calibration is built (`src/engine/hotel/bills.ts`); its Utility Data Manager is a separate task. Later: role-based access (accounts and a database)*
 - [x] 13.36 **P2** [CC] Transitions when switching hotels and metrics; demo script update after the figures are validated (docs/07) — *transitions done (marker colors fade between metrics; the twin's figures count up when a hotel opens); the demo script is the storyline owner's (docs/07)*
 
-Known limits: all five hotels share Chicago weather (O'Hare normals); property types differ through size, age, HVAC and occupancy only (the
+Known limits: the five Lakefront hotels share Chicago weather (O'Hare normals; the Meridian hotels use their own cities'); property types differ through size, age, HVAC and occupancy only (the
 model has no ballroom, pool or 24/7 food-service drivers); heat-pump water heaters are not modeled, so the optimizer cannot pick them.
 
+## Phase 14 — Operator experience (CC; November 2026)
+
+Turning results into decisions for hotel operators: Understand costs → Identify problems → Simulate changes → Evaluate solutions → Optimize
+investments → Make decisions.
+
+Seven improvements for hotel operators (insights, investment results, onboarding, portfolio workflow, simulation results, transparency,
+decision summary). Each part has its own heading below.
+
+### 14A — Insights and simulation results
+- [x] 14.1 [CC] Engine rules for 3–5 prioritized energy insights from existing outputs (cost driver, intensity vs portfolio and ENERGY STAR,
+      occupancy sensitivity, price, weather and equipment exposure, the best eligible upgrade) — *done: `src/engine/hotel/insights.ts`; rules,
+      thresholds and data in docs/13 §14, decisions in docs/15 §22; tests in `src/engine/hotel/__tests__/insights.test.ts`*
+- [x] 14.2 [CC] "Opportunities & alerts" cards in the Hotel tab: title, explanation, figure, category, priority, action, "How was this
+      calculated?" — *done: `src/insights/EnergyInsights.tsx` (one-line hook in Lovable's `HotelTab`); follows the open hotel; desktop and phone*
+- [x] 14.3 [CC] Insight actions open the feature they name — *done: HVAC → twin Equipment view; stress exposures → that stress test (applied,
+      scrolled to); occupancy → the Scenario tab with the same +10-point what-if; intensity → the portfolio comparison; investment → Invest and
+      the optimizer (on click only). Tested in `src/test/insights.test.tsx` and in a browser*
+- [x] 14.4 [CC] Simulation impact summary whenever a what-if or stress test is active: electricity, gas, cost and carbon, today vs the scenario,
+      change and %, with Reset — *done: `impactSummary` (`src/engine/hotel/impact.ts`), `src/scenario/ScenarioImpact.tsx` in the Scenario tab
+      and page (minimal hook in Lovable's `ScenarioSimulator`)*
+- [x] 14.5 [CC] Stress-test results: baseline vs stressed energy, cost and carbon with %, the selected plan under the stress and cost avoided, a
+      small chart, exact assumptions, and an action to the investments — *done in `src/twin/parts/StressTests.tsx` (reuses `stressTestReport`)*
+- [x] 14.6 [CC] Classify each stress test (temporary event / operational scenario / persistent financial assumption) and keep temporary events
+      out of long-term returns — *done: `stressKind`; the engine already kept temporary events out of payback, NPV and the recommendation; the
+      panel's "per year" wording for temporary events is fixed ("in the year it happens (one-off, not annualized)"). Table in docs/13 §14*
+
+
+### 14B Investment results and report (Improvements 2 and 7; `src/report/`, docs/18)
+- [x] 14B.1 [CC] Executive summary of the recommended plan: investment, budget left, annual savings, % cut in the bill, payback, NPV 5 and 10,
+      carbon — *done: `AiPlanResults` under "Why this plan" (one-line hook in `BudgetOptimizer`); figures are the evaluation's financials*
+- [x] 14B.2 [CC] Before vs after: electricity, gas, cost, carbon, intensity with absolute and % change — *done: from the baseline the plan
+      was measured against (what-if aware) and the package outcome; gas rising with LED is shown as it is*
+- [x] 14B.3 [CC] Upgrade breakdown, expandable: description, quantity or capacity, installed cost and range, savings, payback, life,
+      incentives, key assumptions — *done*
+- [x] 14B.4 [CC] Savings contribution without double counting — *done: the engine's sequential marginal savings, which add up to the
+      package total (checked; otherwise only the combined figure is shown with "not additive")*
+- [x] 14B.5 [CC] AI plan vs custom plan on the same engine and assumptions; copy the AI plan into a custom plan — *already built
+      (PlanCompare, Customize AI plan); added the Selected upgrades row and the custom plan's results and report*
+- [x] 14B.6 [CC] Plain-language financial reading, honest about poor results — *done: `interpretFinancials` (no payback, payback beyond
+      life, negative NPV → "Not financially attractive"; payback over 7 years → "Pays back, but slowly"; docs/15 §23)*
+- [x] 14B.7 [CC] Downloadable PDF investment report (multi-page, navy and cyan on white, header, footer, page numbers, charts from the
+      model, assumptions, sources, risks) for AI plans, custom plans and the portfolio plan — *done: `@react-pdf/renderer`, lazy-loaded;
+      file name `EnergyTwin_<Name>_InvestmentReport_<date>.pdf`; loading and error states*
+- [x] 14B.8 [CC] Report preview identical to the PDF — *done: the same report data drawn as light pages (works on phones)*
+- [x] 14B.9 [CC] Incentives in the report: counted, listed-not-counted, and illustrative-only lines (`financials.illustrativeIncentives`,
+      the program-year rule) clearly outside the base case — *done*
+- [x] 14B.10 [CC] Tests: figures equal the engine's for AI, custom and portfolio plans; honest readings; a real PDF is generated; state
+      unchanged; browser check on desktop and phone — *done*
+- [ ] 14B.11 P2 [CC] Stress-test results and the advisor's explanation in the report; a monthly energy chart; brand fonts in the PDF
+- [ ] 14B.12 P2 [Store] Keep the "synthetic" label when a sample hotel's budget is edited (the app's badge disappears today; the report
+      already keeps the label)
+
+
+### 14F Calculation transparency (Improvement 6; `src/explain/`, docs/21)
+- [x] 14F.1 [CC] "How was this calculated?" next to major figures: what it means, how, main inputs with their data label, sources, limits,
+      technical detail on demand — *done (November 2026): `explain(metric, state)` for 12 figures; ⓘ on the KPI strip and the recommended
+      plan's tiles; portfolio figures get theirs with the portfolio-workflow branch*
+- [x] 14F.2 [CC] Data labels: published source, your input, modeled estimate, synthetic demo data, assumption — *done: `DATA_CLASS`,
+      shown on every input and in a legend in the Sources panel*
+- [x] 14F.3 [CC] Incentive transparency — *done in the engine (program year, illustrative 2025 rates, territory) and stated in the
+      incentives explanation*
+- [x] 14F.4 [CC] Financial assumptions in one place — *done: Sources panel list with labels; the discount rate stays editable and
+      recalculates everything*
+- [x] 14F.5 [CC] No invented confidence scores; one estimate statement on every explanation — *done*
+- [x] 14F.6 [CC] Sources panel lists the hotel model's sources (the home-era ResStock, RECS and Rewiring America entries removed) — *done
+      (minimal edit in Lovable's `SourcesSheet.tsx`)*
+- [x] 14F.7 [CC] ⓘ on the portfolio KPIs — *done: annual energy cost, savings potential, carbon and energy intensity (portfolio-level explanations: `portfolioCost`, `portfolioCarbon`, `portfolioIntensity`); investment priority keeps its own "Why this ranking?" explainer*
+
+### 14E — Utility data and calibration (built November 2026; docs/19)
+
+- [x] 14.E1 [CC] Hotel tab "Utility data" section replaces "Monthly bill: estimated": status (modeled estimate / data provided / calibrated model), source, coverage, billed spending vs projection, Manage Utility Data and Compare & calibrate buttons — *minimal edit in HotelTab.tsx; `src/utility/UtilityDataSection.tsx`*
+- [x] 14.E2 [CC] Utility Data Manager dialog with three starts: Edit sample (default, synthetic), Upload Excel / CSV, Enter manually — *`src/utility/UtilityDataManager.tsx`*
+- [x] 14.E3 [CC] Spreadsheet editor: click to edit, arrow / Enter / Tab navigation, multi-cell paste from Excel, invalid cells highlighted, billing year, billing-periods view with dates and add / remove rows, undo (Ctrl+Z, 50 steps), Reset sample, Clear, Cancel with confirmation, Apply — *`SpreadsheetGrid.tsx`*
+- [x] 14.E4 [CC] Live summary: annual kWh, therms, electricity $, gas $, combined, average per bill, coverage, complete vs incomplete
+- [x] 14.E5 [CC] Download Excel template (.xlsx: Instructions, Monthly Utility Data with formats and validation, Example Data labeled synthetic) that uploads back unchanged — *exceljs, loaded on demand; round trip tested*
+- [x] 14.E6 [CC] Excel and CSV upload: column mapping step, units never assumed (kWh/MWh; therms/CCF/Mcf/MMBtu/Dth), review in the spreadsheet before saving
+- [x] 14.E7 [CC] Validation with errors (block Apply) and warnings: numbers, negative use, months, dates, duplicates, overlapping periods, long periods, zero use, negative cost, outliers, implied rates, incomplete history — *`billsValidate.ts`; thresholds in docs/15 §24*
+- [x] 14.E8 [CC] Labels: sample (synthetic), edited sample (synthetic unless marked real), user-entered, uploaded; calibrated model is a status
+- [x] 14.E9 [CC] Calibration: per fuel, bounded base and weather multipliers by least squares, base only when weather is not identifiable, billing periods prorated by day, ASHRAE Guideline 14 NMBE and CV(RMSE) before and after, modeled baseline kept when data are insufficient or the fit is poor — *replaces the single factor per fuel; `bills.ts`, `baseline.ts`*
+- [x] 14.E10 [CC] Review: monthly charts (bills, original model, calibrated model) per fuel and for spending, totals and % differences, factors, verdicts, reasons, method and limits
+- [x] 14.E11 [CC] Baseline choice (original modeled / calibrated), never switched silently; every result follows (twin, KPIs, scenarios, stress tests, optimizer, custom plans, portfolio, advisor context); stale plans cleared with a notice
+- [x] 14.E12 [CC] Per-hotel storage in local storage, independent per hotel; Remove data restores the modeled baseline; Reset demo clears it; nothing sent to the server or the advisor — *`src/store/utilityData.ts`*
+- [x] 14.E13 [CC] Twin header and portfolio card / table show the data and baseline status
+- [x] 14.E14 [CC] Tests: calibration, periods, metrics, units, validation, store, editor, xlsx round trip; browser check desktop and phone
+- [x] 14.E15 [CC] PDF investment report: add data source, billing period, historical use, selected baseline and calibration metrics — *done (November 2026): "Utility data and baseline" in the hotel report (preview and PDF): source and synthetic label, billing period, actual vs modeled vs calibrated per fuel, NMBE / CV(RMSE) before and after, the baseline the report used, limits; `utilityForReport` in `src/report/fromStore.ts`; tests in `src/report/__tests__/reportUtility.test.ts` and the PDF test*
+- [ ] 14.E16 [CC] Several meters per fuel with their own billing periods (advanced import with a meter column)
+- [ ] 14.E17 [CC] Weather normalization to the billing year's actual weather (needs daily historical weather per billing period)
+- [ ] 14.E18 [TEAM] Try the template with a real hotel's bills; check the bounds and thresholds against real data
+
+
+### 14C Onboarding tour, portfolio first (Improvement 3; `src/tour/`, docs/16)
+- [x] 14C.1 [CC] Rework the existing tour (not a duplicate) for the portfolio-first journey: welcome, portfolio KPIs, map, ranking, a hotel's
+      profile and utility data, insights, time-lapse, what-ifs, stress tests, optimizer, 10-year payoff, results and report, finish — *done
+      (November 2026): 13 steps, about 33 s on desktop; steps 1–4 on `/`, 5–13 on `/hotel`*
+- [x] 14C.2 [CC] Live figures for the new steps from the engine (portfolio cost, savings potential, efficiency spread, top priority and why,
+      first insight) — *done; tested against the engine in `src/test/tour.test.tsx`*
+- [x] 14C.3 [CC] State safety: no hotel setting, plan or assumption changes; no optimizer run (the payoff chart uses the cached read-only run)
+      — *done; the existing state-unchanged test still passes*
+- [x] 14C.4 [CC] Fix: the first-visit start could be lost to an effect that ran twice (React development mode, remounts) — *done*
+- [x] 14C.5 [CC] Fix: "Find my best investments" opened the homepage after the route change; now the hotel's Invest tab — *done*
+- [x] 14C.6 [CC] Browser check, desktop 1440×900 and phone 390×844, first visit to finish, no console errors — *done*
+
+### 14D — Portfolio workflow and multi-city (built November 2026; branch `portfolio/workflow-multicity`)
+
+The portfolio is the homepage and the way into every hotel; the hotel dashboard is one click away and back. Improvement 4 of the
+operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" brief and the multi-city part of 13.35. Design in docs/17.
+
+- [x] 14D.1 [CC] Portfolio as the homepage — *done: `/` (and `/portfolio`) show the portfolio (`src/app/PortfolioHome.tsx`); the hotel dashboard
+      moved unchanged from `src/routes/index.tsx` to `src/app/HotelDashboard.tsx`, served at `/hotel`; `/overview`, `/scenario`, `/optimizer` link
+      back to `/hotel`. Header "Your Hotel Portfolio", the subtitle, the tagline "See the savings before you spend." and an **Optimize portfolio**
+      button that scrolls to the portfolio optimizer*
+- [x] 14D.2 [CC] Landing rules — *done (`src/app/landing.ts`): new visitors and Reset demo land on the portfolio; a returning user lands where they
+      last were (portfolio or hotel, local storage `energy-twin:last-view:v1`), on the first load of a visit only; an organization with a single
+      hotel opens that hotel directly*
+- [x] 14D.3 [CC] KPI cards — *done: annual energy cost, savings potential (with the net investment), carbon and properties (with rooms and cities)
+      first; electricity, gas, total energy, energy intensity, rooms and the budget in a compact strip (collapsible on phones); "Estimate" on
+      every modeled figure; the synthetic label in the header*
+- [x] 14D.4 [CC] "Which hotel deserves my attention first?" — *done: **Start here** names the top investment priority hotel, the reason from the
+      engine (its best package's 10-year NPV, net investment, NPV per dollar, savings and payback) and, when different, notes that the biggest
+      spender ranks lower because its upgrades return less per dollar; **Open <hotel>** and **Why this ranking?** buttons. Omitted (with a short
+      note) when no hotel has a package with a positive 10-year NPV*
+- [x] 14D.5 [CC] Explain the investment priority — *done: `src/portfolio/priority.ts` restates the engine's rule exactly and
+      `PriorityExplainer.tsx` shows it for every hotel shown (best package, net investment, 10-year NPV, NPV per dollar, score, and energy cost for
+      comparison only); opened from Start here, the hotel card ("Why?") and the table's Priority header; a test checks the scores equal the
+      engine's*
+- [x] 14D.6 [CC] Ranked, sortable comparison — *done: the table sorts by any column (cost, intensity, savings, priority…), hotel names open the
+      hotel, the location shows the city, the sort is kept in the store, and the hotel you last opened is highlighted*
+- [x] 14D.7 [CC] Drill-down and breadcrumb — *done: opening a hotel keeps its property context; the hotel shows "Portfolio › <organization> ›
+      <hotel>" (Portfolio and the organization go back), the city is in the hotel's subtitle*
+- [x] 14D.8 [CC] Return without losing context — *done: store `portfolioView` (additive): map metric, selected hotel (its card reopens), list
+      open or closed, table sort, the street map's camera, scroll position and an anchor; the organization and filters were already in the
+      store. Changing organization or filters clears what no longer applies*
+- [x] 14D.9 [CC] Cross-property decisions — *done: a portfolio hotel's Invest tab shows **This hotel in <organization>**: its priority and rank,
+      its savings potential and energy cost as shares of the portfolio's, and, once the portfolio optimizer has run, the package the shared
+      budget gives it and its share of the plan's savings, with a link to the portfolio optimizer. The portfolio optimizer's rows open each
+      hotel's plan (the Invest tab). Same engine figures; a reconciliation test checks a hotel's baseline equals its portfolio row and its
+      allocation equals the single-hotel evaluation*
+- [x] 14D.10 [CC] Multi-city organization — *done: Meridian Hotels & Resorts (synthetic) in `organizations.json`: Midtown Tower Hotel (New York,
+      420 rooms), Brickell Bay Suites and South Beach Inn (Miami), LoDo Union Station Hotel (Denver), each on its own city's sourced data (pass 11).
+      The Chicago chains and every demo figure are unchanged*
+- [x] 14D.11 [CC] Multi-city map — *done: zoomed out over several cities, the street map shows one marker per city (hotels, the city's figure for
+      the metric); city markers and city chips zoom to a city; the drawn map becomes a labeled schematic with one panel per city (no streets or
+      coastlines are drawn for cities without sourced map data), its legend below the panels; the city filter and totals by city*
+- [x] 14D.12 [CC] Add my hotel in any supported city — *done: City (Chicago, New York, Miami, Denver) then area; a note says what applies there
+      (no utility incentives researched outside Illinois; savings parameters calibrated to Chicago)*
+- [x] 14D.13 [CC] Marker hover preview and colors — *done: the tooltip shows location, rooms, energy cost, intensity, savings and priority, with
+      "Click to open · Explore hotel"; cost and intensity use blue → amber → red with the legend saying high = spends more / uses more per ft²;
+      savings potential and priority use a green scale (high = a bigger opportunity), never red*
+- [x] 14D.14 [CC] Top bar — *done (minimal Lovable edit): Portfolio, Hotel analysis, Reports (opens the hotel's Invest tab, where the investment
+      results are, scrolled to Preview / Download PDF report when a plan exists — `openReports` in `src/app/landing.ts`), Tour, Sources, and Reset demo (secondary, returns
+      to the portfolio)*
+- [x] 14D.15 [CC] Tour routes — *done (minimal): hotel steps use `/hotel`, the portfolio step `/`; the tour content will be reworked separately*
+- [x] 14D.16 [CC] Tests and browser check — *done: `src/test/portfolioWorkflow.test.tsx` (multi-city resolution, Chicago chain unchanged, city
+      filter and panels, Add my hotel in Miami, priority equals the engine, Start here and the explainer, the hotel → portfolio round trip, Reset
+      demo, reconciliation, landing rules); Playwright on desktop 1440×900 and phone 390×844, street map and drawn map*
+- [ ] 14D.17 **P2** [CC] Later — *marker clustering within a city at very low zoom; panning on the drawn schematic; arrow keys between markers;
+      per-city savings parameters (beyond Chicago's IL-TRM) and utility incentives outside Illinois*
+### 14G Equipment inventory (`src/engine/hotel/equipment.ts`, `src/twin/parts/EquipmentLayer.tsx`, docs/20)
+- [x] 14G.1 [CC] Audit the Equipment tab — *done (November 2026): fan-coil "27 kW" was the guest-room HVAC system (labeled system-level now);
+      boiler demand was gas shown as kW (electricity and gas apart, therms/h and kBtu/h, useful heat); storage "× 600" was gallons (`1 × 600 gal`);
+      hot-water parts repeated one system's totals (shown once); zone savings looked like item savings (scope labeled); shared boiler/chiller
+      efficiency text split; unsourced AHU constant moved to data as an assumption; three 200 kBtu/h water heaters to match the cost. Table in docs/20 §1*
+- [x] 14G.2 [CC] One equipment data model: `HotelInput.equipment` corrections, validated (`validateEquipment`), resolved into
+      `profile.equipment` and `profile.equipmentLevers`; `currentEquipment` gives the cards with estimated / user-entered provenance — *done*
+- [x] 14G.3 [CC] Simulation levers: heating efficiency, cooling COP, LED share by zone, water-heater efficiency (gas part), existing solar
+      (monthly netting); schedules and smart controls through the hotel's own settings; everything else informational and labeled — *done; equations in docs/20 §3*
+- [x] 14G.4 [CC] No double counting: LED retrofits only the rest (ineligible at 100%), HVAC and water heating scale with the gap to their
+      targets, solar limited to the roof left, entered plant capacity sets the HVAC cost basis; corrections never shown as savings — *done; docs/20 §4*
+- [x] 14G.5 [CC] Equipment tab: Current equipment / Proposed upgrades, Add (19 templates in 7 categories), Edit (kind-specific validated fields),
+      Remove (confirmation; last heating, cooling or hot-water item kept), Replace (engine evaluation side by side, or "needs more information"),
+      Undo, Reset to sample equipment, "Add to my plan" — *done*
+- [x] 14G.6 [CC] Per-hotel persistence (`energy-twin:equipment:v1`), portfolio totals carry saved corrections, Reset demo clears them — *done*
+- [x] 14G.7 [CC] Report and PDF list the current equipment with provenance — *done (`src/report/data.ts` `equipment`)*
+- [x] 14G.8 [CC] Tests — *done: `src/engine/hotel/__tests__/equipment.test.ts` (levers, no double counting, validation),
+      `src/test/equipmentInventory.test.tsx` (store, persistence, independence, reconciliation, report, UI); browser check desktop and phone*
+- [ ] 14G.9 P2 [CC] Heat-pump water heaters and fuel switching; per-appliance demand; hourly solar self-consumption for existing arrays;
+      multi-step undo; persisting card-edited schedules for sample hotels
+
 ## Phase 8 — Demo hardening (all)
-- [ ] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
-      $50,000 budget, an advisor question **chosen after calibration from what the results actually show**, closing before/after with carbon
-- [ ] 8.2 Cache the advisor answers for the demo; no console errors; no layout shift (*waits for the storyline's questions; the advisor now also answers questions about the hotel chain, Phase 13*)
+- [x] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
+      $50,000 budget, an advisor question **chosen after calibration from what the results actually show**, closing before/after with carbon — *done (November 2026): docs/07 brought up to date (10 packages fit at $50,000 on the scenario, not 14; the 300-room package and baseline; the act-6 question "Why not solar, and what should I do with $50,000?"; an optional portfolio line), with Reset demo and the tour noted before each run. The storyline owner may still reword it; keep the bold figures*
+- [x] 8.2 Cache the advisor answers for the demo; no console errors; no layout shift — *done (November 2026): validated AI answers are saved in local storage (`src/store/advisorAnswers.ts`, key `energy-twin:advisor-answers:v1`) and replayed at once, re-checked against the results; Reset demo keeps them. The template answer to the act-6 question now also explains why solar is left out. Remaining for the team: ask the act-6 question once in the rehearsal on the demo laptop (8.3)*
 - [ ] 8.3 Rehearse five times in a row without a failure; record the backup video (30–45 s); test the real projector resolution
 - [ ] 8.4 [TEAM] Slides: tagline "Simulate smarter. Spend better. Save energy.", the three pillars, roadmap (P2 items), and Q&A owners
 - [x] 8.5 Claims check: nothing says engineering-grade accuracy, verified carbon savings, guaranteed returns or real-time monitoring — *done (November 2026): every screen checked; "Verified incentives" became "Utility incentives (published rates)", the stale "most costs are placeholders" note now names the remaining placeholders, "AI recommended" says the optimizer picks and the advisor only explains, and the "Synthetic demo data" badge now shows for every portfolio hotel (minimal edits in Overview, ScenarioSimulator, BudgetOptimizer, AdvisorPanel)*
 - [x] 8.7 "Reset demo" control: restores the 100-room preset, baseline, July 3 PM, 3D home view and clears the advisor — *done: "Reset demo" in the top bar (`resetDemo()`) restores the starting state (100-room preset, no what-if or stress test, no plans, twin controls at their start: July, 12:00), the 3D home view, the portfolio, and clears the advisor and the custom plans saved in this browser; the time is the app's start time rather than 3 PM, so the storyline can set it*
-- [ ] 8.8 Re-run the demo figures from the engine before each rehearsal and update the script in `docs/07`
+- [x] 8.8 Re-run the demo figures from the engine before each rehearsal and update the script in `docs/07` — *done (November 2026): `src/test/demoScript.test.ts` walks the demo path through the store and fails when a bold figure in docs/07 no longer matches; `DEMO_FIGURES=1 npx vitest run src/test/demoScript.test.ts` prints them*
 - [x] 8.6 Remove or hide leftover home-only code paths from the demo (home UI removed in LV9; home engine, data, unused home components and specs removed November 2026, verified with an import graph); decide whether to delete the home engine and data after the demo
 
 ## Definition of done (per task)

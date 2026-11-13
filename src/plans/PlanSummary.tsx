@@ -1,5 +1,6 @@
 import { Info, TriangleAlert, X } from "lucide-react";
 import type { PlanEvaluation } from "@/engine/hotel";
+import { IllustrativeIncentive } from "./IllustrativeIncentive";
 import { energySaved, pct, tonnes, unverifiedIncentives, usd, verifiedIncentives, years } from "./format";
 
 /**
@@ -30,7 +31,7 @@ export function PlanSummary({ plan, rate, onRemove }: { plan: PlanEvaluation; ra
           </div>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-4">
             <div><dt className="text-muted-foreground">Gross cost</dt><dd className="text-sm font-semibold tabular-nums">{usd(f.grossCost.mid)}</dd><dd className="text-[10px] text-muted-foreground tabular-nums">{usd(f.grossCost.low)}–{usd(f.grossCost.high)}</dd></div>
-            <div><dt className="text-muted-foreground">Utility incentives</dt><dd className="text-sm font-semibold tabular-nums">{verified > 0 ? `−${usd(verified)}` : "$0"}</dd><dd className="text-[10px] text-muted-foreground">{unverified.length ? `published rates; ${unverified.length} more listed, not counted` : "published rates; pre-approval needed"}</dd></div>
+            <div><dt className="text-muted-foreground">Utility incentives</dt><dd className="text-sm font-semibold tabular-nums">{verified > 0 ? `−${usd(verified)}` : "$0"}</dd><dd className="text-[10px] text-muted-foreground">{unverified.length ? `published 2026 rates; ${unverified.length} more listed, not counted` : "published 2026 rates; pre-approval needed"}</dd></div>
             <div><dt className="text-muted-foreground">Net investment</dt><dd className="text-sm font-semibold tabular-nums">{usd(f.netInvestment.mid)}</dd></div>
             <div><dt className="text-muted-foreground">Saves / yr</dt><dd className="text-sm font-semibold tabular-nums text-savings">{usd(f.annualSavings.mid)}</dd><dd className="text-[10px] text-muted-foreground tabular-nums">{usd(f.annualSavings.low)}–{usd(f.annualSavings.high)}</dd></div>
             <div><dt className="text-muted-foreground">Simple payback</dt><dd className="text-sm font-semibold tabular-nums">{years(f.simplePaybackYears)}</dd></div>
@@ -39,6 +40,7 @@ export function PlanSummary({ plan, rate, onRemove }: { plan: PlanEvaluation; ra
             <div><dt className="text-muted-foreground">Comfort score</dt><dd className="text-sm font-semibold tabular-nums">{pct(e.comfort.score)}</dd></div>
             <div className="col-span-2 sm:col-span-4"><dt className="text-muted-foreground">Energy saved / yr</dt><dd className="tabular-nums">{energySaved(f)}</dd></div>
           </dl>
+          <IllustrativeIncentive f={f} />
           {e.lineItems.length > 0 && (
             <div className="border-t border-glass-border pt-2">
               <h4 className="mb-1 text-xs font-medium text-muted-foreground">In this plan (each upgrade's contribution, applied in the model's order)</h4>
@@ -77,7 +79,7 @@ export function PlanSummary({ plan, rate, onRemove }: { plan: PlanEvaluation; ra
         </ul>
       )}
       <p className="text-[10px] text-muted-foreground">
-        Recomputed with all upgrades together (savings are not added up). Estimates: some installed costs are still assumptions (the LED retrofit mix, VRF equipment) and chiller costs are a lower bound; incentives use ComEd's published rates, are estimated from the modeled equipment and need the utility's approval.
+        Recomputed with all upgrades together (savings are not added up). Estimates: some installed costs are still assumptions (the LED retrofit mix, VRF equipment) and chiller costs are a lower bound; incentives count only ComEd's published 2026 rates (the 2025 lighting rate is shown separately as illustrative), are estimated from the modeled equipment and need the utility's approval.
       </p>
     </section>
   );

@@ -11,11 +11,14 @@ interface Column {
   f: FinancialBreakdown;
   comfort: PackageComfort;
   overBudget: boolean;
+  /** The upgrades in the plan, as the engine names them. */
+  upgrades: string;
 }
 
 const ROWS: { label: string; value: (c: Column) => string; better?: (a: number, b: number) => boolean; num?: (c: Column) => number }[] = [
+  { label: "Selected upgrades", value: (c) => c.upgrades },
   { label: "Gross installation cost", value: (c) => usd(c.f.grossCost.mid) },
-  { label: "Utility incentives (published rates)", value: (c) => (verifiedIncentives(c.f) > 0 ? usd(verifiedIncentives(c.f)) : "$0") },
+  { label: "Utility incentives (published 2026 rates)", value: (c) => (verifiedIncentives(c.f) > 0 ? usd(verifiedIncentives(c.f)) : "$0") },
   { label: "Net investment", value: (c) => usd(c.f.netInvestment.mid) },
   { label: "Annual savings", value: (c) => usd(c.f.annualSavings.mid), num: (c) => c.f.annualSavings.mid, better: (a, b) => a > b },
   { label: "Simple payback", value: (c) => years(c.f.simplePaybackYears), num: (c) => c.f.simplePaybackYears ?? Infinity, better: (a, b) => a < b },
@@ -25,6 +28,10 @@ const ROWS: { label: string; value: (c: Column) => string; better?: (a: number, 
   { label: "CO₂ avoided / yr", value: (c) => tonnes(c.f.carbonAvoidedKgPerYear.mid), num: (c) => c.f.carbonAvoidedKgPerYear.mid, better: (a, b) => a > b },
   { label: "Comfort score", value: (c) => pct(c.comfort.score), num: (c) => c.comfort.score, better: (a, b) => a > b },
   { label: "Within budget", value: (c) => (c.overBudget ? "Over budget" : "Yes") },
+  {
+    label: "Illustrative: payback if ComEd renews the 2025 lighting rate (not counted above)",
+    value: (c) => (c.f.illustrativeIncentives ? `${years(c.f.illustrativeIncentives.simplePaybackYears)} (net ${usd(c.f.illustrativeIncentives.netInvestment)})` : "—"),
+  },
 ];
 
 /** The AI plan and your plans side by side, all from the same engine calculation. */
@@ -42,11 +49,11 @@ export function PlanCompare({ onCustomize }: { onCustomize: (packageId: string) 
   const chosen = picked ?? plans.slice(-2).map((p) => p.id);
 
   const columns: Column[] = [];
-  if (ai) columns.push({ key: `ai:${ai.role}`, label: `AI · ${ai.roleLabel}`, kind: "ai", f: ai.evaluation.financials, comfort: ai.evaluation.comfort, overBudget: ai.evaluation.financials.grossCost.mid > (hotelPlan?.budget ?? budget) });
+  if (ai) columns.push({ key: `ai:${ai.role}`, label: `AI · ${ai.roleLabel}`, kind: "ai", f: ai.evaluation.financials, comfort: ai.evaluation.comfort, overBudget: ai.evaluation.financials.grossCost.mid > (hotelPlan?.budget ?? budget), upgrades: ai.evaluation.lineItems.map((l) => l.label).join(", ") });
   for (const id of chosen) {
     const p = plans.find((x) => x.id === id);
     const ev = p ? selectCustomPlanEvaluation(state, p.id) : null;
-    if (p && ev?.evaluation) columns.push({ key: p.id, label: p.name, kind: "custom", f: ev.evaluation.financials, comfort: ev.evaluation.comfort, overBudget: ev.evaluation.financials.grossCost.mid > ev.budget });
+    if (p && ev?.evaluation) columns.push({ key: p.id, label: p.name, kind: "custom", f: ev.evaluation.financials, comfort: ev.evaluation.comfort, overBudget: ev.evaluation.financials.grossCost.mid > ev.budget, upgrades: ev.evaluation.lineItems.map((l) => l.label).join(", ") });
   }
   const best = (row: (typeof ROWS)[number]) => {
     if (!row.num || !row.better || columns.length < 2) return null;

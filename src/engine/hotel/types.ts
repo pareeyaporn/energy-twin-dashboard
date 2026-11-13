@@ -48,7 +48,16 @@ export interface HotelInput {
   operatingHours?: number;
   hvacType?: HvacType;
   monthlyEnergyBill?: number;
+  /**
+   * Up to 12 months of utility bills (use, optionally cost). When given, the model is calibrated to them fuel by fuel and, unless a
+   * rate is entered, the bills' average rates replace the state averages. Takes precedence over `monthlyEnergyBill`.
+   */
+  utilityBills?: UtilityBillMonth[];
+  /** Use the average rates of the bills (cost / use) instead of the state averages, when the bills carry costs. Default false. */
+  useBillRates?: boolean;
   electricityRate?: number; // $/kWh
+  /** Corrections to the estimated equipment: what is actually installed (docs/20). Changes the baseline, never counts as savings. */
+  equipment?: EquipmentOverride[];
   /** EPA eGRID subregion acronym (for example RFCW); defaults from the city, then the state, then the U.S. rate. */
   gridSubregion?: string;
   /** Override for the solar installed price, $ per W (DC) before incentives, all sizes (the low–high spread of the size tier is kept). */
@@ -71,6 +80,9 @@ export interface HotelInput {
 
 /** Every field filled in. */
 export interface HotelProfile {
+  /** Valid equipment corrections (docs/20) and the simulation levers they set. */
+  equipment?: EquipmentOverride[];
+  equipmentLevers?: EquipmentLevers;
   name: string;
   city: string;
   state: string;
@@ -85,6 +97,9 @@ export interface HotelProfile {
   operatingHours: number;
   hvacType: HvacType;
   monthlyEnergyBill: number | null;
+  /** Valid bill months (empty when none were given). */
+  utilityBills: UtilityBillMonth[];
+  useBillRates: boolean;
   electricityRate: number;
   gasRate: number;
   occupancy: number;
@@ -186,6 +201,98 @@ export interface Calibration {
   factor: number;
   source: 'bill' | 'benchmark';
   clamped: boolean;
+  /**
+   * Utility-bill calibration (docs/19): per fuel, a multiplier on the weather-independent load kinds (base, occupancy, schedule) and
+   * one on the weather-driven kind, fitted to the bills. 1 = the modeled value. Absent without bills.
+   */
+  method?: 'utility_bills';
+  fuelFactors?: { elec: FuelFactors; gas: FuelFactors };
+  /** The full comparison and fit (also when calibration was not possible, with the reason). */
+  report?: CalibrationReport;
+}
+
+export interface FuelFactors {
+  /** Multiplier on the weather-independent part (base, occupancy and schedule load kinds). */
+  base: number;
+  /** Multiplier on the weather-driven part (heating, cooling and fan energy that follows degree days). */
+  weather: number;
+}
+
+/**
+ * One utility bill: a calendar month (`month` 0–11) or a billing period (`start` inclusive and `end` exclusive, ISO dates
+ * YYYY-MM-DD; then `month` is the month the period mostly falls in). Use in kWh and therms; cost in $ (all-in, may be negative
+ * for an adjustment).
+ */
+export interface UtilityBillMonth {
+  month: number;
+  start?: string;
+  end?: string;
+  elecKWh?: number;
+  gasTherms?: number;
+  elecCost?: number;
+  gasCost?: number;
+}
+
+export type UtilityFuel = 'elec' | 'gas';
+
+export interface FitMetrics {
+  /** Bills compared. */
+  n: number;
+  /** Parameters fitted (0 for the original model). */
+  p: number;
+  /** ASHRAE Guideline 14 normalized mean bias error, % (positive: the bills are higher than the model). */
+  nmbePct: number;
+  /** ASHRAE Guideline 14 coefficient of variation of the root-mean-square error, %. */
+  cvrmsePct: number;
+  /** At least 12 bills, |NMBE| <= 5% and CV(RMSE) <= 15% (Guideline 14 monthly criteria). */
+  meetsGuideline14: boolean;
+}
+
+export interface BillComparison {
+  /** Index of the bill in the record list. */
+  index: number;
+  month: number;
+  start?: string;
+  end?: string;
+  days: number;
+  actual: number;
+  modeled: number;
+  calibrated: number;
+}
+
+export interface FuelCalibration {
+  fuel: UtilityFuel;
+  unit: 'kWh' | 'therms';
+  /** two_parameter: base and weather fitted; base_only: weather left as modeled; none: not calibrated (see reason). */
+  mode: 'two_parameter' | 'base_only' | 'none';
+  factors: FuelFactors;
+  /** A factor stopped at its bound. */
+  atBound: boolean;
+  /** Days of the year the bills cover (typical-year days; overlaps are not counted twice). */
+  coverageDays: number;
+  bills: number;
+  /** Share of the fuel's modeled use that follows the weather, over the billed days. */
+  weatherShare: number;
+  /** Totals over the billed days. */
+  actualTotal: number;
+  modeledTotal: number;
+  calibratedTotal: number;
+  before: FitMetrics | null;
+  after: FitMetrics | null;
+  /** The calibrated fuel replaces the modeled one in the baseline. */
+  usable: boolean;
+  /** Plain-language reason when not usable or when weather was not fitted. */
+  reason: string | null;
+  rows: BillComparison[];
+}
+
+export interface CalibrationReport {
+  elec: FuelCalibration;
+  gas: FuelCalibration;
+  /** At least one fuel calibrated. */
+  usable: boolean;
+  /** Always true in this version: bills are compared with normal-year weather (NOAA 1991-2020), not the billing year's weather. */
+  weatherNormalNotActual: true;
 }
 
 export interface EnergyResult {
@@ -283,7 +390,16 @@ export interface HotelData {
     /** With smart room controls, the share of guest-room fan energy saved while a room is empty (calibrated to the IL-TRM). */
     smartControlFan: { reductionWhenEmpty: number; source: string };
     /** Energy price growth (nominal, a year) and the discount rate, with their source. */
-    finance: { elecPriceGrowth: number; gasPriceGrowth: number; discountRate: number; discountRateAlternatives: number[]; source: string; verified: boolean };
+    finance: {
+      elecPriceGrowth: number;
+      gasPriceGrowth: number;
+      discountRate: number;
+      /** The year plans are evaluated for: an incentive counts in the base case only when its program year equals it (docs/15). */
+      analysisYear?: number;
+      discountRateAlternatives: number[];
+      source: string;
+      verified: boolean;
+    };
     profileDefaults: {
       rooms: number;
       sqftPerRoom: number;
@@ -309,7 +425,7 @@ export interface HotelData {
     verified: boolean;
   };
   weather: {
-    climates: Record<string, { label: string; meanTempF: number[]; highTempF?: number[]; lowTempF?: number[]; balancePointF: number; latitude?: number; solar?: ClimateSolar }>;
+    climates: Record<string, { label: string; meanTempF: number[]; highTempF?: number[]; lowTempF?: number[]; balancePointF: number; latitude?: number; solar?: ClimateSolar; /** Where this city's temperatures come from (the shared `source` covers Chicago). */ source?: string }>;
     cityToClimate: Record<string, string>;
     defaultClimate: string;
     source: string;
@@ -341,7 +457,7 @@ export interface HotelData {
       ptac: { label: string; tonsPerPublicSqft: number; efficiency: string };
       pthp: { label: string; tonsPerPublicSqft: number; efficiency: string };
       vrf: { label: string; tonsPerRoom: number; efficiency: string };
-      central_plant: { label: string; boilerKBtuHPerSqft: number; tonsPerSqft: number; efficiency: string };
+      central_plant: { label: string; boilerKBtuHPerSqft: number; tonsPerSqft: number; efficiency: string; boilerEfficiency?: string; chillerEfficiency?: string };
       rtu: { label: string; tonsPerSqft: number; efficiency: string };
     };
     guestRoomLightingKW: number;
@@ -352,12 +468,87 @@ export interface HotelData {
     kitchen: { rangeKBtuHPerRoom: number; hoods: number; hoodKW: number; refrigeration: number; refrigerationKW: number };
     elevators: { perFloors: number; ratedKW: number };
     laundry: { dryerKBtuH: number };
-    hotWater: { heaterKBtuHPerRoom: number; storageGalPerRoom: number; recircPumps: number; recircPumpKW: number };
+    hotWater: { heaterKBtuHPerRoom: number; storageGalPerRoom: number; recircPumps: number; recircPumpKW: number; heaterUnitKBtuH?: number };
+    /** Public-area air handling, kW per ft² of public area (assumption). */
+    publicAirHandlingKWPerSqft?: number;
+    /** Reference values and validation bounds for inventory edits (docs/20). */
+    levers?: EquipmentLeverData;
+    /** Templates for "Add equipment" (docs/20). */
+    templates?: EquipmentTemplate[];
+    templatesSource?: string;
     source: string;
     verified: boolean;
   };
   presets: { id: string; label: string; synthetic: boolean; note?: string; input: HotelInput }[];
   upgrades: UpgradesData;
+}
+
+// ---- Equipment inventory (Phase 14G, docs/20) ----
+
+export type EquipmentCategory = 'hvac' | 'water' | 'lighting' | 'kitchen' | 'laundry' | 'other' | 'renewables';
+/** How an item's efficiency is expressed. */
+export type EfficiencyKind = 'thermal' | 'heatPumpCop' | 'chillerCop' | 'dxCop' | 'ledShare';
+/** The simulation parameter an item feeds; items without a lever are informational. */
+export type EquipmentLever = 'heatingEfficiency' | 'coolingCop' | 'ledShare' | 'waterHeaterEfficiency' | 'existingSolarKw';
+export type EquipmentFuel = 'electric' | 'gas' | 'solar';
+
+export interface EquipmentTemplate {
+  id: string;
+  category: EquipmentCategory;
+  label: string;
+  zone: ZoneId;
+  fuel: EquipmentFuel;
+  capacityUnit: string;
+  efficiencyKind?: EfficiencyKind;
+  defaultEfficiency?: number;
+  lever?: EquipmentLever;
+  defaultCapacity?: number;
+  defaultSchedule?: string;
+  note?: string;
+}
+
+export interface EquipmentLeverData {
+  coolingCopReference: Record<HvacType, number>;
+  waterHeaterReferenceEfficiency: number;
+  waterHeaterUpgradeEfficiency: number;
+  bounds: Record<'thermal' | 'heatPumpCop' | 'chillerCop' | 'dxCop' | 'ledShare' | 'quantity' | 'capacity' | 'ageYears', [number, number]>;
+  source: string;
+}
+
+/**
+ * An operator's change to the estimated equipment (the hotel's current, installed equipment, not a proposal). `id` is the estimated
+ * item it corrects (for example "boilers") or a new id for added equipment (with `template`). Any field given is user-entered.
+ */
+export interface EquipmentOverride {
+  id: string;
+  template?: string;
+  removed?: boolean;
+  label?: string;
+  quantity?: number;
+  /** Per unit, in the item's capacity unit. */
+  capacity?: number;
+  zone?: ZoneId;
+  schedule?: string;
+  /** In the item's efficiency kind: thermal efficiency (0–1), COP, or LED share of fixtures (0–1). */
+  efficiency?: number;
+  /** Values for an item with more than one modeled efficiency (for example a heat pump's heating COP and cooling COP). */
+  levers?: Partial<Record<EquipmentLever, number>>;
+  ageYears?: number;
+  notes?: string;
+}
+
+/** What the current equipment changes in the simulation (undefined = the estimate's reference value). */
+export interface EquipmentLevers {
+  /** Seasonal heating efficiency of the main heating system (thermal efficiency, or COP for heat pumps). */
+  heatingEfficiency?: number;
+  /** Cooling COP of the main cooling equipment. */
+  coolingCop?: number;
+  /** Share of lighting already LED, by zone (0–1). */
+  ledShare?: Partial<Record<ZoneId, number>>;
+  /** Gas water heaters' thermal efficiency. */
+  waterHeaterEfficiency?: number;
+  /** Existing solar, kW DC. */
+  existingSolarKw?: number;
 }
 
 // ---- Upgrades, costs and financial metrics (Phase 2) ----
@@ -406,17 +597,30 @@ export interface IncentiveProgram {
   kind: 'percent_of_cost' | 'per_kw' | 'per_room' | 'fixed' | 'per_watt_reduced' | 'per_watt_controlled' | 'per_ton';
   /** Only for these HVAC types (for example a rate that depends on how guest rooms are heated). */
   hvacTypes?: HvacType[];
+  /**
+   * Only for hotels in these states (2-letter codes): a utility or state program (ComEd, Peoples Gas, Illinois Shines) is not offered
+   * elsewhere. Absent = nationwide (for example a federal tax credit).
+   */
+  states?: string[];
   /** The program's cap on the incentive as a share of the measure's cost (ComEd: 90%). */
   maxShareOfCost?: number;
-  /** The program year the rate comes from, shown with the amount. */
-  programYear?: string;
+  /**
+   * The program year the rate comes from. With a year, the rate counts in the base case only in that analysis year; a verified rate
+   * from another year is shown separately as illustrative. Null when the program has no researched year; absent in older data (no check).
+   */
+  programYear?: number | string | null;
+  /** Why the program year matters (for example the latest worksheet that could be confirmed). */
+  programYearNote?: string;
   value: number | null;
   applied: boolean;
   note: string;
   source: string;
   verified: boolean;
-  /** 'verified' once the amount and eligibility are confirmed from the program's own source; 'unverified' until then. */
-  status?: 'verified' | 'unverified';
+  /**
+   * 'verified' once the amount and eligibility are confirmed from the program's own source; 'unverified' until then;
+   * 'illustrative' for a verified rate from another program year (shown separately, not in the base case).
+   */
+  status?: 'verified' | 'unverified' | 'illustrative';
 }
 
 /** One incentive line on an upgrade's financial breakdown. */
@@ -430,6 +634,32 @@ export interface IncentiveLine {
   origin: 'program' | 'user';
   note: string;
   source: string;
+  /** The program year of the rate, when known. */
+  programYear?: number;
+  /**
+   * For a verified rate from another program year: the amount it would give (mid), computed exactly like an applied incentive, shown
+   * separately and never counted in the base case. Absent otherwise.
+   */
+  illustrativeAmount?: number;
+}
+
+/** What a plan would look like if verified incentives from another program year were renewed (illustrative, not the base case). */
+export interface IllustrativeIncentives {
+  /** For example "if ComEd renews the 2025 rate". */
+  label: string;
+  /** The program years involved (for example [2025]). */
+  programYears: number[];
+  /** The incentive lines behind it, with their amounts. */
+  lines: { id: string; label: string; amount: number; programYear: number; source: string }[];
+  /** Sum of those incentives (mid). */
+  total: number;
+  /** The base-case figures with them subtracted from the net investment (mid; same savings stream and discount rate). */
+  netInvestment: number;
+  simplePaybackYears: number | null;
+  netBenefit5: number;
+  netBenefit10: number;
+  npv5: number;
+  npv10: number;
 }
 
 /**
@@ -471,6 +701,11 @@ export interface FinancialBreakdown {
   solar: SolarDetails | null;
   /** Plain-language assumptions behind these numbers (shown next to them). */
   assumptions: string[];
+  /**
+   * Set when verified incentives from another program year exist for these upgrades (for example ComEd's 2025 lighting rates): the same
+   * figures if they were renewed. Illustrative only; every other figure here excludes them.
+   */
+  illustrativeIncentives?: IllustrativeIncentives;
 }
 
 export interface ProjectionYear {

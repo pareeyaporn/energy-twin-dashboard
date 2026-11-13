@@ -1,4 +1,6 @@
 import { hotelData } from './data';
+import { equipmentLevers, validateEquipment } from './equipment';
+import { billRates, normalizeBills } from './bills';
 import type { HotelData, HotelInput, HotelProfile, ResolvedProfile } from './types';
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n));
@@ -65,8 +67,23 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
   }
 
   const rateEntry = data.rates[state] ?? data.rates['default'];
-  const electricityRate = num('electricityRate', input.electricityRate, rateEntry?.commercialElecPerKWh ?? 0.14, 0.01, 2);
-  const gasRate = num('gasRate', input.gasRate, rateEntry?.commercialGasPerTherm ?? 1, 0.05, 20);
+  // The hotel's own bills: their average rates stand in for the state averages only when asked (useBillRates) and no rate is entered.
+  const utilityBills = normalizeBills(input.utilityBills);
+  if (input.utilityBills?.length && utilityBills.length === 0) notes.push('The utility bills had no usable bill; the model was not calibrated.');
+  const fromBills = billRates(utilityBills);
+  const elecFromBills = fromBills.elecPerKWh !== null && fromBills.elecPerKWh >= 0.01 && fromBills.elecPerKWh <= 2 ? fromBills.elecPerKWh : null;
+  const gasFromBills = fromBills.gasPerTherm !== null && fromBills.gasPerTherm >= 0.05 && fromBills.gasPerTherm <= 20 ? fromBills.gasPerTherm : null;
+  let electricityRate: number;
+  const useBillRates = input.useBillRates === true;
+  if (useBillRates && input.electricityRate === undefined && elecFromBills !== null) {
+    electricityRate = elecFromBills;
+    notes.push(`Electricity rate from your bills: $${elecFromBills.toFixed(4)} per kWh.`);
+  } else electricityRate = num('electricityRate', input.electricityRate, rateEntry?.commercialElecPerKWh ?? 0.14, 0.01, 2);
+  let gasRate: number;
+  if (useBillRates && input.gasRate === undefined && gasFromBills !== null) {
+    gasRate = gasFromBills;
+    notes.push(`Gas rate from your bills: $${gasFromBills.toFixed(3)} per therm.`);
+  } else gasRate = num('gasRate', input.gasRate, rateEntry?.commercialGasPerTherm ?? 1, 0.05, 20);
 
   const occupancy = num('occupancy', input.occupancy, d.occupancy, 0, 1);
   let seasonalOccupancy = d.seasonalOccupancy;
@@ -96,7 +113,7 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
 
   let monthlyEnergyBill: number | null = null;
   if (isNum(input.monthlyEnergyBill) && input.monthlyEnergyBill > 0) monthlyEnergyBill = input.monthlyEnergyBill;
-  else defaulted.push('monthlyEnergyBill');
+  else if (utilityBills.length === 0) defaulted.push('monthlyEnergyBill');
 
   const budget = num('budget', input.budget, d.budget, 0, 100_000_000);
   const horizonYears = Math.round(num('horizonYears', input.horizonYears, d.horizonYears, 1, 30));
@@ -116,6 +133,8 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
     operatingHours,
     hvacType,
     monthlyEnergyBill,
+    utilityBills,
+    useBillRates,
     electricityRate,
     gasRate,
     occupancy,
@@ -138,6 +157,16 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
   if (input.solarExportCreditPerKWh !== undefined) {
     if (Number.isFinite(input.solarExportCreditPerKWh) && input.solarExportCreditPerKWh >= 0 && input.solarExportCreditPerKWh <= 0.5) profile.solarExportCreditPerKWh = input.solarExportCreditPerKWh;
     else notes.push('Solar export credit must be between $0 and $0.50 per kWh; the default is used instead.');
+  }
+  // The hotel's current equipment (docs/20): corrections to the estimate. Invalid fields are dropped with a note.
+  if (input.equipment?.length) {
+    const eq = validateEquipment(input.equipment, profile, data);
+    for (const pr of eq.problems) notes.push(`Equipment: ${pr.message}`);
+    if (eq.overrides.length) {
+      profile.equipment = eq.overrides;
+      const levers = equipmentLevers(profile, eq.overrides, data);
+      if (Object.keys(levers).length) profile.equipmentLevers = levers;
+    }
   }
   return { profile, defaulted, notes };
 }

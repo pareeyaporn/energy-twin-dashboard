@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { DiscountRateControl, NpvEstimate } from "@/components/DiscountRateControl";
 import { ProjectionSparkline } from "@/components/Projection";
+import { IllustrativeIncentive } from "@/plans/IllustrativeIncentive";
 
 // Display formatting only; values come straight from the engine's financial breakdown.
 export const fmtMoney = (n: number) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -47,6 +48,7 @@ export function FinancialLines({ f, dense = false }: { f: FinancialBreakdown; de
     {row("7 Net benefit, 5 years", fmtMoney(f.netBenefit5.mid), fmtRange(f.netBenefit5), neg(f.netBenefit5.mid))}
     {row("   Net benefit, 10 years", fmtMoney(f.netBenefit10.mid), fmtRange(f.netBenefit10), neg(f.netBenefit10.mid))}
     {row("8 CO2, estimate / yr", fmtTonnes(f.carbonAvoidedKgPerYear.mid))}
+    <IllustrativeIncentive f={f} />
     {f.solar && <div className="space-y-1 rounded-md border border-border p-2 text-xs"><p className="font-medium">Solar</p>
       {[["Size", `${f.solar.sizeKw.toLocaleString("en-US", { maximumFractionDigits: 1 })} kW`], ["Yearly generation", `${fmtNum(f.solar.generationKWh)} kWh`], ["Used on site", `${fmtNum(f.solar.selfConsumedKWh)} kWh`], ["Exported", `${fmtNum(f.solar.exportedKWh)} kWh`], ["Installed cost", `$${f.solar.installedCostPerW.toFixed(2)}/W`]].map(([l, v]) => <div key={l} className="flex justify-between gap-2"><span className="text-muted-foreground">{l}</span><span className="num">{v}</span></div>)}
     </div>}

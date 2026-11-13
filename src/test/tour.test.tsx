@@ -1,8 +1,9 @@
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useTwin } from "@/store/useTwin";
+import { selectEnergyInsights, selectPortfolioSummary } from "@/store/hotelDerived";
 import { TOUR_STEPS, bodyOf } from "@/tour/steps";
-import { finishSummary, insightFor } from "@/tour/insights";
+import { finishSummary, insightFor, projectionSeries } from "@/tour/insights";
 import { overlaps, placeCard } from "@/tour/layout";
 import { TOUR_STORAGE_KEY, readTourOutcome, useTour } from "@/tour/useTour";
 import { TourButton, resetTourAutoStart } from "@/tour/TourButton";
@@ -12,7 +13,7 @@ TOUR_TIMING.waitMs = 150;
 TOUR_TIMING.navMs = 200;
 
 const navigate = vi.fn();
-let pathname = "/";
+let pathname = "/hotel";
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => navigate,
   useRouterState: ({ select }: { select: (s: { location: { pathname: string } }) => string }) => select({ location: { pathname } }),
@@ -49,8 +50,11 @@ describe("tour card placement", () => {
 });
 
 describe("tour steps", () => {
-  it("are 14 short steps for hotel operators, ending with a clear action", () => {
-    expect(TOUR_STEPS).toHaveLength(14);
+  it("are 13 short steps, portfolio first, ending with a clear action", () => {
+    expect(TOUR_STEPS).toHaveLength(13);
+    expect(TOUR_STEPS.slice(0, 4).every((x) => x.route === "/")).toBe(true);
+    expect(TOUR_STEPS.slice(4).every((x) => x.route === "/hotel")).toBe(true);
+    expect(TOUR_STEPS.map((x) => x.id)).toEqual(expect.arrayContaining(["insights", "profile", "report", "projections", "optimizer"]));
     expect(TOUR_STEPS[0]!.id).toBe("welcome");
     expect(TOUR_STEPS.at(-1)!.title).toBe("You're ready to explore!");
     for (const s of TOUR_STEPS) {
@@ -61,15 +65,28 @@ describe("tour steps", () => {
   it("live figures come from the engine for the open hotel (and change with it)", () => {
     useTwin.getState().resetHotel();
     const s = useTwin.getState();
-    expect(insightFor("welcome", s)!.value).toBeCloseTo(s.baseline.annual.cost, 6);
-    expect(insightFor("flow", s)!.value).toBeCloseTo(s.baseline.annual.elecCost / s.baseline.annual.cost, 9);
+    const sum = selectPortfolioSummary(s);
+    expect(insightFor("welcome", s)!.value).toBeCloseTo(sum.totals.cost, 6);
+    expect(insightFor("portfolio-kpis", s)!.value).toBeCloseTo(sum.totals.savingsPotential, 6);
+    const top = [...sum.properties].sort((x, y) => y.priorityScore - x.priorityScore)[0]!;
+    expect(insightFor("ranking", s)!.label).toContain(top.name);
+    expect(insightFor("portfolio", s)!.value).toBeCloseTo(Math.max(...sum.properties.map((x) => x.siteEui)), 6);
+    expect(insightFor("insights", s)!.value).toBeCloseTo(selectEnergyInsights(s)[0]!.metric.value, 6);
     const opt = insightFor("optimizer", s)!;
     expect(opt.value).toBeGreaterThan(0);
     expect(insightFor("stress", s)!.value).toBeGreaterThan(0);
-    expect(insightFor("portfolio", s)!.note).toMatch(/Top priority/);
+    // The 10-year chart: each recommended package, year 0 = minus the net investment, year 10 = the engine's 10-year net benefit.
+    const series = projectionSeries(s);
+    expect(series.length).toBeGreaterThan(0);
+    for (const x of series) {
+      expect(x.cumulative).toHaveLength(11);
+      expect(x.cumulative[0]).toBeCloseTo(-x.netInvestment, 6);
+      expect(x.cumulative[10]).toBeCloseTo(x.net10, 0);
+    }
+    expect(insightFor("projections", s)!.value).toBeCloseTo(Math.max(...series.map((x) => x.net10)), 6);
     expect(finishSummary(s)[0]!.value).toBeCloseTo(s.baseline.annual.cost, 6);
     useTwin.getState().selectHotelPreset("demo-chicago-300");
-    expect(insightFor("welcome", useTwin.getState())!.value).not.toBeCloseTo(s.baseline.annual.cost, 0);
+    expect(insightFor("insights", useTwin.getState())!.note).toMatch(/Riverwalk|Grand|300|findings/);
     // Computing them changes nothing in the app.
     expect(useTwin.getState().hotelPlan).toBeNull();
     useTwin.getState().resetHotel();
@@ -82,16 +99,15 @@ describe("tour views", () => {
     useTour.setState({ active: false, index: 0, direction: 1, origin: null, restore: null });
   });
   afterEach(() => cleanup());
-  it("plays the time-lapse and the energy flow during their steps, then restores the user's view", () => {
-    pathname = "/";
+  it("plays the time-lapse during its step, then restores the user's view", () => {
+    pathname = "/hotel";
     useTwin.getState().setTwinLayer("rooms");
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
     act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "seasons") }));
     expect(useTwin.getState().timeMode).toBe("seasons");
     expect(useTwin.getState().playing).toBe(true);
-    act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "flow") }));
-    expect(useTwin.getState().twinLayer).toBe("flow");
+    act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "drivers") }));
     expect(useTwin.getState().playing).toBe(false);
     act(() => useTour.getState().end("skipped"));
     expect(useTwin.getState().twinLayer).toBe("rooms");
@@ -101,7 +117,7 @@ describe("tour views", () => {
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
     act(() => useTour.getState().end("completed", "optimize"));
-    expect(useTour.getState().restore).toEqual({ path: "/", tab: "Invest", then: "optimize" });
+    expect(useTour.getState().restore).toEqual({ path: "/hotel", tab: "Invest", then: "optimize" });
   });
 });
 
@@ -112,7 +128,7 @@ describe("tour flow", () => {
     useTour.setState({ active: false, index: 0, direction: 1, origin: null, restore: null });
     resetTourAutoStart();
     navigate.mockClear();
-    pathname = "/";
+    pathname = "/hotel";
   });
   afterEach(() => cleanup());
 
@@ -143,6 +159,7 @@ describe("tour flow", () => {
 
   it("Take a tour replays from the first step; Next, Back, Skip and Finish work, and hotel state is unchanged", async () => {
     window.localStorage.setItem(TOUR_STORAGE_KEY, "completed");
+    pathname = "/"; // the tour starts on the portfolio homepage
     const snap = () => {
       const t = useTwin.getState();
       return JSON.stringify({ input: t.hotelInput, scenario: t.scenario, plans: t.customPlans, layer: t.twinLayer, time: [t.timeMode, t.timeMonth, t.timeHour, t.playing, t.playbackSpeed], plan: t.hotelPlan });
@@ -150,9 +167,9 @@ describe("tour flow", () => {
     const before = snap();
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
-    expect(await screen.findByText("Meet your hotel's digital twin")).toBeTruthy();
-    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 14");
-    expect((await screen.findByTestId("tour-insight")).textContent).toMatch(/a year on energy/);
+    expect(await screen.findByText("Welcome to Energy Twin")).toBeTruthy();
+    expect(screen.getByTestId("tour-progress").textContent).toBe("1 of 13");
+    expect((await screen.findByTestId("tour-insight")).textContent).toMatch(/a year on energy across/);
     fireEvent.click(screen.getByTestId("tour-next"));
     expect(useTour.getState().index).toBe(1);
     act(() => useTour.getState().back());
@@ -173,7 +190,7 @@ describe("tour flow", () => {
     fireEvent.click(screen.getByText("Skip tour"));
     expect(useTour.getState().active).toBe(false);
     expect(readTourOutcome()).toBe("skipped");
-    expect(useTour.getState().restore?.path ?? "/").toBe("/");
+    expect(useTour.getState().restore?.path ?? "/hotel").toBe("/hotel");
   });
 
   it("Escape skips the tour", () => {
@@ -188,6 +205,6 @@ describe("tour flow", () => {
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
     act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "portfolio") }));
-    expect(navigate).toHaveBeenCalledWith({ to: "/portfolio" });
+    expect(navigate).toHaveBeenCalledWith({ to: "/" });
   });
 });

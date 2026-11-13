@@ -121,6 +121,13 @@ function budget(c: AdvisorContext, q: ParsedQuestion): string[] | null {
   s.push(`For ${OBJECTIVE_TEXT[c.hotel.objective] ?? 'your goal'}, the top choice is ${describePackage(win)}, leaving ${usd(win.remainingBudget)} of the budget unspent.`);
   const others = plan.packages.filter((p) => p.name !== win.name).map((p) => `${p.role.toLowerCase()}: ${p.name} (${usd(p.cost)}, saving ${usd(p.annualSavings.mid)} a year)`);
   if (others.length) s.push(`Other options are ${others.join('; ')}.`);
+  // An upgrade the question names that the top choice leaves out ("why not solar?"): its own figures, from the comparison.
+  for (const id of q.upgrades) {
+    const u = c.upgrades.find((x) => x.id === id);
+    if (!u || win.upgradeIds.includes(id)) continue;
+    const why = u.cost > plan.budget ? `costs more than the ${usd(plan.budget)} budget` : 'saves less for the money than the packages above';
+    s.push(`${describeUpgrade(u)}; it is not in the top choice because it ${why}.`);
+  }
   return s;
 }
 

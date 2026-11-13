@@ -5,7 +5,9 @@ import type {
   FinancialMetrics,
   HotelData,
   HotelProfile,
+  IllustrativeIncentives,
   IncentiveLine,
+  IncentiveProgram,
   ProjectionYear,
   Range3,
   SolarDetails,
@@ -22,6 +24,38 @@ export const DEFAULT_FINANCE: Omit<FinancialAssumptions, 'horizonYears'> = {
   gasPriceGrowth: hotelData.defaults.finance.gasPriceGrowth,
   discountRate: hotelData.defaults.finance.discountRate,
 };
+
+/** The year plans are evaluated for (defaults.json `finance.analysisYear`; 2026). Incentives count only for their own program year. */
+export const ANALYSIS_YEAR: number = hotelData.defaults.finance.analysisYear ?? 2026;
+
+/** A program's year as a number ("2025 rate" or 2025 → 2025); null when unknown. */
+export function programYearOf(prog: Pick<IncentiveProgram, 'programYear'>): number | null {
+  const y = prog.programYear;
+  if (typeof y === 'number' && Number.isFinite(y)) return y;
+  if (typeof y === 'string') {
+    const m = /\b(19|20)\d{2}\b/.exec(y);
+    return m ? Number(m[0]) : null;
+  }
+  return null;
+}
+
+/**
+ * How a program counts (docs/15 §21, the program-year rule):
+ *   'applied'      verified, with an amount, marked applied, and its program year is the analysis year (or the data gives no year field);
+ *   'illustrative' verified, with an amount, but its program year is another year: shown separately ("if renewed"), never in the base case;
+ *   'listed'       anything else: listed as possible, $0 in the figures.
+ */
+export function incentiveStatus(
+  prog: Pick<IncentiveProgram, 'programYear' | 'verified' | 'value' | 'applied'>,
+  analysisYear: number = ANALYSIS_YEAR,
+): 'applied' | 'illustrative' | 'listed' {
+  if (!prog.verified || prog.value === null) return 'listed';
+  const year = programYearOf(prog);
+  const hasYear = prog.programYear !== undefined;
+  if (hasYear && year !== null && year !== analysisYear) return 'illustrative';
+  if (hasYear && year === null) return 'listed';
+  return prog.applied ? 'applied' : 'listed';
+}
 
 /** The two fixed comparison periods every upgrade is shown over, besides the hotel's own horizon. */
 export const BENEFIT_YEARS = [5, 10] as const;
@@ -173,19 +207,25 @@ export function incentiveLines(
   overrides: IncentiveOverrides = {},
   data: HotelData = hotelData,
   coverage: Partial<Record<UpgradeId, number>> = {},
-): { lines: IncentiveLine[]; total: Range3 } {
+): { lines: IncentiveLine[]; total: Range3; illustrativeTotal: Range3 } {
   const lines: IncentiveLine[] = [];
   const total: Range3 = { low: 0, mid: 0, high: 0 };
+  const illustrativeTotal: Range3 = { low: 0, mid: 0, high: 0 };
+  const analysisYear = data.defaults.finance.analysisYear ?? ANALYSIS_YEAR;
   for (const item of items) {
     const user = overrides[item.id];
     const userSet = typeof user === 'number' && Number.isFinite(user) && user > 0;
     for (const prog of data.incentives.incentives) {
       if (!prog.appliesTo.includes(item.id)) continue;
       if (prog.hvacTypes && !prog.hvacTypes.includes(p.hvacType)) continue;
-      const usable = !userSet && prog.applied && prog.verified && prog.value !== null;
+      // A utility's program only reaches hotels in its territory (approximated by state; ComEd serves northern Illinois).
+      if (prog.states && !prog.states.includes(p.state)) continue;
+      const status = incentiveStatus(prog, analysisYear);
+      const usable = !userSet && status === 'applied';
+      const illustrative = !userSet && status === 'illustrative';
       const cov = coverage[item.id] ?? 1;
-      const amountAt = (s: (typeof SCENARIOS)[number]): number => {
-        if (!usable || prog.value === null) return 0;
+      const rateAt = (s: (typeof SCENARIOS)[number]): number => {
+        if (prog.value === null) return 0;
         const v = prog.value;
         const raw =
           prog.kind === 'percent_of_cost'
@@ -199,8 +239,21 @@ export function incentiveLines(
                   : v;
         return Math.min(raw, item.cost[s] * (prog.maxShareOfCost ?? 1));
       };
+      const amountAt = (s: (typeof SCENARIOS)[number]) => (usable ? rateAt(s) : 0);
       for (const s of SCENARIOS) total[s] += amountAt(s);
-      lines.push({ id: `${item.id}:${prog.id}`, label: prog.label, amount: amountAt('mid'), applied: usable, origin: 'program', note: prog.note, source: prog.source });
+      if (illustrative) for (const s of SCENARIOS) illustrativeTotal[s] += rateAt(s);
+      const year = programYearOf(prog);
+      lines.push({
+        id: `${item.id}:${prog.id}`,
+        label: prog.label,
+        amount: amountAt('mid'),
+        applied: usable,
+        origin: 'program',
+        note: prog.note,
+        source: prog.source,
+        ...(year !== null ? { programYear: year } : {}),
+        ...(illustrative ? { illustrativeAmount: rateAt('mid') } : {}),
+      });
     }
     if (userSet) {
       for (const s of SCENARIOS) total[s] += Math.min(user, item.cost[s]);
@@ -215,13 +268,13 @@ export function incentiveLines(
       });
     }
   }
-  return { lines, total };
+  return { lines, total, illustrativeTotal };
 }
 
 /** The common breakdown shown for every upgrade and package. */
 export function financialBreakdown(input: {
   grossCost: Range3;
-  incentives: { lines: IncentiveLine[]; total: Range3 };
+  incentives: { lines: IncentiveLine[]; total: Range3; illustrativeTotal?: Range3 };
   annualSavings: Range3;
   /** Solar part of the first-year savings in each scenario (0 without solar). */
   solarValue: Range3;
@@ -273,6 +326,28 @@ export function financialBreakdown(input: {
   }
   const applied = input.incentives.lines.filter((l) => l.applied);
   const listed = input.incentives.lines.filter((l) => !l.applied);
+  const illustrativeLines = input.incentives.lines.filter((l) => l.illustrativeAmount !== undefined && l.illustrativeAmount > 0);
+  let illustrativeIncentives: IllustrativeIncentives | undefined;
+  const illusTotal = input.incentives.illustrativeTotal?.mid ?? 0;
+  if (illustrativeLines.length > 0 && illusTotal > 0) {
+    // Same savings stream and discount rate as the base case; only the net investment is lower.
+    const n = Math.max(0, net.mid - illusTotal);
+    const years = [...new Set(illustrativeLines.map((l) => l.programYear).filter((y): y is number => y !== undefined))].sort();
+    illustrativeIncentives = {
+      label: illustrativeLines.every((l) => l.label.startsWith('ComEd'))
+        ? `if ComEd renews the ${years.join(' and ')} rate`
+        : `if the ${years.join(' and ')} rates are renewed`,
+      programYears: years,
+      lines: illustrativeLines.map((l) => ({ id: l.id, label: l.label, amount: l.illustrativeAmount ?? 0, programYear: l.programYear ?? 0, source: l.source })),
+      total: illusTotal,
+      netInvestment: n,
+      simplePaybackYears: input.annualSavings.mid > 0 ? n / input.annualSavings.mid : null,
+      netBenefit5: netBenefitOver(BENEFIT_YEARS[0], stream('mid'), n),
+      netBenefit10: netBenefitOver(BENEFIT_YEARS[1], stream('mid'), n),
+      npv5: npvOver(BENEFIT_YEARS[0], stream('mid'), n, r),
+      npv10: npvOver(BENEFIT_YEARS[1], stream('mid'), n, r),
+    };
+  }
   const assumptions = [
     `First-year savings use today's energy prices; electricity prices are assumed to rise ${round1(input.priceGrowth * 100)}% a year and gas ${round1(input.gasPriceGrowth * 100)}% a year (EIA Annual Energy Outlook 2026, commercial, nominal).`,
     applied.length
@@ -280,6 +355,9 @@ export function financialBreakdown(input: {
       : listed.length
         ? 'No incentives applied; possible programs are listed with each upgrade and are applied only once confirmed.'
         : 'No incentive programs are listed for this upgrade.',
+    ...(illustrativeIncentives
+      ? [`Not counted: ${illustrativeIncentives.lines.map((l) => l.label).join('; ')} (${illustrativeIncentives.programYears.join(', ')} rate; the ${ANALYSIS_YEAR} rate is not yet confirmed), shown separately as illustrative.`]
+      : []),
     'Simple payback is the net investment divided by first-year savings.',
     `Net present value discounts future savings at ${round1(input.discountRate * 100)}% a year (a product decision; 3% is the alternative).`,
     input.solar
@@ -312,6 +390,7 @@ export function financialBreakdown(input: {
     npv10: npv(BENEFIT_YEARS[1]),
     solar: input.solar,
     assumptions,
+    ...(illustrativeIncentives ? { illustrativeIncentives } : {}),
   };
 }
 

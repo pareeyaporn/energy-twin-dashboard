@@ -206,4 +206,108 @@ can be changed. Sourced data is logged separately in [14_RESEARCH_LOG.md](14_RES
   controls. The savings (4–10% of HVAC) are unchanged. The choice moves the 300-room recommendation from LED + energy management to insulation +
   LED + sensors; the demo script follows (docs/07).
 - **LED keeps an assumed mix** (about 14% of fixtures replaced, the rest relamped) between the two sourced EIA bounds, rather than either extreme.
-- **Validation findings are reported, not tuned**: the model's guest-room controls savings read lower than field studies (docs/14 pass 10).
+- **Validation findings are reported, not tuned**: the model's guest-room controls savings sit inside the Illinois TRM range and below field studies from other climates (docs/14 pass 10).
+
+## 21. The program-year rule for incentives (November 2026)
+
+- **An incentive counts in the base case only when it is verified and its program year equals the analysis year** (`finance.analysisYear`,
+  2026, in defaults.json). The rule is general (`incentiveStatus` in `src/engine/hotel/finance.ts`); it does not single out a program.
+- **A verified rate from another year is shown separately as illustrative**, computed exactly like an applied incentive (same eligibility,
+  basis and 90% cap) with the same savings stream and discount rate; only the net investment is lower. The breakdown carries it as
+  `illustrativeIncentives` ("if ComEd renews the 2025 rate": amount, net investment, payback, 5- and 10-year net benefit and NPV), and the
+  plan views, the package lines and the comparison show it labeled "Illustrative". It never enters the optimizer's ranking, the portfolio
+  totals or any other figure.
+- **Today this affects ComEd's LED ($0.75 per W reduced) and occupancy-sensor ($0.25 per W controlled) rates**: they come from the 2025 Indoor
+  Lighting worksheet; the 2026 lighting worksheet could not be reached and a secondary page is not a confirmed 2026 amount. The 2026 guest-room
+  energy management rates (2026 HVAC worksheet) stay applied. When the 2026 lighting worksheet confirms a rate, set its `programYear` to 2026.
+- **Effect on the demo** (the user's choice, "exclude, show separately"): at $50,000 on the 85% scenario, LED + sensors is $38,940 net (was
+  $24,184), payback 3.8 years (was 2.3); illustrative with the 2025 rate: $24,184 net, 2.3 years. The packages chosen did not change for the
+  demo hotel; at the portfolio level O'Hare Gateway and Wells Street pick different packages.
+
+## 22. Energy insight thresholds and order (November 2026)
+
+The insights (docs/13 §14) only show findings the engine's own results support. The thresholds are team choices meant to keep the list short
+and meaningful, not sourced values; they are in `INSIGHT_THRESHOLDS` (`src/engine/hotel/insights.ts`) and can be tuned there.
+
+| Threshold | Value | Why |
+| --- | --- | --- |
+| Biggest cost driver | ≥ 25% of the bill | A use that is a quarter of the bill is worth an operator's attention; below that the "biggest" is not a driver |
+| Energy intensity | ≥ 10% above the portfolio median or the ENERGY STAR hotel median | Smaller gaps are within what climate and amenities explain; the ENERGY STAR median is national and not climate-adjusted, so the text says so |
+| Occupancy sensitivity | +10 points moves the bill ≥ 2% | A realistic busy-season step; 2% is the smallest change worth planning for |
+| Price exposure | a sustained +20% (the existing stress test) adds ≥ 3% | The stress test's size; 3% of the bill separates real exposure from noise |
+| Weather and equipment | ≥ 1% of the year's bill | Both are one-off or illustrative magnitudes, so a lower bar; the weather figure is a one-off total, never annualized |
+| Investment opportunity | fits the budget (installed cost), payback within the upgrade's life, positive 10-year net benefit | An upgrade that does not pay back within its life is not an opportunity; the optimizer then combines them |
+| High priority | dollar findings ≥ 5% of the bill; cost driver ≥ 1/3; intensity ≥ 25% above | One common scale ("a twentieth of the bill") so priorities compare across cards |
+| Count and order | at most 5; one energy-resilience card (the larger of price and weather); fixed order investment, cost driver, intensity, occupancy, resilience, equipment | Fewer, actionable cards; the order follows the operator's journey from what to do to what to watch |
+
+- **Insights read the baseline**, not the active what-if, so they describe the hotel as it runs today and do not change while the user
+  experiments; the Simulation impact panel covers the what-if.
+- **Actions only do what their label says**: the investment button runs the optimizer only when clicked; stress and occupancy buttons apply
+  that what-if (undone with Reset); the HVAC button switches the twin to the Equipment view; the intensity button opens the portfolio comparison.
+- **Stress-test kinds**: weather = temporary event; occupancy and equipment = operational scenario (temporary or persistent as defined);
+  prices = persistent financial assumption. Only persistent tests change long-term returns (unchanged from Phase 12).
+## 23. Reading a plan's finances and attributing savings (November 2026)
+
+- **When a plan is called attractive:** it saves money, its payback is no longer than its equipment's expected life (the savings-weighted
+  average of its upgrades' lifetimes) and its 10-year NPV at the app's discount rate is at least zero. A plan that pays back in more than
+  **7 years** is "pays back, but slowly" (a team choice for wording, not a published threshold; a typical owner's horizon for efficiency
+  capital). Otherwise it is "not financially attractive", and the report says "we do not recommend proceeding on these figures".
+- **Attribution:** each upgrade's share is its marginal saving when the engine applies the upgrades in its fixed order, interactions counted,
+  so the shares add up to the package total. Standalone savings are never added. The order is stated wherever the split is shown.
+- **Incentives in the report** follow the base case: only applied incentives are counted; illustrative incentives (for example a 2025 rate
+  not confirmed for 2026) are shown separately with what the net investment would be, and no figure includes them.
+- **The report's date** is the user's at the moment of the click (in the file name and on page 1); the engine has no clock.
+- **Synthetic label in reports** also applies to a sample hotel whose inputs were edited, because its building data are still the sample's.
+## 24. Utility data and calibration (November 2026)
+
+Team choices for the utility data feature (docs/19); the Guideline 14 criteria are reported, the rest are ours.
+
+- **Two multipliers per fuel, each 0.5–2.0** (weather-independent and weather-driven parts) rather than one factor on everything: few,
+  physically meaningful, and the monthly bills can identify them. The bounds cover the spread of hotel intensities around the climate
+  benchmark; a bill needing more usually means a wrong input (floor area, systems) or a missing meter, so we stop at the bound and say so.
+- **Weather fitted only when identifiable:** weather part at least 10% of the fuel and varying by at least 25% (coefficient of variation
+  of its daily rate) between bills; otherwise base only.
+- **When a fuel is calibrated:** 12 bills covering at least 330 days (Guideline 14 uses 12 months), and CV(RMSE) after the fit at most
+  30% (twice Guideline 14's 15%) and not worse than the original model. Otherwise the model is kept and the reason shown.
+- **The user chooses the baseline**; saving new records returns the hotel to the modeled baseline; plans made on the other baseline are
+  cleared with a notice.
+- **Validation thresholds:** outlier = use per day above 3× or below ⅓ of the fuel's median (6 bills or more); implied rate outside
+  $0.03–$0.60 per kWh or $0.20–$5.00 per therm; billing period over 62 days; all warnings, not errors. Negative cost is a warning
+  (credits), negative use an error.
+- **Units never assumed:** a use column without a unit in its header must get one from the user; gas volume converts at 1,037 Btu per
+  cubic foot (the EIA average already used for prices).
+- **Sample data:** derived from the hotel's own model with a documented shift (electricity ×1.06 / ×0.88, gas ×0.94 / ×1.12) and wobble,
+  labeled synthetic, never marked as real unless the user edits it and ticks "These are my hotel's real utility records".
+- **Storage:** browser only, per hotel; nothing goes to the server or the AI advisor except whether the baseline is calibrated.
+
+## 25. The portfolio as the homepage; multi-city portfolios (November 2026)
+
+- **The portfolio is the homepage** (`/`); the single-hotel dashboard is `/hotel`. Operators of several hotels start from "which hotel first";
+  a single-hotel organization skips the portfolio.
+- **Landing:** new visitors and Reset demo land on the portfolio. A returning user lands where they last were, on the first load of a visit only
+  (afterwards, opening the portfolio is always the user's choice).
+- **"Start here" uses investment priority**, not energy cost or intensity: the question is where a dollar does the most. When the biggest spender
+  is a different hotel, the card says why it ranks lower, so spending is not mistaken for priority.
+- **A national synthetic organization** (Meridian Hotels & Resorts) carries the multi-city hotels, so the Chicago demo chain and every demo figure
+  stay unchanged.
+- **The drawn map for several cities is a schematic** (one panel per city), not a drawn U.S. map: no sourced map geometry is bundled for those
+  cities, and an invented outline would look like data.
+- **Map colors:** cost and intensity use blue → amber → red, with the legend saying what high means (spends more, uses more per ft²); savings
+  potential and priority use a green scale, never red, because high is good there.
+- **"Reports" in the top bar** opens the hotel's Invest tab (the investment results) until the investment report is merged.
+- **What the portfolio remembers** (organization, filters, metric, selected hotel, list, sort, camera, scroll) is view state only, in the store;
+  no figure depends on it.
+
+## 26. The equipment inventory: which edits change the model (November 2026)
+
+- **Current equipment vs proposed upgrades are separate.** Correcting the installed equipment recalculates the baseline and is never shown
+  as savings; investments stay in the optimizer and custom plans, measured against the corrected hotel (docs/20).
+- **Only defensible levers change consumption**: heating efficiency, cooling COP, LED share by zone, water-heater efficiency, existing solar,
+  and the hotel's existing schedule and smart-controls settings. Quantities, nameplates, ages and other equipment are informational and
+  labeled so, because the model is by zone and end use, not per appliance; adding equipment must not add consumption without a modeled reason.
+- **Validation bounds** (thermal 50–99%, heat-pump COP 1.5–5, chiller COP 2–8, DX COP 2–5, LED 0–100%) are limits for typing errors, not data.
+- **The last heating, cooling or hot-water equipment cannot be removed**: a hotel without heating would silently lose its heating demand.
+- **Several items on one lever average by capacity** (count × capacity), a seasonal approximation.
+- **Replacement maps to existing upgrades** (HVAC equipment, LED, water heating, solar); anything else says "needs more information"
+  rather than inventing a cost.
+- **Existing solar is netted monthly with no export credit**, consistent with the $0 export-credit fallback (docs/15 earlier sections).

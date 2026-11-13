@@ -65,6 +65,7 @@ ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustra
 | Onboarding tour (15 steps with live figures, a time-lapse and the energy flow; first visit and replay; `docs/16`) | Built |
 | Add my hotel (saved in the browser, on the map, its own twin) | Built |
 | Organizations, brands, regions, ownership; switcher, filters, totals by group | Built (two synthetic organizations, Chicago only) |
+| Utility data: Utility Data Manager (editable sample, Excel/CSV upload, template), validation, calibration to bills (ASHRAE Guideline 14 metrics), choice of baseline; `docs/19` | Built (browser storage; not weather-normalized) |
 | Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |
 
 ## Tech stack
@@ -127,6 +128,7 @@ npx vitest run  # tests
 - [Data and research to-do](docs/08_DATA_TODO.md) and [setup](docs/01_SETUP.md)
 - [3D twin spec](docs/04_3D_SPEC.md) (what drives each visual)
 - [Onboarding tour](docs/16_ONBOARDING_TOUR.md) (every tutorial step and how the tour behaves)
+- [Utility data and calibration](docs/19_UTILITY_DATA.md) (spreadsheet, Excel template, validation, calibration method, baseline choice)
 
 ## Working with Lovable
 

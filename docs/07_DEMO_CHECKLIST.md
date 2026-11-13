@@ -68,7 +68,7 @@ answer (task 8.2) appears at once, or the template answer within 8 s. Wrong stat
 
 | Question | Answer owner | Short answer |
 | --- | --- | --- |
-| How accurate are the savings? | Engine lead | Planning estimates from public and benchmark data, shown as ranges and labeled synthetic where they are; not an engineering audit. Compared against a benchmark; calibration to real bills is on the roadmap |
+| How accurate are the savings? | Engine lead | Planning estimates from public and benchmark data, shown as ranges and labeled synthetic where they are; not an engineering audit. Compared against a benchmark; an operator can load 12 months of bills (Hotel tab → Manage Utility Data) and calibrate the model to them, with ASHRAE Guideline 14 fit metrics (docs/19) |
 | How is this different from Eden? | Pitch lead | Eden designs new net-zero single-family homes for architects and builders. We help operators of **existing** buildings simulate operating decisions and pick investments |
 | How is it different from ENERGY STAR Portfolio Manager? | Pitch lead | Portfolio Manager benchmarks past performance. We simulate what happens next and rank what to buy within a budget |
 | Does the AI make up numbers? | Engine lead | No. A deterministic engine computes everything; the AI only explains, and the app rejects any answer with a number that is not in the results |

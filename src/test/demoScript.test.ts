@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { useTwin } from "@/store/useTwin";
 import { selectAllProperties, selectDisplayed, selectHourState, selectPortfolioSummary, selectUpgradeComparison } from "@/store/hotelDerived";
-import { ZONE_IDS, ZONE_LABELS, benchmarkComparison } from "@/engine/hotel";
+import { ZONE_IDS, ZONE_LABELS } from "@/engine/hotel";
 import type { RankedPackage } from "@/engine/hotel";
 
 const usd = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
@@ -22,65 +22,81 @@ async function optimize() {
   return plan;
 }
 
-/** The demo path, act by act, with the figures each act says. */
+async function optimizePortfolio() {
+  vi.useFakeTimers();
+  const run = useTwin.getState().runPortfolioOptimizer();
+  await vi.advanceTimersByTimeAsync(3000);
+  await run;
+  vi.useRealTimers();
+  const plan = useTwin.getState().portfolioPlan!;
+  expect(plan).not.toBeNull();
+  return plan;
+}
+
+/** The demo path (docs/07, November 2026 version), act by act, with the figures each act says. */
 export async function demoFigures(): Promise<{ figures: Record<string, string>; names: Record<string, string> }> {
   const t = () => useTwin.getState();
   const f: Record<string, string> = {};
   const names: Record<string, string> = {};
   t().resetDemo();
 
-  // Act 1 and 2: the 100-room hotel.
-  const s = t();
-  f["baseline cost"] = usd(s.baseline.annual.cost);
-  const zones = [...ZONE_IDS].sort((a, b) => s.baseline.byZone[b].cost - s.baseline.byZone[a].cost);
-  zones.slice(0, 3).forEach((z, i) => (f[`zone ${i + 1}: ${ZONE_LABELS[z]}`] = usd(s.baseline.byZone[z].cost)));
-  const bench = benchmarkComparison(s.baseline, s.hotel.profile.floorAreaSqft);
-  const star = bench.peers.find((p) => p.id.startsWith("energy_star"))!;
-  f["site EUI"] = `${bench.siteEuiKBtuPerSqft.toFixed(1)} kBtu/ft²`;
-  f["vs ENERGY STAR median"] = `${Math.round(star.difference * 100)}% above the ENERGY STAR hotel median of ${star.siteEuiKBtuPerSqft.toFixed(0)}`;
+  // Act 1: the portfolio (3D map, KPIs, top opportunity).
+  const sum = selectPortfolioSummary(t());
+  f["portfolio hotels"] = String(selectAllProperties(t()).filter((p) => p.organizationId === t().organizationId).length);
+  f["portfolio energy cost"] = usd(sum.totals.cost);
+  f["portfolio savings potential"] = usd(sum.totals.savingsPotential);
+  f["portfolio savings share"] = `${((sum.totals.savingsPotential / sum.totals.cost) * 100).toFixed(1)}%`;
+  const first = [...sum.properties].sort((a, b) => b.priorityScore - a.priorityScore)[0]!;
+  names["top hotel"] = first.name;
+  f["top opportunity saves / yr"] = usd(first.potential!.annualSavings);
+  f["top opportunity net investment"] = usd(first.potential!.netInvestment);
+  f["top opportunity payback"] = yrs(first.potential!.paybackYears);
+  const spender = [...sum.properties].sort((a, b) => b.annual.cost - a.annual.cost)[0]!;
+  names["biggest spender"] = spender.name;
+  f["biggest spender cost"] = usd(spender.annual.cost);
 
-  // Act 3: a living building (the 3D presets January night 21:00 and July afternoon 15:00).
+  // Act 2: one budget across the chain (the page's default budget and objective).
+  const pp = await optimizePortfolio();
+  f["portfolio budget"] = usd(pp.budget);
+  f["portfolio plan saves / yr"] = usd(pp.totals.annualSavings);
+  f["portfolio plan payback"] = yrs(pp.totals.paybackYears);
+  f["portfolio hotels funded"] = `${pp.allocations.filter((a) => a.evaluation).length} of ${pp.allocations.length}`;
+
+  // Act 3: fly into the top hotel; the twin, a January night, a July afternoon, the carbon view.
+  t().openProperty(first.id);
+  const s = t();
+  f["hotel cost"] = usd(s.baseline.annual.cost);
+  const zones = [...ZONE_IDS].sort((a, b) => s.baseline.byZone[b].cost - s.baseline.byZone[a].cost);
+  f[`zone 1: ${ZONE_LABELS[zones[0]!]}`] = usd(s.baseline.byZone[zones[0]!].cost);
   t().setTime({ mode: "seasons", month: 0, hour: 21 });
   f["January night heating"] = `${Math.round(selectHourState(t()).demandKW.heating)} kW`;
   t().setTime({ month: 6, hour: 15 });
   f["July afternoon cooling"] = `${Math.round(selectHourState(t()).demandKW.cooling)} kW`;
+  const a = s.baseline.annual;
+  const gasCarbon = a.gasTherms * s.baseline.emissionFactors.gasKgPerTherm;
+  f["gas share of the bill"] = `${Math.round((a.gasCost / a.cost) * 100)}%`;
+  f["gas share of the carbon"] = `${Math.round((gasCarbon / a.carbonKg) * 100)}%`;
+  f["hotel carbon"] = `${Math.round(a.carbonKg / 1000).toLocaleString("en-US")} t`;
 
-  // Act 4: occupancy 60% → 85%, then smart room controls.
+  // Act 4: ask the AI "What if occupancy rises to 85%?" (the run_scenario tool), then Apply this what-if (the same scenario).
   t().setScenario({ occupancy: 0.85 });
   const occ = selectDisplayed(t()).result.annual.cost;
   f["85% occupancy cost"] = usd(occ);
   f["85% occupancy rise"] = usd(occ - s.baseline.annual.cost);
-  t().setScenario({ smartRoomControls: true });
-  const smart = selectDisplayed(t()).result.annual.cost;
-  f["smart controls save at 85%"] = usd(occ - smart);
 
-  // Act 5: $50,000 on the scenario.
-  t().setHotelBudget(50_000);
+  // Act 5: the hotel's budget on that scenario (the optimizer follows the scenario).
   const plan = await optimize();
+  f["hotel budget"] = usd(t().hotel.profile.budget);
   f["combinations tested"] = plan.combinationsTested.toLocaleString("en-US");
   f["feasible packages"] = plan.feasibleCount.toLocaleString("en-US");
   const top = plan.packages[0] as RankedPackage;
   const tf = top.evaluation.financials;
   names["top package"] = top.evaluation.name;
-  f["top gross"] = usd(tf.grossCost.mid);
-  f["top incentives"] = usd(tf.incentivesTotal);
   f["top net"] = usd(tf.netInvestment.mid);
   f["top saves / yr"] = usd(tf.annualSavings.mid);
   f["top payback"] = yrs(tf.simplePaybackYears);
   f["top 10-year net benefit"] = usd(tf.netBenefit10.mid);
   f["top CO2 / yr"] = `${Math.round(tf.carbonAvoidedKgPerYear.mid / 1000)} t`;
-  // ComEd's 2025 lighting rate: shown separately, not counted (the program-year rule, docs/15).
-  const ti = tf.illustrativeIncentives;
-  if (ti) {
-    f["top illustrative incentive"] = usd(ti.total);
-    f["top illustrative net"] = usd(ti.netInvestment);
-    f["top illustrative payback"] = yrs(ti.simplePaybackYears);
-  }
-  const fast = plan.packages.find((p) => p.role === "fastest_payback");
-  if (fast) {
-    names["fastest payback package"] = fast.evaluation.name;
-    f["fastest payback"] = yrs(fast.evaluation.financials.simplePaybackYears);
-  }
   const solar = selectUpgradeComparison(t()).find((r) => r.id === "rooftop_solar");
   if (solar) {
     f["solar cost"] = usd(solar.financials.grossCost.mid);
@@ -88,28 +104,6 @@ export async function demoFigures(): Promise<{ figures: Record<string, string>; 
   }
   t().applyHotelPackage(top.evaluation.id);
   f["after applying top package"] = usd(selectDisplayed(t()).result.annual.cost);
-
-  // Act 7: the 300-room preset at $150,000 (the preset resets the scenario).
-  t().selectHotelPreset("demo-chicago-300");
-  f["300-room baseline"] = usd(t().baseline.annual.cost);
-  t().setHotelBudget(150_000);
-  const big = (await optimize()).packages[0]!;
-  const bf = big.evaluation.financials;
-  names["300 package"] = big.evaluation.name;
-  f["300 gross"] = usd(bf.grossCost.mid);
-  f["300 net"] = usd(bf.netInvestment.mid);
-  f["300 saves / yr"] = usd(bf.annualSavings.mid);
-  f["300 payback"] = yrs(bf.simplePaybackYears);
-  if (bf.illustrativeIncentives) f["300 illustrative net"] = usd(bf.illustrativeIncentives.netInvestment);
-
-  // Portfolio (optional act): the chain.
-  t().resetDemo();
-  const sum = selectPortfolioSummary(t());
-  f["portfolio hotels"] = String(selectAllProperties(t()).filter((p) => p.organizationId === t().organizationId).length);
-  f["portfolio energy cost"] = usd(sum.totals.cost);
-  f["portfolio savings potential"] = usd(sum.totals.savingsPotential);
-  const first = [...sum.properties].sort((a, b) => b.priorityScore - a.priorityScore)[0]!;
-  f["portfolio top priority"] = `${first.name} (${first.priorityScore} of 100)`;
   t().resetDemo();
   return { figures: f, names };
 }
@@ -123,7 +117,6 @@ describe("demo script figures (docs/07)", () => {
     // Each figure must appear in bold, exactly as the app formats it (package names are said in short, so they are printed only).
     const missing = Object.entries(f).filter(([, v]) => !section.includes(`**${v}**`));
     expect(missing, "update docs/07 with these engine figures").toEqual([]);
-    expect(names["top package"]).toMatch(/LED lighting/);
-    expect(names["300 package"]).toMatch(/insulation.*LED.*Occupancy sensors/i);
+    expect(names["top hotel"]).toBe("Riverwalk Grand");
   }, 60_000);
 });

@@ -1,4 +1,5 @@
 import { baselineConditions } from './conditions';
+import { leverReference } from './equipment';
 import {
   CALIBRATION_RANGE,
   CATEGORIES,
@@ -283,15 +284,25 @@ export function simulate(
   for (const u of END_USES) {
     // Heating: the CBECS share describes a gas-heated hotel; other systems need reference efficiency / their efficiency as much site energy.
     const hs = d.heatingSystems;
-    const heatFactor = u === 'heating' ? hs.reference.efficiency / hs[p.hvacType].efficiency : 1;
+    // The hotel's current equipment (docs/20) replaces the reference efficiency where the operator entered one.
+    const lev = p.equipmentLevers ?? {};
+    const heatFactor = u === 'heating' ? hs.reference.efficiency / (lev.heatingEfficiency ?? hs[p.hvacType].efficiency) : 1;
+    const ref = leverReference(p, data);
+    const coolFactor = u === 'cooling' && lev.coolingCop ? ref.coolingCop / lev.coolingCop : 1;
     const share = (d.endUseShareOfSiteByClimate?.[p.climateId] ?? d.endUseShareOfSite)[u];
-    const e0u = siteAnnual * share * heatFactor;
-    const fuel = fuelSplit(u, p, data);
+    const baseFuel = fuelSplit(u, p, data);
+    // Water heaters' efficiency scales the gas part of hot water only (the electric part is pumps and electric heaters).
+    const dhw = u === 'hotWater' && lev.waterHeaterEfficiency ? ref.waterHeaterEfficiency / lev.waterHeaterEfficiency : 1;
+    const dhwMult = baseFuel.electric + baseFuel.gas * dhw;
+    const fuel = dhw === 1 ? baseFuel : { electric: baseFuel.electric / dhwMult, gas: (baseFuel.gas * dhw) / dhwMult };
+    const e0u = siteAnnual * share * heatFactor * coolFactor * dhwMult;
     const w = d.driverWeights[u];
     for (const z of ZONE_IDS) {
       const zs = zoneShare(u, z, p, data);
       if (zs <= 0) continue;
-      const e0 = e0u * zs;
+      // Lighting already LED in a zone uses less: the LED measure's own mid reduction on the LED share (docs/20).
+      const ledShare = u === 'lighting' ? (lev.ledShare?.[z] ?? 0) : 0;
+      const e0 = e0u * zs * (ledShare > 0 ? 1 - ledShare * ledReductionMid(data) : 1);
       for (let m = 0; m < 12; m++) {
         const days = DAYS_IN_MONTH[m] ?? 30;
         const occ = c.occupancyByMonth[m] ?? 0;
@@ -368,6 +379,7 @@ export function simulate(
     hdd: actual.hdd[m] ?? 0,
     cdd: actual.cdd[m] ?? 0,
   }));
+  if (p.equipmentLevers?.existingSolarKw) applyExistingSolar(cells, p, data, { elecRate, gasRate, efElec, efGas });
   const agg = aggregateCells(cells, monthMeta);
 
   return {
@@ -419,4 +431,39 @@ function calibrateToBills(p: HotelProfile, cond: Conditions, raw: EnergyResult, 
   const clamped = (report.elec.usable && report.elec.atBound) || (report.gas.usable && report.gas.atBound);
   const cal: Calibration = { factor: 1, source: 'bill', clamped, method: 'utility_bills', fuelFactors, report };
   return simulate(p, cond, data, cal);
+}
+
+/** The LED retrofit's mid lighting reduction (upgrades.json), used for lighting that is already LED. */
+export function ledReductionMid(data: HotelData): number {
+  return data.upgrades.upgrades.find((u) => u.id === 'led_lighting')?.params['lightingReduction']?.mid ?? 0;
+}
+
+/**
+ * Existing solar (docs/20): each month's generation (kW x the location's PVWatts mid yield x the month's share) is subtracted from
+ * the hotel's purchased electricity, at most all of it (no export credit, monthly netting). The reduction is spread over the month's
+ * electric cells in proportion to their electricity, so every zone and end use shows purchased energy.
+ */
+function applyExistingSolar(cells: Cell[], p: HotelProfile, data: HotelData, env: { elecRate: number; gasRate: number; efElec: number; efGas: number }): void {
+  const kw = p.equipmentLevers?.existingSolarKw ?? 0;
+  const climate = data.weather.climates[p.climateId] ?? data.weather.climates[data.weather.defaultClimate];
+  const sol = climate?.solar;
+  if (!sol || kw <= 0) return;
+  for (let m = 0; m < 12; m++) {
+    const month = cells.filter((c) => c.month === m);
+    const elec = month.reduce((s, c) => s + c.elecKWh, 0);
+    if (elec <= 0) continue;
+    const gen = kw * sol.kWhPerKwYear.mid * (sol.monthlyShare[m] ?? 0);
+    const k = 1 - Math.min(gen, elec) / elec;
+    for (const c of month) {
+      if (c.elecKWh <= 0) continue;
+      const removedKBtu = c.elecKWh * (1 - k) * KBTU_PER_KWH;
+      const site = c.siteKBtu;
+      c.elecKWh *= k;
+      if (site > 0) for (const lt of Object.keys(c.loadKBtu) as LoadType[]) c.loadKBtu[lt] *= (site - removedKBtu) / site;
+      c.siteKBtu = Math.max(0, site - removedKBtu);
+      c.elecCost = c.elecKWh * env.elecRate;
+      c.cost = c.elecCost + c.gasCost;
+      c.carbonKg = c.elecKWh * env.efElec + c.gasTherms * env.efGas;
+    }
+  }
 }

@@ -487,6 +487,14 @@ territory (`states`). Still Chicago- or Illinois-based for every city: the upgra
 occupancy default and the age factor. Synthetic national organization: Meridian Hotels & Resorts (4 hotels, 910 rooms, about $1.57 million a year,
 savings potential about $113,000 a year; no incentives apply outside Illinois). Its top priority is Midtown Tower Hotel (New York), whose best
 package returns about 2.04 dollars of 10-year NPV per dollar.
+## 15. Current equipment levers (Phase 14G, November 2026)
+
+The operator's equipment corrections (`HotelInput.equipment`, validated by `validateEquipment`) set `profile.equipmentLevers`, which the
+simulation uses in place of reference values: heating site energy × `0.80 / e_h`; cooling electricity × `COP_ref / COP`; a zone's lighting
+× `(1 − s × 0.45)` for LED share s; the gas part of hot water × `0.80 / e_w`; existing solar netted from purchased electricity month by
+month (PVWatts mid yield). Upgrades measure against the corrected baseline without double counting (LED converts only the rest; the HVAC
+and water-heating reductions scale with the gap left to their targets; solar is limited to the roof left). Without corrections every
+result is unchanged. Full description, audit and limits: docs/20.
 
 ## Appendix A — Store contract (task 1.10): approved and built
 

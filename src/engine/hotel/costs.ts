@@ -1,4 +1,5 @@
 import { hotelData } from './data';
+import { enteredPlantCapacity } from './equipment';
 import { areasOf, orderUpgrades, upgradeDef } from './upgrades';
 import { solarCostPerW } from './solar';
 import { isSolar } from './constants';
@@ -8,6 +9,9 @@ const SCENARIOS = ['low', 'mid', 'high'] as const;
 
 /** The hotel's estimated cooling capacity in tons, by HVAC type (equipment.json placeholders; 0.75 ton per guest room is an assumption). */
 export function coolingTons(p: HotelProfile, data: HotelData = hotelData): number {
+  // Capacity the operator entered for the central plant (current equipment, docs/20) replaces the estimate.
+  const entered = enteredPlantCapacity(p, data).chillerTons;
+  if (entered !== null) return entered;
   const e = data.equipment;
   const publicSqft = p.floorAreaSqft * e.publicAreaShareOfFloorArea;
   const c = e.central;
@@ -27,6 +31,8 @@ export function coolingTons(p: HotelProfile, data: HotelData = hotelData): numbe
 
 /** Central boiler capacity in kBtu/h (central plant only). */
 export function boilerKBtuH(p: HotelProfile, data: HotelData = hotelData): number {
+  const entered = enteredPlantCapacity(p, data).boilerKBtuH;
+  if (entered !== null) return entered;
   return p.hvacType === 'central_plant' ? p.floorAreaSqft * data.equipment.central.central_plant.boilerKBtuHPerSqft : 0;
 }
 

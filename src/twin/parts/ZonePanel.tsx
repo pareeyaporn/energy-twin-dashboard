@@ -3,6 +3,7 @@ import { ZONE_LABELS } from "@/engine/hotel";
 import { useTwin } from "@/store/useTwin";
 import { selectEquipment, selectOpportunities, selectTypicalDay, selectZoneRows } from "@/store/hotelDerived";
 import { kwh, monthLabel, percent, signedUsd, therms, usd } from "../format";
+import { quantityText } from "./equipmentSystems";
 
 /** Details of the selected zone: energy, cost, equipment, schedules, efficiency assumptions, opportunities and its hourly load. */
 export function ZonePanel() {
@@ -65,13 +66,16 @@ export function ZonePanel() {
       </section>
 
       <section aria-label="Equipment, schedules and efficiency">
-        <h4 className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">Major equipment (estimates)</h4>
+        <h4 className="mb-1 text-xs uppercase tracking-wide text-muted-foreground">Major equipment</h4>
         {items.length === 0 ? (
           <p className="text-sm text-muted-foreground">No modeled equipment for this zone.</p>
         ) : (
           <ul className="space-y-1 text-sm">
             {items.map((i) => (
-              <li key={i.id}>{i.label} <span className="text-muted-foreground">× {i.count.toLocaleString("en-US")}</span></li>
+              <li key={i.id}>
+                {i.label} <span className="text-muted-foreground">{quantityText(i)}</span>{" "}
+                <span className="text-[10px] text-text-muted">{i.estimated ? "estimated" : "your data"}</span>
+              </li>
             ))}
           </ul>
         )}

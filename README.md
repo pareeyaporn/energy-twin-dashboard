@@ -64,6 +64,7 @@ ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustra
 | Digital twin: 2D (`src/twin`) and 3D (`src/three`, Phase 9) | Built |
 | Workspace UI (Lovable, prompts LV1–LV15) | Built |
 | Flow, Rooms and Equipment layers (animated Sankey, room façade, equipment cards) | Built (Phase 10) |
+| Editable equipment inventory: current equipment vs proposed upgrades, add / edit / remove / replace, simulation levers (`docs/20`) | Built (Phase 14G) |
 | Investment catalog and custom plans; stress tests | Built (Phases 11 and 12) |
 | Hotel portfolio, the homepage (`/`; the hotel dashboard is `/hotel`): synthetic Chicago chains and a multi-city organization (New York, Miami, Denver) on a MapLibre map (city markers when zoomed out; a per-city schematic offline), "Start here" and the investment priority explained, the view kept when you visit a hotel and come back, totals, comparison table, charts, one budget split across hotels, open any hotel in the twin; my portfolio (custom plan per hotel) vs the AI portfolio; portfolio stress tests | Built (Phase 13 P0 and P1) |
 | AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |

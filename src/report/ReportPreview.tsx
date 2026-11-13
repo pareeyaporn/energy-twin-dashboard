@@ -192,6 +192,13 @@ function HotelPreview({ d }: { d: HotelReportData }) {
               />
             </>
           )}
+          {d.equipment && (
+            <>
+              <H3>Current equipment</H3>
+              <p className="mb-1 text-[11px] text-[#475569]">{d.equipment.note}</p>
+              <List items={d.equipment.lines} />
+            </>
+          )}
           <H3>Utility incentives</H3>
           <List
             items={[

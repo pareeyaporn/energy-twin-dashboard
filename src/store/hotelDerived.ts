@@ -1,4 +1,5 @@
 // Hotel state helpers and selectors for the Energy Twin store. Pure functions that call the engine (src/engine/hotel);
+import { withEquipment } from "./equipmentStorage";
 // no math lives here. Selectors are memoized on their inputs so components can call them on every render.
 import {
   STRESS_TESTS,
@@ -369,10 +370,13 @@ export function selectPortfolioItems(s: TwinState): { property: PortfolioPropert
   );
   const next = shown.map((property) => ({
     property,
+    // Unopened hotels carry their saved equipment corrections (docs/20) and their chosen utility baseline (docs/19), so portfolio totals
+    // match each hotel's own view. Both helpers are cached, so the input stays the same object while nothing changes.
     input:
       property.id === s.activePropertyId
         ? s.hotelInput
-        : (s.propertyStates[property.id]?.hotelInput ?? withUtilityCached(property.id, property.input, s.utilityData[property.id])),
+        : (s.propertyStates[property.id]?.hotelInput ??
+          withUtilityCached(property.id, withEquipment(property, s.equipmentByProperty?.[property.id]), s.utilityData[property.id])),
   }));
   const same = next.length === lastItems.length && next.every((x, i) => x.property === lastItems[i]!.property && x.input === lastItems[i]!.input);
   if (!same) lastItems = next;

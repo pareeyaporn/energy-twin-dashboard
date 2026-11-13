@@ -48,6 +48,19 @@ export { validateGrid, recordsToGrid, VALIDATION_RULES } from './billsValidate';
 export type { GridField, GridMode, GridIssue, GridCheck } from './billsValidate';
 export { sampleUtilityBills, SAMPLE_YEAR, SAMPLE_SHIFT, SAMPLE_WOBBLE } from './billsSample';
 export {
+  currentEquipment,
+  estimatedInventory,
+  equipmentLevers,
+  equipmentTemplates,
+  validateEquipment,
+  replacementUpgrade,
+  usableRoofKw,
+  leverReference,
+  formatEfficiency,
+  enteredPlantCapacity,
+} from './equipment';
+export type { LeverValue, EquipmentRole, EquipmentProblem } from './equipment';
+export {
   upgradeDef,
   upgradeLifetime,
   orderUpgrades,

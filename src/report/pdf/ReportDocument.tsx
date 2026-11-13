@@ -375,6 +375,13 @@ function HotelReport({ d, generated }: { d: HotelReportData; generated: string }
             />
           </>
         )}
+        {d.equipment && (
+          <>
+            <Text style={st.h3}>Current equipment</Text>
+            <Text style={{ marginBottom: 2 }}>{t(d.equipment.note)}</Text>
+            <Bullets items={d.equipment.lines} />
+          </>
+        )}
         <Text style={st.h3}>Utility incentives</Text>
         <Bullets
           items={[

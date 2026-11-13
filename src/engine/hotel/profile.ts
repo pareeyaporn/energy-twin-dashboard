@@ -1,4 +1,5 @@
 import { hotelData } from './data';
+import { equipmentLevers, validateEquipment } from './equipment';
 import { billRates, normalizeBills } from './bills';
 import type { HotelData, HotelInput, HotelProfile, ResolvedProfile } from './types';
 
@@ -156,6 +157,16 @@ export function resolveProfile(input: HotelInput = {}, data: HotelData = hotelDa
   if (input.solarExportCreditPerKWh !== undefined) {
     if (Number.isFinite(input.solarExportCreditPerKWh) && input.solarExportCreditPerKWh >= 0 && input.solarExportCreditPerKWh <= 0.5) profile.solarExportCreditPerKWh = input.solarExportCreditPerKWh;
     else notes.push('Solar export credit must be between $0 and $0.50 per kWh; the default is used instead.');
+  }
+  // The hotel's current equipment (docs/20): corrections to the estimate. Invalid fields are dropped with a note.
+  if (input.equipment?.length) {
+    const eq = validateEquipment(input.equipment, profile, data);
+    for (const pr of eq.problems) notes.push(`Equipment: ${pr.message}`);
+    if (eq.overrides.length) {
+      profile.equipment = eq.overrides;
+      const levers = equipmentLevers(profile, eq.overrides, data);
+      if (Object.keys(levers).length) profile.equipmentLevers = levers;
+    }
   }
   return { profile, defaulted, notes };
 }

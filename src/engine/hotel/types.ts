@@ -56,6 +56,8 @@ export interface HotelInput {
   /** Use the average rates of the bills (cost / use) instead of the state averages, when the bills carry costs. Default false. */
   useBillRates?: boolean;
   electricityRate?: number; // $/kWh
+  /** Corrections to the estimated equipment: what is actually installed (docs/20). Changes the baseline, never counts as savings. */
+  equipment?: EquipmentOverride[];
   /** EPA eGRID subregion acronym (for example RFCW); defaults from the city, then the state, then the U.S. rate. */
   gridSubregion?: string;
   /** Override for the solar installed price, $ per W (DC) before incentives, all sizes (the low–high spread of the size tier is kept). */
@@ -78,6 +80,9 @@ export interface HotelInput {
 
 /** Every field filled in. */
 export interface HotelProfile {
+  /** Valid equipment corrections (docs/20) and the simulation levers they set. */
+  equipment?: EquipmentOverride[];
+  equipmentLevers?: EquipmentLevers;
   name: string;
   city: string;
   state: string;
@@ -452,7 +457,7 @@ export interface HotelData {
       ptac: { label: string; tonsPerPublicSqft: number; efficiency: string };
       pthp: { label: string; tonsPerPublicSqft: number; efficiency: string };
       vrf: { label: string; tonsPerRoom: number; efficiency: string };
-      central_plant: { label: string; boilerKBtuHPerSqft: number; tonsPerSqft: number; efficiency: string };
+      central_plant: { label: string; boilerKBtuHPerSqft: number; tonsPerSqft: number; efficiency: string; boilerEfficiency?: string; chillerEfficiency?: string };
       rtu: { label: string; tonsPerSqft: number; efficiency: string };
     };
     guestRoomLightingKW: number;
@@ -463,12 +468,87 @@ export interface HotelData {
     kitchen: { rangeKBtuHPerRoom: number; hoods: number; hoodKW: number; refrigeration: number; refrigerationKW: number };
     elevators: { perFloors: number; ratedKW: number };
     laundry: { dryerKBtuH: number };
-    hotWater: { heaterKBtuHPerRoom: number; storageGalPerRoom: number; recircPumps: number; recircPumpKW: number };
+    hotWater: { heaterKBtuHPerRoom: number; storageGalPerRoom: number; recircPumps: number; recircPumpKW: number; heaterUnitKBtuH?: number };
+    /** Public-area air handling, kW per ft² of public area (assumption). */
+    publicAirHandlingKWPerSqft?: number;
+    /** Reference values and validation bounds for inventory edits (docs/20). */
+    levers?: EquipmentLeverData;
+    /** Templates for "Add equipment" (docs/20). */
+    templates?: EquipmentTemplate[];
+    templatesSource?: string;
     source: string;
     verified: boolean;
   };
   presets: { id: string; label: string; synthetic: boolean; note?: string; input: HotelInput }[];
   upgrades: UpgradesData;
+}
+
+// ---- Equipment inventory (Phase 14G, docs/20) ----
+
+export type EquipmentCategory = 'hvac' | 'water' | 'lighting' | 'kitchen' | 'laundry' | 'other' | 'renewables';
+/** How an item's efficiency is expressed. */
+export type EfficiencyKind = 'thermal' | 'heatPumpCop' | 'chillerCop' | 'dxCop' | 'ledShare';
+/** The simulation parameter an item feeds; items without a lever are informational. */
+export type EquipmentLever = 'heatingEfficiency' | 'coolingCop' | 'ledShare' | 'waterHeaterEfficiency' | 'existingSolarKw';
+export type EquipmentFuel = 'electric' | 'gas' | 'solar';
+
+export interface EquipmentTemplate {
+  id: string;
+  category: EquipmentCategory;
+  label: string;
+  zone: ZoneId;
+  fuel: EquipmentFuel;
+  capacityUnit: string;
+  efficiencyKind?: EfficiencyKind;
+  defaultEfficiency?: number;
+  lever?: EquipmentLever;
+  defaultCapacity?: number;
+  defaultSchedule?: string;
+  note?: string;
+}
+
+export interface EquipmentLeverData {
+  coolingCopReference: Record<HvacType, number>;
+  waterHeaterReferenceEfficiency: number;
+  waterHeaterUpgradeEfficiency: number;
+  bounds: Record<'thermal' | 'heatPumpCop' | 'chillerCop' | 'dxCop' | 'ledShare' | 'quantity' | 'capacity' | 'ageYears', [number, number]>;
+  source: string;
+}
+
+/**
+ * An operator's change to the estimated equipment (the hotel's current, installed equipment, not a proposal). `id` is the estimated
+ * item it corrects (for example "boilers") or a new id for added equipment (with `template`). Any field given is user-entered.
+ */
+export interface EquipmentOverride {
+  id: string;
+  template?: string;
+  removed?: boolean;
+  label?: string;
+  quantity?: number;
+  /** Per unit, in the item's capacity unit. */
+  capacity?: number;
+  zone?: ZoneId;
+  schedule?: string;
+  /** In the item's efficiency kind: thermal efficiency (0–1), COP, or LED share of fixtures (0–1). */
+  efficiency?: number;
+  /** Values for an item with more than one modeled efficiency (for example a heat pump's heating COP and cooling COP). */
+  levers?: Partial<Record<EquipmentLever, number>>;
+  ageYears?: number;
+  notes?: string;
+}
+
+/** What the current equipment changes in the simulation (undefined = the estimate's reference value). */
+export interface EquipmentLevers {
+  /** Seasonal heating efficiency of the main heating system (thermal efficiency, or COP for heat pumps). */
+  heatingEfficiency?: number;
+  /** Cooling COP of the main cooling equipment. */
+  coolingCop?: number;
+  /** Share of lighting already LED, by zone (0–1). */
+  ledShare?: Partial<Record<ZoneId, number>>;
+  /** Gas water heaters' thermal efficiency. */
+  waterHeaterEfficiency?: number;
+  /** Existing solar, kW DC. */
+  existingSolarKw?: number;
 }
 
 // ---- Upgrades, costs and financial metrics (Phase 2) ----

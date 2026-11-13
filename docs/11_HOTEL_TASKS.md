@@ -560,6 +560,26 @@ operator-experience brief, the "Redesign Homepage Around the Hotel Portfolio" br
       demo, reconciliation, landing rules); Playwright on desktop 1440×900 and phone 390×844, street map and drawn map*
 - [ ] 14D.17 **P2** [CC] Later — *marker clustering within a city at very low zoom; panning on the drawn schematic; arrow keys between markers;
       per-city savings parameters (beyond Chicago's IL-TRM) and utility incentives outside Illinois*
+### 14G Equipment inventory (`src/engine/hotel/equipment.ts`, `src/twin/parts/EquipmentLayer.tsx`, docs/20)
+- [x] 14G.1 [CC] Audit the Equipment tab — *done (November 2026): fan-coil "27 kW" was the guest-room HVAC system (labeled system-level now);
+      boiler demand was gas shown as kW (electricity and gas apart, therms/h and kBtu/h, useful heat); storage "× 600" was gallons (`1 × 600 gal`);
+      hot-water parts repeated one system's totals (shown once); zone savings looked like item savings (scope labeled); shared boiler/chiller
+      efficiency text split; unsourced AHU constant moved to data as an assumption; three 200 kBtu/h water heaters to match the cost. Table in docs/20 §1*
+- [x] 14G.2 [CC] One equipment data model: `HotelInput.equipment` corrections, validated (`validateEquipment`), resolved into
+      `profile.equipment` and `profile.equipmentLevers`; `currentEquipment` gives the cards with estimated / user-entered provenance — *done*
+- [x] 14G.3 [CC] Simulation levers: heating efficiency, cooling COP, LED share by zone, water-heater efficiency (gas part), existing solar
+      (monthly netting); schedules and smart controls through the hotel's own settings; everything else informational and labeled — *done; equations in docs/20 §3*
+- [x] 14G.4 [CC] No double counting: LED retrofits only the rest (ineligible at 100%), HVAC and water heating scale with the gap to their
+      targets, solar limited to the roof left, entered plant capacity sets the HVAC cost basis; corrections never shown as savings — *done; docs/20 §4*
+- [x] 14G.5 [CC] Equipment tab: Current equipment / Proposed upgrades, Add (19 templates in 7 categories), Edit (kind-specific validated fields),
+      Remove (confirmation; last heating, cooling or hot-water item kept), Replace (engine evaluation side by side, or "needs more information"),
+      Undo, Reset to sample equipment, "Add to my plan" — *done*
+- [x] 14G.6 [CC] Per-hotel persistence (`energy-twin:equipment:v1`), portfolio totals carry saved corrections, Reset demo clears them — *done*
+- [x] 14G.7 [CC] Report and PDF list the current equipment with provenance — *done (`src/report/data.ts` `equipment`)*
+- [x] 14G.8 [CC] Tests — *done: `src/engine/hotel/__tests__/equipment.test.ts` (levers, no double counting, validation),
+      `src/test/equipmentInventory.test.tsx` (store, persistence, independence, reconciliation, report, UI); browser check desktop and phone*
+- [ ] 14G.9 P2 [CC] Heat-pump water heaters and fuel switching; per-appliance demand; hourly solar self-consumption for existing arrays;
+      multi-step undo; persisting card-edited schedules for sample hotels
 
 ## Phase 8 — Demo hardening (all)
 - [x] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

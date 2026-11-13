@@ -77,6 +77,40 @@ package ranking. (Carbon fines such as New York's Local Law 97 appear in the pit
 **Limits:** an estimate, not verified carbon accounting. It uses the grid's **yearly average** (location-based), not the hour-by-hour mix,
 so noon solar and midnight lighting count the same. And because the energy is an estimate until real bills are entered, so is the carbon.
 
+**What is included, and what isn't.** Energy Twin counts the energy-related carbon: purchased electricity (Scope 2) and natural gas
+burned on site (Scope 1). That is the core of hotel energy footprints, and electricity plus gas is about 96% of a typical US hotel's
+energy (EIA CBECS 2018, below).
+
+| Energy source in US hotels and resorts | Share of energy (major fuels) | Hotels using it | In Energy Twin? |
+| --- | --- | --- | --- |
+| Electricity | 57.1% | 100% | Yes |
+| Natural gas | 39.2% | 64% | Yes |
+| District steam, hot water or chilled water | 2.7% | about 5% | No |
+| Fuel oil or diesel (boilers, emergency generators) | 1.0% | 7% | No |
+| Propane | small (not a CBECS major fuel) | 14% | No |
+| On-site solar | small | about 3% | Yes (existing solar, in the equipment list) |
+
+Source: computed from the CBECS 2018 public microdata, hotels and resorts (`PBAPLUS` 38, 272 buildings, weighted with `FINALWT` to
+65,800 US buildings): each fuel's Btu over the major-fuel total `MFBTU`; "hotels using it" from the `…USED` flags (`docs/14`, pass 13).
+
+| Carbon source | Scope | In Energy Twin? |
+| --- | --- | --- |
+| Purchased electricity | 2 | Yes (EPA eGRID) |
+| Natural gas burned on site | 1 | Yes (EPA factor) |
+| District steam or chilled water | 2 | No |
+| Fuel oil, propane, generator diesel | 1 | No |
+| Refrigerant leaks (AC, chillers, kitchen refrigeration) | 1 | No: the largest gap; these gases warm the planet thousands of times more than CO₂ per kg |
+| Hotel vehicles (shuttles) | 1 | No |
+| Electricity lost on power lines | 2 (adjustment) | No: eGRID's output rate excludes it |
+| Outsourced laundry, food, waste, water, guest travel, construction materials | 3 | No: outside a building energy tool |
+
+The app's "How was this calculated?" panel for carbon lists the same exclusions. Possible next steps: an optional refrigerant line
+(refrigerant type and pounds recharged a year from service records × EPA's warming factor), then district steam and other fuels when
+we model New York or rural hotels.
+
+**To a judge:** "We cover electricity and natural gas, about 96% of a typical US hotel's energy, and the energy-related carbon, Scopes 1
+and 2. Refrigerants, district steam and backup fuels are next."
+
 **In one line:** "We convert the estimated energy to carbon with EPA's published factors for Chicago's grid and for natural gas."
 
 ## 4. Then what are all the JSON files?

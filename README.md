@@ -17,6 +17,17 @@ All P0 and P1 features are built, plus an interactive 3D twin, and run on a synt
 Numbers are **estimates**: most inputs are now sourced from primary documents (EIA, EPA eGRID, NOAA, PVWatts, IL-TRM, CBECS, ENERGY STAR);
 installed costs, solar $/W and incentive amounts are still labeled placeholders or unverified. See the status below.
 
+## Screenshots
+
+Synthetic demonstration data; every figure is a modeled estimate.
+
+| | |
+| --- | --- |
+| ![Portfolio dashboard](docs/images/01-portfolio.jpg) **Portfolio dashboard:** spend, savings potential and carbon for the chain, and the top investment opportunity | ![3D city map](docs/images/02-map-3d.jpg) **3D city map:** OpenStreetMap buildings (approximate heights), hotels colored by the chosen metric; a click flies in |
+| ![Portfolio optimizer](docs/images/03-portfolio-optimizer.jpg) **One budget across the chain:** the exact search's package per hotel, the allocation bar and the projected change | ![Hotel digital twin](docs/images/04-hotel-twin.jpg) **Hotel digital twin:** the 3D building beside the compact Hotel step (overview, briefing, top opportunities) |
+| ![Carbon flow](docs/images/05-carbon-flow.jpg) **Where the carbon goes:** grid and gas → zones → uses, by cost, energy or carbon | ![AI advisor](docs/images/06-advisor.jpg) **AI advisor:** the AI asks the engine to run the what-if; the result card and Apply come from the engine |
+| ![PDF report](docs/images/07-report.jpg) **Investment report:** the recommendation, before and after, cash flow and every assumption, as a PDF | |
+
 ## What it does
 - **One workspace:** four numbered tabs (1 Hotel, 2 Scenario, 3 Invest, 4 Ask) beside the digital twin, with a cost / energy / carbon
   strip that shows before → after for whatever is being tested. Overview ("Report"), full scenario and full optimizer pages are one click away.

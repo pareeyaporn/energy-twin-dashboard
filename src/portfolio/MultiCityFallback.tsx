@@ -15,9 +15,16 @@ const PAD = 34;
  * relative positions, scaled to fit, and the panels are not to scale with each other. Same markers, hover, selection and keyboard
  * behavior as the other maps.
  */
-export function MultiCityFallback({ rows, colors, ranks, hoverId, selectedId, metricLabel, valueText, onHover, onSelect, onBackground, flyTo, cityValueText, selectedOffset, reduce }: MapViewProps & { selectedOffset: boolean }) {
+export function MultiCityFallback({ rows, colors, ranks, hoverId, selectedId, metricLabel, valueText, onHover, onSelect, onBackground, flyTo, fitNonce, fitIds, cityValueText, selectedOffset, reduce }: MapViewProps & { selectedOffset: boolean }) {
   const groups = cityGroups(rows);
   const panelRefs = useRef<Record<string, HTMLElement | null>>({});
+  // A city chip or city marker: bring that city's panel into view and mark it.
+  const focusCity = fitIds?.length ? (rows.find((r) => r.id === fitIds[0])?.city ?? null) : null;
+  useEffect(() => {
+    if (!fitNonce || !focusCity) return;
+    panelRefs.current[focusCity]?.scrollIntoView?.({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fitNonce]);
   // "Fly to" a hotel: bring its city's panel into view.
   useEffect(() => {
     const r = flyTo && rows.find((x) => x.id === flyTo.id);
@@ -27,7 +34,7 @@ export function MultiCityFallback({ rows, colors, ranks, hoverId, selectedId, me
   }, [flyTo?.n]);
   return (
     <div
-      className={`relative h-full w-full overflow-y-auto p-3 pb-32 lg:pr-[19.5rem] ${selectedOffset ? "sm:pl-[330px]" : ""}`}
+      className={`relative h-full w-full overflow-y-auto p-3 lg:pr-[19.5rem] ${selectedOffset ? "sm:pl-[330px]" : ""}`}
       style={{ background: BASEMAP.background }}
       role="group"
       aria-label={`Schematic map of the portfolio's hotels in ${groups.length} ${groups.length === 1 ? "city" : "cities"}`}
@@ -56,7 +63,7 @@ export function MultiCityFallback({ rows, colors, ranks, hoverId, selectedId, me
                 panelRefs.current[g.city] = el;
               }}
               aria-label={`${g.city}, ${hotels.length} hotel${hotels.length === 1 ? "" : "s"}`}
-              className="relative overflow-hidden rounded-xl border border-glass-border"
+              className={`relative overflow-hidden rounded-xl border ${focusCity === g.city ? "border-primary/70 shadow-[0_0_24px_-10px_var(--primary)]" : "border-glass-border"}`}
               style={{ background: BASEMAP.land, height: PANEL_H }}
               data-testid={`city-panel-${g.city}`}
             >

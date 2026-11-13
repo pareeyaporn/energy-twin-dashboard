@@ -129,7 +129,7 @@ export function PortfolioPage() {
         <dl className="grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid="portfolio-kpis">
           {primary.map((x) => (
             <div key={x.k} className="panel rounded-xl p-3">
-              <dt className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">{x.k}<span className="rounded-full border border-glass-border px-1.5 text-[9px]">Estimate</span></dt>
+              <dt className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">{x.k}{x.k !== "Properties" && <span className="rounded-full border border-glass-border px-1.5 text-[9px]">Estimate</span>}</dt>
               <dd className="num text-lg font-semibold">{x.v}</dd>
               {x.note && <dd className="text-[11px] text-muted-foreground">{x.note}</dd>}
             </div>

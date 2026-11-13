@@ -77,6 +77,8 @@ export function CityMap({ rows, onExplore, reduce, onWhy }: { rows: PropertySumm
   const ranks = useMemo(() => Object.fromEntries(ranked.map((r, i) => [r.id, i + 1])), [ranked]);
   const selected = rows.find((r) => r.id === pinned) ?? null;
   const tiles = useTiles && !failed;
+  // The drawn map for several cities is a schematic of panels: its legend goes below the map so it never covers a panel's hotels.
+  const panels = !tiles && !allInChicago(rows);
   const fly = (id: string) => setFlyTo((f) => ({ id, n: (f?.n ?? 0) + 1 }));
 
   const props: MapViewProps = {
@@ -186,17 +188,24 @@ export function CityMap({ rows, onExplore, reduce, onWhy }: { rows: PropertySumm
         <div className="relative h-[400px] overflow-hidden rounded-2xl border border-glass-border bg-[#060e1d] shadow-[0_24px_60px_-30px_rgb(0_0_0/0.9),inset_0_0_0_1px_color-mix(in_oklab,var(--primary)_8%,transparent)] sm:h-[480px] lg:h-[540px]">
           {tiles ? (
             <MapLibreView {...props} onFail={() => setFailed(true)} />
-          ) : allInChicago(rows) ? (
+          ) : !panels ? (
             <MapFallback {...props} />
           ) : (
             <MultiCityFallback {...props} selectedOffset={!!selected} />
           )}
           {/* A soft edge vignette keeps the overlays readable without hiding the map. */}
           <div aria-hidden className="pointer-events-none absolute inset-0 z-[5] rounded-2xl shadow-[inset_0_0_80px_10px_rgb(6_14_29/0.75)]" />
-          <div className="absolute bottom-3 left-3 z-10">
+          {!panels && (
+            <div className="absolute bottom-3 left-3 z-10">
+              <MapLegend def={def} values={rows.map(def.value)} />
+            </div>
+          )}
+        </div>
+        {panels && (
+          <div className="mt-3">
             <MapLegend def={def} values={rows.map(def.value)} />
           </div>
-        </div>
+        )}
         {selected && (
           <div className="mt-3 sm:absolute sm:left-3 sm:top-3 sm:z-20 sm:mt-0" data-testid="map-card-slot">
             <PropertyCard row={selected} onExplore={onExplore} onClose={() => setPinned(null)} color={colors[selected.id]} rank={ranks[selected.id]} metric={metric} {...(onWhy ? { onWhy } : {})} />

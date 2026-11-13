@@ -1,4 +1,5 @@
 import { ArrowRight, Building2, X } from "lucide-react";
+import { UtilityBadge } from "@/utility/UtilityBadge";
 import type { PropertySummary } from "@/engine/hotel";
 import { Button } from "@/components/ui/button";
 import { percent, usd } from "@/twin/format";
@@ -74,7 +75,7 @@ export function PropertyCard({
             </div>
           ))}
         </dl>
-        <p className="mt-2 text-[10px] text-muted-foreground">{row.synthetic ? "Demonstration property · synthetic data · modeled estimates" : "Your hotel · your inputs (defaults where blank) · modeled estimates"}</p>
+        <p className="mt-2 text-[10px] text-muted-foreground">{row.synthetic ? "Demonstration property · synthetic data · modeled estimates" : "Your hotel · your inputs (defaults where blank) · modeled estimates"}<UtilityBadge propertyId={row.id} /></p>
         <Button size="sm" className="mt-2.5 w-full" onClick={() => onExplore(row.id)} data-testid={`explore-${row.id}`}>
           Explore digital twin <ArrowRight />
         </Button>

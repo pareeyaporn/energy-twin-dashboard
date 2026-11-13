@@ -15,6 +15,7 @@ import { View3D, hasWebGL } from "./parts/View3D";
 import { PortfolioBreadcrumb } from "./parts/PortfolioBreadcrumb";
 import { useTwinClock } from "./useTwinClock";
 import { useCountUp } from "./useCountUp";
+import { UtilityHeaderNote } from "@/utility/UtilityBadge";
 
 const LAYERS: { id: TwinLayer; label: string }[] = [
   { id: "zones", label: "Zones" },
@@ -74,6 +75,7 @@ export function HotelTwin() {
             {displayed.package ? `: ${displayed.package.roleLabel}` : ""}
           </div>
           <div className="text-2xl font-semibold tabular-nums" data-testid="twin-cost" aria-label={`${usd(displayed.result.annual.cost)} per year`}>{usd(shownCost)} <span className="text-sm font-normal text-muted-foreground">/ yr</span></div>
+          <UtilityHeaderNote />
           {Math.abs(delta) >= 1 && (
             <div className={`text-sm tabular-nums ${delta < 0 ? "text-savings" : "text-loss"}`} data-testid="twin-delta">
               {signedUsd(shownDelta)} per year vs before

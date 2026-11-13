@@ -742,7 +742,7 @@ export const useTwin = create<TwinState>((set, get) => ({
     set((s) => ({
       advisorBusy: true,
       advisorSeq: s.advisorSeq + 2,
-      advisorMessages: [...s.advisorMessages, { id: `m-${n}`, role: "user", text: q }],
+      advisorMessages: [...s.advisorMessages, { id: `m-${n}`, role: "user", text: q, scope }],
     }));
     const s = get();
     // The context holds every number the advisor may use; the browser then rejects any answer with a number that is not in it.

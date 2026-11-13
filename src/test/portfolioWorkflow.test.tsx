@@ -97,11 +97,14 @@ describe("investment priority, explained", () => {
     expect(s.reason).toMatch(/per dollar invested/);
   });
 
-  it("Start here and Why this ranking? on the page", () => {
+  it("Top investment opportunity, Why this hotel? and the full ranking on the page", () => {
     render(<PortfolioPage />);
     const top = startHere(selectPortfolioSummary(get()).properties)!.top;
     expect(screen.getByTestId("start-here").textContent).toContain(top.name);
+    // "Why this hotel?" shows the reason first; the full ranking opens from there.
     fireEvent.click(screen.getByTestId("priority-why"));
+    expect(screen.getByTestId("start-here-reason").textContent).toMatch(/per dollar invested/);
+    fireEvent.click(screen.getByTestId("priority-why-all"));
     expect(screen.getByTestId("priority-explainer").textContent).toMatch(/Energy spending, floor area and intensity are not inputs/);
     expect(screen.getAllByTestId("priority-row")).toHaveLength(5);
   });

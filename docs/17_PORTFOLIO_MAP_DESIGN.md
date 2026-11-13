@@ -196,6 +196,34 @@ Removed: the cost, intensity and savings bar charts (the same figures as the map
 later)" (a roadmap item, for the slides). On the hotel dashboard: Opportunities & alerts come first in the Hotel tab, the KPI tiles are slim,
 and the sample-hotel picker moved below the benchmark (the demo script still uses it for the 300-room sample).
 
+## Page structure after the redesign (November 2026, docs/11 14H)
+
+The story: understand the portfolio → discover opportunities → explore hotels → optimize investments. Same features and figures; sections
+are spaced evenly (48–64 px), headings larger, cyan only for primary actions, selection, key financial highlights and focus.
+
+1. **Overview.** Tagline, "Your Hotel Portfolio", the subtitle "See where energy costs are highest, discover savings opportunities, and invest
+   smarter.", a context line (organization · hotels · city, the cities or "N cities") and the synthetic label as a small pill. Actions: Ask AI
+   (ghost, the portfolio chat), Add hotel (outline), **Optimize portfolio** (primary, scrolls to the optimizer). Organization (and City for a
+   multi-city organization) stay visible; Brand, Region and Ownership sit in "Filters (n)" (a popover, a collapsible on phones) with chips (×)
+   and Reset filters; "Showing X of Y hotels" on the right. Four KPI cards (`PortfolioKpis.tsx`): annual energy spend, potential annual savings
+   (slightly highlighted, with savings ÷ spend and a thin bar), annual carbon emissions, properties; compact values (`format.ts`), the exact value
+   in the title and the accessible label. The secondary totals follow as one strip with separators.
+2. **Top investment opportunity** (`StartHere.tsx`): the ranking's first hotel (`startHere`), its best package's annual savings, net investment
+   and simple payback, one sentence; Explore this hotel, Why this hotel? (the reason, the contrast and the package, then the full ranking), Ask AI.
+3. **Explore your hotels**: a page heading and subtitle above `<CityMap/>`, which is unchanged.
+4. **Plan your portfolio investments** (`PortfolioOptimizer.tsx`, section label "Portfolio investments" for the tour): one toolbar (budget,
+   presets, objective, run), tabs Recommended plan / My plan / Compare plans. Results: plan KPIs from the plan's totals; the allocation bar
+   (`AllocationBar.tsx`, `allocation.ts`), one segment per funded hotel at its package's **gross** installed cost (what the budget is checked
+   against) plus the unused remainder, colors by the hotel's position in the organization (validated categorical palette), hover or focus
+   tooltip, click opens the hotel's plan, a legend with every value; current → optimized spend and carbon, labeled "Projected, if funded · not
+   implemented"; the package table; all totals; report actions; "How does the optimizer work?". Empty state before a run.
+5. **Compare properties** (`PortfolioTable.tsx`): the seven columns with unit hints, an inline savings-potential bar, a priority bar, a "Top"
+   marker on the top opportunity, the last visited hotel highlighted; a note that savings potential is each hotel's own best package, not what
+   the budget funds. Scrolls inside its frame on phones.
+6. **Advanced analytics** (closed): groups, electricity vs gas, stress tests, definitions.
+
+Tour targets are unchanged (`portfolio-kpis`, `section[aria-label="City map"]`, `portfolio-table`, `section[aria-label="Portfolio investments"]`).
+
 ## Files
 
 Added for multi-city and the workflow: `cities.ts` (grouping), `CityCluster.tsx`, `MultiCityFallback.tsx`, `priority.ts`, `PriorityExplainer.tsx`, `StartHere.tsx`, `HotelInPortfolio.tsx`, `anchors.ts`; `src/app/` (homepage, hotel dashboard, landing rules).

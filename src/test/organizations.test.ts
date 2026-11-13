@@ -10,8 +10,8 @@ beforeEach(() => {
 });
 
 describe("organizations data", () => {
-  it("has two synthetic organizations whose hotels all carry a brand, region and ownership type", () => {
-    expect(hotelOrganizations.map((o) => o.id)).toEqual(["lakefront-hotel-group", "northshore-hospitality"]);
+  it("has three synthetic organizations whose hotels all carry a brand, region and ownership type", () => {
+    expect(hotelOrganizations.map((o) => o.id)).toEqual(["lakefront-hotel-group", "northshore-hospitality", "meridian-hotels"]);
     const ids = new Set<string>();
     for (const o of hotelOrganizations) {
       expect(o.synthetic).toBe(true);

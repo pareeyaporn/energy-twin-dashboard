@@ -1,4 +1,5 @@
 import type { PropertySummary } from "@/engine/hotel";
+import type { CityGroup } from "./cities";
 
 /** What both map views (street map and drawn map) receive. Display only: values and colors come from the engine via the store. */
 export interface MapViewProps {
@@ -16,8 +17,13 @@ export interface MapViewProps {
   onBackground: () => void;
   /** Fly to this hotel when `n` changes. */
   flyTo: { id: string; n: number } | null;
-  /** Fit all hotels when this changes (0 = initial). */
+  /** Fit the hotels when this changes (0 = initial): those in `fitIds`, or all of them when it is null. */
   fitNonce: number;
+  fitIds?: string[] | null;
+  /** The hotels' cities (more than one: zoomed out, the street map shows one marker per city). */
+  cities?: CityGroup[];
+  cityValueText?: (city: string) => string;
+  onPickCity?: (city: string) => void;
   reduce: boolean;
 }
 

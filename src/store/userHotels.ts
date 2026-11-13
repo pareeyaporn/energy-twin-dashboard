@@ -1,6 +1,6 @@
 // "Add my hotel": hotels the user enters, kept in this browser (local storage) and shown in the portfolio next to the sample chain.
-// Only the user's inputs are stored; every figure is recomputed by the engine. No address is sent anywhere: the location is a Chicago
-// neighborhood chosen from a list (the model has Chicago weather only).
+// Only the user's inputs are stored; every figure is recomputed by the engine. No address is sent anywhere: the location is an area
+// chosen from a list, in one of the cities the model has sourced weather, prices and grid data for (Chicago, New York, Miami, Denver).
 import type { HotelInput, HvacType, Ownership, PortfolioProperty } from "@/engine/hotel";
 
 export const USER_HOTELS_STORAGE_KEY = "energy-twin:my-hotels:v1";
@@ -20,6 +20,50 @@ export const CHICAGO_AREAS = [
   { id: "midway", label: "Midway", region: "Airports", lat: 41.7868, lng: -87.7522 },
 ] as const;
 
+/** The cities a user's hotel can be in: each has sourced weather, prices, grid and intensity data (research passes 6 and 11). */
+export const HOTEL_CITIES = [
+  {
+    city: "Chicago",
+    state: "IL",
+    note: "Chicago weather (O'Hare normals), Illinois rates and ComEd incentives (2026 rates only).",
+  },
+  {
+    city: "New York",
+    state: "NY",
+    note: "New York weather (Central Park normals), New York rates and the NYC grid. No New York utility incentives have been researched, so none apply; upgrade savings parameters are calibrated to Chicago.",
+  },
+  {
+    city: "Miami",
+    state: "FL",
+    note: "Miami weather (airport normals), Florida rates and the Florida grid. No Florida utility incentives have been researched, so none apply; upgrade savings parameters are calibrated to Chicago.",
+  },
+  {
+    city: "Denver",
+    state: "CO",
+    note: "Denver weather (airport normals), Colorado rates and the Rockies grid. No Colorado utility incentives have been researched, so none apply; upgrade savings parameters are calibrated to Chicago.",
+  },
+] as const;
+export type HotelCity = (typeof HOTEL_CITIES)[number]["city"];
+
+const CITY_AREAS = [
+  { id: "nyc-midtown", label: "Midtown Manhattan", region: "Northeast", city: "New York", lat: 40.7549, lng: -73.984 },
+  { id: "nyc-downtown", label: "Lower Manhattan", region: "Northeast", city: "New York", lat: 40.7075, lng: -74.0113 },
+  { id: "nyc-brooklyn", label: "Downtown Brooklyn", region: "Northeast", city: "New York", lat: 40.6928, lng: -73.9903 },
+  { id: "mia-brickell", label: "Brickell", region: "Southeast", city: "Miami", lat: 25.7617, lng: -80.1918 },
+  { id: "mia-beach", label: "Miami Beach", region: "Southeast", city: "Miami", lat: 25.7907, lng: -80.13 },
+  { id: "mia-airport", label: "Miami Airport", region: "Southeast", city: "Miami", lat: 25.7959, lng: -80.287 },
+  { id: "den-downtown", label: "Downtown Denver", region: "Mountain West", city: "Denver", lat: 39.7392, lng: -104.9903 },
+  { id: "den-lodo", label: "LoDo", region: "Mountain West", city: "Denver", lat: 39.7527, lng: -104.9997 },
+  { id: "den-airport", label: "Denver Airport", region: "Mountain West", city: "Denver", lat: 39.8561, lng: -104.6737 },
+] as const;
+
+/** Every area a hotel can be placed in, with its city (approximate centers, for the map only). */
+export const HOTEL_AREAS: readonly { id: string; label: string; region: string; city: HotelCity; lat: number; lng: number }[] = [
+  ...CHICAGO_AREAS.map((a) => ({ ...a, city: "Chicago" as const })),
+  ...CITY_AREAS,
+];
+export const cityInfo = (city: string) => HOTEL_CITIES.find((c) => c.city === city) ?? HOTEL_CITIES[0];
+
 export const OWNERSHIP_LABEL: Record<Ownership, string> = { owned: "Owned", managed: "Managed", franchised: "Franchised", leased: "Leased" };
 const OWNERSHIPS = Object.keys(OWNERSHIP_LABEL) as Ownership[];
 
@@ -29,14 +73,17 @@ export interface UserHotelMeta {
   brand?: string;
   ownership?: Ownership;
 }
-export type ChicagoAreaId = (typeof CHICAGO_AREAS)[number]["id"];
+/** Any area id (the name is kept from when only Chicago was supported). */
+export type ChicagoAreaId = (typeof CHICAGO_AREAS)[number]["id"] | (typeof CITY_AREAS)[number]["id"];
+export type HotelAreaId = ChicagoAreaId;
 
 const HVAC: HvacType[] = ["ptac", "pthp", "vrf", "central_plant", "rtu"];
 const NUMERIC: (keyof HotelInput)[] = ["rooms", "floors", "floorAreaSqft", "yearBuilt", "occupancy", "monthlyEnergyBill", "budget", "operatingHours", "occupiedHoursPerRoom", "electricityRate", "gasRate", "commonAreaHvacHours", "lightingHoursPerDay", "hotWaterGalPerOccupiedRoomDay", "horizonYears"];
 
 /** Builds the portfolio property for a user's hotel (not synthetic: the inputs are the user's). */
 export function userProperty(id: string, input: HotelInput, areaId: ChicagoAreaId, index: number, meta: UserHotelMeta = {}): PortfolioProperty {
-  const area = CHICAGO_AREAS.find((a) => a.id === areaId) ?? CHICAGO_AREAS[0];
+  const area = HOTEL_AREAS.find((a) => a.id === areaId) ?? HOTEL_AREAS[0]!;
+  const place = cityInfo(area.city);
   // Hotels in the same area are spread slightly so their markers do not sit on top of each other.
   const k = index % 6;
   return {
@@ -51,8 +98,8 @@ export function userProperty(id: string, input: HotelInput, areaId: ChicagoAreaI
     lat: area.lat + 0.004 * Math.sin((k * Math.PI) / 3),
     lng: area.lng + 0.005 * Math.cos((k * Math.PI) / 3),
     synthetic: false,
-    note: "Your hotel: your inputs; anything left blank uses the documented defaults (marked in the profile). Chicago weather, Illinois rates and ComEd incentives.",
-    input: { city: "Chicago", state: "IL", country: "US", ...input },
+    note: `Your hotel: your inputs; anything left blank uses the documented defaults (marked in the profile). ${place.note}`,
+    input: { ...input, city: place.city, state: place.state, country: "US" },
   };
 }
 
@@ -68,7 +115,7 @@ export function sanitizeUserHotels(raw: unknown): { hotels: (PortfolioProperty &
     if (!h || typeof h !== "object") return;
     const x = h as { id?: unknown; areaId?: unknown; input?: Record<string, unknown>; organizationId?: unknown; brand?: unknown; ownership?: unknown };
     if (typeof x.id !== "string" || !x.id.startsWith("my-hotel-") || !x.input || typeof x.input !== "object") return;
-    const areaId = (CHICAGO_AREAS.some((a) => a.id === x.areaId) ? x.areaId : "loop") as ChicagoAreaId;
+    const areaId = (HOTEL_AREAS.some((a) => a.id === x.areaId) ? x.areaId : "loop") as ChicagoAreaId;
     const input: HotelInput = {};
     if (typeof x.input["name"] === "string") input.name = x.input["name"].slice(0, 80);
     for (const k of NUMERIC) {

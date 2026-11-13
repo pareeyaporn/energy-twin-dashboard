@@ -271,10 +271,13 @@ Owner: **P** = pitch lead, **E** = engine lead, **T** = tech lead. Keep answers 
 
 | # | Question | Owner | Answer |
 | --- | --- | --- | --- |
-| 22 | Where is the AI? | T | Two places: the advisor explains the results in plain English, and the engine's optimizer does the deciding (an exact search, not a language model). The AI never produces a number. |
-| 23 | Can the AI hallucinate a saving? | T | The app checks every number in the answer against the computed results and rejects the answer if one does not match, falling back to a template answer built from the model's numbers. Show the advisor. |
-| 24 | Which model, and what does it cost to run? | T | Claude, called from a backend function; one short call per question, cached for repeated questions. The engine runs in the browser, so simulations and the optimizer cost nothing per use. |
-| 25 | Why not let the AI do the optimization? | T | Money decisions need reproducible, auditable numbers. A deterministic engine gives the same answer every time and can be tested (552 tests); the AI is best at explaining it. |
+| 22 | Where is the AI? | T | In the advisor chat (hotel Ask tab and the portfolio page), the "Ask AI" buttons, a three-sentence briefing per hotel, the PDF report's executive summary and the bill-column helper. All of it explains or sets up the engine's numbers; the energy model, the optimizer and the financials are deterministic code (docs/23). |
+| 23 | Can the AI hallucinate a saving? | T | It can try, and the browser throws the answer away: every number in an AI text is checked against the figures the engine produced for that answer. One unknown number and a template answer built from the same results replaces it. The same check covers follow-ups, the briefing and the report summary. Show the advisor. |
+| 24 | What does "tool use" mean here? | T | When a question needs a new calculation ("what if occupancy hits 85%?", "what does $50,000 buy?"), the AI asks our engine to run it; the engine runs in the browser and the AI explains the result. The answer shows the engine's result card, and buttons apply it to the twin only when you click. |
+| 25 | Why not let the AI do the optimization? | T | The optimizer tests every combination within the budget with the same costs, incentives, interactions and discount rate every time, so owners and lenders can audit it. A language model could miss combinations, could not guarantee the arithmetic and could answer differently twice. The AI does what it is good at: understanding the question, picking the calculation, explaining the trade-offs. |
+| 25a | Which model, and what does it cost to run? | T | Claude, called from a backend function: one to three short calls per question (a tool round adds one), a capped answer length, a monthly spending limit. A few cents at most per question; the simulations and the optimizer run in the browser and cost nothing per use. |
+| 25b | What do you send to the AI? Our bills? | T | The engine's results for the hotel on screen, never raw bills. The column helper sends only the spreadsheet's headers, and you confirm each suggestion; the report summary leaves the utility section out. |
+| 25c | What if the AI is down? | T | Nothing breaks: the same engine tools run from a keyword parser with a template answer, the briefing shows a template, the report has no summary paragraph, the column mapping keeps its automatic guess. |
 
 ### Technical
 

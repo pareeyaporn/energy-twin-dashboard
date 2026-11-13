@@ -155,7 +155,7 @@ question once (tasks 15.10–15.11). Rehearsed answers are then saved and replay
 - Observed during the browser check, not caused by this feature: on a phone, the portfolio page's map "Explore digital twin" marker buttons sit
   outside the viewport and widen the page (scroll width about 705 px on a 390 px screen).
 
-## For the pitch Q&A (to copy into docs/22)
+## For the pitch Q&A (copied into docs/22, Part D #22–25c)
 
 **Where is the AI?** In six places, all explaining or setting up the engine's numbers:
 - the advisor chat, on the Ask tab and the portfolio page;

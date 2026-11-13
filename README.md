@@ -26,8 +26,8 @@ installed costs, solar $/W and incentive amounts are still labeled placeholders 
   rooftop HVAC heating or cooling, solar panels (or a "not installed" preview), a street with people whose number follows the guests out,
   a camera that glides to the selected zone, an "Energy view" heat map and an hourly readout (modeled temperature, demand by end use, cost).
   The **2D view** adds room, equipment and energy-flow layers. Both share one clock ("Year + day" plays every hour of every month), stress tests
-  and a before/after split view with upgrade markers. Without WebGL, on phones or with "reduce effects", the 2D view is used.
-- **Scenario simulator:** occupancy, setpoints, smart room controls, schedules, electricity price, four stress tests, "why this changed" and comfort notes.
+  and a before/after split view with upgrade markers. The **energy-flow** layer shows where cost, energy or **carbon** goes (grid and gas, plus refrigerant leaks when entered, → zones → uses). Without WebGL, on phones or with "reduce effects", the 2D view is used.
+- **Scenario simulator:** occupancy, setpoints, smart room controls, schedules, electricity price, stress tests, "why this changed" and comfort notes.
   Saved scenarios (per browser session).
 - **Upgrade comparison:** eight upgrades, solar included, each with the same breakdown: gross cost, incentives (listed, applied only when confirmed),
   net investment, kWh and therms saved, $ saved, simple payback, 5- and 10-year net benefit and CO2 avoided, NPV at 8% (or 3%) and a
@@ -43,8 +43,10 @@ installed costs, solar $/W and incentive amounts are still labeled placeholders 
   selected plan holds up (extra costs avoided), and for persistent changes payback, NPV and whether the recommendation changes.
 - **Budget optimizer:** tests every valid combination (512; solar sizes exclude each other) and returns three packages (maximum savings, fastest payback, balanced) within the budget
   and a comfort limit, measured against the current scenario when one is running. It uses exactly the numbers on the cards.
-- **AI advisor:** plain-language answers from Claude, grounded in the computed results. The browser rejects any answer with a number that is
-  not in the results and falls back to a template answer; nothing is invented.
+- **AI assistant:** Claude chooses which engine calculation to run (what-if, best plan, compare, stress test, portfolio split), the browser
+  runs it, and Claude explains the result, with result cards, one-click actions and follow-ups; also a hotel briefing, a report summary and a
+  bill-column helper. The browser rejects any text with a number that is not in the results and falls back to a template answer (`docs/23`).
+- **Utility data:** a spreadsheet of 12 months of bills (use and cost kept in step as you type), Excel/CSV upload and calibration to the bills (`docs/19`).
 
 ## Demo path (6–7 minutes)
 Seven acts, scripted with timings in [docs/07](docs/07_DEMO_CHECKLIST.md): the problem → meet the twin in 3D (zones, Energy view, benchmark) →
@@ -58,16 +60,16 @@ ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustra
 
 | Area | State |
 | --- | --- |
-| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use) | Built and tested (414 tests) |
-| Data (`src/data/hotel`) | **Sourced from primary documents:** EIA prices, price growth (AEO2026) and hotel end uses (CBECS 2018); EPA eGRID2023 grid factors by location and the EPA gas factor; PVWatts solar output; NOAA weather; IL-TRM hotel measures (smart controls, sensors, lighting interaction, hot water); NLR solar O&M and degradation; Chicago hotel sizes and occupancy (Choose Chicago, STR). Solar $/W by size from LBNL's 2025 Data Update (2024 national medians, editable). ComEd standard incentives (LED, occupancy sensors, guest-room energy management) from the utility's worksheets. **Still placeholders or assumptions:** the LED retrofit mix (between sourced bounds), VRF equipment cost, the solar export credit ($0, editable), and the monthly occupancy shape. Phase 7 is closed except installed costs (7.6). See `docs/08`, `docs/14`, `docs/15` |
+| Hotel engine (`src/engine/hotel`): baseline, scenarios, upgrades, common financial breakdown with NPV and a 10-year projection, solar, incentives, optimizer, peer benchmark, twin data and the hourly state (sun, modeled temperature, demand by end use), carbon flows and refrigerant leaks | Built and tested (about 590 tests across the app) |
+| Data (`src/data/hotel`) | **Sourced from primary documents:** EIA prices, price growth (AEO2026) and hotel end uses (CBECS 2018); EPA eGRID2023 grid factors by location and the EPA gas factor; PVWatts solar output; NOAA weather; IL-TRM hotel measures (smart controls, sensors, lighting interaction, hot water); NLR solar O&M and degradation; Chicago hotel sizes and occupancy (Choose Chicago, STR). Solar $/W by size from LBNL's 2025 Data Update (2024 national medians, editable). ComEd standard incentives (LED, occupancy sensors, guest-room energy management) from the utility's worksheets. Refrigerant warming factors (EPA GHG Emission Factors Hub 2025). **Still placeholders or assumptions:** the LED retrofit mix (between sourced bounds), VRF equipment cost, the solar export credit ($0, editable), the zone allocation and the monthly occupancy shape; each is labeled on screen (audit in `docs/08`). See `docs/08`, `docs/14`, `docs/15` |
 | Store (`src/store`): profile, scenarios, optimizer (scenario-aware), upgrade comparison, twin controls, advisor | Built |
 | Digital twin: 2D (`src/twin`) and 3D (`src/three`, Phase 9) | Built |
 | Workspace UI (Lovable, prompts LV1–LV15) | Built |
-| Flow, Rooms and Equipment layers (animated Sankey, room façade, equipment cards) | Built (Phase 10) |
+| Flow, Rooms and Equipment layers (animated Sankey by cost, energy or carbon; room façade; equipment cards with optional refrigerant records) | Built (Phase 10; carbon view 14.E20) |
 | Editable equipment inventory: current equipment vs proposed upgrades, add / edit / remove / replace, simulation levers (`docs/20`) | Built (Phase 14G) |
 | Investment catalog and custom plans; stress tests | Built (Phases 11 and 12) |
 | Hotel portfolio, the homepage (`/`; the hotel dashboard is `/hotel`): synthetic Chicago chains and a multi-city organization (New York, Miami, Denver) on a MapLibre map (city markers when zoomed out; a per-city schematic offline), "Start here" and the investment priority explained, the view kept when you visit a hotel and come back, totals, comparison table, charts, one budget split across hotels, open any hotel in the twin; my portfolio (custom plan per hotel) vs the AI portfolio; portfolio stress tests | Built (Phase 13 P0 and P1) |
-| AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer) |
+| AI advisor (edge function + browser checks + chat panel) | Live on Lovable Cloud with the Claude API (about 3 s an answer; 8 s limit, then a template answer); redeploy for the tool protocol (`docs/23`) |
 | AI assistant (`docs/23`): the AI calls engine tools (what-if, best plan, compare, stress test, portfolio split) and explains the results, with result cards, action buttons and follow-ups; Ask AI buttons; a Hotel tab briefing; an AI executive summary in the report; Suggest with AI for bill columns (headers only); a portfolio chat. Every number is checked against the engine's results | Built (Phase 15); tested with mocks, the live model to be checked after redeploying the function |
 | Investment results (summary, before/after, upgrade breakdown, savings contribution, plain-language reading) and the downloadable PDF investment report with preview, for AI plans, custom plans and the portfolio (`docs/18`) | Built (Phase 14B) |
 | Calculation transparency: "How was this calculated?" on major figures, data labels, financial assumptions (`docs/21`) | Built |
@@ -75,8 +77,8 @@ ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustra
 | Add my hotel (saved in the browser, on the map, its own twin) | Built |
 | Opportunities & alerts (3–5 insights from the engine with working actions), simulation impact summary, clearer stress results (kind, one-off vs yearly, carbon, %, chart) | Built (Phase 14A; rules in `docs/13` §14) |
 | Organizations, brands, regions, ownership; switcher, filters, totals by group | Built (two synthetic organizations, Chicago only) |
-| Utility data: Utility Data Manager (editable sample, Excel/CSV upload, template), validation, calibration to bills (ASHRAE Guideline 14 metrics), choice of baseline; `docs/19` | Built (browser storage; not weather-normalized) |
-| Demo hardening (cached answers, reset, rehearsals) | Next (Phase 8): calibration first round is done |
+| Utility data: Utility Data Manager (editable sample with use and cost kept in step, Excel/CSV upload, template), validation, calibration to bills (ASHRAE Guideline 14 metrics), choice of baseline; `docs/19` | Built (browser storage; not weather-normalized) |
+| Demo hardening (cached answers, reset, data labels, tested advisor questions in `docs/07`) | Mostly done (Phase 8): rehearsals and the live-model check of the advisor remain |
 
 ## Tech stack
 - TanStack Start (React, TypeScript, Vite), Tailwind, shadcn/ui, built to a Cloudflare Worker target
@@ -139,7 +141,7 @@ npx vitest run  # tests
 - [Data status and to-do](docs/08_DATA_TODO.md), the [research log](docs/14_RESEARCH_LOG.md) (every sourced value, before and after) and the
   [product decisions](docs/15_PRODUCT_DECISIONS.md) (choices, not facts: discount rate, optimizer rules, HVAC types, solar sizes, emissions, incentives)
 - [Claude Code prompts](docs/05_CLAUDE_CODE_PROMPTS.md), [Lovable prompts](docs/06_LOVABLE_PROMPTS.md), [demo checklist](docs/07_DEMO_CHECKLIST.md)
-- [Data and research to-do](docs/08_DATA_TODO.md) and [setup](docs/01_SETUP.md)
+- [Setup](docs/01_SETUP.md)
 - [3D twin spec](docs/04_3D_SPEC.md) (what drives each visual)
 - [Onboarding tour](docs/16_ONBOARDING_TOUR.md) (every tutorial step and how the tour behaves)
 - [Portfolio map design](docs/17_PORTFOLIO_MAP_DESIGN.md) (the homepage map: palette, markers, overlaps, multi-city, list, legend, mobile)
@@ -147,7 +149,8 @@ npx vitest run  # tests
 - [Utility data and calibration](docs/19_UTILITY_DATA.md) (spreadsheet, Excel template, validation, calibration method, baseline choice)
 - [Equipment inventory](docs/20_EQUIPMENT_INVENTORY.md) (audit, data model, which edits change the model, current vs proposed)
 - [Calculation transparency](docs/21_CALCULATION_TRANSPARENCY.md) ("How was this calculated?", data labels, financial assumptions)
-- [How it works, in plain language](docs/24_HOW_IT_WORKS.md) (top-down method, the data files, what the equipment list changes)
+- [AI assistant](docs/23_AI_ADVISOR.md) (engine tools the AI may call, protocol, actions, briefing, report summary, guardrails, privacy)
+- [How it works, in plain language](docs/24_HOW_IT_WORKS.md) (top-down method, the data files, what the equipment list changes, how carbon is counted)
 - [Pitch and Q&A](docs/22_PITCH_AND_QA.md) (why it is a wow, demo moments, 44 judge questions with answers)
 
 ## Working with Lovable

@@ -37,7 +37,7 @@ default. Rates are "Published source" when they are the EIA state averages and "
 | --- | --- | --- | --- |
 | Annual energy cost | Simulated kWh × electricity price + therms × gas price, by zone, end use and month | Building, location (NOAA), occupancy, calibration, prices | All-in average prices (no demand charges); typical weather year |
 | Annual energy use | Same simulation, electricity at 3.412 kBtu/kWh and gas at 100 kBtu/therm | Building, location | Site energy, not source energy; modeled unless calibrated |
-| Carbon | kWh × eGRID subregion factor + therms × 5.311 kg CO₂e | Grid subregion, gas factor (EPA GHG Hub 2025) | Annual average factors, not marginal; not verified savings |
+| Carbon | kWh × eGRID subregion factor + therms × 5.311 kg CO₂e | Grid subregion, gas factor (EPA GHG Hub 2025); refrigerant leaks when entered (reported separately) | Annual average factors, not marginal; covers electricity and on-site gas (Scope 1 and 2 energy), not refrigerants, other fuels, line losses or Scope 3; not verified savings |
 | Energy intensity | Site kBtu ÷ floor area | Floor area | Context only against national medians |
 | Annual savings | Cost before minus cost after the upgrades, applied in order so interactions count once | Prices, savings rates (low/mid/high) | Range shown; not guaranteed |
 | Installed cost | Each upgrade's unit cost × quantity, low/mid/high | Published unit costs where found | Not quotes; some costs are assumptions |

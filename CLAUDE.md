@@ -63,7 +63,7 @@ Full specs live in `/docs`. Read the relevant doc before working on an area:
 
 | Path | Owner | Notes |
 | --- | --- | --- |
-| `src/pages/`, `src/components/` | Lovable | Do NOT edit unless the user explicitly asks |
+| `src/routes/`, `src/components/` | Lovable | Do NOT edit unless the user explicitly asks |
 | `src/store/` | Shared | Agreed contract. Change only with the user's OK; keep backwards compatible |
 | `src/engine/` | Claude Code | Pure TypeScript. No React, no network, no AI. The engine lives in `hotel/` |
 | `src/data/` | Claude Code | JSON only. Every value carries a source; `hotel/` is the data set (three home-era files remain only because the store imports them) |

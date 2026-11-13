@@ -191,11 +191,24 @@ report, the AI advisor and its number check. **Each new type needs:** its zones,
 | Hospitals and clinics | 24/7, high fresh-air requirements, medical equipment, reliability before savings | ComStock (hospital, outpatient) and CBECS | Medium |
 | Schools | Term calendars, daytime occupancy | ComStock (primary, secondary schools) and CBECS | Easy to medium |
 | Museums and convention centers | Strict humidity and temperature control, gallery or event lighting, event schedules | CBECS ("public assembly"); no ComStock model, so more assumptions | Medium to hard |
+| Senior living and nursing homes | Closest to hotels: rooms, 24/7, hot water, kitchens, laundry; residents stay, so occupancy is steadier and comfort limits are stricter | CBECS counts nursing and assisted living within lodging; no ComStock model, so the zones come from the hotel model | Easy: the nearest neighbour |
+| Dormitories | Rooms and showers like a hotel, but on a term calendar (summer nearly empty) | CBECS (lodging: dormitories); no ComStock model | Easy |
+| Resorts, casinos and convention hotels | Hotels plus pools, spas, gaming floors and event halls with their own schedules | ComStock large hotel plus extra zones; CBECS | Medium |
+| Restaurant and retail chains | Many small, similar sites: kitchens and refrigeration, opening hours; the portfolio map and optimizer fit them directly | ComStock (full-service and quick-service restaurants, standalone retail, strip malls) and CBECS (food service, food sales) | Easy to medium |
+| Grocery stores | Refrigeration runs all day and dominates; heat from cases changes heating and cooling | CBECS (food sales); ComStock covers retail but not grocery refrigeration in detail | Medium |
+| Warehouses and cold storage | Simple buildings with big lighting and (for cold storage) refrigeration loads; LED and controls pay back fast | ComStock (warehouse) and CBECS (refrigerated warehouses as their own type) | Easy (warehouses) to medium (cold storage) |
+| Apartment buildings (multifamily) | Residential use per unit, often split bills between owner and tenants | NREL ResStock (the residential counterpart of ComStock) | Medium: residential data, new tenant-owner split |
+| Government buildings and campuses | Mixed types on one site (offices, labs, dorms, sports), public budgets and carbon targets | ComStock and CBECS by type; a campus is a portfolio of types | Medium: the portfolio view is the starting point |
 | Factories | Process energy (motors, compressed air, furnaces, process heat) dominates; production schedules drive it | Not in ComStock or CBECS; EIA's Manufacturing Energy Consumption Survey and process-specific models | Hardest: a different product line |
+| Data centers | Almost all energy is servers and cooling, set by computing load, not people or weather | Not in ComStock or CBECS in usable detail | Not this product: a different engine, and the reason prices rise (B1) |
 
-**Order:** hotels → offices and retail → hospitals and schools → public assembly (museums, convention centers) → factories. (The app's data
-already lists resorts, casinos, convention centers and entertainment venues as future types: `futureBuildingTypes` in
-`src/data/hotel/properties.json`.) **Product next steps alongside:** a pilot on a real hotel's bills, tariffs and demand charges, accounts and
+**Order, and why:** hotels → **senior living and dorms** (the same model: rooms, hot water, kitchens, laundry) → **restaurant and retail
+chains** (many similar sites, so the portfolio view sells itself; ComStock has the data) → **warehouses and cold storage** (simple buildings,
+quick LED and controls paybacks) → **offices, schools and hospitals** (the best data, but more competition and, for hospitals, reliability
+before savings) → public assembly (museums, convention centers) → factories (a different product line). Data centers are not on this path:
+they are a different engine. **Go-to-market lens:** cities that fine buildings for carbon (for example New York's Local Law 97) are where any
+of these types needs the tool first. (The app's data already lists resorts, casinos, convention centers and entertainment venues as future
+types: `futureBuildingTypes` in `src/data/hotel/properties.json`.) **Product next steps alongside:** a pilot on a real hotel's bills, tariffs and demand charges, accounts and
 roles, more cities with local incentives.
 
 ---
@@ -280,21 +293,22 @@ Owner: **P** = pitch lead, **E** = engine lead, **T** = tech lead. Keep answers 
 | --- | --- | --- | --- |
 | 32 | Who pays? | P | Team decision: fill in (for example a per-property subscription for owners and chains, or a tool for energy consultants and utilities). Do not quote prices we have not set. |
 | 33 | How big is the market? | P | US hotels and resorts spend about $5.2 billion a year on energy and use about 46 billion kWh, 1.2% of all US electricity sold (EIA CBECS 2018 and Electric Power Annual); with motels and inns about $6.2 billion. |
-| 34 | What's next? | P | A pilot on a real hotel's bills; tariffs and demand charges; accounts and roles; more cities with local incentives; then offices and retail, hospitals and schools, and public assembly (B6). |
+| 34 | What's next? | P | A pilot on a real hotel's bills; tariffs and demand charges; accounts and roles; more cities with local incentives; then senior living and dorms, restaurant and retail chains, warehouses, and offices, schools and hospitals (B6). |
 | 35 | Can this work for other buildings: hospitals, malls, museums, factories? | P | Yes; hotels are the first type, not the limit. The engine models a building as zones, end uses and drivers, and its national data (NREL ComStock, EIA CBECS) already covers offices, retail, schools, hospitals, clinics, restaurants and warehouses. Factories come last: their energy is mostly industrial processes, which needs different data (EIA's manufacturing survey) and models. |
-| 36 | Could a utility use this? | P | Yes: it already applies a utility's own incentive rules by program year and territory; a utility could use it to target customers and explain programs. |
-| 37 | What's the biggest weakness? | E | Honest answer: savings parameters come from the Illinois rulebook for every city, some installed costs are still assumptions, and bills are compared with normal-year weather. Each is labeled in the app and listed in docs/08 and docs/13. |
+| 36 | Which buildings are next, and why those? | P | Senior living and dorms first: they work like hotels (rooms, hot water, kitchens, laundry), so most of the model carries over. Then restaurant and retail chains, because many similar sites fit the portfolio optimizer, and warehouses, where LED and controls pay back fast. Offices, schools and hospitals have the best data but more competitors. Data centers are a different product. |
+| 37 | Could a utility use this? | P | Yes: it already applies a utility's own incentive rules by program year and territory; a utility could use it to target customers and explain programs. |
+| 38 | What's the biggest weakness? | E | Honest answer: savings parameters come from the Illinois rulebook for every city, some installed costs are still assumptions, and bills are compared with normal-year weather. Each is labeled in the app and listed in docs/08 and docs/13. |
 
 ### Tough or skeptical questions
 
 | # | Question | Owner | Answer |
 | --- | --- | --- | --- |
-| 38 | Why should I trust your numbers over a vendor's? | E | Because we show the work: every input, source and assumption, the same assumptions for every option, and we say when the answer is "don't buy it". |
-| 39 | Your smart thermostat savings look low. | E | They match Illinois' deemed savings for a Chicago hotel. Field studies elsewhere report more, mainly in milder climates and against guests leaving units at extreme settings. We report it rather than tune it. |
-| 40 | Isn't a 3.8-year payback too good to be true? | E | It is an estimate for a synthetic hotel, from published lighting savings and costs; real quotes and an audit come next. With the 2025 lighting incentive it would be 2.3 years, which we deliberately do not count. |
-| 41 | What happens with a building you can't model? | E | The app labels what it does not know: unsupported equipment is informational, unknown replacements say "needs more information", and building types we do not simulate are not offered. |
-| 42 | Did you talk to hotel operators? | P | Not in 48 hours; we used published evidence (EIA data, the industry association, trade press, a chief engineer's own retrofit). The first step after the hackathon is a pilot on a real hotel's bills. |
-| 43 | What did you cut? | P | Accounts, tariffs, weather-normalized bills and more building types. We chose depth and honesty over breadth. |
+| 39 | Why should I trust your numbers over a vendor's? | E | Because we show the work: every input, source and assumption, the same assumptions for every option, and we say when the answer is "don't buy it". |
+| 40 | Your smart thermostat savings look low. | E | They match Illinois' deemed savings for a Chicago hotel. Field studies elsewhere report more, mainly in milder climates and against guests leaving units at extreme settings. We report it rather than tune it. |
+| 41 | Isn't a 3.8-year payback too good to be true? | E | It is an estimate for a synthetic hotel, from published lighting savings and costs; real quotes and an audit come next. With the 2025 lighting incentive it would be 2.3 years, which we deliberately do not count. |
+| 42 | What happens with a building you can't model? | E | The app labels what it does not know: unsupported equipment is informational, unknown replacements say "needs more information", and building types we do not simulate are not offered. |
+| 43 | Did you talk to hotel operators? | P | Not in 48 hours; we used published evidence (EIA data, the industry association, trade press, a chief engineer's own retrofit). The first step after the hackathon is a pilot on a real hotel's bills. |
+| 44 | What did you cut? | P | Accounts, tariffs, weather-normalized bills and more building types. We chose depth and honesty over breadth. |
 
 ---
 

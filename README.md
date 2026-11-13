@@ -145,7 +145,7 @@ npx vitest run  # tests
 - [Utility data and calibration](docs/19_UTILITY_DATA.md) (spreadsheet, Excel template, validation, calibration method, baseline choice)
 - [Equipment inventory](docs/20_EQUIPMENT_INVENTORY.md) (audit, data model, which edits change the model, current vs proposed)
 - [Calculation transparency](docs/21_CALCULATION_TRANSPARENCY.md) ("How was this calculated?", data labels, financial assumptions)
-- [Pitch and Q&A](docs/22_PITCH_AND_QA.md) (why it is a wow, demo moments, 40 judge questions with answers)
+- [Pitch and Q&A](docs/22_PITCH_AND_QA.md) (why it is a wow, demo moments, 44 judge questions with answers)
 
 ## Working with Lovable
 

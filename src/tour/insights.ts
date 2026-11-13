@@ -131,8 +131,12 @@ export function insightFor(stepId: string, s: TwinState): Insight | null {
       if (!hi || !lo) return null;
       return { value: hi.totals.cost, format: "usd", label: `in ${MONTHS[hi.month] ?? ""}, the costliest month`, note: `${MONTHS[lo.month] ?? ""} costs ${usd(lo.totals.cost)}, the least.` };
     }
-    case "flow":
-      return a.cost > 0 ? { value: a.elecCost / a.cost, format: "pct", label: "of the bill is electricity", note: `Natural gas is ${usd(a.gasCost)} a year.` } : null;
+    case "flow": {
+      // Carbon versus cost: natural gas's share of each (the same annual figures, gas carbon at the EPA factor).
+      if (a.cost <= 0 || a.carbonKg <= 0) return null;
+      const gasCarbon = a.gasTherms * s.baseline.emissionFactors.gasKgPerTherm;
+      return { value: gasCarbon / a.carbonKg, format: "pct", label: "of the carbon comes from natural gas", note: `Gas is ${pct(a.gasCost / a.cost)} of the bill but ${pct(gasCarbon / a.carbonKg)} of the carbon.` };
+    }
     case "drivers": {
       const from = p.occupancy;
       const to = from <= 0.7 ? Math.min(1, from + 0.25) : Math.max(0, from - 0.25);
@@ -217,19 +221,22 @@ export function reportOutline(s: TwinState): ReportOutline | null {
   return { plan: w.evaluation.name, headline: d.interpretation.headline, verdict: d.interpretation.verdict, sections: REPORT_SECTIONS };
 }
 
-/** The advisor card: an example question and the template answer built from the model's own numbers (no network, nothing stored). */
-export const ADVISOR_EXAMPLE_QUESTION = "Why not solar, and what should I do with my budget?";
+/**
+ * The advisor card: an example question and the answer the advisor's engine tools give for it (the same `run_scenario` tool the AI calls,
+ * run in the browser, and its template answer). No network, nothing stored, nothing applied.
+ */
+export const ADVISOR_EXAMPLE_QUESTION = "What if occupancy rises to 85%?";
 export function advisorExample(s: TwinState): { question: string; answer: string } | null {
-  const plan = bestPackage(s.hotel, s.baseline, s.hotelDiscountRate);
   const question = ADVISOR_EXAMPLE_QUESTION;
-  const ctx = advisor.buildAdvisorContext({ hotel: s.hotel, baseline: s.baseline, scenario: {}, scenarioResult: null, plan, syntheticDemo: true }, question);
-  const text = advisor.fallbackAnswer(advisor.parseQuestion(question), ctx);
+  const env = { hotel: s.hotel, baseline: s.baseline, discountRate: s.hotelDiscountRate };
+  const calls = advisor.planToolCalls(question, "hotel");
+  if (!calls.length) return null;
+  const runs = calls.map((c, i) => advisor.runTool(env, { ...c, id: c.id ?? `tour-${i}` } as never));
+  const ctx = advisor.buildAdvisorContext({ hotel: s.hotel, baseline: s.baseline, scenario: {}, scenarioResult: null, plan: null, syntheticDemo: true }, question);
+  const text = advisor.toolAnswer(runs, ctx);
   const sentences = text.split(/(?<=[.!?])\s+(?=[A-Z])/);
-  // Answer the question asked: the top choice for the budget, then why solar is or is not in it.
-  const top = sentences.find((x) => /top choice is/.test(x)) ?? sentences[0] ?? "";
-  const solar = sentences.find((x) => /solar/i.test(x) && x !== top);
-  const answer = [top, solar].filter(Boolean).join(" ");
-  return answer ? { question, answer } : null;
+  const answer = sentences.slice(0, 2).join(" ");
+  return answer ? { question, answer: `${answer} [Apply this what-if]` } : null;
 }
 
 /** The open portfolio's top-priority hotel (highest investment priority among the hotels shown), or null. */

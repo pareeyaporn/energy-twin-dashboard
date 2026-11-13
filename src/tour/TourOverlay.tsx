@@ -4,7 +4,7 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Sparkles, X } from "lucide-react";
 import { useTwin } from "@/store/useTwin";
 import { Button } from "@/components/ui/button";
-import { TOUR_STEPS, bodyOf } from "./steps";
+import { QUICK_TOUR_IDS, TOUR_STEPS, bodyOf, tourSteps } from "./steps";
 import { openWorkspaceTab, waitFor } from "./dom";
 import { advisorExample, finishSummary, formatInsight, insightFor, projectionSeries, reportOutline, topPriorityId } from "./insights";
 import type { ReportOutline } from "./insights";
@@ -71,8 +71,10 @@ export function TourOverlay() {
   const reduce = useTwin((s) => s.reduceEffects);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const step = TOUR_STEPS[index];
-  const total = TOUR_STEPS.length;
+  const mode = useTour((s) => s.mode);
+  const steps = tourSteps(mode);
+  const step = steps[index] ?? steps[0]!;
+  const total = steps.length;
   const [targets, setTargets] = useState<Element[] | null>(null);
   const [box, setBox] = useState<Box | null>(null);
   const [insight, setInsight] = useState<Insight | null>(null);
@@ -340,7 +342,7 @@ export function TourOverlay() {
           <div className="mt-3 space-y-1.5 rounded-xl border border-primary/25 bg-primary/5 p-2.5 text-[11px]" data-testid="tour-advisor-example">
             <p className="ml-auto w-fit max-w-[90%] rounded-lg bg-primary/20 px-2 py-1 text-foreground">{example.question}</p>
             <p className="max-w-[95%] rounded-lg border border-glass-border bg-background/50 px-2 py-1 text-foreground/90">{example.answer}</p>
-            <p className="text-[10px] text-muted-foreground">Example answer built from the model's numbers. In the app, the AI writes the answer and the app checks every number in it.</p>
+            <p className="text-[10px] text-muted-foreground">Computed by the engine's what-if tool, the one the AI calls. In the app, the AI writes the answer, the app checks every number, and Apply puts the result on the twin.</p>
           </div>
         )}
         {last && summary.length > 0 && (
@@ -360,7 +362,7 @@ export function TourOverlay() {
         <div className="mt-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <div className="flex gap-[3px]" aria-hidden>
-              {TOUR_STEPS.map((s, i) => (
+              {steps.map((s, i) => (
                 <span key={s.id} className={`h-1.5 rounded-full ${i === index ? "w-3 bg-primary" : i < index ? "w-1 bg-primary/50" : "w-1 bg-muted-foreground/40"}`} style={{ transition: reduce ? "none" : "width 200ms ease" }} />
               ))}
             </div>
@@ -369,7 +371,16 @@ export function TourOverlay() {
           <div className="flex items-center gap-1.5">
             {!first && !last && <Button size="sm" variant="ghost" onClick={back} aria-label="Back"><ArrowLeft /> Back</Button>}
             {first && <Button size="sm" variant="ghost" onClick={() => end("skipped")}>Skip tour</Button>}
-            {!last && <Button ref={primaryRef} size="sm" onClick={next} data-testid="tour-next">{first ? "Show me" : "Next"} <ArrowRight /></Button>}
+            {first && (
+              <Button size="sm" variant="outline" onClick={() => { useTour.getState().setMode("full"); next(); }} data-testid="tour-full">
+                Full tour · {TOUR_STEPS.length} steps
+              </Button>
+            )}
+            {!last && (
+              <Button ref={primaryRef} size="sm" onClick={() => { if (first) useTour.getState().setMode("quick"); next(); }} data-testid="tour-next">
+                {first ? `Quick tour · ${QUICK_TOUR_IDS.length} steps` : "Next"} <ArrowRight />
+              </Button>
+            )}
           </div>
         </div>
         {last && (

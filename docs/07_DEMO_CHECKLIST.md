@@ -16,9 +16,9 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
       the median (cold climate, restaurant). Shown in the app as context (benchmark card, LV15); noted for Q&A
 - [ ] 3D view loads on the demo laptop and projector (WebGL); "reduce effects" and the 2D switch tested as a fallback
 - [x] Dollar, kWh and carbon figures in the pitch script match what the app shows (checked by `src/test/demoScript.test.ts`, November 2026)
-- [ ] `npm run build` passes; no console errors on the demo path
-- [ ] Published Lovable URL works in an incognito window
-- [ ] Advisor answers for the demo questions are cached (ask them once in the rehearsal on the demo laptop; saved in local storage), and the template fallback is tested by turning the function off
+- [x] `npm run build` passes; no console errors on the demo path — *checked November 2026: the whole 7-act path walked in a browser (1440 × 900) in 70 s with no page or console errors (only the blocked advisor host on the test machine); every figure on screen matched the script*
+- [ ] Published Lovable URL works in an incognito window — *team: the lovable.app hosts are not reachable from the build machine*
+- [ ] Advisor answers for the demo questions are cached (ask them once in the rehearsal on the demo laptop; saved in local storage), and the template fallback is tested by turning the function off — *fallback checked (November 2026): with the function unreachable, act 4 still showed the engine's result card and "Apply this what-if" worked. Caching the live answers needs the redeployed function on the demo laptop (team)*
 - [x] Claims check (task 8.5, November 2026): nothing says engineering-grade accuracy, verified carbon savings, guaranteed returns or real-time monitoring
 
 ## On the demo laptop
@@ -44,20 +44,29 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 
 ## Demo path (6–7 minutes) — run 5 times in a row without a failure
 
-Story: *a hotel GM is being pitched solar, smart thermostats and LEDs and doesn't know which pays. Energy Twin lets her test before she spends.*
-Every figure below comes from the engine (synthetic 100-room Lakeshore Inn, Chicago, November 2026 data). **If the engine changes, re-run
-the numbers (task 8.8) and update this script, never the other way round.**
+Story: *the owner of a five-hotel Chicago chain has one budget and three vendors pitching solar, smart thermostats and LEDs. Energy Twin shows
+her where the money goes, lets her test a decision with the AI, and tells her what to buy — before she spends a dollar.*
+Every figure below comes from the engine (synthetic Lakefront Hotel Group; the hotel is its top priority, Riverwalk Grand, 300 rooms).
+**If the engine changes, re-run the numbers (task 8.8) and update this script, never the other way round.** Compact figures on screen
+(e.g. $1.56M) are the same values as the exact ones below.
 
-| Time | Act | Do | Say (figures as of now) |
+| Time | Act (the wow) | Do | Say (figures as of now) |
 | --- | --- | --- | --- |
-| 0:00–0:40 | **1. The problem** | Title slide, then the app (after **Reset demo**): it opens on **Your Hotel Portfolio** (the chain on the map); click **Lakeshore Inn** on the map, then **Explore hotel** | "Hotels run 24/7, occupancy swings the bill, and most owners have no energy team. Here's a chain on one map; let's open one hotel. This hotel spends **$120,178** a year on energy. Every vendor says their product is the answer." |
-| 0:40–1:40 | **2. Meet the twin** | Let the 3D fly-in play; turn on **Energy view**; click **Central HVAC** (camera glides), then **Guest rooms** | "A digital twin of an existing hotel, synthetic but built from public data. The plant is the biggest cost at **$34,152**, then guest rooms **$21,587** and hallways **$21,130**." Benchmark card: "**86.5 kBtu/ft²**, **37% above the ENERGY STAR hotel median of 63**: there is room to save." |
-| 1:40–2:40 | **3. A living building** | Season presets **January night** (21:00), then **July afternoon** (15:00); point at the hourly readout and the street; **Flow** tab with the animated Sankey | "Same clock for the whole hotel. A January night: **80 kW** of heating, the roof unit glows red, lit windows are guests in their rooms. July afternoon: **102 kW** of cooling. The people outside are guests who are out right now, from the model." |
-| 2:40–3:40 | **4. Test an operating decision** | Scenario: occupancy **60% → 85%**; open "why it changed"; turn on **smart room controls** | "A conference season: the bill rises **$12,869** to **$133,047**. Smart room controls claw back **$1,014**: less than you'd think, because at 85% few rooms are empty. That's the kind of thing you want to know before buying." |
-| 3:40–5:10 | **5. Spend the budget** | Invest: **$50,000**, "optimize for this scenario" (on by itself); **Find the best investments**; show the three packages; open the **10-year projection** on the top one; open **Compare all upgrades** and point at solar; **Apply** the top package and show the split twin | "It tested every combination, **256**, and **10** fit the budget and comfort limit. Best: **LED lighting + occupancy sensors**: **$38,940** installed (**$0** in counted incentives, so **$38,940** net), saving **$10,302** a year, payback **3.8 years**, **$73,209** over ten years, **27 t** of CO2 a year. ComEd's lighting incentive is shown separately: its 2026 rate isn't confirmed yet, so we don't count it. If ComEd renews the 2025 rate, that's **$14,756** back, **$24,184** net and **2.3 years**. Fastest: sensors alone, **2.5 years**. Solar on the full roof costs **$159,500** (LBNL national median, $2.90/W) and takes about **18.5 years** here, so it isn't recommended — and we only count incentives the utility has published for this year." After **Apply**: "the twin now shows the hotel after the upgrade: **$121,731** a year at 85% occupancy." |
-| 5:10–6:00 | **6. Ask the advisor** | Ask: *"Why not solar, and what should I do with $50,000?"* (saved from the rehearsal, task 8.2) | "The answer is written by Claude but every number comes from the model; the app rejects any answer with a number that isn't in the results." |
-| 6:00–6:40 | **7. Scale and honesty** | Switch to the **300-room** preset (baseline **$374,741**), budget **$150,000**, **Find the best investments**; then close on the before/after strip (energy, cost, carbon) | "A 300-room downtown hotel: **insulation + LED + occupancy sensors**, **$132,578** (**$132,578** net, or **$88,309** if ComEd renews its 2025 lighting rates), **$30,323** a year, **4.4 years**. Estimates, with sources and ranges; not an audit and not live monitoring. *Simulate smarter. Spend better. Save energy.*" |
-| 6:40–7:00 | Buffer, or the chain | Optional if time allows: **Portfolio** in the top bar (or the breadcrumb): the map comes back as you left it; point at **Start here** | "Our **5** Chicago hotels spend **$1,561,819** a year; their best packages would save **$109,905**. Start with **Riverwalk Grand (100 of 100)**." Otherwise hand over to Q&A |
+| 0:00–0:45 | **1. A city-scale digital twin** | After **Reset demo** the app opens on **Your Hotel Portfolio**: the 3D Chicago map. Point at the KPI cards, then the **Top investment opportunity** card | "**5** hotels, one map. They spend **$1,561,819** a year on energy, and their best upgrades could save **$109,905** — **7.0%** of the bill. Where do you start? Not with the biggest bill: Lakefront Convention spends **$591,679** but returns less per dollar. Start with **Riverwalk Grand**: **$28,480** a year saved for **$116,820**, paid back in **4.1 years**." |
+| 0:45–1:30 | **2. One budget, the whole chain** | **Optimize portfolio** (header) → **Optimize portfolio** in the planner; hover the allocation bar | "One budget, **$500,000**, split by an exact search across every hotel's options: **$113,686** a year, payback **4.3 years**, **5 of 5** hotels funded. Every dollar on this bar is a package the engine evaluated." |
+| 1:30–2:40 | **3. Fly into the building** | Map: click **Riverwalk Grand** (the camera flies in among the towers) → **Explore hotel**. In the twin: **Energy view**, click **Central HVAC**; season presets **January night**, then **July afternoon**; then **Flow** → width **Carbon** | "Its twin: **$374,741** a year, the central plant alone **$104,128**. A January night needs **242 kW** of heating; a July afternoon **307 kW** of cooling. Now switch the flow to carbon: gas is only **19%** of the bill but **31%** of the carbon — **1,301 t** a year in total. That's what carbon rules will price." |
+| 2:40–3:40 | **4. Ask the AI to test a decision** | **4 Ask**: type *"What if occupancy rises to 85%?"* → the engine's result card → **Apply this what-if** | "The AI doesn't guess: it asks our engine to run the what-if. A conference season at 85% takes the bill from **$374,741** to **$399,140**, **$24,399** more. One click and the twin shows it. Every number it quotes is checked against the model." |
+| 3:40–5:00 | **5. What should she buy?** | **3 Invest**: budget **$150,000**, "Optimize for this scenario" on → **Find the best investments**; open the top package and its 10-year projection; **Compare all upgrades** → point at solar; **Apply** the top package → **Split** | "It tested **512** combinations; **41** fit the budget and comfort limits. Best: roof insulation, LED and occupancy sensors, **$132,578**, saving **$32,750** a year, paid back in **4.0 years**, **$224,780** net over ten years and **88 t** of CO₂ a year. Solar? **$128,030** and a **19.8 years** payback here. Applied: **$366,390** a year. And it says which costs are placeholders: get quotes." |
+| 5:00–5:50 | **6. Hand it to the owner** | **Preview report** (then show the PDF pages) | "One click, a PDF for the owner and the bank: the recommendation, before and after, cash flow, and every assumption — labeled estimates, placeholder costs named." |
+| 5:50–6:40 | **7. Back to the chain, and close** | **Portfolio** in the breadcrumb: the map is as she left it | "From one map to one building to one decision. Estimates, not an audit — but now she knows where to start. **Simulate smarter. Spend better. Save energy.**" |
+
+**Why this order:** the business wow (the chain and its top opportunity) lands in the first 45 seconds; the visual wow (the 3D city, the
+building, the carbon flow) carries the middle; the AI moment shows the engine and the AI working together; the decision and the report
+close on money. Every act ends on a number the judge can check on screen.
+
+**Wow moments to hit, and their backups:** the fly-in among the towers (backup: **2D**, then the drawn map); the carbon flip on the Flow
+view (works without WebGL); the AI result card with Apply (works offline: the same engine tool runs from a keyword parser, see below);
+the allocation bar and the split twin.
 
 **Before every run:** press **Reset demo** (top bar); it returns to the portfolio homepage. The onboarding tour (quick 8 steps or full 18) starts by itself only on a browser's first visit, and once more on browsers that saw the earlier
 tour: run it (or skip it) once on the demo laptop beforehand so it does not open mid-demo. **Figures:** `src/test/demoScript.test.ts` walks this path through the app's store and
@@ -65,14 +74,14 @@ fails if any bold figure above no longer matches the engine; print the current o
 `DEMO_FIGURES=1 npx vitest run src/test/demoScript.test.ts` (task 8.8).
 
 **Advisor answers (task 8.2):** a live answer that passes the number check is saved in the browser (local storage,
-`energy-twin:advisor-answers:v1`), keyed by the question and every result it may use. Ask the act-6 question once during the rehearsal on the
-demo laptop, in the same state as the demo (after acts 1–5): from then on it returns the same text instantly, even offline or after a reload;
+`energy-twin:advisor-answers:v1`), keyed by the question and every result it may use. Ask the act-4 question once during the rehearsal on the
+demo laptop, in the same state as the demo (after acts 1–3): from then on it returns the same text instantly, even offline or after a reload;
 Reset demo keeps it. Each saved answer is re-checked against the results before it is shown, and if the state differs (for example another
 budget) the advisor asks again. If the live advisor cannot be reached, the template answer covers the plan and why solar is left out.
 
-**3-minute cut** (if the slot has a hard limit): drop act 3 (a living building) and act 7 (scale and honesty), and tighten the rest:
-act 1 (0:00–0:25), act 2 (0:25–1:00, keep Energy view and one zone click), act 4 (1:00–1:40), act 5 (1:40–2:30, packages and the solar line;
-skip the projection), act 6 (2:30–2:55), then the one-line close "Estimates, not an audit. Simulate smarter. Spend better. Save energy." (2:55–3:00).
+**3-minute cut** (if the slot has a hard limit): act 1 (0:00–0:35, KPIs and the top opportunity), act 3 shortened (0:35–1:20: fly in,
+Explore, the carbon flip only), act 4 (1:20–2:00, the AI what-if and Apply), act 5 (2:00–2:50: find the best investments, the top package,
+one line on solar), then the close "Estimates, not an audit. Simulate smarter. Spend better. Save energy." (2:50–3:00).
 
 **Fallbacks:** no WebGL or a slow laptop → 2D button (the script works in 2D; skip act 3's 3D moments). Advisor slow or offline → the saved
 answer (task 8.2) appears at once, or the template answer within 8 s. Wrong state → the **Reset demo** button (task 8.7).
@@ -133,7 +142,7 @@ Where to ask: hotel questions in the **Ask** tab of the hotel; portfolio questio
 
 | Ask | What happens |
 | --- | --- |
-| *"Why not solar, and what should I do with $50,000?"* | The act-6 demo question: runs `find_best_plan`; the answer explains why solar pays back slowly here |
+| *"Why not solar, and what should I do with $50,000?"* | Runs `find_best_plan`; the answer explains why solar pays back slowly here (good for Q&A) |
 | *"Why is HVAC my biggest cost?"* | No tool needed: the AI explains the zone and end-use figures already on screen. Offline: template answer |
 | *"What are the risks?"* | The AI may run stress tests; offline: template answer |
 

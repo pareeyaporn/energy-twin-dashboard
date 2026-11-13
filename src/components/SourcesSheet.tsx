@@ -1,13 +1,19 @@
 import { ExternalLink } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useTwin } from "@/store/useTwin";
+import { DataClassLegend, FinancialAssumptionsPanel } from "@/explain/HowCalculated";
 
+// The hotel model's main sources (every value and where it was read: docs/14 research log).
 const sources = [
-  { name: "EIA", desc: "Electricity and natural gas prices by state.", url: "https://www.eia.gov/electricity/data.php" },
-  { name: "NREL ResStock", desc: "Legacy sample energy and upgrade reference; not hotel-specific.", url: "https://resstock.nrel.gov/" },
-  { name: "EIA RECS", desc: "Legacy energy consumption reference; not hotel-specific.", url: "https://www.eia.gov/consumption/residential/" },
-  { name: "Rewiring America", desc: "Legacy upgrade incentive reference; hotel eligibility not verified.", url: "https://www.rewiringamerica.org/" },
-  { name: "NREL PVWatts", desc: "Solar production estimates for your location.", url: "https://pvwatts.nrel.gov/" },
+  { name: "EIA prices", desc: "Commercial electricity and natural gas prices by state (Electric Power Monthly, natural gas prices).", url: "https://www.eia.gov/electricity/monthly/" },
+  { name: "EIA Annual Energy Outlook 2026", desc: "Energy price growth used in net benefit and NPV.", url: "https://www.eia.gov/outlooks/aeo/" },
+  { name: "NREL ComStock", desc: "Hotel energy intensity and end-use split by climate zone (2025 Release 3).", url: "https://comstock.nrel.gov/" },
+  { name: "NOAA Climate Normals", desc: "1991–2020 monthly temperatures for each city.", url: "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals" },
+  { name: "EPA eGRID", desc: "Grid emission factors by subregion (eGRID2023).", url: "https://www.epa.gov/egrid" },
+  { name: "NREL PVWatts", desc: "Solar production for each city.", url: "https://pvwatts.nrel.gov/" },
+  { name: "Illinois Statewide TRM v14.0", desc: "Upgrade savings, measure lives and some costs.", url: "https://www.ilsag.info/technical-reference-manual/" },
+  { name: "ComEd incentive worksheets", desc: "Business incentive rates and program rules (2026; 2025 lighting rates shown as illustrative).", url: "https://www.comed.com/ways-to-save/for-your-business" },
+  { name: "LBNL Tracking the Sun / Distributed Solar", desc: "Installed solar prices by system size.", url: "https://emp.lbl.gov/tracking-the-sun" },
 ];
 
 export function SourcesSheet() {
@@ -18,6 +24,7 @@ export function SourcesSheet() {
     <Sheet open={sourcesOpen} onOpenChange={setSourcesOpen}>
       <SheetContent className="overflow-y-auto border-border bg-panel">
         <SheetHeader><SheetTitle>Sources</SheetTitle><SheetDescription>References and assumptions behind the estimates; synthetic values are not verified.</SheetDescription></SheetHeader>
+        <div className="mt-5 space-y-5"><FinancialAssumptionsPanel /><DataClassLegend /></div>
         {lineSources.length > 0 && <section className="mt-5 space-y-3"><h2 className="text-sm font-semibold">Investment sources</h2><ul className="space-y-3 text-xs text-muted-foreground">{lineSources.map((source) => <li key={source} className="break-words border-b border-border pb-3">{source}</li>)}</ul></section>}
         <ul className="mt-6 space-y-3">
           {sources.map((s) => (

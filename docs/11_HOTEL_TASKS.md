@@ -453,6 +453,22 @@ decision summary). Each part has its own heading below.
 - [ ] 14B.12 P2 [Store] Keep the "synthetic" label when a sample hotel's budget is edited (the app's badge disappears today; the report
       already keeps the label)
 
+
+### 14F Calculation transparency (Improvement 6; `src/explain/`, docs/21)
+- [x] 14F.1 [CC] "How was this calculated?" next to major figures: what it means, how, main inputs with their data label, sources, limits,
+      technical detail on demand — *done (November 2026): `explain(metric, state)` for 12 figures; ⓘ on the KPI strip and the recommended
+      plan's tiles; portfolio figures get theirs with the portfolio-workflow branch*
+- [x] 14F.2 [CC] Data labels: published source, your input, modeled estimate, synthetic demo data, assumption — *done: `DATA_CLASS`,
+      shown on every input and in a legend in the Sources panel*
+- [x] 14F.3 [CC] Incentive transparency — *done in the engine (program year, illustrative 2025 rates, territory) and stated in the
+      incentives explanation*
+- [x] 14F.4 [CC] Financial assumptions in one place — *done: Sources panel list with labels; the discount rate stays editable and
+      recalculates everything*
+- [x] 14F.5 [CC] No invented confidence scores; one estimate statement on every explanation — *done*
+- [x] 14F.6 [CC] Sources panel lists the hotel model's sources (the home-era ResStock, RECS and Rewiring America entries removed) — *done
+      (minimal edit in Lovable's `SourcesSheet.tsx`)*
+- [ ] 14F.7 [CC] ⓘ on the portfolio KPIs (intensity, savings potential, investment priority) after the portfolio-workflow merge
+
 ## Phase 8 — Demo hardening (all)
 - [x] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,
       $50,000 budget, an advisor question **chosen after calibration from what the results actually show**, closing before/after with carbon — *done (November 2026): docs/07 brought up to date (10 packages fit at $50,000 on the scenario, not 14; the 300-room package and baseline; the act-6 question "Why not solar, and what should I do with $50,000?"; an optional portfolio line), with Reset demo and the tour noted before each run. The storyline owner may still reword it; keep the bold figures*

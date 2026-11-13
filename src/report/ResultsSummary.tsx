@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import type { HotelReportData, ReportMetricPair } from "./data";
 import { aiReportFromState, customReportFromState, portfolioReportFromState } from "./fromStore";
 import { ReportActions } from "./ReportActions";
+import { HowCalculated } from "@/explain/HowCalculated";
+import type { MetricId } from "@/explain/explanations";
 
 // The investment results, written for an owner: what it costs, what it saves, when it pays back, what it is worth, and which upgrades
 // do it. Every figure is the report data built from the engine's evaluation (the same data as the PDF).
@@ -14,10 +16,10 @@ const pct = (r: number) => `${Math.round(r * 100)}%`;
 const yrs = (n: number | null) => (n === null ? "No payback" : `${n.toFixed(1)} years`);
 const COLORS = ["var(--primary)", "var(--savings)", "var(--heat)", "oklch(0.7 0.12 260)", "oklch(0.75 0.13 320)", "oklch(0.8 0.1 120)", "oklch(0.7 0.1 30)", "oklch(0.72 0.08 200)"];
 
-function Tile({ label, value, note, tone, question }: { label: string; value: string; note?: string | undefined; tone?: "good" | "bad" | undefined; question?: string | undefined }) {
+function Tile({ label, value, note, tone, question, how }: { label: string; value: string; note?: string | undefined; tone?: "good" | "bad" | undefined; question?: string | undefined; how?: MetricId }) {
   return (
     <div className="min-w-0 rounded-lg border border-glass-border bg-background/40 p-2.5" title={question}>
-      <dt className="text-[11px] text-muted-foreground">{label}</dt>
+      <dt className="flex items-center justify-between gap-1 text-[11px] text-muted-foreground">{label}{how && <HowCalculated metric={how} />}</dt>
       <dd className={cn("num mt-0.5 text-base font-semibold tabular-nums", tone === "good" && "text-savings", tone === "bad" && "text-heat")}>{value}</dd>
       {note && <dd className="text-[10px] text-muted-foreground">{note}</dd>}
     </div>
@@ -148,14 +150,14 @@ export function ResultsSummary({ d, compact = false, show = "all" }: { d: HotelR
     <div className="space-y-3" data-testid="results-summary">
       {show === "all" && (
         <dl className={cn("grid gap-2", compact ? "grid-cols-2" : "grid-cols-2 md:grid-cols-4")} aria-label="Executive summary (modeled estimates)">
-          <Tile label="Recommended investment" value={usd(d.investment.netInvestment)} note={`${usd(d.investment.grossCost)} installed${d.investment.incentivesApplied > 0 ? ` − ${usd(d.investment.incentivesApplied)} incentives` : ""}`} question="How much do I need to invest?" />
+          <Tile how="upgradeCost" label="Recommended investment" value={usd(d.investment.netInvestment)} note={`${usd(d.investment.grossCost)} installed${d.investment.incentivesApplied > 0 ? ` − ${usd(d.investment.incentivesApplied)} incentives` : ""}`} question="How much do I need to invest?" />
           <Tile label="Budget left" value={usd(d.investment.remainingBudget)} note={`of ${usd(d.budget)}`} tone={d.investment.overBudget ? "bad" : undefined} />
-          <Tile label="Estimated annual savings" value={usd(f.annualSavings)} note={`${usd(f.savingsRange[0])} to ${usd(f.savingsRange[1])}`} tone="good" question="How much money will I save?" />
+          <Tile how="annualSavings" label="Estimated annual savings" value={usd(f.annualSavings)} note={`${usd(f.savingsRange[0])} to ${usd(f.savingsRange[1])}`} tone="good" question="How much money will I save?" />
           <Tile label="Cut in energy cost" value={pct(f.savingsPctOfBill)} note={`of ${usd(d.current.cost)} a year`} />
-          <Tile label="Pays for itself in" value={yrs(f.paybackYears)} note="simple payback" question="How long until I recover my investment?" />
-          <Tile label="NPV, 5 years" value={usd(f.npv5)} note={`at ${pct(f.discountRate)} a year`} tone={f.npv5 < 0 ? "bad" : undefined} question="What is the long-term financial return?" />
-          <Tile label="NPV, 10 years" value={usd(f.npv10)} note={`at ${pct(f.discountRate)} a year`} tone={f.npv10 < 0 ? "bad" : "good"} />
-          <Tile label="Carbon avoided" value={`${num(d.environment.carbonKgAvoided / 1000, 1)} t`} note={`CO₂e a year (${pct(d.environment.carbonPct)})`} />
+          <Tile how="payback" label="Pays for itself in" value={yrs(f.paybackYears)} note="simple payback" question="How long until I recover my investment?" />
+          <Tile how="npv" label="NPV, 5 years" value={usd(f.npv5)} note={`at ${pct(f.discountRate)} a year`} tone={f.npv5 < 0 ? "bad" : undefined} question="What is the long-term financial return?" />
+          <Tile how="npv" label="NPV, 10 years" value={usd(f.npv10)} note={`at ${pct(f.discountRate)} a year`} tone={f.npv10 < 0 ? "bad" : "good"} />
+          <Tile how="carbon" label="Carbon avoided" value={`${num(d.environment.carbonKgAvoided / 1000, 1)} t`} note={`CO₂e a year (${pct(d.environment.carbonPct)})`} />
         </dl>
       )}
       <Verdict v={d.interpretation} />

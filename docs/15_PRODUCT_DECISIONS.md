@@ -259,3 +259,16 @@ and meaningful, not sourced values; they are in `INSIGHT_THRESHOLDS` (`src/engin
 - **The report's date** is the user's at the moment of the click (in the file name and on page 1); the engine has no clock.
 - **Synthetic label in reports** also applies to a sample hotel whose inputs were edited, because its building data are still the sample's.
 
+## 24. The equipment inventory: which edits change the model (November 2026)
+
+- **Current equipment vs proposed upgrades are separate.** Correcting the installed equipment recalculates the baseline and is never shown
+  as savings; investments stay in the optimizer and custom plans, measured against the corrected hotel (docs/20).
+- **Only defensible levers change consumption**: heating efficiency, cooling COP, LED share by zone, water-heater efficiency, existing solar,
+  and the hotel's existing schedule and smart-controls settings. Quantities, nameplates, ages and other equipment are informational and
+  labeled so, because the model is by zone and end use, not per appliance; adding equipment must not add consumption without a modeled reason.
+- **Validation bounds** (thermal 50–99%, heat-pump COP 1.5–5, chiller COP 2–8, DX COP 2–5, LED 0–100%) are limits for typing errors, not data.
+- **The last heating, cooling or hot-water equipment cannot be removed**: a hotel without heating would silently lose its heating demand.
+- **Several items on one lever average by capacity** (count × capacity), a seasonal approximation.
+- **Replacement maps to existing upgrades** (HVAC equipment, LED, water heating, solar); anything else says "needs more information"
+  rather than inventing a cost.
+- **Existing solar is netted monthly with no export credit**, consistent with the $0 export-credit fallback (docs/15 earlier sections).

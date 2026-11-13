@@ -456,6 +456,15 @@ changes"; it used to say "per year" for every test), adds carbon and percentage 
 because the extra heating is gas ($0.929 a therm, about $9.3 per MMBtu) while the extra cooling is electric ($0.1405 a kWh, about $41.2 per
 MMBtu), and only one month changes in each.
 
+## 15. Current equipment levers (Phase 14G, November 2026)
+
+The operator's equipment corrections (`HotelInput.equipment`, validated by `validateEquipment`) set `profile.equipmentLevers`, which the
+simulation uses in place of reference values: heating site energy × `0.80 / e_h`; cooling electricity × `COP_ref / COP`; a zone's lighting
+× `(1 − s × 0.45)` for LED share s; the gas part of hot water × `0.80 / e_w`; existing solar netted from purchased electricity month by
+month (PVWatts mid yield). Upgrades measure against the corrected baseline without double counting (LED converts only the rest; the HVAC
+and water-heating reductions scale with the gap left to their targets; solar is limited to the roof left). Without corrections every
+result is unchanged. Full description, audit and limits: docs/20.
+
 ## Appendix A — Store contract (task 1.10): approved and built
 
 Approved and implemented in `src/store/useTwin.ts` (hotel fields added next to the home-era ones, nothing removed) with helpers and selectors in `src/store/hotelDerived.ts`.

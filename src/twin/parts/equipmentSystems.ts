@@ -73,7 +73,9 @@ function addedSystem(item: EquipmentItem): SystemDef {
 export function systemOf(item: EquipmentItem): SystemDef & { zone: ZoneId; label: string; key: string; group: EquipmentCategory } {
   const def = item.added ? addedSystem(item) : (BY_ID[item.id] ?? { endUses: ["equipment"] as EndUse[], upgrades: [] });
   const uses = def.endUses.length === 3 ? "HVAC" : def.endUses.map((u) => END_USE_LABELS[u].toLowerCase()).join(" and ");
-  return { ...def, zone: item.zone, label: `${ZONE_LABELS[item.zone]} ${uses}`.trim(), key: `${item.zone}|${def.endUses.join(",")}`, group: item.category };
+  const zoneLabel = ZONE_LABELS[item.zone];
+  const label = zoneLabel.toLowerCase() === uses ? zoneLabel : `${zoneLabel} ${uses}`.trim();
+  return { ...def, zone: item.zone, label, key: `${item.zone}|${def.endUses.join(",")}`, group: item.category };
 }
 
 /** 1 therm per hour of gas is 29.3071 kW (thermal). */

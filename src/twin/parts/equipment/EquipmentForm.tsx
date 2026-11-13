@@ -184,7 +184,7 @@ export function EquipmentForm({ mode, onClose }: { mode: EditorMode; onClose: ()
   };
   const title = mode.kind === "add" ? "Add equipment" : `Edit ${mode.item.label}`;
   const field = (id: string, label: string, node: React.ReactNode, hint?: string, f?: string) => (
-    <label htmlFor={id} className="block text-xs">
+    <label key={id} htmlFor={id} className="block text-xs">
       <span className="mb-1 block font-medium">{label}</span>
       {node}
       {hint && <span className="mt-0.5 block text-[11px] text-muted-foreground">{hint}</span>}

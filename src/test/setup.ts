@@ -1,23 +1,26 @@
 import "@testing-library/jest-dom/vitest";
 
-Object.defineProperty(window, "scrollTo", {
-  writable: true,
-  value: () => {},
-});
+// Browser stubs for jsdom; skipped in tests that run in the node environment (for example the PDF report test).
+if (typeof window !== "undefined") {
+  Object.defineProperty(window, "scrollTo", {
+    writable: true,
+    value: () => {},
+  });
 
-Object.defineProperty(window, "matchMedia", {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => {},
-  }),
-});
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => {},
+    }),
+  });
+}
 
 // jsdom has no ResizeObserver; Recharts' ResponsiveContainer (used by the projection sparklines) needs one.
 if (typeof globalThis.ResizeObserver === "undefined") {

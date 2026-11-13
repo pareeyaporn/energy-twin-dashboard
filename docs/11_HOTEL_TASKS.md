@@ -406,6 +406,9 @@ model has no ballroom, pool or 24/7 food-service drivers); heat-pump water heate
 Turning results into decisions for hotel operators: Understand costs → Identify problems → Simulate changes → Evaluate solutions → Optimize
 investments → Make decisions.
 
+Seven improvements for hotel operators (insights, investment results, onboarding, portfolio workflow, simulation results, transparency,
+decision summary). Each part has its own heading below.
+
 ### 14A — Insights and simulation results
 - [x] 14.1 [CC] Engine rules for 3–5 prioritized energy insights from existing outputs (cost driver, intensity vs portfolio and ENERGY STAR,
       occupancy sensitivity, price, weather and equipment exposure, the best eligible upgrade) — *done: `src/engine/hotel/insights.ts`; rules,
@@ -423,6 +426,32 @@ investments → Make decisions.
 - [x] 14.6 [CC] Classify each stress test (temporary event / operational scenario / persistent financial assumption) and keep temporary events
       out of long-term returns — *done: `stressKind`; the engine already kept temporary events out of payback, NPV and the recommendation; the
       panel's "per year" wording for temporary events is fixed ("in the year it happens (one-off, not annualized)"). Table in docs/13 §14*
+
+
+### 14B Investment results and report (Improvements 2 and 7; `src/report/`, docs/18)
+- [x] 14B.1 [CC] Executive summary of the recommended plan: investment, budget left, annual savings, % cut in the bill, payback, NPV 5 and 10,
+      carbon — *done: `AiPlanResults` under "Why this plan" (one-line hook in `BudgetOptimizer`); figures are the evaluation's financials*
+- [x] 14B.2 [CC] Before vs after: electricity, gas, cost, carbon, intensity with absolute and % change — *done: from the baseline the plan
+      was measured against (what-if aware) and the package outcome; gas rising with LED is shown as it is*
+- [x] 14B.3 [CC] Upgrade breakdown, expandable: description, quantity or capacity, installed cost and range, savings, payback, life,
+      incentives, key assumptions — *done*
+- [x] 14B.4 [CC] Savings contribution without double counting — *done: the engine's sequential marginal savings, which add up to the
+      package total (checked; otherwise only the combined figure is shown with "not additive")*
+- [x] 14B.5 [CC] AI plan vs custom plan on the same engine and assumptions; copy the AI plan into a custom plan — *already built
+      (PlanCompare, Customize AI plan); added the Selected upgrades row and the custom plan's results and report*
+- [x] 14B.6 [CC] Plain-language financial reading, honest about poor results — *done: `interpretFinancials` (no payback, payback beyond
+      life, negative NPV → "Not financially attractive"; payback over 7 years → "Pays back, but slowly"; docs/15 §23)*
+- [x] 14B.7 [CC] Downloadable PDF investment report (multi-page, navy and cyan on white, header, footer, page numbers, charts from the
+      model, assumptions, sources, risks) for AI plans, custom plans and the portfolio plan — *done: `@react-pdf/renderer`, lazy-loaded;
+      file name `EnergyTwin_<Name>_InvestmentReport_<date>.pdf`; loading and error states*
+- [x] 14B.8 [CC] Report preview identical to the PDF — *done: the same report data drawn as light pages (works on phones)*
+- [x] 14B.9 [CC] Incentives in the report: counted, listed-not-counted, and illustrative-only lines (`financials.illustrativeIncentives`,
+      the program-year rule) clearly outside the base case — *done*
+- [x] 14B.10 [CC] Tests: figures equal the engine's for AI, custom and portfolio plans; honest readings; a real PDF is generated; state
+      unchanged; browser check on desktop and phone — *done*
+- [ ] 14B.11 P2 [CC] Stress-test results and the advisor's explanation in the report; a monthly energy chart; brand fonts in the PDF
+- [ ] 14B.12 P2 [Store] Keep the "synthetic" label when a sample hotel's budget is edited (the app's badge disappears today; the report
+      already keeps the label)
 
 ## Phase 8 — Demo hardening (all)
 - [x] 8.1 Make the **6–7 minute** path in `docs/07` deterministic (was three minutes, brief section 12): synthetic 100-room hotel, zone view, occupancy 60% to 85%, smart room controls on,

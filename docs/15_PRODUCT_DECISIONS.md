@@ -246,4 +246,16 @@ and meaningful, not sourced values; they are in `INSIGHT_THRESHOLDS` (`src/engin
   that what-if (undone with Reset); the HVAC button switches the twin to the Equipment view; the intensity button opens the portfolio comparison.
 - **Stress-test kinds**: weather = temporary event; occupancy and equipment = operational scenario (temporary or persistent as defined);
   prices = persistent financial assumption. Only persistent tests change long-term returns (unchanged from Phase 12).
+## 23. Reading a plan's finances and attributing savings (November 2026)
+
+- **When a plan is called attractive:** it saves money, its payback is no longer than its equipment's expected life (the savings-weighted
+  average of its upgrades' lifetimes) and its 10-year NPV at the app's discount rate is at least zero. A plan that pays back in more than
+  **7 years** is "pays back, but slowly" (a team choice for wording, not a published threshold; a typical owner's horizon for efficiency
+  capital). Otherwise it is "not financially attractive", and the report says "we do not recommend proceeding on these figures".
+- **Attribution:** each upgrade's share is its marginal saving when the engine applies the upgrades in its fixed order, interactions counted,
+  so the shares add up to the package total. Standalone savings are never added. The order is stated wherever the split is shown.
+- **Incentives in the report** follow the base case: only applied incentives are counted; illustrative incentives (for example a 2025 rate
+  not confirmed for 2026) are shown separately with what the net investment would be, and no figure includes them.
+- **The report's date** is the user's at the moment of the click (in the file name and on page 1); the engine has no clock.
+- **Synthetic label in reports** also applies to a sample hotel whose inputs were edited, because its building data are still the sample's.
 

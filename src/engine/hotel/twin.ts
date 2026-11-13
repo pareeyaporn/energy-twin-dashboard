@@ -154,6 +154,10 @@ export interface FlowLink {
   gasKBtu: number;
   elecKWh: number;
   gasTherms: number;
+  /** Carbon of the link's electricity and gas (kg CO₂e, the result's emission factors); they sum to `carbonKg`. */
+  elecCarbonKg: number;
+  gasCarbonKg: number;
+  carbonKg: number;
 }
 export interface FlowGraph {
   nodes: FlowNode[];
@@ -183,7 +187,7 @@ interface FlowPart {
 const KBTU_PER_KWH = 3.412;
 const KBTU_PER_THERM = 100;
 
-function flowGraph(parts: FlowPart[], period: 'year' | 'hour'): FlowGraph {
+function flowGraph(parts: FlowPart[], period: 'year' | 'hour', ef: EnergyResult['emissionFactors']): FlowGraph {
   const nodes: FlowNode[] = [
     { id: 'grid', label: 'Grid electricity', kind: 'source' },
     { id: 'gas', label: 'Natural gas', kind: 'source' },
@@ -199,7 +203,12 @@ function flowGraph(parts: FlowPart[], period: 'year' | 'hour'): FlowGraph {
     const gasCostUsd = g ? ps.reduce((s, x) => s + x.gasCost, 0) : 0;
     const elecKBtu = elecKWh * KBTU_PER_KWH;
     const gasKBtu = gasTherms * KBTU_PER_THERM;
-    return { source, target, costUsd: elecCostUsd + gasCostUsd, siteKBtu: elecKBtu + gasKBtu, elecCostUsd, gasCostUsd, elecKBtu, gasKBtu, elecKWh, gasTherms };
+    const elecCarbonKg = elecKWh * ef.elecKgPerKWh;
+    const gasCarbonKg = gasTherms * ef.gasKgPerTherm;
+    return {
+      source, target, costUsd: elecCostUsd + gasCostUsd, siteKBtu: elecKBtu + gasKBtu, elecCostUsd, gasCostUsd, elecKBtu, gasKBtu, elecKWh, gasTherms,
+      elecCarbonKg, gasCarbonKg, carbonKg: elecCarbonKg + gasCarbonKg,
+    };
   };
   const links: FlowLink[] = [];
   for (const z of ZONE_IDS) {
@@ -216,11 +225,12 @@ function flowGraph(parts: FlowPart[], period: 'year' | 'hour'): FlowGraph {
   return { nodes, links, period };
 }
 
-/** Grid and gas → zones → categories, with cost and site energy (split by fuel) on every link, for the year. Flows are conserved. */
+/** Grid and gas → zones → categories, with cost, site energy and carbon (split by fuel) on every link, for the year. Flows are conserved. */
 export function energyFlows(result: EnergyResult): FlowGraph {
   return flowGraph(
     result.cells.map((c) => ({ zone: c.zone, endUse: c.endUse, elecKWh: c.elecKWh, gasTherms: c.gasTherms, elecCost: c.elecCost, gasCost: c.gasCost })),
     'year',
+    result.emissionFactors,
   );
 }
 
@@ -245,7 +255,7 @@ export function energyFlowsAt(result: EnergyResult, month: number, hour: number,
     const th = (c.gasTherms / days) * sh;
     parts.push({ zone: c.zone, endUse: c.endUse, elecKWh: kWh, gasTherms: th, elecCost: kWh * result.rates.elecPerKWh, gasCost: th * result.rates.gasPerTherm });
   }
-  return flowGraph(parts, 'hour');
+  return flowGraph(parts, 'hour', result.emissionFactors);
 }
 
 /** One zone and end use over a typical day: electricity (kW), gas (therms per hour) and cost per hour, 24 values each. */

@@ -367,3 +367,15 @@ York, Florida or Colorado utility incentive has been researched, so hotels there
 | NYC Local Law 97 | buildings over 25,000 ft² incl. hotels; $268 per tCO₂e over the limit; limits tighten in 2030 | Compliance guides | Search excerpt (nyc.gov blocked) |
 
 Used only in the pitch (docs/22 part 5); no model value changed.
+
+## Pass 14 (November 2026, refrigerant GWPs)
+
+| Value | Figure | Source | Status |
+| --- | --- | --- | --- |
+| 100-year GWP, HFC-32 / HFC-134a | 677 / 1,300 | EPA GHG Emission Factors Hub 2025 (`ghg-emission-factors-hub-2025.xlsx`), Table 11, IPCC AR5 | Verified (downloaded from epa.gov, November 2026) |
+| 100-year GWP, R-404A / R-407C / R-410A / R-507A | 3,943 / 1,624 / 1,924 / 3,985 | Same, Table 12 (blended refrigerants) | Verified |
+| R-22 (HCFC-22) | not counted | Not in the Hub's GWP tables; ozone-depleting substance under the Montreal Protocol, outside EPA's GHG inventory scope | Decision based on the source |
+| kg per lb | 0.45359237 | Exact definition | Verified |
+
+Used in `emissions.json` (`refrigerants`, `refrigerantSource`) for operator-entered refrigerant top-ups (docs/20).
+

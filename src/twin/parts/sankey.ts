@@ -3,7 +3,7 @@
 import type { FlowGraph, FlowNode } from "@/engine/hotel";
 
 export type FlowMetric = "cost" | "energy" | "carbon";
-export type Fuel = "elec" | "gas";
+export type Fuel = "elec" | "gas" | "refrigerant";
 
 export interface Band {
   key: string;
@@ -50,6 +50,8 @@ export function flowBands(graph: FlowGraph, metric: FlowMetric): Band[] {
     const gas = metric === "cost" ? l.gasCostUsd : metric === "carbon" ? l.gasCarbonKg : l.gasKBtu;
     if (elec > 0) out.push({ key: `${l.source}>${l.target}:elec`, source: l.source, target: l.target, fuel: "elec", value: elec });
     if (gas > 0) out.push({ key: `${l.source}>${l.target}:gas`, source: l.source, target: l.target, fuel: "gas", value: gas });
+    if (metric === "carbon" && l.refrigerantCarbonKg > 0)
+      out.push({ key: `${l.source}>${l.target}:refrigerant`, source: l.source, target: l.target, fuel: "refrigerant", value: l.refrigerantCarbonKg });
   }
   return out;
 }

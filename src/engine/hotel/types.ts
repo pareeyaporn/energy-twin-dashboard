@@ -440,6 +440,9 @@ export interface HotelData {
     cityToSubregion: Record<string, string>;
     stateDefaultSubregion: Record<string, string>;
     gasKgCO2ePerTherm: number;
+    /** Refrigerants an operator can record, with their 100-year GWP (null: recorded but not counted, e.g. HCFC-22). */
+    refrigerants?: Record<string, { gwp: number | null; label: string; typicalUse: string }>;
+    refrigerantSource?: string;
     source: string;
     verified: boolean;
   };
@@ -535,6 +538,14 @@ export interface EquipmentOverride {
   levers?: Partial<Record<EquipmentLever, number>>;
   ageYears?: number;
   notes?: string;
+  /** Refrigerant top-ups from service records (cooling and refrigeration equipment only). Carbon only; never changes energy. */
+  refrigerant?: RefrigerantRecord;
+}
+
+/** A system's refrigerant and how much was added in a year to replace leaks (pounds). */
+export interface RefrigerantRecord {
+  type: string;
+  lbsPerYear: number;
 }
 
 /** What the current equipment changes in the simulation (undefined = the estimate's reference value). */

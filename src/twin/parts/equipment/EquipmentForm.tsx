@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ZONE_IDS, ZONE_LABELS, equipmentTemplates, estimatedInventory, validateEquipment } from "@/engine/hotel";
+import { KG_PER_LB, ZONE_IDS, ZONE_LABELS, equipmentTemplates, estimatedInventory, holdsRefrigerant, refrigerantOptions, validateEquipment } from "@/engine/hotel";
 import type { EquipmentItem, EquipmentLever, EquipmentOverride, EquipmentTemplate, LeverValue, ZoneId } from "@/engine/hotel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -22,6 +22,8 @@ interface Draft {
   schedule: string;
   ageYears: string;
   notes: string;
+  refrigerantType: string;
+  refrigerantLbs: string;
   levers: Partial<Record<EquipmentLever, string>>;
   lightingHours: string;
   commonHvacHours: string;
@@ -37,6 +39,8 @@ function draftOf(item: EquipmentItem, hours: { lighting: number; commonHvac: num
     schedule: item.schedule,
     ageYears: item.ageYears !== undefined ? String(item.ageYears) : "",
     notes: item.notes ?? "",
+    refrigerantType: item.refrigerant?.type ?? "",
+    refrigerantLbs: item.refrigerant ? String(item.refrigerant.lbsPerYear) : "",
     levers: Object.fromEntries(item.levers.filter((l) => l.lever !== "existingSolarKw").map((l) => [l.lever, show(l, l.value)])),
     lightingHours: String(hours.lighting),
     commonHvacHours: String(hours.commonHvac),
@@ -73,6 +77,12 @@ function overrideOf(item: EquipmentItem, estimate: EquipmentItem | undefined, d:
     else o.ageYears = age;
   }
   if (d.notes.trim()) o.notes = d.notes.trim();
+  if (holdsRefrigerant(item) && (d.refrigerantType || d.refrigerantLbs.trim())) {
+    const lbs = num(d.refrigerantLbs);
+    if (!d.refrigerantType) problems["refrigerant"] = "Choose the refrigerant.";
+    else if (lbs === undefined || !Number.isFinite(lbs)) problems["refrigerant"] = "Enter the pounds added in a year (0 if none).";
+    else o.refrigerant = { type: d.refrigerantType, lbsPerYear: lbs };
+  }
   const levers: Partial<Record<EquipmentLever, number>> = {};
   for (const l of item.levers) {
     if (l.lever === "existingSolarKw") continue;
@@ -249,6 +259,23 @@ export function EquipmentForm({ mode, onClose }: { mode: EditorMode; onClose: ()
               {field("eq-age", "Age (years)", <input id="eq-age" inputMode="numeric" className={inputCls} value={d.ageYears} onChange={(e) => set({ ageYears: e.target.value })} aria-invalid={!!err("ageYears")} />, "Informational", "ageYears")}
               {field("eq-notes", "Notes", <input id="eq-notes" className={inputCls} value={d.notes} maxLength={500} onChange={(e) => set({ notes: e.target.value })} />)}
             </div>
+            {holdsRefrigerant(item) && (() => {
+              const opt = refrigerantOptions().find((r) => r.id === d.refrigerantType);
+              const lbs = num(d.refrigerantLbs);
+              const kg = opt?.gwp != null && lbs !== undefined && Number.isFinite(lbs) ? lbs * KG_PER_LB * opt.gwp : null;
+              return (
+                <div className="grid gap-3 sm:grid-cols-2" data-testid="eq-refrigerant">
+                  {field("eq-ref-type", "Refrigerant (service records)", (
+                    <select id="eq-ref-type" className={inputCls} value={d.refrigerantType} onChange={(e) => set({ refrigerantType: e.target.value })} aria-invalid={!!err("refrigerant")}>
+                      <option value="">Not entered</option>
+                      {refrigerantOptions().map((r) => <option key={r.id} value={r.id}>{r.label}{r.gwp !== null ? ` (GWP ${r.gwp.toLocaleString("en-US")})` : ""}</option>)}
+                    </select>
+                  ), opt?.typicalUse ?? "Carbon only; never changes energy or cost.")}
+                  {field("eq-ref-lbs", "Pounds added in a year (to replace leaks)", <input id="eq-ref-lbs" inputMode="decimal" className={inputCls} value={d.refrigerantLbs} onChange={(e) => set({ refrigerantLbs: e.target.value })} aria-invalid={!!err("refrigerant")} />,
+                    opt && opt.gwp === null ? "R-22 is ozone-depleting and outside EPA's greenhouse-gas inventory: recorded, not counted." : kg !== null ? `About ${(kg / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 })} t CO₂e a year (lb × 0.454 × GWP, EPA).` : "From the service contractor's records.", "refrigerant")}
+                </div>
+              );
+            })()}
             {check?.warnings.map((w) => <p key={w} className="text-[11px] text-heat">{w}</p>)}
           </div>
         )}

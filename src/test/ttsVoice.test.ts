@@ -15,10 +15,13 @@ describe("tts function (OpenAI text-to-speech)", () => {
     const res = await handleTtsRequest(req({ text: "Your bill rises by $24,399." }), { env: { OPENAI_API_KEY: "sk-test" }, fetch: fetchImpl as unknown as typeof fetch });
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("audio/mpeg");
-    const [url, init] = fetchImpl.mock.calls[0]!;
+    const call = fetchImpl.mock.calls[0];
+    if (!call) throw new Error("Expected a speech request");
+    const [url, init] = call;
+    if (!init) throw new Error("Expected speech request options");
     expect(url).toBe("https://api.openai.com/v1/audio/speech");
-    expect((init!.headers as Record<string, string>).authorization).toBe("Bearer sk-test");
-    const body = JSON.parse(String(init!.body));
+    expect((init.headers as Record<string, string>)["authorization"]).toBe("Bearer sk-test");
+    const body = JSON.parse(String(init.body));
     expect(body).toEqual({ model: "gpt-4o-mini-tts", voice: "nova", input: "Your bill rises by $24,399.", response_format: "mp3", instructions: TTS_INSTRUCTIONS });
   });
 

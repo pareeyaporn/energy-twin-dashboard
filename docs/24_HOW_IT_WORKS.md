@@ -99,14 +99,12 @@ Source: computed from the CBECS 2018 public microdata, hotels and resorts (`PBAP
 | Natural gas burned on site | 1 | Yes (EPA factor) |
 | District steam or chilled water | 2 | No |
 | Fuel oil, propane, generator diesel | 1 | No |
-| Refrigerant leaks (AC, chillers, kitchen refrigeration) | 1 | No: the largest gap; these gases warm the planet thousands of times more than CO₂ per kg |
+| Refrigerant leaks (AC, chillers, kitchen refrigeration) | 1 | Optional (branch `twin/flow-carbon`): enter the refrigerant and pounds added a year in Equipment; carbon = lb × 0.454 × GWP (EPA), shown next to the energy carbon. These gases warm the planet hundreds to thousands of times more than CO₂ per kg |
 | Hotel vehicles (shuttles) | 1 | No |
 | Electricity lost on power lines | 2 (adjustment) | No: eGRID's output rate excludes it |
 | Outsourced laundry, food, waste, water, guest travel, construction materials | 3 | No: outside a building energy tool |
 
-The app's "How was this calculated?" panel for carbon lists the same exclusions. Possible next steps: an optional refrigerant line
-(refrigerant type and pounds recharged a year from service records × EPA's warming factor), then district steam and other fuels when
-we model New York or rural hotels.
+The app's "How was this calculated?" panel for carbon lists the same exclusions. Next: district steam and other fuels when we model New York or rural hotels.
 
 **To a judge:** "We cover electricity and natural gas, about 96% of a typical US hotel's energy, and the energy-related carbon, Scopes 1
 and 2. Refrigerants, district steam and backup fuels are next."

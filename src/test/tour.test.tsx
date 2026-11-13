@@ -182,27 +182,42 @@ describe("tour flow", () => {
   });
   afterEach(() => cleanup());
 
-  it("starts on a first visit, once, and not again after it is finished", async () => {
+  it("starts on every page load (demo), once per load, even after it was finished; ?tour=off stops it", async () => {
     vi.useFakeTimers();
     // The main view has loaded.
     const kpi = document.createElement("div");
     kpi.dataset["testid"] = "kpi-cost";
     kpi.getBoundingClientRect = () => ({ top: 10, left: 10, right: 210, bottom: 110, width: 200, height: 100, x: 10, y: 10, toJSON: () => ({}) });
     document.body.appendChild(kpi);
+    const settle = () =>
+      act(async () => {
+        await vi.advanceTimersByTimeAsync(1000);
+      });
     render(<TourButton autoStart />);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1000);
-    });
+    await settle();
     expect(useTour.getState().active).toBe(true);
     act(() => useTour.getState().end("completed"));
     expect(readTourOutcome()).toBe("completed");
+    // Same page load: not again.
+    cleanup();
+    render(<TourButton autoStart />);
+    await settle();
+    expect(useTour.getState().active).toBe(false);
+    // A new page load: it starts again, though it was finished.
     cleanup();
     resetTourAutoStart();
     render(<TourButton autoStart />);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1000);
-    });
+    await settle();
+    expect(useTour.getState().active).toBe(true);
+    act(() => useTour.getState().end("skipped"));
+    // ?tour=off: no start.
+    cleanup();
+    resetTourAutoStart();
+    window.history.replaceState(null, "", "/hotel?tour=off");
+    render(<TourButton autoStart />);
+    await settle();
     expect(useTour.getState().active).toBe(false);
+    window.history.replaceState(null, "", "/");
     kpi.remove();
     vi.useRealTimers();
   });

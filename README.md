@@ -90,7 +90,7 @@ ComEd's lighting incentive is a 2025 rate, so it is shown separately as illustra
 | AI assistant (`docs/23`): the AI calls engine tools (what-if, best plan, compare, stress test, portfolio split) and explains the results, with result cards, action buttons and follow-ups; Ask AI buttons; a Hotel tab briefing; an AI executive summary in the report; Suggest with AI for bill columns (headers only); a portfolio chat. Every number is checked against the engine's results | Built (Phase 15); tested with mocks, the live model to be checked after redeploying the function |
 | Investment results (summary, before/after, upgrade breakdown, savings contribution, plain-language reading) and the downloadable PDF investment report with preview, for AI plans, custom plans and the portfolio (`docs/18`) | Built (Phase 14B) |
 | Calculation transparency: "How was this calculated?" on major figures, data labels, financial assumptions (`docs/21`) | Built |
-| Onboarding tour: a **quick tour (8 steps)** and a **full tour (18 steps)**, one story from the portfolio (KPIs, top opportunity, 3D map, one budget across the chain) to the top-priority hotel (briefing and insights, zones, time-lapse, carbon flow, equipment and bills, what-ifs, stress tests, optimizer, 10-year payoff, own plans and the PDF, the AI running a what-if); live figures; first visit and replay; `docs/16` | Built |
+| Onboarding tour: a **quick tour (8 steps)** and a **full tour (18 steps)**, one story from the portfolio (KPIs, top opportunity, 3D map, one budget across the chain) to the top-priority hotel (briefing and insights, zones, time-lapse, carbon flow, equipment and bills, what-ifs, stress tests, optimizer, 10-year payoff, own plans and the PDF, the AI running a what-if); live figures; starts on every page load (demo setting, `?tour=off` to skip) and replay; `docs/16` | Built |
 | Add my hotel (saved in the browser, on the map, its own twin) | Built |
 | Opportunities & alerts (3–5 insights from the engine with working actions), simulation impact summary, clearer stress results (kind, one-off vs yearly, carbon, %, chart) | Built (Phase 14A; rules in `docs/13` §14) |
 | Organizations, brands, regions, ownership; switcher, filters, totals by group | Built (two synthetic organizations, Chicago only) |
@@ -135,7 +135,7 @@ Full detail: [docs/12_BACKEND_ARCHITECTURE.md](docs/12_BACKEND_ARCHITECTURE.md).
 | `src/portfolio/` | Hotel portfolio page: city map, totals, comparison, charts, portfolio optimizer, priority explanation |
 | `src/advisor/` | The AI assistant's UI: result cards, actions, follow-ups, Ask AI buttons, the portfolio chat, the briefing (`docs/23`) |
 | `src/app/` | The homepage (portfolio), the hotel dashboard (`/hotel`) and the landing rules |
-| `src/tour/` | First-visit onboarding tour |
+| `src/tour/` | Onboarding tour (starts on every page load) |
 | `src/insights/` | Opportunities & alerts cards (rules in `src/engine/hotel/insights.ts`) |
 | `src/scenario/` | Simulation impact summary |
 | `supabase/functions/` | Backend function: the AI advisor |

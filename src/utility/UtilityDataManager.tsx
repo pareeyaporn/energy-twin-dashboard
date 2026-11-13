@@ -92,6 +92,12 @@ export function UtilityDataManager({ open, onOpenChange, initialStep = "edit" }:
   const [source, setSource] = useState<Source>("sample");
   const [draft, setDraft] = useState<Draft>(() => savedDraft() ?? sampleDraft());
   const [history, setHistory] = useState<Draft[]>([]);
+  // Typed use and cost stay in step at each month's rate: on for the sample and manual entry, off for uploaded bills (real bills carry fees
+  // and demand charges that a single rate does not follow).
+  const [linked, setLinked] = useState(() => (savedDraft()?.provenance ?? "sample") !== "uploaded");
+  const elecPrice = useTwin((s) => s.hotel.profile.electricityRate);
+  const gasPrice = useTwin((s) => s.hotel.profile.gasRate);
+  const prices = useMemo(() => ({ elec: elecPrice, gas: gasPrice }), [elecPrice, gasPrice]);
   const [confirm, setConfirm] = useState<null | { message: string; run: () => void }>(null);
   const [upload, setUpload] = useState<null | { fileName: string; table: string[][]; mapping: ColumnMapping; questions: string[]; sheet?: string }>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -143,6 +149,7 @@ export function UtilityDataManager({ open, onOpenChange, initialStep = "edit" }:
     }
     guard(s === "sample" ? "Load the sample data? Unsaved changes will be lost." : "Start a blank spreadsheet? Unsaved changes will be lost.", () => {
       setSource(s);
+      setLinked(true);
       setHistory([]);
       setDraft(s === "sample" ? sampleDraft() : { rows: MONTHS12(), mode: "monthly", year: SAMPLE_YEAR, provenance: "user_entered", markedActual: true, useBillRates: false });
       setStep("edit");
@@ -184,6 +191,7 @@ export function UtilityDataManager({ open, onOpenChange, initialStep = "edit" }:
     guard("Replace the spreadsheet with the uploaded file? Unsaved changes will be lost.", () => {
       setSource("upload");
       setHistory([]);
+      setLinked(false);
       setDraft({
         rows: usesDates ? g.rows : toMonthly(g.rows.map((r) => ({ ...r, start: "", end: "" }))),
         mode: usesDates ? "periods" : "monthly",
@@ -376,10 +384,14 @@ export function UtilityDataManager({ open, onOpenChange, initialStep = "edit" }:
                 {draft.mode === "periods" && (
                   <Button size="sm" variant="outline" className="h-7" onClick={() => change({ rows: [...draft.rows, emptyGridRow()] })} data-testid="add-row"><Plus />Add bill</Button>
                 )}
+                <label className="flex items-center gap-1" title="Editing kWh or therms updates the cost at that month's rate, and the other way round. Pasted cells are kept as pasted.">
+                  <input type="checkbox" checked={linked} onChange={(e) => setLinked(e.target.checked)} data-testid="toggle-linked" />
+                  Keep use and cost in step
+                </label>
                 <Button size="sm" variant="ghost" className="h-7" onClick={undo} disabled={!history.length} aria-label="Undo the last edit (Ctrl+Z)"><RotateCcw />Undo</Button>
               </div>
 
-              <SpreadsheetGrid rows={draft.rows} mode={draft.mode} issues={check.issues} onChange={(rows) => change({ rows })} onUndo={undo} onRemoveRow={(i) => change({ rows: draft.rows.filter((_, j) => j !== i) })} />
+              <SpreadsheetGrid rows={draft.rows} mode={draft.mode} issues={check.issues} linked={linked} fallbackRates={prices} onChange={(rows) => change({ rows })} onUndo={undo} onRemoveRow={(i) => change({ rows: draft.rows.filter((_, j) => j !== i) })} />
 
               <dl className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4 lg:grid-cols-7" aria-label="Totals" data-testid="utility-summary">
                 {[

@@ -1,13 +1,16 @@
 # 13 — Hotel engine spec (`src/engine/hotel/`)
 
-What the Phase 1 engine computes and the assumptions behind it. Code and tests live in `src/engine/hotel/`; data in `src/data/hotel/`.
-All data values are **synthetic placeholders** (`verified: false`) except the EIA commercial prices in `rates.json`. Outputs are **estimates**.
+What the engine computes and the assumptions behind it. Code and tests live in `src/engine/hotel/`; data in `src/data/hotel/`.
+Most inputs are now sourced from primary documents (EIA, EPA, NOAA, NREL ComStock and PVWatts, IL-TRM, CBECS); the remaining placeholders
+and how they are labeled on screen are listed in `docs/08` ("On-screen labels"). Every value's source is in `docs/14`. Outputs are **estimates**.
+A plain-language version of this spec is `docs/24`.
 
 ## 1. Scope
 **Does:** monthly and annual energy, cost and carbon by zone, end use and month; occupancy, setpoint, schedule, weather and price what-ifs with
 the reasons for each change and comfort flags; hourly "typical day" profiles, room-by-room occupancy, equipment lists and energy flows for the twin.
-**Does not (yet):** hourly or daily simulation of a real year, demand charges and tariff structures, real weather, equipment-level physics, the optimizer
-(Phase 3), or measured data. Upgrades, costs and financial metrics are in section 8. No randomness anywhere: the same input always gives the same output.
+Also: carbon on every energy flow, and optional refrigerant leaks entered per system (carbon only; `refrigerant.ts`, docs/20 §3).
+**Does not (yet):** hourly or daily simulation of a real year, demand charges and tariff structures, real (non-normal) weather, equipment-level
+physics, or metered data (utility bills calibrate monthly totals, docs/19). Upgrades, costs and financial metrics are in section 8; the optimizer in section 9. No randomness anywhere: the same input always gives the same output.
 
 Conventions: electricity in kWh, gas in therms, cost in US dollars (not rounded; round only for display), site energy in kBtu
 (3.412 kBtu per kWh, 100 kBtu per therm), temperatures in °F, a 365-day year.

@@ -42,6 +42,26 @@ The home-era data files were removed, except `presetHomes.json`, `mockPackages.j
 57% electric (national, includes nursing homes); the ENERGY STAR national median for hotels is 63.0 kBtu/ft² (August 2024). Plausible for a Chicago
 hotel with a restaurant, but on the high side; the default EUI input stays a placeholder (B5).
 
+## On-screen labels for unverified data (audit, November 2026)
+
+Checklist item (docs/07): every value that is not `"verified": true` must be clearly labeled on screen. The values below stay unverified
+because no primary source publishes them (searched in passes 1–14); each is labeled where it appears. Checked in the browser on every page
+and tab (portfolio; Hotel, Scenario, Invest, Ask; Zones, Rooms, Equipment, Flow; report preview and PDF).
+
+| Unverified data (file) | Where it shows | Label on screen |
+| --- | --- | --- |
+| The demo hotels and the portfolio (`presets.json`, `properties.json`, `organizations.json`) | Everywhere | "Synthetic demo data" / "Synthetic demonstration portfolio · modeled estimates" badges, footer "Estimates from synthetic and public data, not an engineering audit" |
+| Baseline internals: zone allocation, plant share, driver weights, equipment sizing, monthly occupancy shape (`defaults.json`, `equipment.json`) | KPI tiles, twin zones, rooms, flow, equipment | "Estimate" badge on every KPI, "Modeled estimate" captions, "Simulated data" on the twin; equipment cards "Estimated" until edited |
+| Defaulted hotel inputs (`defaults.json` profile defaults) | Hotel tab, report | "default (estimate)" next to each defaulted input; the report lists the defaulted inputs as a risk |
+| Upgrade savings ranges partly from search excerpts (`upgrades.json`) | Invest tab, comparison, catalog, report, advisor cards | "Estimated annual savings" with the low–high range; "Estimate" badge on the comparison; "Computed by the Energy Twin engine · modeled estimate" on advisor cards |
+| **Installed costs still placeholders:** LED retrofit (all hotels), HVAC equipment for VRF hotels (`upgrades.json` `costStatus`) | Catalog card; **added this pass:** recommended plan results, upgrade comparison table, portfolio plan, report | "Placeholder cost" (catalog, comparison row); "Includes placeholder installed costs (assumptions, not quotes) for: …" (plan results, portfolio plan); the report's risks name them |
+| Incentives not confirmed for this year or not researched (`incentives.json`: federal 48E, Illinois Shines, Peoples Gas, HVAC equipment, EMS) | Plan results, report | "Listed, not counted" or "Shown for illustration only … No figure above includes it" |
+| Solar ±15% price band (`rates.json` solar) | Solar rows | The installed price is the LBNL median (sourced); the band is a range on an "Estimate" |
+| Comfort limits, financial assumptions (product decisions, docs/15) | Scenario comfort flags, "How was this calculated?" | Data class "Assumption" in the explanation panels |
+
+Not done (would need new primary data): replacing the LED retrofit and VRF costs with contractor or program cost data; sourcing the
+zone allocation and driver weights (no published hotel breakdown exists); monthly occupancy (STR publishes annual figures only).
+
 ## To do — priority A (changes results or the recommendation)
 
 - [x] **A1. Calibrate smart room controls — done (option a).** Guest-room fan energy is cut 17% while rooms are empty, in the shared simulation;

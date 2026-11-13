@@ -11,7 +11,7 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 
 ## Before rehearsals
 
-- [ ] All data placeholders replaced and `"verified": true`, or clearly labeled "estimated" or "synthetic" on screen
+- [x] All data placeholders replaced and `"verified": true`, or clearly labeled "estimated" or "synthetic" on screen — *done (November 2026) by labeling: the remaining placeholders cannot be replaced from published sources (docs/08); every screen that shows them was checked and labeled. Audit table in docs/08, "On-screen labels"*
 - [x] The demo hotel's results sanity-checked against the ENERGY STAR hotel median (63.0) and CBECS lodging (85.7): 86.5 kBtu/ft², 37% above
       the median (cold climate, restaurant). Shown in the app as context (benchmark card, LV15); noted for Q&A
 - [ ] 3D view loads on the demo laptop and projector (WebGL); "reduce effects" and the 2D switch tested as a fallback

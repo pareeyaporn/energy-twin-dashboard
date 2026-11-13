@@ -15,6 +15,8 @@ export interface UpgradeComparisonRow {
   metrics: FinancialMetrics;
   comfort: PackageComfort;
   lifetimeYears: number;
+  /** Whether the installed cost is sourced or a placeholder (assumption or bound), for this hotel's HVAC type. */
+  costStatus: 'sourced' | 'placeholder';
   source: string;
 }
 
@@ -35,6 +37,7 @@ export function compareUpgrades(ctx: UpgradeContext, options: Omit<EvaluateOptio
       metrics: e.metrics,
       comfort: e.comfort,
       lifetimeYears: upgradeLifetime(id, ctx.profile, data),
+      costStatus: def.costStatusByHvac?.[ctx.profile.hvacType] ?? def.costStatus ?? 'placeholder',
       source: def.source,
     };
   });

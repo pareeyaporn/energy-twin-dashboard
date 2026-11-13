@@ -140,7 +140,11 @@ npx vitest run  # tests
 - [Data and research to-do](docs/08_DATA_TODO.md) and [setup](docs/01_SETUP.md)
 - [3D twin spec](docs/04_3D_SPEC.md) (what drives each visual)
 - [Onboarding tour](docs/16_ONBOARDING_TOUR.md) (every tutorial step and how the tour behaves)
+- [Portfolio map design](docs/17_PORTFOLIO_MAP_DESIGN.md) (the homepage map: palette, markers, overlaps, multi-city, list, legend, mobile)
+- [Investment results and PDF report](docs/18_INVESTMENT_REPORT.md) (every figure, where it comes from, wording rules, the PDF layout)
 - [Utility data and calibration](docs/19_UTILITY_DATA.md) (spreadsheet, Excel template, validation, calibration method, baseline choice)
+- [Equipment inventory](docs/20_EQUIPMENT_INVENTORY.md) (audit, data model, which edits change the model, current vs proposed)
+- [Calculation transparency](docs/21_CALCULATION_TRANSPARENCY.md) ("How was this calculated?", data labels, financial assumptions)
 
 ## Working with Lovable
 

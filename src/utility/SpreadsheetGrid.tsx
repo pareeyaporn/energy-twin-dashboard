@@ -94,7 +94,7 @@ export function SpreadsheetGrid({ rows, mode, issues, onChange, onUndo, onRemove
       <table ref={ref} role="grid" aria-label="Utility records" className="w-full min-w-[640px] border-collapse text-sm">
         <thead className="sticky top-0 z-10 bg-card">
           <tr role="row" className="border-b border-border text-left text-xs text-muted-foreground">
-            <th role="columnheader" className="w-32 px-3 py-2 font-medium">{mode === "periods" ? "Bill" : "Month"}</th>
+            <th role="columnheader" className="sticky left-0 z-10 w-24 bg-card px-3 py-2 font-medium sm:w-32">{mode === "periods" ? "Bill" : "Month"}</th>
             {columns.map((col) => (
               <th key={col.field} role="columnheader" className="px-2 py-2 text-right font-medium">
                 {col.label}
@@ -107,7 +107,7 @@ export function SpreadsheetGrid({ rows, mode, issues, onChange, onUndo, onRemove
         <tbody>
           {rows.map((row, r) => (
             <tr key={r} role="row" className="border-b border-border/40" data-testid="utility-row">
-              <th role="rowheader" scope="row" className={`px-3 py-1 text-left text-xs font-medium ${issueAt(r, "month") === "error" ? "text-destructive" : ""}`}>
+              <th role="rowheader" scope="row" className={`sticky left-0 z-[1] bg-card px-3 py-1 text-left text-xs font-medium ${issueAt(r, "month") === "error" ? "text-destructive" : ""}`}>
                 {mode === "periods" ? `Bill ${r + 1}` : row.month !== null ? MONTHS[row.month] : "—"}
               </th>
               {columns.map((col, c) => {

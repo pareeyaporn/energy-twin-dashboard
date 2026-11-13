@@ -48,7 +48,7 @@ function FuelPanel({ f }: { f: FuelCalibration }) {
           <ComposedChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="var(--border)" strokeOpacity={0.4} vertical={false} />
             <XAxis dataKey="label" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} stroke="var(--border)" interval={0} />
-            <YAxis width={54} tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} stroke="var(--border)" tickFormatter={(v: number) => (v >= 1000 ? `${Math.round(v / 1000)}k` : String(v))} />
+            <YAxis width={54} tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} stroke="var(--border)" tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}k` : String(Math.round(v)))} />
             <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", fontSize: 11 }} formatter={(v: unknown, n: string) => [`${int(Number(v))} ${f.unit}`, n]} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
             <Bar dataKey="actual" name="Bills (actual)" fill="var(--primary)" fillOpacity={0.55} isAnimationActive={false} />

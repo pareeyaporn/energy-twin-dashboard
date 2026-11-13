@@ -31,6 +31,7 @@ Built November 2026 (task block 14E in docs/11). Product decisions: docs/15 §24
 | Billing year | Selector (metadata for calendar-month bills; used to propose dates when switching to periods) |
 | Billing periods view | Checkbox "Billing periods (start and end dates)": adds Start date and End date columns, one row per bill, **Add bill** and a remove button per row. Months convert to periods (1st to 1st of the next month) and back |
 | Editing | Click a cell; **arrow keys**, **Enter / Shift+Enter** (down / up), **Tab** move between cells; Esc leaves a cell |
+| Keep use and cost in step | Checkbox (on for the sample and manual entry, off for uploaded bills). Typing a month's kWh updates its electricity cost at that month's rate (cost ÷ use, captured when the cell gets focus), and typing the cost updates the kWh; the same for therms and gas cost. With no cost yet, the hotel's price is used (EIA state average or its own rate). Pasted cells are kept as pasted. Off for uploads because real bills carry fixed fees and demand charges a single rate does not follow (`src/utility/linkedCells.ts`) |
 | Paste from Excel | Pasting a block of cells (tab-separated) fills from the focused cell; "$" and thousands separators are removed |
 | Undo | **Ctrl/Cmd+Z** in a cell or the Undo button (last 50 edits) |
 | Highlighting | Error cells outlined red (`aria-invalid`), warning cells amber; the message is the cell's tooltip and in the issues list |

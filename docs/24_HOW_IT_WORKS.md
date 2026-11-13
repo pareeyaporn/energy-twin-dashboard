@@ -42,11 +42,42 @@ The demo hotel is **Lakeshore Inn**, a synthetic 100-room hotel in Chicago, 55,0
 
 Quick check you can do by hand: 698,150 kWh × $0.1405 = $98,090, and 23,776 therms × $0.929 = $22,088. Total $120,178.
 
-## 3. "Carbon price": there isn't one
+## 3. How carbon is calculated (in tonnes)
 
-Carbon is measured in **tonnes**, not dollars. We multiply energy by an emission factor (step 9). The app **does not** put a dollar price
-on carbon anywhere, and carbon doesn't change any cost, payback or package ranking. (Carbon fines such as New York's Local Law 97 are
-mentioned in the pitch as a reason the topic matters, not used in the math.)
+Carbon is **calculated, not measured**: nothing in the hotel meters it. We take the estimated energy and multiply by kilograms of CO₂e
+per unit, the same way cost multiplies by dollars per unit.
+
+```
+carbon (kg) = kWh × kg per kWh  +  therms × kg per therm
+tonnes      = kg ÷ 1,000          (a metric tonne: 1,000 kg, about 2,205 lb)
+```
+
+**Lakeshore Inn (synthetic, estimate):**
+
+| | Energy a year | × Factor | = Carbon |
+| --- | --- | --- | --- |
+| Electricity | 698,150 kWh | 0.4155 kg CO₂e per kWh | 290,082 kg |
+| Natural gas | 23,776 therms | 5.311 kg CO₂e per therm | 126,274 kg |
+| **Total** | | | **416,356 kg ≈ 416 tonnes** |
+
+**Where the two factors come from** (`src/data/hotel/emissions.json`):
+- **Electricity, 0.4155 kg per kWh:** EPA eGRID2023. EPA divides everything a grid region's power plants emitted in a year by the
+  electricity they produced. Chicago is in the RFC West region (it serves ComEd). Grids differ, so the factor follows the city: California's
+  grid is about 0.195, so the same kWh there counts for less than half the carbon. The U.S. average (0.3497) is used when the region is unknown.
+- **Natural gas, 5.311 kg per therm:** EPA GHG Emission Factors Hub 2025. This is chemistry: burning a therm of gas always releases
+  about 5.3 kg of CO₂, plus small amounts of methane and nitrous oxide.
+- **CO₂e (CO₂-equivalent):** methane and nitrous oxide are converted into the amount of CO₂ that would warm the planet as much
+  (IPCC AR5 factors), so everything adds up in one unit.
+
+**Upgrades work the same way:** carbon avoided = kWh saved × 0.4155 + therms saved × 5.311.
+
+**There is no carbon price.** Carbon stays in tonnes; the app never turns it into dollars, and it doesn't change any cost, payback or
+package ranking. (Carbon fines such as New York's Local Law 97 appear in the pitch as a reason the topic matters, not in the math.)
+
+**Limits:** an estimate, not verified carbon accounting. It uses the grid's **yearly average** (location-based), not the hour-by-hour mix,
+so noon solar and midnight lighting count the same. And because the energy is an estimate until real bills are entered, so is the carbon.
+
+**In one line:** "We convert the estimated energy to carbon with EPA's published factors for Chicago's grid and for natural gas."
 
 ## 4. Then what are all the JSON files?
 

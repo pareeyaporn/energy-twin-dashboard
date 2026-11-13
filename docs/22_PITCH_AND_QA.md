@@ -165,3 +165,81 @@ Owner column: **P** = pitch lead, **E** = engine lead, **T** = tech lead. Keep a
 - "We'd rather tell you not to buy solar than sell you an 18-year payback."
 - "This is synthetic data with real sources. Give it your bills and it calibrates to your building."
 - "See the savings before you spend."
+
+---
+
+## Part 4 — The five judging criteria, answered
+
+For each: the claim, the evidence we can show, where it is in the demo, and the gap to close before judging. Figures are the app's output
+for synthetic data unless a source is named.
+
+### 1. User, problem and value
+
+- **User:** the general manager and chief engineer of an existing hotel (one building), and the owner, asset manager or chain executive who
+  decides where capital goes (the portfolio).
+- **Problem:** energy is a large, controllable operating cost that hotels decide on with vendor promises. They run 24/7, occupancy swings the
+  bill, and most have no energy team, so they cannot tell which upgrade pays back for *their* building and budget before spending.
+- **Value:** see where the money goes, test a decision before making it, and get the best upgrades for a budget with costs, savings ranges,
+  payback, NPV and carbon, plus a report to take to the owner. Example: at $50,000 the app recommends LED lighting + occupancy sensors
+  ($38,940, $10,302 a year, 3.8-year payback) and says no to solar (18.5 years).
+- **Tied to the prompt:** *fill in with the hackathon prompt's own words* (the repo does not record it); state the one sentence that maps the
+  prompt to "existing hotels deciding energy investments".
+- **In the demo:** act 1 (the problem and the $120,178 bill), "Start here", the optimizer.
+
+### 2. Evidence and opportunity
+
+- **Energy is a big, specific cost in hotels (sourced):** US lodging used 598 trillion Btu in 2018 (EIA CBECS 2018, Table E1). ENERGY STAR's
+  hotel guidance: lighting is almost a quarter of a hotel's electricity; heating and cooling almost 40% of the electricity and more than half
+  of the gas.
+- **Savings are real and documented (published hotel cases, docs/14):** Loews Vanderbilt, Nashville, 22% ($328,250 a year) with LED and
+  guest-room controls; Hilton Austin 31% ($400,000) multi-measure; the Willard InterContinental, 11% of whole-building energy from lighting.
+  (Some are from search excerpts, not the full documents; docs/14 labels which.) The model's results fall in the same range (all upgrades
+  together: about 25% of the demo hotel's bill).
+- **The opportunity is concrete:** Chicago alone has 147 hotels with 49,526 rooms (Choose Chicago); the 5-hotel sample chain spends $1.56M a
+  year with $109,905 a year of savings potential (modeled).
+- **Why existing buildings:** earlier winners such as Eden cover new-build design; existing buildings are most of the stock and need
+  operations plus investment decisions.
+- **Gaps to close:** (a) *user evidence*: 2–3 quotes or conversations with hotel GMs, engineers or owners (even short calls) would make this
+  criterion; (b) a *market size in dollars* from a named source (for example US hotel energy spend), or leave it out. Do not estimate either on
+  stage.
+
+### 3. Product judgment and MVP
+
+- **Focused:** one building type (hotels), one decision (what to fix and buy with a budget), one journey: Portfolio → identify the
+  opportunity → explore the hotel → simulate → invest → report.
+- **Judgment calls we made (and can defend):** a deterministic engine computes every number and the AI only explains, with a number check;
+  incentives count only when confirmed for the analysis year; a correction to the building is never counted as a saving; the optimizer says
+  "don't" when a plan does not pay back; the portfolio page leads with the decision, the detail is collapsed.
+- **Cut on purpose:** accounts, tariffs and demand charges, weather-normalized bills, other building types (listed as roadmap).
+- **Working demo:** the whole path runs in the Lovable app (`main`): portfolio map → Riverwalk Grand → 3D time-lapse → occupancy what-if →
+  optimizer → 10-year payoff → PDF report → advisor; a 19-step tour shows it in about 35 s. 552 automated tests, and a test checks every figure
+  in the demo script.
+- **Gap:** rehearse it five times on the demo laptop (task 8.3) and record the backup video; check the live advisor there.
+
+### 4. Positioning and adoption
+
+- **Why the user cares:** "See the savings before you spend": a GM can defend a decision to the owner with a report; an owner can compare
+  options on the same assumptions; a chain can put the budget where it returns most (not where the bill is biggest).
+- **Positioning:** not a benchmark (ENERGY STAR Portfolio Manager shows the past), not a vendor calculator (sells one product), not a
+  new-build design tool (Eden): a decision tool for existing buildings, operations and investments, honest about uncertainty.
+- **Adoption path:** start with the sample, then the user's own hotel in minutes (Add my hotel, a few fields), then 12 months of bills
+  (Excel template) to calibrate; no hardware, no sensors, runs in the browser; the PDF report travels to the owner or the bank.
+- **Channels to name (team decision):** for example hotel management companies and franchise groups, energy consultants who audit hotels,
+  and utilities that run efficiency programs (the app already applies a utility's own incentive rules by program year and territory).
+- **Gap:** pick one primary channel and say why.
+
+### 5. Measurement and viability
+
+- **How we would know it works (product measures):**
+  - *Activation:* share of new users who add their own hotel and run the optimizer in the first session.
+  - *Decision value:* share of hotels that export a report; share of reports that lead to an approved project.
+  - *Accuracy loop:* after an upgrade, compare the next 12 months of bills with the prediction. The calibration already measures fit with
+    ASHRAE Guideline 14 metrics (NMBE, CV(RMSE)); the same metrics measure predicted versus realized savings.
+  - *Outcome:* realized savings and avoided carbon across hotels that installed recommended upgrades.
+- **Why it can be sustainable:** the engine runs in the browser (simulations and the optimizer cost nothing per use); the AI is one short,
+  cached call per question; the data are public sources refreshed yearly (EIA, NOAA, eGRID, the Illinois TRM, utility worksheets).
+- **Business model (team decision, do not improvise prices):** candidates are a per-property subscription for owners and chains, a
+  professional tool for energy consultants, or a utility-program license.
+- **Path forward:** real hotels with real bills (pilot with 1–3 properties), tariffs and demand charges, accounts and roles, more cities with
+  local incentives, then resorts, convention centers and offices.
+- **Gaps:** choose the business model and one pilot target to name.

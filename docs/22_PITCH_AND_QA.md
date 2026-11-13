@@ -152,6 +152,7 @@ Owner column: **P** = pitch lead, **E** = engine lead, **T** = tech lead. Keep a
 | 31 | Who pays? | P | Team decision: fill in (for example a per-property subscription for owners and chains, or a tool for energy consultants and utilities). Do not quote prices we have not set. |
 | 32 | How big is the market? | P | Fill in with a sourced figure (number of US hotels and their energy spend, from a named source), or skip; never estimate on stage. |
 | 33 | What's next? | P | Real buildings with real bills, tariffs and demand charges, accounts and roles, more cities with local incentives, then other building types (resorts, convention centers, offices). |
+| 33b | Can this work for other buildings: hospitals, malls, museums, factories? | P | Yes, that is the plan; hotels are the first type, not the limit. The engine models a building as zones, end uses and drivers, and its national data (NREL ComStock, EIA CBECS) already covers offices, retail and strip malls, schools, hospitals, outpatient clinics, restaurants and warehouses. Next: offices and retail, then hospitals and schools, then public assembly such as museums. Factories come last: their energy is mostly industrial processes, which needs different data (EIA's manufacturing survey) and models. See "Roadmap: beyond hotels". |
 | 34 | Could a utility use this? | P | Yes: it already applies a utility's own incentive rules by program year and territory; a utility could use it to target customers and explain programs. |
 | 35 | What's the biggest weakness? | E | Honest answer: savings parameters come from the Illinois rulebook for every city, some installed costs are still assumptions, and bills are compared with normal-year weather. Each is labeled in the app and listed in docs/08 and docs/13. |
 
@@ -352,3 +353,35 @@ association and trade press." Then the next step: "Our first pilot is to run Ene
 **Verified documents:** [EIA STEO November 2026](https://www.eia.gov/outlooks/steo/pdf/steo_full.pdf); [EIA STEO January 2026](https://www.eia.gov/outlooks/steo/archives/jan26.pdf);
 [EIA CBECS 2018 Table C1](https://www.eia.gov/consumption/commercial/data/2018/ce/xls/c1.xlsx); [EIA CBECS 2018 Table C2](https://www.eia.gov/consumption/commercial/data/2018/ce/xls/c2.xlsx);
 [EIA Electric Power Annual Table 2.2](https://www.eia.gov/electricity/annual/xls/epa_02_02.xlsx); [EIA CBECS 2018 microdata](https://www.eia.gov/consumption/commercial/data/2018/index.php?view=microdata).
+
+---
+
+## Part 6 — Roadmap: beyond hotels
+
+**The idea:** simulate any B2B building before money is spent. Hotels came first because they run 24/7, occupancy swings the bill, and their
+owners make large investments with little energy expertise. The product is built so the next types reuse almost everything.
+
+**What carries over unchanged:** the optimizer (every combination within a budget), the financial model (payback, NPV, net benefit, price
+growth), the incentive rules (program year, territory), carbon from grid factors, utility-bill calibration, the equipment inventory, the
+portfolio map and optimizer, the PDF report, the AI advisor and its number check.
+
+**What each new type needs:** its zones, its drivers (what makes energy go up and down), its upgrades and its benchmark data.
+
+| Building type | What is different | Data available | Difficulty |
+| --- | --- | --- | --- |
+| Offices | Weekday schedules, plug loads, lighting | NREL ComStock (small, medium, large offices) and EIA CBECS | Easiest next step |
+| Retail and malls | Opening hours, foot traffic, refrigeration, large lighting loads | ComStock (standalone retail, strip malls) and CBECS (enclosed malls are their own category) | Easy to medium |
+| Hospitals and clinics | 24/7, high fresh-air requirements, medical equipment, reliability before savings | ComStock (hospital, outpatient) and CBECS | Medium |
+| Schools | Term calendars, daytime occupancy | ComStock (primary, secondary schools) and CBECS | Easy to medium |
+| Museums and convention centers | Strict humidity and temperature control, gallery or event lighting, event schedules | CBECS ("public assembly"); no ComStock model, so more assumptions | Medium to hard |
+| Factories | Process energy (motors, compressed air, furnaces, process heat) dominates; production schedules drive it | Not in ComStock or CBECS; EIA's Manufacturing Energy Consumption Survey and process-specific models | Hardest: a different product line |
+
+**Order:** hotels → offices and retail → hospitals and schools → public assembly (museums, convention centers) → factories.
+(The app's data already lists resorts, casinos, convention centers and entertainment venues as future types: `futureBuildingTypes` in
+`src/data/hotel/properties.json`.)
+
+**How to say it (15 seconds):** "We started with hotels, but the engine models any commercial building as zones, end uses and drivers, and
+the national data behind it already covers offices, retail, hospitals and schools. Hotels are our first type, not our limit."
+
+**If asked about factories:** "Factories are a different problem: most of their energy goes into production processes, not the building. That
+needs its own data and models, so it comes after the commercial building types."

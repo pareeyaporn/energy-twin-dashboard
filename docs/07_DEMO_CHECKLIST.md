@@ -35,7 +35,7 @@ The demo follows section 12 of [10_HOTEL_SPEC.md](10_HOTEL_SPEC.md). Task number
 | --- | --- | --- |
 | The app is in a strange state (wrong hotel, a what-if left on, a plan applied) | **Reset demo** in the top bar; it returns to the portfolio with everything cleared | "Let me reset the demo." |
 | The 3D map is blank or slow | **2D** in the map toolbar, or **Use the simplified map** (the drawn map needs no tiles) | "Same data, flat view." |
-| The 3D hotel twin is slow, black or missing | **2D** above the twin; or turn on **Reduce effects** | "Same model in 2D." |
+| The 3D hotel twin is slow, black or missing | **2D** above the twin (it uses the same model and numbers) | "Same model in 2D." |
 | The advisor spins or says it can't reach the AI | Wait 8 s: the template answer appears with the same engine result cards and buttons. Rehearsed questions answer instantly (saved in the browser) | "The numbers come from the engine either way; the AI only explains them." |
 | Wi-Fi drops | Keep going: everything runs in the browser after load; only a new live AI answer needs the network (saved ones still work). Phone hotspot as a backup | — |
 | The tour pops up | **Skip**; it won't open again in this browser | — |

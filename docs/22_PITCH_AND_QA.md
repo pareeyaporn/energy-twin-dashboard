@@ -307,7 +307,20 @@ can't guess anymore. Energy Twin shows them what to fix, what it saves and what 
   so less precise). Check: the same method gives $11,521 million for all lodging, against EIA's published $11,513 million.
 - **Caveats to say if asked:** 2018 dollars (commercial electricity prices have risen since; see the EIA figures above), and an estimate from a
   survey sample.
-- **How to say it:** "US hotels spend over five billion dollars a year on energy, by EIA's own survey."
+- **Electricity share (verified, 2018):**
+
+  | | Electricity | Share of all US electricity sold | Share of all commercial-building electricity |
+  | --- | --- | --- | --- |
+  | All lodging (hotels, motels, dorms, nursing homes, …) | 100 billion kWh | 2.6% | 8.4% |
+  | Hotels and resorts | 46 billion kWh | 1.2% | 3.9% |
+  | Hotels, resorts, motels and inns | 55 billion kWh | 1.4% | 4.6% |
+
+  Lodging electricity is 342 of lodging's 598 trillion Btu (CBECS 2018 Table C1), 100.2 billion kWh at 3,412 Btu per kWh; the hotel rows
+  are computed from the CBECS microdata (Σ ELCNS × FINALWT; the same sum gives 100.3 billion kWh for all lodging). US electricity sold
+  in 2018: 3,859 billion kWh (EIA Electric Power Annual, Table 2.2, sales to ultimate customers). All commercial buildings: 1,196 billion kWh
+  (CBECS). The 598 trillion Btu is **all** lodging site energy (electricity and gas), not electricity.
+- **How to say it:** "US hotels spend over five billion dollars a year on energy and use about 46 billion kWh of electricity, more than 1% of
+  all the electricity sold in the country, by EIA's own data."
 
 ### What operators and the industry say (no calls needed)
 
@@ -337,4 +350,5 @@ association and trade press." Then the next step: "Our first pilot is to run Ene
 [LBNL 2024 data center report](https://eta.lbl.gov/publications/2024-lbnl-data-center-energy-usage-report);
 [NYC Buildings: Local Law 97](https://www.nyc.gov/assets/buildings/pdf/presentations/2023bsls/ll97.pdf).
 **Verified documents:** [EIA STEO November 2026](https://www.eia.gov/outlooks/steo/pdf/steo_full.pdf); [EIA STEO January 2026](https://www.eia.gov/outlooks/steo/archives/jan26.pdf);
-[EIA CBECS 2018 Table C2](https://www.eia.gov/consumption/commercial/data/2018/ce/xls/c2.xlsx); [EIA CBECS 2018 microdata](https://www.eia.gov/consumption/commercial/data/2018/index.php?view=microdata).
+[EIA CBECS 2018 Table C1](https://www.eia.gov/consumption/commercial/data/2018/ce/xls/c1.xlsx); [EIA CBECS 2018 Table C2](https://www.eia.gov/consumption/commercial/data/2018/ce/xls/c2.xlsx);
+[EIA Electric Power Annual Table 2.2](https://www.eia.gov/electricity/annual/xls/epa_02_02.xlsx); [EIA CBECS 2018 microdata](https://www.eia.gov/consumption/commercial/data/2018/index.php?view=microdata).

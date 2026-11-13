@@ -24,7 +24,7 @@ export function TourButton({ autoStart = import.meta.env.MODE !== "test" }: { au
 
   useEffect(() => {
     if (!autoStart || autoStartTried || useTour.getState().active) return;
-    if (pathname !== "/" && pathname !== "/portfolio") return;
+    if (pathname !== "/" && pathname !== "/portfolio" && pathname !== "/hotel") return;
     autoStartTried = true;
     if (readTourOutcome() !== null) return;
     const signal = { cancelled: false };

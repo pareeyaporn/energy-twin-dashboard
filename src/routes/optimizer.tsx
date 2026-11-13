@@ -17,5 +17,5 @@ export const Route = createFileRoute("/optimizer")({
 });
 
 function OptimizerPage() {
-  return <main className="min-h-screen bg-background"><header className="flex h-16 items-center justify-between gap-3 border-b border-border px-4 md:px-8"><Link to="/" className="font-semibold">Energy Twin</Link><Button asChild variant="ghost" size="sm"><Link to="/"><ArrowLeft />Dashboard</Link></Button></header><BudgetOptimizer /><Disclaimer /><SourcesSheet /></main>;
+  return <main className="min-h-screen bg-background"><header className="flex h-16 items-center justify-between gap-3 border-b border-border px-4 md:px-8"><Link to="/" className="font-semibold">Energy Twin</Link><Button asChild variant="ghost" size="sm"><Link to="/hotel"><ArrowLeft />Dashboard</Link></Button></header><BudgetOptimizer /><Disclaimer /><SourcesSheet /></main>;
 }

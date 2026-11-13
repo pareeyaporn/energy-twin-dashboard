@@ -12,7 +12,7 @@ TOUR_TIMING.waitMs = 150;
 TOUR_TIMING.navMs = 200;
 
 const navigate = vi.fn();
-let pathname = "/";
+let pathname = "/hotel";
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => navigate,
   useRouterState: ({ select }: { select: (s: { location: { pathname: string } }) => string }) => select({ location: { pathname } }),
@@ -92,7 +92,7 @@ describe("tour views", () => {
   });
   afterEach(() => cleanup());
   it("plays the time-lapse and the energy flow during their steps, then restores the user's view", () => {
-    pathname = "/";
+    pathname = "/hotel";
     useTwin.getState().setTwinLayer("rooms");
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
@@ -121,7 +121,7 @@ describe("tour flow", () => {
     useTour.setState({ active: false, index: 0, direction: 1, origin: null, restore: null });
     resetTourAutoStart();
     navigate.mockClear();
-    pathname = "/";
+    pathname = "/hotel";
   });
   afterEach(() => cleanup());
 
@@ -182,7 +182,7 @@ describe("tour flow", () => {
     fireEvent.click(screen.getByText("Skip tour"));
     expect(useTour.getState().active).toBe(false);
     expect(readTourOutcome()).toBe("skipped");
-    expect(useTour.getState().restore?.path ?? "/").toBe("/");
+    expect(useTour.getState().restore?.path ?? "/hotel").toBe("/hotel");
   });
 
   it("Escape skips the tour", () => {
@@ -197,6 +197,6 @@ describe("tour flow", () => {
     render(<TourButton autoStart={false} />);
     fireEvent.click(screen.getByTestId("take-tour"));
     act(() => useTour.setState({ index: TOUR_STEPS.findIndex((s) => s.id === "portfolio") }));
-    expect(navigate).toHaveBeenCalledWith({ to: "/portfolio" });
+    expect(navigate).toHaveBeenCalledWith({ to: "/" });
   });
 });

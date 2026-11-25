@@ -2,6 +2,10 @@
 
 **Energy Twin: Simulate Smarter. Spend Better. Save Energy.**
 
+![Energy Twin demo: the 3D hotel twin playing through the year and day, with live energy demand, then exploding the floors](docs/images/energy-twin-demo.gif)
+
+*The 3D twin plays through every hour of the year: seasons, day and night, occupied rooms lit, and the energy readout updating live. Synthetic demo data; modeled estimates.*
+
 What if hotel owners could see the impact of energy upgrades before spending a dollar? Energy Twin turns existing hotels into AI-powered
 virtual testing grounds. Operators can visualize energy flows, simulate changing conditions, and stress-test decisions across one property
 or an entire portfolio. Our optimizer finds the best upgrade combinations within a budget, revealing projected savings, payback, and carbon
